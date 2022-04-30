@@ -1,0 +1,42 @@
+{
+  "listeners": {
+    "RoninListener": {
+      "rpcUrl": "",
+      "blockTime": 15,
+      "safeBlockRange": 0,
+      "secret": {
+        "validator": "",
+        "relayer": ""
+      },
+      "fromHeight": 11500000,
+      "subscriptions": {
+        "ValidatorContractUpdated": {
+          "from": "0x123",
+          "to": "0x456",
+          "type": 1,
+          "handler": {
+            "abi": "./contracts/common/BridgeAdmin.abi",
+            "name": "ValidatorContractUpdated"
+          },
+          "callbacks": {
+            "RoninListener": "ValidatorContractUpdatedCallBack",
+            "EthereumListener": "ValidatorContractUpdatedCallBack"
+          }
+        },
+        "Deposited": {
+          "from": "0x123",
+          "to": "0x456",
+          "type": 0,
+          "handler": {
+            "abi": "./contracts/common/BridgeAdmin.abi",
+            "name": "Deposited"
+          },
+          "callbacks": {
+            "RoninListener": "ValidatorContractUpdatedCallBack1"
+          }
+        }
+      }
+    }
+  },
+  "numberOfWorkers": 1024
+}
