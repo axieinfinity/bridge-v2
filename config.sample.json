@@ -23,16 +23,73 @@
             "EthereumListener": "ValidatorContractUpdatedCallBack"
           }
         },
-        "Deposited": {
-          "from": "0x123",
-          "to": "0x456",
-          "type": 0,
+        // Events goes here
+        "MainchainWithdrewSubscription": {
+          "address": "0x00...RoninGatewayV2...00",
+          "type": 0, // Event Subscription
           "handler": {
-            "abi": "./contracts/common/BridgeAdmin.abi",
-            "name": "Deposited"
+            "abi": "./contracts/ronin/RoninGatewayV2.abi",
+            "name": "MainchainWithdrew" // MainchainWithdrew(bytes32 receiptHash, Transfer.Receipt receipt)
           },
           "callbacks": {
-            "RoninListener": "ValidatorContractUpdatedCallBack1"
+            "RoninListener": "StoreMainchainWithdrawCallback"
+            // TODO: stores the receipt to own database for future check from `ProvideReceiptSignatureCallback`
+          }
+        },
+        "WithdrawalRequestedSubscription": {
+          "address": "0x00...RoninGatewayV2...00",
+          "type": 0, // Event Subscription
+          "handler": {
+            "abi": "./contracts/ronin/RoninGatewayV2.abi",
+            "name": "WithdrawalRequested" // WithdrawalRequested(bytes32 receiptHash, Transfer.Receipt receipt)
+          },
+          "callbacks": {
+            "RoninListener": "ProvideReceiptSignatureCallback"
+            // TODO: validator signs `eth_signTypeDataV4` on the receipt `Transfer.Receipt` before call method `RoninGatewayV2.bulkSubmitWithdrawalSignatures()`
+            // NOTE: consider checking whether the withdrawal is done on mainchain or not (by checking in own database if has event `MainchainWithdrew` for the receipt).
+          }
+        },
+        "WithdrawalSignaturesRequestedSubscription": {
+          "address": "0x00...RoninGatewayV2...00",
+          "type": 0, // Event Subscription
+          "handler": {
+            "abi": "./contracts/ronin/RoninGatewayV2.abi",
+            "name": "WithdrawalSignaturesRequested" // WithdrawalSignaturesRequested(bytes32 receiptHash, Transfer.Receipt)
+          },
+          "callbacks": {
+            "RoninListener": "ProvideReceiptSignatureCallback"
+            // NOTE: same callback as the `WithdrawalRequestedSubscription` subscription
+          }
+        }
+      }
+    },
+    "EthereumListener": {
+      // ...configs
+      "subscriptions": {
+        "DepositRequestedSubscription": {
+          "address": "0x00...MainchainGatewayV2...00",
+          "type": 0, // Event Subscription
+          "handler": {
+            "abi": "./contracts/mainchain/MainchainGatewayV2.abi",
+            "name": "DepositRequested" // DepositRequested(bytes32 receiptHash, Transfer.Receipt receipt)
+          },
+          "callbacks": {
+            "RoninListener": "DepositRequestedCallback"
+            // TODO: use validator account to call method `RoninGatewayV2.bulkDepositFor()`
+            // NOTE: consider checking the deposit is done or not (by querying onto Ronin method `RoninGatewayV2.vote(receipt.mainchain.chainId, receipt.id).status == VoteStatus.Executed`)
+          }
+        },
+        "WithdrewSubscription": {
+          "address": "0x00...MainchainGatewayV2...00",
+          "type": 0, // Event Subscription
+          "handler": {
+            "abi": "./contracts/mainchain/MainchainGatewayV2.abi",
+            "name": "Withdrew" // Withdrew(bytes32 receiptHash, Transfer.Receipt receipt)
+          },
+          "callbacks": {
+            "RoninListener": "WithdrewCallback"
+            // TODO: use validator account to call method `RoninGatewayV2.acknowledgeMainchainWithdrew()`
+            // NOTE: consider checking the task is done or not (by querying onto Ronin method `RoninGatewayV2.mainchainWithdrew(receipt.id)`)
           }
         }
       }
