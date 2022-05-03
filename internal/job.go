@@ -1,17 +1,13 @@
-package listener
+package internal
 
 import (
 	"context"
 	"fmt"
+	"github.com/axieinfinity/bridge-v2/internal/types"
 	"github.com/axieinfinity/bridge-v2/internal/utils"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/log"
 	"time"
-)
-
-const (
-	listenHandler = iota
-	callbackHandler
 )
 
 type Job struct {
@@ -22,7 +18,7 @@ type Job struct {
 	NextTry    int32
 	MaxTry     int32
 	BackOff    int32
-	Listener   IListener
+	Listener   types.IListener
 }
 
 func (job Job) Hash() common.Hash {
@@ -37,26 +33,31 @@ type Worker struct {
 	id int
 
 	// queue is passed from subscriber is used to add workerChan to queue
-	queue chan chan IJob
+	queue chan chan types.IJob
 
 	// mainChain is controller's jobChan which is used to push job back to controller
-	mainChan chan<- IJob
+	mainChan chan<- types.IJob
 
 	// workerChan is used to receive and process job
-	workerChan chan IJob
+	workerChan chan types.IJob
+
+	failedChan  chan<- types.IJob
+	successChan chan<- types.IJob
 
 	closeChan chan struct{}
-	listeners map[string]IListener
+	listeners map[string]types.IListener
 }
 
-func NewWorker(ctx context.Context, id int, mainChan chan<- IJob, queue chan chan IJob, size int, listeners map[string]IListener) *Worker {
+func NewWorker(ctx context.Context, id int, mainChan, failedChan, successChan chan<- types.IJob, queue chan chan types.IJob, size int, listeners map[string]types.IListener) *Worker {
 	return &Worker{
-		ctx:        ctx,
-		id:         id,
-		workerChan: make(chan IJob, size),
-		mainChan:   mainChan,
-		queue:      queue,
-		listeners:  listeners,
+		ctx:         ctx,
+		id:          id,
+		workerChan:  make(chan types.IJob, size),
+		mainChan:    mainChan,
+		failedChan:  failedChan,
+		successChan: successChan,
+		queue:       queue,
+		listeners:   listeners,
 	}
 }
 
@@ -84,28 +85,24 @@ func (w *Worker) start() {
 	}
 }
 
-func (w *Worker) processJob(job IJob) {
+func (w *Worker) processJob(job types.IJob) {
 	var (
 		err error
-		val interface{}
+		val []byte
 	)
-	switch job.GetType() {
-	case listenHandler:
-		val, err = job.Process()
-		if err != nil {
-			goto ERROR
-		}
-		job.GetListener().SendCallbackJobs(w.listeners, job.GetSubscriptionName(), job.GetTransaction(), val, w.mainChan)
-	case callbackHandler:
-		_, err = job.Process()
-		if err != nil {
-			goto ERROR
-		}
+	val, err = job.Process()
+	if err != nil {
+		goto ERROR
 	}
+	if job.GetType() == types.ListenHandler {
+		job.GetListener().SendCallbackJobs(w.listeners, job.GetSubscriptionName(), job.GetTransaction(), val, w.mainChan)
+	}
+	w.successChan <- job
 	return
 ERROR:
 	if job.GetRetryCount()+1 > job.GetMaxTry() {
 		log.Info("[Worker][processJob] job reaches its maxTry", "jobTransaction", job.GetTransaction().GetHash().Hex())
+		w.failedChan <- job
 		return
 	}
 	job.IncreaseRetryCount()

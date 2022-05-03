@@ -9,6 +9,10 @@
         "relayer": ""
       },
       "fromHeight": 11500000,
+      "contracts": {
+        "Gateway": "0x00...RoninGatewayV2...00",
+        "BrigeAdmin": "0x4567"
+      },
       "subscriptions": {
         "ValidatorContractUpdated": {
           "from": "0x123",

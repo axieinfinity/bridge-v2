@@ -54,117 +54,117 @@ type TransferReceipt struct {
 // TransferRequest is an auto generated low-level Go binding around an user-defined struct.
 type TransferRequest struct {
 	RecipientAddr common.Address
-	TokenAddr common.Address
-	Info      TokenInfo
+	TokenAddr     common.Address
+	Info          TokenInfo
 }
 
-// RoninMetaData contains all meta data concerning the Ronin contract.
-var RoninMetaData = &bind.MetaData{
-	ABI: "[{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"receiptHash\",\"type\":\"bytes32\"},{\"components\":[{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"enumTransfer.Kind\",\"name\":\"kind\",\"type\":\"uint8\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"tokenAddr\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"chainId\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Owner\",\"name\":\"mainchain\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"tokenAddr\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"chainId\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Owner\",\"name\":\"ronin\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"enumToken.Standard\",\"name\":\"erc\",\"type\":\"uint8\"},{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"quantity\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Info\",\"name\":\"info\",\"type\":\"tuple\"}],\"indexed\":false,\"internalType\":\"structTransfer.Receipt\",\"name\":\"receipt\",\"type\":\"tuple\"}],\"name\":\"Deposited\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address[]\",\"name\":\"tokens\",\"type\":\"address[]\"},{\"indexed\":false,\"internalType\":\"uint256[]\",\"name\":\"threshold\",\"type\":\"uint256[]\"}],\"name\":\"MinimumThresholdsUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"Paused\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"previousAdminRole\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"newAdminRole\",\"type\":\"bytes32\"}],\"name\":\"RoleAdminChanged\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"}],\"name\":\"RoleGranted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"}],\"name\":\"RoleRevoked\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"_nonce\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"_numerator\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"_denominator\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"_previousNumerator\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"_previousDenominator\",\"type\":\"uint256\"}],\"name\":\"ThresholdUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address[]\",\"name\":\"roninTokens\",\"type\":\"address[]\"},{\"indexed\":false,\"internalType\":\"address[]\",\"name\":\"mainchainTokens\",\"type\":\"address[]\"},{\"indexed\":false,\"internalType\":\"uint256[]\",\"name\":\"chainIds\",\"type\":\"uint256[]\"}],\"name\":\"TokenMapped\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"Unpaused\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"contractIWeightedValidator\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"ValidatorContractUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"receiptHash\",\"type\":\"bytes32\"},{\"components\":[{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"enumTransfer.Kind\",\"name\":\"kind\",\"type\":\"uint8\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"tokenAddr\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"chainId\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Owner\",\"name\":\"mainchain\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"tokenAddr\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"chainId\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Owner\",\"name\":\"ronin\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"enumToken.Standard\",\"name\":\"erc\",\"type\":\"uint8\"},{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"quantity\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Info\",\"name\":\"info\",\"type\":\"tuple\"}],\"indexed\":false,\"internalType\":\"structTransfer.Receipt\",\"name\":\"\",\"type\":\"tuple\"}],\"name\":\"WithdrawalRequested\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"receiptHash\",\"type\":\"bytes32\"},{\"components\":[{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"enumTransfer.Kind\",\"name\":\"kind\",\"type\":\"uint8\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"tokenAddr\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"chainId\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Owner\",\"name\":\"mainchain\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"tokenAddr\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"chainId\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Owner\",\"name\":\"ronin\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"enumToken.Standard\",\"name\":\"erc\",\"type\":\"uint8\"},{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"quantity\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Info\",\"name\":\"info\",\"type\":\"tuple\"}],\"indexed\":false,\"internalType\":\"structTransfer.Receipt\",\"name\":\"\",\"type\":\"tuple\"}],\"name\":\"WithdrawalSignaturesRequested\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"DEFAULT_ADMIN_ROLE\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"WITHDRAWAL_MIGRATOR\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"enumTransfer.Kind\",\"name\":\"kind\",\"type\":\"uint8\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"tokenAddr\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"chainId\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Owner\",\"name\":\"mainchain\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"tokenAddr\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"chainId\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Owner\",\"name\":\"ronin\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"enumToken.Standard\",\"name\":\"erc\",\"type\":\"uint8\"},{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"quantity\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Info\",\"name\":\"info\",\"type\":\"tuple\"}],\"internalType\":\"structTransfer.Receipt[]\",\"name\":\"_receipts\",\"type\":\"tuple[]\"}],\"name\":\"bulkDepositFor\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"recipientAddr\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"tokenAddr\",\"type\":\"address\"},{\"components\":[{\"internalType\":\"enumToken.Standard\",\"name\":\"erc\",\"type\":\"uint8\"},{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"quantity\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Info\",\"name\":\"info\",\"type\":\"tuple\"}],\"internalType\":\"structTransfer.Request[]\",\"name\":\"_requests\",\"type\":\"tuple[]\"},{\"internalType\":\"uint256\",\"name\":\"_chainId\",\"type\":\"uint256\"}],\"name\":\"bulkRequestWithdrawalFor\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256[]\",\"name\":\"_withdrawals\",\"type\":\"uint256[]\"},{\"internalType\":\"bytes[]\",\"name\":\"_signatures\",\"type\":\"bytes[]\"}],\"name\":\"bulkSubmitWithdrawalSignatures\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_voteWeight\",\"type\":\"uint256\"}],\"name\":\"checkThreshold\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"enumTransfer.Kind\",\"name\":\"kind\",\"type\":\"uint8\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"tokenAddr\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"chainId\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Owner\",\"name\":\"mainchain\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"tokenAddr\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"chainId\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Owner\",\"name\":\"ronin\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"enumToken.Standard\",\"name\":\"erc\",\"type\":\"uint8\"},{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"quantity\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Info\",\"name\":\"info\",\"type\":\"tuple\"}],\"internalType\":\"structTransfer.Receipt\",\"name\":\"_receipt\",\"type\":\"tuple\"}],\"name\":\"depositFor\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"depositVote\",\"outputs\":[{\"internalType\":\"enumGovernorCore.VoteStatus\",\"name\":\"status\",\"type\":\"uint8\"},{\"internalType\":\"bytes32\",\"name\":\"finalHash\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_roninToken\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_chainId\",\"type\":\"uint256\"}],\"name\":\"getMainchainToken\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"_addr\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"}],\"name\":\"getRoleAdmin\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"index\",\"type\":\"uint256\"}],\"name\":\"getRoleMember\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"}],\"name\":\"getRoleMemberCount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getThreshold\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_withdrawalId\",\"type\":\"uint256\"},{\"internalType\":\"address[]\",\"name\":\"_validators\",\"type\":\"address[]\"}],\"name\":\"getWithdrawalSignatures\",\"outputs\":[{\"internalType\":\"bytes[]\",\"name\":\"_signatures\",\"type\":\"bytes[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"grantRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"hasRole\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_roleSetter\",\"type\":\"address\"},{\"internalType\":\"contractIWeightedValidator\",\"name\":\"_validatorContract\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_numerator\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_denominator\",\"type\":\"uint256\"},{\"internalType\":\"address[]\",\"name\":\"_withdrawalMigrators\",\"type\":\"address[]\"},{\"internalType\":\"address[]\",\"name\":\"_roninTokens\",\"type\":\"address[]\"},{\"internalType\":\"address[]\",\"name\":\"_mainchainTokens\",\"type\":\"address[]\"},{\"internalType\":\"uint256[][2]\",\"name\":\"_packedNumbers\",\"type\":\"uint256[][2]\"}],\"name\":\"initialize\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address[]\",\"name\":\"_roninTokens\",\"type\":\"address[]\"},{\"internalType\":\"address[]\",\"name\":\"_mainchainTokens\",\"type\":\"address[]\"},{\"internalType\":\"uint256[]\",\"name\":\"_chainIds\",\"type\":\"uint256[]\"}],\"name\":\"mapTokens\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"markWithdrawalMigrated\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"recipientAddr\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"tokenAddr\",\"type\":\"address\"},{\"components\":[{\"internalType\":\"enumToken.Standard\",\"name\":\"erc\",\"type\":\"uint8\"},{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"quantity\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Info\",\"name\":\"info\",\"type\":\"tuple\"}],\"internalType\":\"structTransfer.Request[]\",\"name\":\"_requests\",\"type\":\"tuple[]\"},{\"internalType\":\"address[]\",\"name\":\"_requesters\",\"type\":\"address[]\"}],\"name\":\"migrateWithdrawals\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"minimumThreshold\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"minimumVoteWeight\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"nonce\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"pause\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"paused\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"renounceRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"recipientAddr\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"tokenAddr\",\"type\":\"address\"},{\"components\":[{\"internalType\":\"enumToken.Standard\",\"name\":\"erc\",\"type\":\"uint8\"},{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"quantity\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Info\",\"name\":\"info\",\"type\":\"tuple\"}],\"internalType\":\"structTransfer.Request\",\"name\":\"_request\",\"type\":\"tuple\"},{\"internalType\":\"uint256\",\"name\":\"_chainId\",\"type\":\"uint256\"}],\"name\":\"requestWithdrawalFor\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_withdrawalId\",\"type\":\"uint256\"}],\"name\":\"requestWithdrawalSignatures\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"revokeRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address[]\",\"name\":\"_tokens\",\"type\":\"address[]\"},{\"internalType\":\"uint256[]\",\"name\":\"_thresholds\",\"type\":\"uint256[]\"}],\"name\":\"setMinimumThresholds\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_numerator\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_denominator\",\"type\":\"uint256\"}],\"name\":\"setThreshold\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"contractIWeightedValidator\",\"name\":\"_validatorContract\",\"type\":\"address\"}],\"name\":\"setValidatorContract\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"interfaceId\",\"type\":\"bytes4\"}],\"name\":\"supportsInterface\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"unpause\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"validatorContract\",\"outputs\":[{\"internalType\":\"contractIWeightedValidator\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"withdrawal\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"enumTransfer.Kind\",\"name\":\"kind\",\"type\":\"uint8\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"tokenAddr\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"chainId\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Owner\",\"name\":\"mainchain\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"tokenAddr\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"chainId\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Owner\",\"name\":\"ronin\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"enumToken.Standard\",\"name\":\"erc\",\"type\":\"uint8\"},{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"quantity\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Info\",\"name\":\"info\",\"type\":\"tuple\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"withdrawalCount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"withdrawalMigrated\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"}]",
+// GatewayMetaData contains all meta data concerning the Gateway contract.
+var GatewayMetaData = &bind.MetaData{
+	ABI: "[{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"receiptHash\",\"type\":\"bytes32\"},{\"components\":[{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"enumTransfer.Kind\",\"name\":\"kind\",\"type\":\"uint8\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"tokenAddr\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"chainId\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Owner\",\"name\":\"mainchain\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"tokenAddr\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"chainId\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Owner\",\"name\":\"ronin\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"enumToken.Standard\",\"name\":\"erc\",\"type\":\"uint8\"},{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"quantity\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Info\",\"name\":\"info\",\"type\":\"tuple\"}],\"indexed\":false,\"internalType\":\"structTransfer.Receipt\",\"name\":\"receipt\",\"type\":\"tuple\"}],\"name\":\"Deposited\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"receiptHash\",\"type\":\"bytes32\"},{\"components\":[{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"enumTransfer.Kind\",\"name\":\"kind\",\"type\":\"uint8\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"tokenAddr\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"chainId\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Owner\",\"name\":\"mainchain\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"tokenAddr\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"chainId\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Owner\",\"name\":\"ronin\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"enumToken.Standard\",\"name\":\"erc\",\"type\":\"uint8\"},{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"quantity\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Info\",\"name\":\"info\",\"type\":\"tuple\"}],\"indexed\":false,\"internalType\":\"structTransfer.Receipt\",\"name\":\"receipt\",\"type\":\"tuple\"}],\"name\":\"MainchainWithdrew\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address[]\",\"name\":\"tokens\",\"type\":\"address[]\"},{\"indexed\":false,\"internalType\":\"uint256[]\",\"name\":\"threshold\",\"type\":\"uint256[]\"}],\"name\":\"MinimumThresholdsUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"Paused\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"previousAdminRole\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"newAdminRole\",\"type\":\"bytes32\"}],\"name\":\"RoleAdminChanged\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"}],\"name\":\"RoleGranted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"}],\"name\":\"RoleRevoked\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"_nonce\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"_numerator\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"_denominator\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"_previousNumerator\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"_previousDenominator\",\"type\":\"uint256\"}],\"name\":\"ThresholdUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address[]\",\"name\":\"roninTokens\",\"type\":\"address[]\"},{\"indexed\":false,\"internalType\":\"address[]\",\"name\":\"mainchainTokens\",\"type\":\"address[]\"},{\"indexed\":false,\"internalType\":\"uint256[]\",\"name\":\"chainIds\",\"type\":\"uint256[]\"}],\"name\":\"TokenMapped\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"Unpaused\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"contractIWeightedValidator\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"ValidatorContractUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"receiptHash\",\"type\":\"bytes32\"},{\"components\":[{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"enumTransfer.Kind\",\"name\":\"kind\",\"type\":\"uint8\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"tokenAddr\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"chainId\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Owner\",\"name\":\"mainchain\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"tokenAddr\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"chainId\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Owner\",\"name\":\"ronin\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"enumToken.Standard\",\"name\":\"erc\",\"type\":\"uint8\"},{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"quantity\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Info\",\"name\":\"info\",\"type\":\"tuple\"}],\"indexed\":false,\"internalType\":\"structTransfer.Receipt\",\"name\":\"\",\"type\":\"tuple\"}],\"name\":\"WithdrawalRequested\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"receiptHash\",\"type\":\"bytes32\"},{\"components\":[{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"enumTransfer.Kind\",\"name\":\"kind\",\"type\":\"uint8\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"tokenAddr\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"chainId\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Owner\",\"name\":\"mainchain\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"tokenAddr\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"chainId\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Owner\",\"name\":\"ronin\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"enumToken.Standard\",\"name\":\"erc\",\"type\":\"uint8\"},{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"quantity\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Info\",\"name\":\"info\",\"type\":\"tuple\"}],\"indexed\":false,\"internalType\":\"structTransfer.Receipt\",\"name\":\"\",\"type\":\"tuple\"}],\"name\":\"WithdrawalSignaturesRequested\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"DEFAULT_ADMIN_ROLE\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"WITHDRAWAL_MIGRATOR\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_withdrawalId\",\"type\":\"uint256\"}],\"name\":\"acknowledgeMainchainWithdrew\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"enumTransfer.Kind\",\"name\":\"kind\",\"type\":\"uint8\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"tokenAddr\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"chainId\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Owner\",\"name\":\"mainchain\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"tokenAddr\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"chainId\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Owner\",\"name\":\"ronin\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"enumToken.Standard\",\"name\":\"erc\",\"type\":\"uint8\"},{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"quantity\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Info\",\"name\":\"info\",\"type\":\"tuple\"}],\"internalType\":\"structTransfer.Receipt[]\",\"name\":\"_receipts\",\"type\":\"tuple[]\"}],\"name\":\"bulkDepositFor\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"recipientAddr\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"tokenAddr\",\"type\":\"address\"},{\"components\":[{\"internalType\":\"enumToken.Standard\",\"name\":\"erc\",\"type\":\"uint8\"},{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"quantity\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Info\",\"name\":\"info\",\"type\":\"tuple\"}],\"internalType\":\"structTransfer.Request[]\",\"name\":\"_requests\",\"type\":\"tuple[]\"},{\"internalType\":\"uint256\",\"name\":\"_chainId\",\"type\":\"uint256\"}],\"name\":\"bulkRequestWithdrawalFor\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256[]\",\"name\":\"_withdrawals\",\"type\":\"uint256[]\"},{\"internalType\":\"bytes[]\",\"name\":\"_signatures\",\"type\":\"bytes[]\"}],\"name\":\"bulkSubmitWithdrawalSignatures\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_voteWeight\",\"type\":\"uint256\"}],\"name\":\"checkThreshold\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"enumTransfer.Kind\",\"name\":\"kind\",\"type\":\"uint8\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"tokenAddr\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"chainId\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Owner\",\"name\":\"mainchain\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"tokenAddr\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"chainId\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Owner\",\"name\":\"ronin\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"enumToken.Standard\",\"name\":\"erc\",\"type\":\"uint8\"},{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"quantity\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Info\",\"name\":\"info\",\"type\":\"tuple\"}],\"internalType\":\"structTransfer.Receipt\",\"name\":\"_receipt\",\"type\":\"tuple\"}],\"name\":\"depositFor\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"depositVote\",\"outputs\":[{\"internalType\":\"enumGatewayGovernance.VoteStatus\",\"name\":\"status\",\"type\":\"uint8\"},{\"internalType\":\"bytes32\",\"name\":\"finalHash\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_roninToken\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_chainId\",\"type\":\"uint256\"}],\"name\":\"getMainchainToken\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"_addr\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"}],\"name\":\"getRoleAdmin\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"index\",\"type\":\"uint256\"}],\"name\":\"getRoleMember\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"}],\"name\":\"getRoleMemberCount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getThreshold\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_withdrawalId\",\"type\":\"uint256\"},{\"internalType\":\"address[]\",\"name\":\"_validators\",\"type\":\"address[]\"}],\"name\":\"getWithdrawalSignatures\",\"outputs\":[{\"internalType\":\"bytes[]\",\"name\":\"_signatures\",\"type\":\"bytes[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"grantRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"hasRole\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_roleSetter\",\"type\":\"address\"},{\"internalType\":\"contractIWeightedValidator\",\"name\":\"_validatorContract\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_numerator\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_denominator\",\"type\":\"uint256\"},{\"internalType\":\"address[]\",\"name\":\"_withdrawalMigrators\",\"type\":\"address[]\"},{\"internalType\":\"address[]\",\"name\":\"_roninTokens\",\"type\":\"address[]\"},{\"internalType\":\"address[]\",\"name\":\"_mainchainTokens\",\"type\":\"address[]\"},{\"internalType\":\"uint256[][2]\",\"name\":\"_packedNumbers\",\"type\":\"uint256[][2]\"}],\"name\":\"initialize\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"mainchainWithdrew\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address[]\",\"name\":\"_roninTokens\",\"type\":\"address[]\"},{\"internalType\":\"address[]\",\"name\":\"_mainchainTokens\",\"type\":\"address[]\"},{\"internalType\":\"uint256[]\",\"name\":\"_chainIds\",\"type\":\"uint256[]\"}],\"name\":\"mapTokens\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"markWithdrawalMigrated\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"recipientAddr\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"tokenAddr\",\"type\":\"address\"},{\"components\":[{\"internalType\":\"enumToken.Standard\",\"name\":\"erc\",\"type\":\"uint8\"},{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"quantity\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Info\",\"name\":\"info\",\"type\":\"tuple\"}],\"internalType\":\"structTransfer.Request[]\",\"name\":\"_requests\",\"type\":\"tuple[]\"},{\"internalType\":\"address[]\",\"name\":\"_requesters\",\"type\":\"address[]\"}],\"name\":\"migrateWithdrawals\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"minimumThreshold\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"minimumVoteWeight\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"nonce\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"pause\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"paused\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"renounceRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"recipientAddr\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"tokenAddr\",\"type\":\"address\"},{\"components\":[{\"internalType\":\"enumToken.Standard\",\"name\":\"erc\",\"type\":\"uint8\"},{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"quantity\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Info\",\"name\":\"info\",\"type\":\"tuple\"}],\"internalType\":\"structTransfer.Request\",\"name\":\"_request\",\"type\":\"tuple\"},{\"internalType\":\"uint256\",\"name\":\"_chainId\",\"type\":\"uint256\"}],\"name\":\"requestWithdrawalFor\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_withdrawalId\",\"type\":\"uint256\"}],\"name\":\"requestWithdrawalSignatures\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"revokeRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address[]\",\"name\":\"_tokens\",\"type\":\"address[]\"},{\"internalType\":\"uint256[]\",\"name\":\"_thresholds\",\"type\":\"uint256[]\"}],\"name\":\"setMinimumThresholds\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_numerator\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_denominator\",\"type\":\"uint256\"}],\"name\":\"setThreshold\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"contractIWeightedValidator\",\"name\":\"_validatorContract\",\"type\":\"address\"}],\"name\":\"setValidatorContract\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"interfaceId\",\"type\":\"bytes4\"}],\"name\":\"supportsInterface\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"unpause\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"validatorContract\",\"outputs\":[{\"internalType\":\"contractIWeightedValidator\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"withdrawal\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"enumTransfer.Kind\",\"name\":\"kind\",\"type\":\"uint8\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"tokenAddr\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"chainId\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Owner\",\"name\":\"mainchain\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"tokenAddr\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"chainId\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Owner\",\"name\":\"ronin\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"enumToken.Standard\",\"name\":\"erc\",\"type\":\"uint8\"},{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"quantity\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Info\",\"name\":\"info\",\"type\":\"tuple\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"withdrawalCount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"withdrawalMigrated\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"}]",
 }
 
-// RoninABI is the input ABI used to generate the binding from.
-// Deprecated: Use RoninMetaData.ABI instead.
-var RoninABI = RoninMetaData.ABI
+// GatewayABI is the input ABI used to generate the binding from.
+// Deprecated: Use GatewayMetaData.ABI instead.
+var GatewayABI = GatewayMetaData.ABI
 
-// Ronin is an auto generated Go binding around an Ethereum contract.
-type Ronin struct {
-	RoninCaller     // Read-only binding to the contract
-	RoninTransactor // Write-only binding to the contract
-	RoninFilterer   // Log filterer for contract events
+// Gateway is an auto generated Go binding around an Ethereum contract.
+type Gateway struct {
+	GatewayCaller     // Read-only binding to the contract
+	GatewayTransactor // Write-only binding to the contract
+	GatewayFilterer   // Log filterer for contract events
 }
 
-// RoninCaller is an auto generated read-only Go binding around an Ethereum contract.
-type RoninCaller struct {
+// GatewayCaller is an auto generated read-only Go binding around an Ethereum contract.
+type GatewayCaller struct {
 	contract *bind.BoundContract // Generic contract wrapper for the low level calls
 }
 
-// RoninTransactor is an auto generated write-only Go binding around an Ethereum contract.
-type RoninTransactor struct {
+// GatewayTransactor is an auto generated write-only Go binding around an Ethereum contract.
+type GatewayTransactor struct {
 	contract *bind.BoundContract // Generic contract wrapper for the low level calls
 }
 
-// RoninFilterer is an auto generated log filtering Go binding around an Ethereum contract events.
-type RoninFilterer struct {
+// GatewayFilterer is an auto generated log filtering Go binding around an Ethereum contract events.
+type GatewayFilterer struct {
 	contract *bind.BoundContract // Generic contract wrapper for the low level calls
 }
 
-// RoninSession is an auto generated Go binding around an Ethereum contract,
+// GatewaySession is an auto generated Go binding around an Ethereum contract,
 // with pre-set call and transact options.
-type RoninSession struct {
-	Contract     *Ronin            // Generic contract binding to set the session for
+type GatewaySession struct {
+	Contract     *Gateway          // Generic contract binding to set the session for
 	CallOpts     bind.CallOpts     // Call options to use throughout this session
 	TransactOpts bind.TransactOpts // Transaction auth options to use throughout this session
 }
 
-// RoninCallerSession is an auto generated read-only Go binding around an Ethereum contract,
+// GatewayCallerSession is an auto generated read-only Go binding around an Ethereum contract,
 // with pre-set call options.
-type RoninCallerSession struct {
-	Contract *RoninCaller  // Generic contract caller binding to set the session for
-	CallOpts bind.CallOpts // Call options to use throughout this session
+type GatewayCallerSession struct {
+	Contract *GatewayCaller // Generic contract caller binding to set the session for
+	CallOpts bind.CallOpts  // Call options to use throughout this session
 }
 
-// RoninTransactorSession is an auto generated write-only Go binding around an Ethereum contract,
+// GatewayTransactorSession is an auto generated write-only Go binding around an Ethereum contract,
 // with pre-set transact options.
-type RoninTransactorSession struct {
-	Contract     *RoninTransactor  // Generic contract transactor binding to set the session for
-	TransactOpts bind.TransactOpts // Transaction auth options to use throughout this session
+type GatewayTransactorSession struct {
+	Contract     *GatewayTransactor // Generic contract transactor binding to set the session for
+	TransactOpts bind.TransactOpts  // Transaction auth options to use throughout this session
 }
 
-// RoninRaw is an auto generated low-level Go binding around an Ethereum contract.
-type RoninRaw struct {
-	Contract *Ronin // Generic contract binding to access the raw methods on
+// GatewayRaw is an auto generated low-level Go binding around an Ethereum contract.
+type GatewayRaw struct {
+	Contract *Gateway // Generic contract binding to access the raw methods on
 }
 
-// RoninCallerRaw is an auto generated low-level read-only Go binding around an Ethereum contract.
-type RoninCallerRaw struct {
-	Contract *RoninCaller // Generic read-only contract binding to access the raw methods on
+// GatewayCallerRaw is an auto generated low-level read-only Go binding around an Ethereum contract.
+type GatewayCallerRaw struct {
+	Contract *GatewayCaller // Generic read-only contract binding to access the raw methods on
 }
 
-// RoninTransactorRaw is an auto generated low-level write-only Go binding around an Ethereum contract.
-type RoninTransactorRaw struct {
-	Contract *RoninTransactor // Generic write-only contract binding to access the raw methods on
+// GatewayTransactorRaw is an auto generated low-level write-only Go binding around an Ethereum contract.
+type GatewayTransactorRaw struct {
+	Contract *GatewayTransactor // Generic write-only contract binding to access the raw methods on
 }
 
-// NewRonin creates a new instance of Ronin, bound to a specific deployed contract.
-func NewRonin(address common.Address, backend bind.ContractBackend) (*Ronin, error) {
-	contract, err := bindRonin(address, backend, backend, backend)
+// NewGateway creates a new instance of Gateway, bound to a specific deployed contract.
+func NewGateway(address common.Address, backend bind.ContractBackend) (*Gateway, error) {
+	contract, err := bindGateway(address, backend, backend, backend)
 	if err != nil {
 		return nil, err
 	}
-	return &Ronin{RoninCaller: RoninCaller{contract: contract}, RoninTransactor: RoninTransactor{contract: contract}, RoninFilterer: RoninFilterer{contract: contract}}, nil
+	return &Gateway{GatewayCaller: GatewayCaller{contract: contract}, GatewayTransactor: GatewayTransactor{contract: contract}, GatewayFilterer: GatewayFilterer{contract: contract}}, nil
 }
 
-// NewRoninCaller creates a new read-only instance of Ronin, bound to a specific deployed contract.
-func NewRoninCaller(address common.Address, caller bind.ContractCaller) (*RoninCaller, error) {
-	contract, err := bindRonin(address, caller, nil, nil)
+// NewGatewayCaller creates a new read-only instance of Gateway, bound to a specific deployed contract.
+func NewGatewayCaller(address common.Address, caller bind.ContractCaller) (*GatewayCaller, error) {
+	contract, err := bindGateway(address, caller, nil, nil)
 	if err != nil {
 		return nil, err
 	}
-	return &RoninCaller{contract: contract}, nil
+	return &GatewayCaller{contract: contract}, nil
 }
 
-// NewRoninTransactor creates a new write-only instance of Ronin, bound to a specific deployed contract.
-func NewRoninTransactor(address common.Address, transactor bind.ContractTransactor) (*RoninTransactor, error) {
-	contract, err := bindRonin(address, nil, transactor, nil)
+// NewGatewayTransactor creates a new write-only instance of Gateway, bound to a specific deployed contract.
+func NewGatewayTransactor(address common.Address, transactor bind.ContractTransactor) (*GatewayTransactor, error) {
+	contract, err := bindGateway(address, nil, transactor, nil)
 	if err != nil {
 		return nil, err
 	}
-	return &RoninTransactor{contract: contract}, nil
+	return &GatewayTransactor{contract: contract}, nil
 }
 
-// NewRoninFilterer creates a new log filterer instance of Ronin, bound to a specific deployed contract.
-func NewRoninFilterer(address common.Address, filterer bind.ContractFilterer) (*RoninFilterer, error) {
-	contract, err := bindRonin(address, nil, nil, filterer)
+// NewGatewayFilterer creates a new log filterer instance of Gateway, bound to a specific deployed contract.
+func NewGatewayFilterer(address common.Address, filterer bind.ContractFilterer) (*GatewayFilterer, error) {
+	contract, err := bindGateway(address, nil, nil, filterer)
 	if err != nil {
 		return nil, err
 	}
-	return &RoninFilterer{contract: contract}, nil
+	return &GatewayFilterer{contract: contract}, nil
 }
 
-// bindRonin binds a generic wrapper to an already deployed contract.
-func bindRonin(address common.Address, caller bind.ContractCaller, transactor bind.ContractTransactor, filterer bind.ContractFilterer) (*bind.BoundContract, error) {
-	parsed, err := abi.JSON(strings.NewReader(RoninABI))
+// bindGateway binds a generic wrapper to an already deployed contract.
+func bindGateway(address common.Address, caller bind.ContractCaller, transactor bind.ContractTransactor, filterer bind.ContractFilterer) (*bind.BoundContract, error) {
+	parsed, err := abi.JSON(strings.NewReader(GatewayABI))
 	if err != nil {
 		return nil, err
 	}
@@ -175,46 +175,46 @@ func bindRonin(address common.Address, caller bind.ContractCaller, transactor bi
 // sets the output to result. The result type might be a single field for simple
 // returns, a slice of interfaces for anonymous returns and a struct for named
 // returns.
-func (_Ronin *RoninRaw) Call(opts *bind.CallOpts, result *[]interface{}, method string, params ...interface{}) error {
-	return _Ronin.Contract.RoninCaller.contract.Call(opts, result, method, params...)
+func (_Gateway *GatewayRaw) Call(opts *bind.CallOpts, result *[]interface{}, method string, params ...interface{}) error {
+	return _Gateway.Contract.GatewayCaller.contract.Call(opts, result, method, params...)
 }
 
 // Transfer initiates a plain transaction to move funds to the contract, calling
 // its default method if one is available.
-func (_Ronin *RoninRaw) Transfer(opts *bind.TransactOpts) (*types.Transaction, error) {
-	return _Ronin.Contract.RoninTransactor.contract.Transfer(opts)
+func (_Gateway *GatewayRaw) Transfer(opts *bind.TransactOpts) (*types.Transaction, error) {
+	return _Gateway.Contract.GatewayTransactor.contract.Transfer(opts)
 }
 
 // Transact invokes the (paid) contract method with params as input values.
-func (_Ronin *RoninRaw) Transact(opts *bind.TransactOpts, method string, params ...interface{}) (*types.Transaction, error) {
-	return _Ronin.Contract.RoninTransactor.contract.Transact(opts, method, params...)
+func (_Gateway *GatewayRaw) Transact(opts *bind.TransactOpts, method string, params ...interface{}) (*types.Transaction, error) {
+	return _Gateway.Contract.GatewayTransactor.contract.Transact(opts, method, params...)
 }
 
 // Call invokes the (constant) contract method with params as input values and
 // sets the output to result. The result type might be a single field for simple
 // returns, a slice of interfaces for anonymous returns and a struct for named
 // returns.
-func (_Ronin *RoninCallerRaw) Call(opts *bind.CallOpts, result *[]interface{}, method string, params ...interface{}) error {
-	return _Ronin.Contract.contract.Call(opts, result, method, params...)
+func (_Gateway *GatewayCallerRaw) Call(opts *bind.CallOpts, result *[]interface{}, method string, params ...interface{}) error {
+	return _Gateway.Contract.contract.Call(opts, result, method, params...)
 }
 
 // Transfer initiates a plain transaction to move funds to the contract, calling
 // its default method if one is available.
-func (_Ronin *RoninTransactorRaw) Transfer(opts *bind.TransactOpts) (*types.Transaction, error) {
-	return _Ronin.Contract.contract.Transfer(opts)
+func (_Gateway *GatewayTransactorRaw) Transfer(opts *bind.TransactOpts) (*types.Transaction, error) {
+	return _Gateway.Contract.contract.Transfer(opts)
 }
 
 // Transact invokes the (paid) contract method with params as input values.
-func (_Ronin *RoninTransactorRaw) Transact(opts *bind.TransactOpts, method string, params ...interface{}) (*types.Transaction, error) {
-	return _Ronin.Contract.contract.Transact(opts, method, params...)
+func (_Gateway *GatewayTransactorRaw) Transact(opts *bind.TransactOpts, method string, params ...interface{}) (*types.Transaction, error) {
+	return _Gateway.Contract.contract.Transact(opts, method, params...)
 }
 
 // DEFAULTADMINROLE is a free data retrieval call binding the contract method 0xa217fddf.
 //
 // Solidity: function DEFAULT_ADMIN_ROLE() view returns(bytes32)
-func (_Ronin *RoninCaller) DEFAULTADMINROLE(opts *bind.CallOpts) ([32]byte, error) {
+func (_Gateway *GatewayCaller) DEFAULTADMINROLE(opts *bind.CallOpts) ([32]byte, error) {
 	var out []interface{}
-	err := _Ronin.contract.Call(opts, &out, "DEFAULT_ADMIN_ROLE")
+	err := _Gateway.contract.Call(opts, &out, "DEFAULT_ADMIN_ROLE")
 
 	if err != nil {
 		return *new([32]byte), err
@@ -229,23 +229,23 @@ func (_Ronin *RoninCaller) DEFAULTADMINROLE(opts *bind.CallOpts) ([32]byte, erro
 // DEFAULTADMINROLE is a free data retrieval call binding the contract method 0xa217fddf.
 //
 // Solidity: function DEFAULT_ADMIN_ROLE() view returns(bytes32)
-func (_Ronin *RoninSession) DEFAULTADMINROLE() ([32]byte, error) {
-	return _Ronin.Contract.DEFAULTADMINROLE(&_Ronin.CallOpts)
+func (_Gateway *GatewaySession) DEFAULTADMINROLE() ([32]byte, error) {
+	return _Gateway.Contract.DEFAULTADMINROLE(&_Gateway.CallOpts)
 }
 
 // DEFAULTADMINROLE is a free data retrieval call binding the contract method 0xa217fddf.
 //
 // Solidity: function DEFAULT_ADMIN_ROLE() view returns(bytes32)
-func (_Ronin *RoninCallerSession) DEFAULTADMINROLE() ([32]byte, error) {
-	return _Ronin.Contract.DEFAULTADMINROLE(&_Ronin.CallOpts)
+func (_Gateway *GatewayCallerSession) DEFAULTADMINROLE() ([32]byte, error) {
+	return _Gateway.Contract.DEFAULTADMINROLE(&_Gateway.CallOpts)
 }
 
 // WITHDRAWALMIGRATOR is a free data retrieval call binding the contract method 0xfe90d9c2.
 //
 // Solidity: function WITHDRAWAL_MIGRATOR() view returns(bytes32)
-func (_Ronin *RoninCaller) WITHDRAWALMIGRATOR(opts *bind.CallOpts) ([32]byte, error) {
+func (_Gateway *GatewayCaller) WITHDRAWALMIGRATOR(opts *bind.CallOpts) ([32]byte, error) {
 	var out []interface{}
-	err := _Ronin.contract.Call(opts, &out, "WITHDRAWAL_MIGRATOR")
+	err := _Gateway.contract.Call(opts, &out, "WITHDRAWAL_MIGRATOR")
 
 	if err != nil {
 		return *new([32]byte), err
@@ -260,23 +260,23 @@ func (_Ronin *RoninCaller) WITHDRAWALMIGRATOR(opts *bind.CallOpts) ([32]byte, er
 // WITHDRAWALMIGRATOR is a free data retrieval call binding the contract method 0xfe90d9c2.
 //
 // Solidity: function WITHDRAWAL_MIGRATOR() view returns(bytes32)
-func (_Ronin *RoninSession) WITHDRAWALMIGRATOR() ([32]byte, error) {
-	return _Ronin.Contract.WITHDRAWALMIGRATOR(&_Ronin.CallOpts)
+func (_Gateway *GatewaySession) WITHDRAWALMIGRATOR() ([32]byte, error) {
+	return _Gateway.Contract.WITHDRAWALMIGRATOR(&_Gateway.CallOpts)
 }
 
 // WITHDRAWALMIGRATOR is a free data retrieval call binding the contract method 0xfe90d9c2.
 //
 // Solidity: function WITHDRAWAL_MIGRATOR() view returns(bytes32)
-func (_Ronin *RoninCallerSession) WITHDRAWALMIGRATOR() ([32]byte, error) {
-	return _Ronin.Contract.WITHDRAWALMIGRATOR(&_Ronin.CallOpts)
+func (_Gateway *GatewayCallerSession) WITHDRAWALMIGRATOR() ([32]byte, error) {
+	return _Gateway.Contract.WITHDRAWALMIGRATOR(&_Gateway.CallOpts)
 }
 
 // CheckThreshold is a free data retrieval call binding the contract method 0xdafae408.
 //
 // Solidity: function checkThreshold(uint256 _voteWeight) view returns(bool)
-func (_Ronin *RoninCaller) CheckThreshold(opts *bind.CallOpts, _voteWeight *big.Int) (bool, error) {
+func (_Gateway *GatewayCaller) CheckThreshold(opts *bind.CallOpts, _voteWeight *big.Int) (bool, error) {
 	var out []interface{}
-	err := _Ronin.contract.Call(opts, &out, "checkThreshold", _voteWeight)
+	err := _Gateway.contract.Call(opts, &out, "checkThreshold", _voteWeight)
 
 	if err != nil {
 		return *new(bool), err
@@ -291,26 +291,26 @@ func (_Ronin *RoninCaller) CheckThreshold(opts *bind.CallOpts, _voteWeight *big.
 // CheckThreshold is a free data retrieval call binding the contract method 0xdafae408.
 //
 // Solidity: function checkThreshold(uint256 _voteWeight) view returns(bool)
-func (_Ronin *RoninSession) CheckThreshold(_voteWeight *big.Int) (bool, error) {
-	return _Ronin.Contract.CheckThreshold(&_Ronin.CallOpts, _voteWeight)
+func (_Gateway *GatewaySession) CheckThreshold(_voteWeight *big.Int) (bool, error) {
+	return _Gateway.Contract.CheckThreshold(&_Gateway.CallOpts, _voteWeight)
 }
 
 // CheckThreshold is a free data retrieval call binding the contract method 0xdafae408.
 //
 // Solidity: function checkThreshold(uint256 _voteWeight) view returns(bool)
-func (_Ronin *RoninCallerSession) CheckThreshold(_voteWeight *big.Int) (bool, error) {
-	return _Ronin.Contract.CheckThreshold(&_Ronin.CallOpts, _voteWeight)
+func (_Gateway *GatewayCallerSession) CheckThreshold(_voteWeight *big.Int) (bool, error) {
+	return _Gateway.Contract.CheckThreshold(&_Gateway.CallOpts, _voteWeight)
 }
 
 // DepositVote is a free data retrieval call binding the contract method 0x4d92c4f0.
 //
 // Solidity: function depositVote(uint256 , uint256 ) view returns(uint8 status, bytes32 finalHash)
-func (_Ronin *RoninCaller) DepositVote(opts *bind.CallOpts, arg0 *big.Int, arg1 *big.Int) (struct {
+func (_Gateway *GatewayCaller) DepositVote(opts *bind.CallOpts, arg0 *big.Int, arg1 *big.Int) (struct {
 	Status    uint8
 	FinalHash [32]byte
 }, error) {
 	var out []interface{}
-	err := _Ronin.contract.Call(opts, &out, "depositVote", arg0, arg1)
+	err := _Gateway.contract.Call(opts, &out, "depositVote", arg0, arg1)
 
 	outstruct := new(struct {
 		Status    uint8
@@ -330,29 +330,29 @@ func (_Ronin *RoninCaller) DepositVote(opts *bind.CallOpts, arg0 *big.Int, arg1 
 // DepositVote is a free data retrieval call binding the contract method 0x4d92c4f0.
 //
 // Solidity: function depositVote(uint256 , uint256 ) view returns(uint8 status, bytes32 finalHash)
-func (_Ronin *RoninSession) DepositVote(arg0 *big.Int, arg1 *big.Int) (struct {
+func (_Gateway *GatewaySession) DepositVote(arg0 *big.Int, arg1 *big.Int) (struct {
 	Status    uint8
 	FinalHash [32]byte
 }, error) {
-	return _Ronin.Contract.DepositVote(&_Ronin.CallOpts, arg0, arg1)
+	return _Gateway.Contract.DepositVote(&_Gateway.CallOpts, arg0, arg1)
 }
 
 // DepositVote is a free data retrieval call binding the contract method 0x4d92c4f0.
 //
 // Solidity: function depositVote(uint256 , uint256 ) view returns(uint8 status, bytes32 finalHash)
-func (_Ronin *RoninCallerSession) DepositVote(arg0 *big.Int, arg1 *big.Int) (struct {
+func (_Gateway *GatewayCallerSession) DepositVote(arg0 *big.Int, arg1 *big.Int) (struct {
 	Status    uint8
 	FinalHash [32]byte
 }, error) {
-	return _Ronin.Contract.DepositVote(&_Ronin.CallOpts, arg0, arg1)
+	return _Gateway.Contract.DepositVote(&_Gateway.CallOpts, arg0, arg1)
 }
 
 // GetMainchainToken is a free data retrieval call binding the contract method 0x5d6a9a90.
 //
 // Solidity: function getMainchainToken(address _roninToken, uint256 _chainId) view returns(address _addr)
-func (_Ronin *RoninCaller) GetMainchainToken(opts *bind.CallOpts, _roninToken common.Address, _chainId *big.Int) (common.Address, error) {
+func (_Gateway *GatewayCaller) GetMainchainToken(opts *bind.CallOpts, _roninToken common.Address, _chainId *big.Int) (common.Address, error) {
 	var out []interface{}
-	err := _Ronin.contract.Call(opts, &out, "getMainchainToken", _roninToken, _chainId)
+	err := _Gateway.contract.Call(opts, &out, "getMainchainToken", _roninToken, _chainId)
 
 	if err != nil {
 		return *new(common.Address), err
@@ -367,23 +367,23 @@ func (_Ronin *RoninCaller) GetMainchainToken(opts *bind.CallOpts, _roninToken co
 // GetMainchainToken is a free data retrieval call binding the contract method 0x5d6a9a90.
 //
 // Solidity: function getMainchainToken(address _roninToken, uint256 _chainId) view returns(address _addr)
-func (_Ronin *RoninSession) GetMainchainToken(_roninToken common.Address, _chainId *big.Int) (common.Address, error) {
-	return _Ronin.Contract.GetMainchainToken(&_Ronin.CallOpts, _roninToken, _chainId)
+func (_Gateway *GatewaySession) GetMainchainToken(_roninToken common.Address, _chainId *big.Int) (common.Address, error) {
+	return _Gateway.Contract.GetMainchainToken(&_Gateway.CallOpts, _roninToken, _chainId)
 }
 
 // GetMainchainToken is a free data retrieval call binding the contract method 0x5d6a9a90.
 //
 // Solidity: function getMainchainToken(address _roninToken, uint256 _chainId) view returns(address _addr)
-func (_Ronin *RoninCallerSession) GetMainchainToken(_roninToken common.Address, _chainId *big.Int) (common.Address, error) {
-	return _Ronin.Contract.GetMainchainToken(&_Ronin.CallOpts, _roninToken, _chainId)
+func (_Gateway *GatewayCallerSession) GetMainchainToken(_roninToken common.Address, _chainId *big.Int) (common.Address, error) {
+	return _Gateway.Contract.GetMainchainToken(&_Gateway.CallOpts, _roninToken, _chainId)
 }
 
 // GetRoleAdmin is a free data retrieval call binding the contract method 0x248a9ca3.
 //
 // Solidity: function getRoleAdmin(bytes32 role) view returns(bytes32)
-func (_Ronin *RoninCaller) GetRoleAdmin(opts *bind.CallOpts, role [32]byte) ([32]byte, error) {
+func (_Gateway *GatewayCaller) GetRoleAdmin(opts *bind.CallOpts, role [32]byte) ([32]byte, error) {
 	var out []interface{}
-	err := _Ronin.contract.Call(opts, &out, "getRoleAdmin", role)
+	err := _Gateway.contract.Call(opts, &out, "getRoleAdmin", role)
 
 	if err != nil {
 		return *new([32]byte), err
@@ -398,23 +398,23 @@ func (_Ronin *RoninCaller) GetRoleAdmin(opts *bind.CallOpts, role [32]byte) ([32
 // GetRoleAdmin is a free data retrieval call binding the contract method 0x248a9ca3.
 //
 // Solidity: function getRoleAdmin(bytes32 role) view returns(bytes32)
-func (_Ronin *RoninSession) GetRoleAdmin(role [32]byte) ([32]byte, error) {
-	return _Ronin.Contract.GetRoleAdmin(&_Ronin.CallOpts, role)
+func (_Gateway *GatewaySession) GetRoleAdmin(role [32]byte) ([32]byte, error) {
+	return _Gateway.Contract.GetRoleAdmin(&_Gateway.CallOpts, role)
 }
 
 // GetRoleAdmin is a free data retrieval call binding the contract method 0x248a9ca3.
 //
 // Solidity: function getRoleAdmin(bytes32 role) view returns(bytes32)
-func (_Ronin *RoninCallerSession) GetRoleAdmin(role [32]byte) ([32]byte, error) {
-	return _Ronin.Contract.GetRoleAdmin(&_Ronin.CallOpts, role)
+func (_Gateway *GatewayCallerSession) GetRoleAdmin(role [32]byte) ([32]byte, error) {
+	return _Gateway.Contract.GetRoleAdmin(&_Gateway.CallOpts, role)
 }
 
 // GetRoleMember is a free data retrieval call binding the contract method 0x9010d07c.
 //
 // Solidity: function getRoleMember(bytes32 role, uint256 index) view returns(address)
-func (_Ronin *RoninCaller) GetRoleMember(opts *bind.CallOpts, role [32]byte, index *big.Int) (common.Address, error) {
+func (_Gateway *GatewayCaller) GetRoleMember(opts *bind.CallOpts, role [32]byte, index *big.Int) (common.Address, error) {
 	var out []interface{}
-	err := _Ronin.contract.Call(opts, &out, "getRoleMember", role, index)
+	err := _Gateway.contract.Call(opts, &out, "getRoleMember", role, index)
 
 	if err != nil {
 		return *new(common.Address), err
@@ -429,23 +429,23 @@ func (_Ronin *RoninCaller) GetRoleMember(opts *bind.CallOpts, role [32]byte, ind
 // GetRoleMember is a free data retrieval call binding the contract method 0x9010d07c.
 //
 // Solidity: function getRoleMember(bytes32 role, uint256 index) view returns(address)
-func (_Ronin *RoninSession) GetRoleMember(role [32]byte, index *big.Int) (common.Address, error) {
-	return _Ronin.Contract.GetRoleMember(&_Ronin.CallOpts, role, index)
+func (_Gateway *GatewaySession) GetRoleMember(role [32]byte, index *big.Int) (common.Address, error) {
+	return _Gateway.Contract.GetRoleMember(&_Gateway.CallOpts, role, index)
 }
 
 // GetRoleMember is a free data retrieval call binding the contract method 0x9010d07c.
 //
 // Solidity: function getRoleMember(bytes32 role, uint256 index) view returns(address)
-func (_Ronin *RoninCallerSession) GetRoleMember(role [32]byte, index *big.Int) (common.Address, error) {
-	return _Ronin.Contract.GetRoleMember(&_Ronin.CallOpts, role, index)
+func (_Gateway *GatewayCallerSession) GetRoleMember(role [32]byte, index *big.Int) (common.Address, error) {
+	return _Gateway.Contract.GetRoleMember(&_Gateway.CallOpts, role, index)
 }
 
 // GetRoleMemberCount is a free data retrieval call binding the contract method 0xca15c873.
 //
 // Solidity: function getRoleMemberCount(bytes32 role) view returns(uint256)
-func (_Ronin *RoninCaller) GetRoleMemberCount(opts *bind.CallOpts, role [32]byte) (*big.Int, error) {
+func (_Gateway *GatewayCaller) GetRoleMemberCount(opts *bind.CallOpts, role [32]byte) (*big.Int, error) {
 	var out []interface{}
-	err := _Ronin.contract.Call(opts, &out, "getRoleMemberCount", role)
+	err := _Gateway.contract.Call(opts, &out, "getRoleMemberCount", role)
 
 	if err != nil {
 		return *new(*big.Int), err
@@ -460,23 +460,23 @@ func (_Ronin *RoninCaller) GetRoleMemberCount(opts *bind.CallOpts, role [32]byte
 // GetRoleMemberCount is a free data retrieval call binding the contract method 0xca15c873.
 //
 // Solidity: function getRoleMemberCount(bytes32 role) view returns(uint256)
-func (_Ronin *RoninSession) GetRoleMemberCount(role [32]byte) (*big.Int, error) {
-	return _Ronin.Contract.GetRoleMemberCount(&_Ronin.CallOpts, role)
+func (_Gateway *GatewaySession) GetRoleMemberCount(role [32]byte) (*big.Int, error) {
+	return _Gateway.Contract.GetRoleMemberCount(&_Gateway.CallOpts, role)
 }
 
 // GetRoleMemberCount is a free data retrieval call binding the contract method 0xca15c873.
 //
 // Solidity: function getRoleMemberCount(bytes32 role) view returns(uint256)
-func (_Ronin *RoninCallerSession) GetRoleMemberCount(role [32]byte) (*big.Int, error) {
-	return _Ronin.Contract.GetRoleMemberCount(&_Ronin.CallOpts, role)
+func (_Gateway *GatewayCallerSession) GetRoleMemberCount(role [32]byte) (*big.Int, error) {
+	return _Gateway.Contract.GetRoleMemberCount(&_Gateway.CallOpts, role)
 }
 
 // GetThreshold is a free data retrieval call binding the contract method 0xe75235b8.
 //
 // Solidity: function getThreshold() view returns(uint256, uint256)
-func (_Ronin *RoninCaller) GetThreshold(opts *bind.CallOpts) (*big.Int, *big.Int, error) {
+func (_Gateway *GatewayCaller) GetThreshold(opts *bind.CallOpts) (*big.Int, *big.Int, error) {
 	var out []interface{}
-	err := _Ronin.contract.Call(opts, &out, "getThreshold")
+	err := _Gateway.contract.Call(opts, &out, "getThreshold")
 
 	if err != nil {
 		return *new(*big.Int), *new(*big.Int), err
@@ -492,23 +492,23 @@ func (_Ronin *RoninCaller) GetThreshold(opts *bind.CallOpts) (*big.Int, *big.Int
 // GetThreshold is a free data retrieval call binding the contract method 0xe75235b8.
 //
 // Solidity: function getThreshold() view returns(uint256, uint256)
-func (_Ronin *RoninSession) GetThreshold() (*big.Int, *big.Int, error) {
-	return _Ronin.Contract.GetThreshold(&_Ronin.CallOpts)
+func (_Gateway *GatewaySession) GetThreshold() (*big.Int, *big.Int, error) {
+	return _Gateway.Contract.GetThreshold(&_Gateway.CallOpts)
 }
 
 // GetThreshold is a free data retrieval call binding the contract method 0xe75235b8.
 //
 // Solidity: function getThreshold() view returns(uint256, uint256)
-func (_Ronin *RoninCallerSession) GetThreshold() (*big.Int, *big.Int, error) {
-	return _Ronin.Contract.GetThreshold(&_Ronin.CallOpts)
+func (_Gateway *GatewayCallerSession) GetThreshold() (*big.Int, *big.Int, error) {
+	return _Gateway.Contract.GetThreshold(&_Gateway.CallOpts)
 }
 
 // GetWithdrawalSignatures is a free data retrieval call binding the contract method 0xecc83649.
 //
 // Solidity: function getWithdrawalSignatures(uint256 _withdrawalId, address[] _validators) view returns(bytes[] _signatures)
-func (_Ronin *RoninCaller) GetWithdrawalSignatures(opts *bind.CallOpts, _withdrawalId *big.Int, _validators []common.Address) ([][]byte, error) {
+func (_Gateway *GatewayCaller) GetWithdrawalSignatures(opts *bind.CallOpts, _withdrawalId *big.Int, _validators []common.Address) ([][]byte, error) {
 	var out []interface{}
-	err := _Ronin.contract.Call(opts, &out, "getWithdrawalSignatures", _withdrawalId, _validators)
+	err := _Gateway.contract.Call(opts, &out, "getWithdrawalSignatures", _withdrawalId, _validators)
 
 	if err != nil {
 		return *new([][]byte), err
@@ -523,23 +523,23 @@ func (_Ronin *RoninCaller) GetWithdrawalSignatures(opts *bind.CallOpts, _withdra
 // GetWithdrawalSignatures is a free data retrieval call binding the contract method 0xecc83649.
 //
 // Solidity: function getWithdrawalSignatures(uint256 _withdrawalId, address[] _validators) view returns(bytes[] _signatures)
-func (_Ronin *RoninSession) GetWithdrawalSignatures(_withdrawalId *big.Int, _validators []common.Address) ([][]byte, error) {
-	return _Ronin.Contract.GetWithdrawalSignatures(&_Ronin.CallOpts, _withdrawalId, _validators)
+func (_Gateway *GatewaySession) GetWithdrawalSignatures(_withdrawalId *big.Int, _validators []common.Address) ([][]byte, error) {
+	return _Gateway.Contract.GetWithdrawalSignatures(&_Gateway.CallOpts, _withdrawalId, _validators)
 }
 
 // GetWithdrawalSignatures is a free data retrieval call binding the contract method 0xecc83649.
 //
 // Solidity: function getWithdrawalSignatures(uint256 _withdrawalId, address[] _validators) view returns(bytes[] _signatures)
-func (_Ronin *RoninCallerSession) GetWithdrawalSignatures(_withdrawalId *big.Int, _validators []common.Address) ([][]byte, error) {
-	return _Ronin.Contract.GetWithdrawalSignatures(&_Ronin.CallOpts, _withdrawalId, _validators)
+func (_Gateway *GatewayCallerSession) GetWithdrawalSignatures(_withdrawalId *big.Int, _validators []common.Address) ([][]byte, error) {
+	return _Gateway.Contract.GetWithdrawalSignatures(&_Gateway.CallOpts, _withdrawalId, _validators)
 }
 
 // HasRole is a free data retrieval call binding the contract method 0x91d14854.
 //
 // Solidity: function hasRole(bytes32 role, address account) view returns(bool)
-func (_Ronin *RoninCaller) HasRole(opts *bind.CallOpts, role [32]byte, account common.Address) (bool, error) {
+func (_Gateway *GatewayCaller) HasRole(opts *bind.CallOpts, role [32]byte, account common.Address) (bool, error) {
 	var out []interface{}
-	err := _Ronin.contract.Call(opts, &out, "hasRole", role, account)
+	err := _Gateway.contract.Call(opts, &out, "hasRole", role, account)
 
 	if err != nil {
 		return *new(bool), err
@@ -554,23 +554,54 @@ func (_Ronin *RoninCaller) HasRole(opts *bind.CallOpts, role [32]byte, account c
 // HasRole is a free data retrieval call binding the contract method 0x91d14854.
 //
 // Solidity: function hasRole(bytes32 role, address account) view returns(bool)
-func (_Ronin *RoninSession) HasRole(role [32]byte, account common.Address) (bool, error) {
-	return _Ronin.Contract.HasRole(&_Ronin.CallOpts, role, account)
+func (_Gateway *GatewaySession) HasRole(role [32]byte, account common.Address) (bool, error) {
+	return _Gateway.Contract.HasRole(&_Gateway.CallOpts, role, account)
 }
 
 // HasRole is a free data retrieval call binding the contract method 0x91d14854.
 //
 // Solidity: function hasRole(bytes32 role, address account) view returns(bool)
-func (_Ronin *RoninCallerSession) HasRole(role [32]byte, account common.Address) (bool, error) {
-	return _Ronin.Contract.HasRole(&_Ronin.CallOpts, role, account)
+func (_Gateway *GatewayCallerSession) HasRole(role [32]byte, account common.Address) (bool, error) {
+	return _Gateway.Contract.HasRole(&_Gateway.CallOpts, role, account)
+}
+
+// MainchainWithdrew is a free data retrieval call binding the contract method 0xf668214a.
+//
+// Solidity: function mainchainWithdrew(uint256 ) view returns(bool)
+func (_Gateway *GatewayCaller) MainchainWithdrew(opts *bind.CallOpts, arg0 *big.Int) (bool, error) {
+	var out []interface{}
+	err := _Gateway.contract.Call(opts, &out, "mainchainWithdrew", arg0)
+
+	if err != nil {
+		return *new(bool), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(bool)).(*bool)
+
+	return out0, err
+
+}
+
+// MainchainWithdrew is a free data retrieval call binding the contract method 0xf668214a.
+//
+// Solidity: function mainchainWithdrew(uint256 ) view returns(bool)
+func (_Gateway *GatewaySession) MainchainWithdrew(arg0 *big.Int) (bool, error) {
+	return _Gateway.Contract.MainchainWithdrew(&_Gateway.CallOpts, arg0)
+}
+
+// MainchainWithdrew is a free data retrieval call binding the contract method 0xf668214a.
+//
+// Solidity: function mainchainWithdrew(uint256 ) view returns(bool)
+func (_Gateway *GatewayCallerSession) MainchainWithdrew(arg0 *big.Int) (bool, error) {
+	return _Gateway.Contract.MainchainWithdrew(&_Gateway.CallOpts, arg0)
 }
 
 // MinimumThreshold is a free data retrieval call binding the contract method 0xbc7f0386.
 //
 // Solidity: function minimumThreshold(address ) view returns(uint256)
-func (_Ronin *RoninCaller) MinimumThreshold(opts *bind.CallOpts, arg0 common.Address) (*big.Int, error) {
+func (_Gateway *GatewayCaller) MinimumThreshold(opts *bind.CallOpts, arg0 common.Address) (*big.Int, error) {
 	var out []interface{}
-	err := _Ronin.contract.Call(opts, &out, "minimumThreshold", arg0)
+	err := _Gateway.contract.Call(opts, &out, "minimumThreshold", arg0)
 
 	if err != nil {
 		return *new(*big.Int), err
@@ -585,23 +616,23 @@ func (_Ronin *RoninCaller) MinimumThreshold(opts *bind.CallOpts, arg0 common.Add
 // MinimumThreshold is a free data retrieval call binding the contract method 0xbc7f0386.
 //
 // Solidity: function minimumThreshold(address ) view returns(uint256)
-func (_Ronin *RoninSession) MinimumThreshold(arg0 common.Address) (*big.Int, error) {
-	return _Ronin.Contract.MinimumThreshold(&_Ronin.CallOpts, arg0)
+func (_Gateway *GatewaySession) MinimumThreshold(arg0 common.Address) (*big.Int, error) {
+	return _Gateway.Contract.MinimumThreshold(&_Gateway.CallOpts, arg0)
 }
 
 // MinimumThreshold is a free data retrieval call binding the contract method 0xbc7f0386.
 //
 // Solidity: function minimumThreshold(address ) view returns(uint256)
-func (_Ronin *RoninCallerSession) MinimumThreshold(arg0 common.Address) (*big.Int, error) {
-	return _Ronin.Contract.MinimumThreshold(&_Ronin.CallOpts, arg0)
+func (_Gateway *GatewayCallerSession) MinimumThreshold(arg0 common.Address) (*big.Int, error) {
+	return _Gateway.Contract.MinimumThreshold(&_Gateway.CallOpts, arg0)
 }
 
 // MinimumVoteWeight is a free data retrieval call binding the contract method 0x7de5dedd.
 //
 // Solidity: function minimumVoteWeight() view returns(uint256)
-func (_Ronin *RoninCaller) MinimumVoteWeight(opts *bind.CallOpts) (*big.Int, error) {
+func (_Gateway *GatewayCaller) MinimumVoteWeight(opts *bind.CallOpts) (*big.Int, error) {
 	var out []interface{}
-	err := _Ronin.contract.Call(opts, &out, "minimumVoteWeight")
+	err := _Gateway.contract.Call(opts, &out, "minimumVoteWeight")
 
 	if err != nil {
 		return *new(*big.Int), err
@@ -616,23 +647,23 @@ func (_Ronin *RoninCaller) MinimumVoteWeight(opts *bind.CallOpts) (*big.Int, err
 // MinimumVoteWeight is a free data retrieval call binding the contract method 0x7de5dedd.
 //
 // Solidity: function minimumVoteWeight() view returns(uint256)
-func (_Ronin *RoninSession) MinimumVoteWeight() (*big.Int, error) {
-	return _Ronin.Contract.MinimumVoteWeight(&_Ronin.CallOpts)
+func (_Gateway *GatewaySession) MinimumVoteWeight() (*big.Int, error) {
+	return _Gateway.Contract.MinimumVoteWeight(&_Gateway.CallOpts)
 }
 
 // MinimumVoteWeight is a free data retrieval call binding the contract method 0x7de5dedd.
 //
 // Solidity: function minimumVoteWeight() view returns(uint256)
-func (_Ronin *RoninCallerSession) MinimumVoteWeight() (*big.Int, error) {
-	return _Ronin.Contract.MinimumVoteWeight(&_Ronin.CallOpts)
+func (_Gateway *GatewayCallerSession) MinimumVoteWeight() (*big.Int, error) {
+	return _Gateway.Contract.MinimumVoteWeight(&_Gateway.CallOpts)
 }
 
 // Nonce is a free data retrieval call binding the contract method 0xaffed0e0.
 //
 // Solidity: function nonce() view returns(uint256)
-func (_Ronin *RoninCaller) Nonce(opts *bind.CallOpts) (*big.Int, error) {
+func (_Gateway *GatewayCaller) Nonce(opts *bind.CallOpts) (*big.Int, error) {
 	var out []interface{}
-	err := _Ronin.contract.Call(opts, &out, "nonce")
+	err := _Gateway.contract.Call(opts, &out, "nonce")
 
 	if err != nil {
 		return *new(*big.Int), err
@@ -647,23 +678,23 @@ func (_Ronin *RoninCaller) Nonce(opts *bind.CallOpts) (*big.Int, error) {
 // Nonce is a free data retrieval call binding the contract method 0xaffed0e0.
 //
 // Solidity: function nonce() view returns(uint256)
-func (_Ronin *RoninSession) Nonce() (*big.Int, error) {
-	return _Ronin.Contract.Nonce(&_Ronin.CallOpts)
+func (_Gateway *GatewaySession) Nonce() (*big.Int, error) {
+	return _Gateway.Contract.Nonce(&_Gateway.CallOpts)
 }
 
 // Nonce is a free data retrieval call binding the contract method 0xaffed0e0.
 //
 // Solidity: function nonce() view returns(uint256)
-func (_Ronin *RoninCallerSession) Nonce() (*big.Int, error) {
-	return _Ronin.Contract.Nonce(&_Ronin.CallOpts)
+func (_Gateway *GatewayCallerSession) Nonce() (*big.Int, error) {
+	return _Gateway.Contract.Nonce(&_Gateway.CallOpts)
 }
 
 // Paused is a free data retrieval call binding the contract method 0x5c975abb.
 //
 // Solidity: function paused() view returns(bool)
-func (_Ronin *RoninCaller) Paused(opts *bind.CallOpts) (bool, error) {
+func (_Gateway *GatewayCaller) Paused(opts *bind.CallOpts) (bool, error) {
 	var out []interface{}
-	err := _Ronin.contract.Call(opts, &out, "paused")
+	err := _Gateway.contract.Call(opts, &out, "paused")
 
 	if err != nil {
 		return *new(bool), err
@@ -678,23 +709,23 @@ func (_Ronin *RoninCaller) Paused(opts *bind.CallOpts) (bool, error) {
 // Paused is a free data retrieval call binding the contract method 0x5c975abb.
 //
 // Solidity: function paused() view returns(bool)
-func (_Ronin *RoninSession) Paused() (bool, error) {
-	return _Ronin.Contract.Paused(&_Ronin.CallOpts)
+func (_Gateway *GatewaySession) Paused() (bool, error) {
+	return _Gateway.Contract.Paused(&_Gateway.CallOpts)
 }
 
 // Paused is a free data retrieval call binding the contract method 0x5c975abb.
 //
 // Solidity: function paused() view returns(bool)
-func (_Ronin *RoninCallerSession) Paused() (bool, error) {
-	return _Ronin.Contract.Paused(&_Ronin.CallOpts)
+func (_Gateway *GatewayCallerSession) Paused() (bool, error) {
+	return _Gateway.Contract.Paused(&_Gateway.CallOpts)
 }
 
 // SupportsInterface is a free data retrieval call binding the contract method 0x01ffc9a7.
 //
 // Solidity: function supportsInterface(bytes4 interfaceId) view returns(bool)
-func (_Ronin *RoninCaller) SupportsInterface(opts *bind.CallOpts, interfaceId [4]byte) (bool, error) {
+func (_Gateway *GatewayCaller) SupportsInterface(opts *bind.CallOpts, interfaceId [4]byte) (bool, error) {
 	var out []interface{}
-	err := _Ronin.contract.Call(opts, &out, "supportsInterface", interfaceId)
+	err := _Gateway.contract.Call(opts, &out, "supportsInterface", interfaceId)
 
 	if err != nil {
 		return *new(bool), err
@@ -709,23 +740,23 @@ func (_Ronin *RoninCaller) SupportsInterface(opts *bind.CallOpts, interfaceId [4
 // SupportsInterface is a free data retrieval call binding the contract method 0x01ffc9a7.
 //
 // Solidity: function supportsInterface(bytes4 interfaceId) view returns(bool)
-func (_Ronin *RoninSession) SupportsInterface(interfaceId [4]byte) (bool, error) {
-	return _Ronin.Contract.SupportsInterface(&_Ronin.CallOpts, interfaceId)
+func (_Gateway *GatewaySession) SupportsInterface(interfaceId [4]byte) (bool, error) {
+	return _Gateway.Contract.SupportsInterface(&_Gateway.CallOpts, interfaceId)
 }
 
 // SupportsInterface is a free data retrieval call binding the contract method 0x01ffc9a7.
 //
 // Solidity: function supportsInterface(bytes4 interfaceId) view returns(bool)
-func (_Ronin *RoninCallerSession) SupportsInterface(interfaceId [4]byte) (bool, error) {
-	return _Ronin.Contract.SupportsInterface(&_Ronin.CallOpts, interfaceId)
+func (_Gateway *GatewayCallerSession) SupportsInterface(interfaceId [4]byte) (bool, error) {
+	return _Gateway.Contract.SupportsInterface(&_Gateway.CallOpts, interfaceId)
 }
 
 // ValidatorContract is a free data retrieval call binding the contract method 0x99439089.
 //
 // Solidity: function validatorContract() view returns(address)
-func (_Ronin *RoninCaller) ValidatorContract(opts *bind.CallOpts) (common.Address, error) {
+func (_Gateway *GatewayCaller) ValidatorContract(opts *bind.CallOpts) (common.Address, error) {
 	var out []interface{}
-	err := _Ronin.contract.Call(opts, &out, "validatorContract")
+	err := _Gateway.contract.Call(opts, &out, "validatorContract")
 
 	if err != nil {
 		return *new(common.Address), err
@@ -740,21 +771,21 @@ func (_Ronin *RoninCaller) ValidatorContract(opts *bind.CallOpts) (common.Addres
 // ValidatorContract is a free data retrieval call binding the contract method 0x99439089.
 //
 // Solidity: function validatorContract() view returns(address)
-func (_Ronin *RoninSession) ValidatorContract() (common.Address, error) {
-	return _Ronin.Contract.ValidatorContract(&_Ronin.CallOpts)
+func (_Gateway *GatewaySession) ValidatorContract() (common.Address, error) {
+	return _Gateway.Contract.ValidatorContract(&_Gateway.CallOpts)
 }
 
 // ValidatorContract is a free data retrieval call binding the contract method 0x99439089.
 //
 // Solidity: function validatorContract() view returns(address)
-func (_Ronin *RoninCallerSession) ValidatorContract() (common.Address, error) {
-	return _Ronin.Contract.ValidatorContract(&_Ronin.CallOpts)
+func (_Gateway *GatewayCallerSession) ValidatorContract() (common.Address, error) {
+	return _Gateway.Contract.ValidatorContract(&_Gateway.CallOpts)
 }
 
 // Withdrawal is a free data retrieval call binding the contract method 0x835fc6ca.
 //
 // Solidity: function withdrawal(uint256 ) view returns(uint256 id, uint8 kind, (address,address,uint256) mainchain, (address,address,uint256) ronin, (uint8,uint256,uint256) info)
-func (_Ronin *RoninCaller) Withdrawal(opts *bind.CallOpts, arg0 *big.Int) (struct {
+func (_Gateway *GatewayCaller) Withdrawal(opts *bind.CallOpts, arg0 *big.Int) (struct {
 	Id        *big.Int
 	Kind      uint8
 	Mainchain TokenOwner
@@ -762,7 +793,7 @@ func (_Ronin *RoninCaller) Withdrawal(opts *bind.CallOpts, arg0 *big.Int) (struc
 	Info      TokenInfo
 }, error) {
 	var out []interface{}
-	err := _Ronin.contract.Call(opts, &out, "withdrawal", arg0)
+	err := _Gateway.contract.Call(opts, &out, "withdrawal", arg0)
 
 	outstruct := new(struct {
 		Id        *big.Int
@@ -788,35 +819,35 @@ func (_Ronin *RoninCaller) Withdrawal(opts *bind.CallOpts, arg0 *big.Int) (struc
 // Withdrawal is a free data retrieval call binding the contract method 0x835fc6ca.
 //
 // Solidity: function withdrawal(uint256 ) view returns(uint256 id, uint8 kind, (address,address,uint256) mainchain, (address,address,uint256) ronin, (uint8,uint256,uint256) info)
-func (_Ronin *RoninSession) Withdrawal(arg0 *big.Int) (struct {
+func (_Gateway *GatewaySession) Withdrawal(arg0 *big.Int) (struct {
 	Id        *big.Int
 	Kind      uint8
 	Mainchain TokenOwner
 	Ronin     TokenOwner
 	Info      TokenInfo
 }, error) {
-	return _Ronin.Contract.Withdrawal(&_Ronin.CallOpts, arg0)
+	return _Gateway.Contract.Withdrawal(&_Gateway.CallOpts, arg0)
 }
 
 // Withdrawal is a free data retrieval call binding the contract method 0x835fc6ca.
 //
 // Solidity: function withdrawal(uint256 ) view returns(uint256 id, uint8 kind, (address,address,uint256) mainchain, (address,address,uint256) ronin, (uint8,uint256,uint256) info)
-func (_Ronin *RoninCallerSession) Withdrawal(arg0 *big.Int) (struct {
+func (_Gateway *GatewayCallerSession) Withdrawal(arg0 *big.Int) (struct {
 	Id        *big.Int
 	Kind      uint8
 	Mainchain TokenOwner
 	Ronin     TokenOwner
 	Info      TokenInfo
 }, error) {
-	return _Ronin.Contract.Withdrawal(&_Ronin.CallOpts, arg0)
+	return _Gateway.Contract.Withdrawal(&_Gateway.CallOpts, arg0)
 }
 
 // WithdrawalCount is a free data retrieval call binding the contract method 0x71706cbe.
 //
 // Solidity: function withdrawalCount() view returns(uint256)
-func (_Ronin *RoninCaller) WithdrawalCount(opts *bind.CallOpts) (*big.Int, error) {
+func (_Gateway *GatewayCaller) WithdrawalCount(opts *bind.CallOpts) (*big.Int, error) {
 	var out []interface{}
-	err := _Ronin.contract.Call(opts, &out, "withdrawalCount")
+	err := _Gateway.contract.Call(opts, &out, "withdrawalCount")
 
 	if err != nil {
 		return *new(*big.Int), err
@@ -831,23 +862,23 @@ func (_Ronin *RoninCaller) WithdrawalCount(opts *bind.CallOpts) (*big.Int, error
 // WithdrawalCount is a free data retrieval call binding the contract method 0x71706cbe.
 //
 // Solidity: function withdrawalCount() view returns(uint256)
-func (_Ronin *RoninSession) WithdrawalCount() (*big.Int, error) {
-	return _Ronin.Contract.WithdrawalCount(&_Ronin.CallOpts)
+func (_Gateway *GatewaySession) WithdrawalCount() (*big.Int, error) {
+	return _Gateway.Contract.WithdrawalCount(&_Gateway.CallOpts)
 }
 
 // WithdrawalCount is a free data retrieval call binding the contract method 0x71706cbe.
 //
 // Solidity: function withdrawalCount() view returns(uint256)
-func (_Ronin *RoninCallerSession) WithdrawalCount() (*big.Int, error) {
-	return _Ronin.Contract.WithdrawalCount(&_Ronin.CallOpts)
+func (_Gateway *GatewayCallerSession) WithdrawalCount() (*big.Int, error) {
+	return _Gateway.Contract.WithdrawalCount(&_Gateway.CallOpts)
 }
 
 // WithdrawalMigrated is a free data retrieval call binding the contract method 0x4f2717c7.
 //
 // Solidity: function withdrawalMigrated() view returns(bool)
-func (_Ronin *RoninCaller) WithdrawalMigrated(opts *bind.CallOpts) (bool, error) {
+func (_Gateway *GatewayCaller) WithdrawalMigrated(opts *bind.CallOpts) (bool, error) {
 	var out []interface{}
-	err := _Ronin.contract.Call(opts, &out, "withdrawalMigrated")
+	err := _Gateway.contract.Call(opts, &out, "withdrawalMigrated")
 
 	if err != nil {
 		return *new(bool), err
@@ -862,398 +893,419 @@ func (_Ronin *RoninCaller) WithdrawalMigrated(opts *bind.CallOpts) (bool, error)
 // WithdrawalMigrated is a free data retrieval call binding the contract method 0x4f2717c7.
 //
 // Solidity: function withdrawalMigrated() view returns(bool)
-func (_Ronin *RoninSession) WithdrawalMigrated() (bool, error) {
-	return _Ronin.Contract.WithdrawalMigrated(&_Ronin.CallOpts)
+func (_Gateway *GatewaySession) WithdrawalMigrated() (bool, error) {
+	return _Gateway.Contract.WithdrawalMigrated(&_Gateway.CallOpts)
 }
 
 // WithdrawalMigrated is a free data retrieval call binding the contract method 0x4f2717c7.
 //
 // Solidity: function withdrawalMigrated() view returns(bool)
-func (_Ronin *RoninCallerSession) WithdrawalMigrated() (bool, error) {
-	return _Ronin.Contract.WithdrawalMigrated(&_Ronin.CallOpts)
+func (_Gateway *GatewayCallerSession) WithdrawalMigrated() (bool, error) {
+	return _Gateway.Contract.WithdrawalMigrated(&_Gateway.CallOpts)
+}
+
+// AcknowledgeMainchainWithdrew is a paid mutator transaction binding the contract method 0xf078c8ce.
+//
+// Solidity: function acknowledgeMainchainWithdrew(uint256 _withdrawalId) returns()
+func (_Gateway *GatewayTransactor) AcknowledgeMainchainWithdrew(opts *bind.TransactOpts, _withdrawalId *big.Int) (*types.Transaction, error) {
+	return _Gateway.contract.Transact(opts, "acknowledgeMainchainWithdrew", _withdrawalId)
+}
+
+// AcknowledgeMainchainWithdrew is a paid mutator transaction binding the contract method 0xf078c8ce.
+//
+// Solidity: function acknowledgeMainchainWithdrew(uint256 _withdrawalId) returns()
+func (_Gateway *GatewaySession) AcknowledgeMainchainWithdrew(_withdrawalId *big.Int) (*types.Transaction, error) {
+	return _Gateway.Contract.AcknowledgeMainchainWithdrew(&_Gateway.TransactOpts, _withdrawalId)
+}
+
+// AcknowledgeMainchainWithdrew is a paid mutator transaction binding the contract method 0xf078c8ce.
+//
+// Solidity: function acknowledgeMainchainWithdrew(uint256 _withdrawalId) returns()
+func (_Gateway *GatewayTransactorSession) AcknowledgeMainchainWithdrew(_withdrawalId *big.Int) (*types.Transaction, error) {
+	return _Gateway.Contract.AcknowledgeMainchainWithdrew(&_Gateway.TransactOpts, _withdrawalId)
 }
 
 // BulkDepositFor is a paid mutator transaction binding the contract method 0xc544376d.
 //
 // Solidity: function bulkDepositFor((uint256,uint8,(address,address,uint256),(address,address,uint256),(uint8,uint256,uint256))[] _receipts) returns()
-func (_Ronin *RoninTransactor) BulkDepositFor(opts *bind.TransactOpts, _receipts []TransferReceipt) (*types.Transaction, error) {
-	return _Ronin.contract.Transact(opts, "bulkDepositFor", _receipts)
+func (_Gateway *GatewayTransactor) BulkDepositFor(opts *bind.TransactOpts, _receipts []TransferReceipt) (*types.Transaction, error) {
+	return _Gateway.contract.Transact(opts, "bulkDepositFor", _receipts)
 }
 
 // BulkDepositFor is a paid mutator transaction binding the contract method 0xc544376d.
 //
 // Solidity: function bulkDepositFor((uint256,uint8,(address,address,uint256),(address,address,uint256),(uint8,uint256,uint256))[] _receipts) returns()
-func (_Ronin *RoninSession) BulkDepositFor(_receipts []TransferReceipt) (*types.Transaction, error) {
-	return _Ronin.Contract.BulkDepositFor(&_Ronin.TransactOpts, _receipts)
+func (_Gateway *GatewaySession) BulkDepositFor(_receipts []TransferReceipt) (*types.Transaction, error) {
+	return _Gateway.Contract.BulkDepositFor(&_Gateway.TransactOpts, _receipts)
 }
 
 // BulkDepositFor is a paid mutator transaction binding the contract method 0xc544376d.
 //
 // Solidity: function bulkDepositFor((uint256,uint8,(address,address,uint256),(address,address,uint256),(uint8,uint256,uint256))[] _receipts) returns()
-func (_Ronin *RoninTransactorSession) BulkDepositFor(_receipts []TransferReceipt) (*types.Transaction, error) {
-	return _Ronin.Contract.BulkDepositFor(&_Ronin.TransactOpts, _receipts)
+func (_Gateway *GatewayTransactorSession) BulkDepositFor(_receipts []TransferReceipt) (*types.Transaction, error) {
+	return _Gateway.Contract.BulkDepositFor(&_Gateway.TransactOpts, _receipts)
 }
 
 // BulkRequestWithdrawalFor is a paid mutator transaction binding the contract method 0x5a7dd06a.
 //
 // Solidity: function bulkRequestWithdrawalFor((address,address,(uint8,uint256,uint256))[] _requests, uint256 _chainId) returns()
-func (_Ronin *RoninTransactor) BulkRequestWithdrawalFor(opts *bind.TransactOpts, _requests []TransferRequest, _chainId *big.Int) (*types.Transaction, error) {
-	return _Ronin.contract.Transact(opts, "bulkRequestWithdrawalFor", _requests, _chainId)
+func (_Gateway *GatewayTransactor) BulkRequestWithdrawalFor(opts *bind.TransactOpts, _requests []TransferRequest, _chainId *big.Int) (*types.Transaction, error) {
+	return _Gateway.contract.Transact(opts, "bulkRequestWithdrawalFor", _requests, _chainId)
 }
 
 // BulkRequestWithdrawalFor is a paid mutator transaction binding the contract method 0x5a7dd06a.
 //
 // Solidity: function bulkRequestWithdrawalFor((address,address,(uint8,uint256,uint256))[] _requests, uint256 _chainId) returns()
-func (_Ronin *RoninSession) BulkRequestWithdrawalFor(_requests []TransferRequest, _chainId *big.Int) (*types.Transaction, error) {
-	return _Ronin.Contract.BulkRequestWithdrawalFor(&_Ronin.TransactOpts, _requests, _chainId)
+func (_Gateway *GatewaySession) BulkRequestWithdrawalFor(_requests []TransferRequest, _chainId *big.Int) (*types.Transaction, error) {
+	return _Gateway.Contract.BulkRequestWithdrawalFor(&_Gateway.TransactOpts, _requests, _chainId)
 }
 
 // BulkRequestWithdrawalFor is a paid mutator transaction binding the contract method 0x5a7dd06a.
 //
 // Solidity: function bulkRequestWithdrawalFor((address,address,(uint8,uint256,uint256))[] _requests, uint256 _chainId) returns()
-func (_Ronin *RoninTransactorSession) BulkRequestWithdrawalFor(_requests []TransferRequest, _chainId *big.Int) (*types.Transaction, error) {
-	return _Ronin.Contract.BulkRequestWithdrawalFor(&_Ronin.TransactOpts, _requests, _chainId)
+func (_Gateway *GatewayTransactorSession) BulkRequestWithdrawalFor(_requests []TransferRequest, _chainId *big.Int) (*types.Transaction, error) {
+	return _Gateway.Contract.BulkRequestWithdrawalFor(&_Gateway.TransactOpts, _requests, _chainId)
 }
 
 // BulkSubmitWithdrawalSignatures is a paid mutator transaction binding the contract method 0xfa389659.
 //
 // Solidity: function bulkSubmitWithdrawalSignatures(uint256[] _withdrawals, bytes[] _signatures) returns()
-func (_Ronin *RoninTransactor) BulkSubmitWithdrawalSignatures(opts *bind.TransactOpts, _withdrawals []*big.Int, _signatures [][]byte) (*types.Transaction, error) {
-	return _Ronin.contract.Transact(opts, "bulkSubmitWithdrawalSignatures", _withdrawals, _signatures)
+func (_Gateway *GatewayTransactor) BulkSubmitWithdrawalSignatures(opts *bind.TransactOpts, _withdrawals []*big.Int, _signatures [][]byte) (*types.Transaction, error) {
+	return _Gateway.contract.Transact(opts, "bulkSubmitWithdrawalSignatures", _withdrawals, _signatures)
 }
 
 // BulkSubmitWithdrawalSignatures is a paid mutator transaction binding the contract method 0xfa389659.
 //
 // Solidity: function bulkSubmitWithdrawalSignatures(uint256[] _withdrawals, bytes[] _signatures) returns()
-func (_Ronin *RoninSession) BulkSubmitWithdrawalSignatures(_withdrawals []*big.Int, _signatures [][]byte) (*types.Transaction, error) {
-	return _Ronin.Contract.BulkSubmitWithdrawalSignatures(&_Ronin.TransactOpts, _withdrawals, _signatures)
+func (_Gateway *GatewaySession) BulkSubmitWithdrawalSignatures(_withdrawals []*big.Int, _signatures [][]byte) (*types.Transaction, error) {
+	return _Gateway.Contract.BulkSubmitWithdrawalSignatures(&_Gateway.TransactOpts, _withdrawals, _signatures)
 }
 
 // BulkSubmitWithdrawalSignatures is a paid mutator transaction binding the contract method 0xfa389659.
 //
 // Solidity: function bulkSubmitWithdrawalSignatures(uint256[] _withdrawals, bytes[] _signatures) returns()
-func (_Ronin *RoninTransactorSession) BulkSubmitWithdrawalSignatures(_withdrawals []*big.Int, _signatures [][]byte) (*types.Transaction, error) {
-	return _Ronin.Contract.BulkSubmitWithdrawalSignatures(&_Ronin.TransactOpts, _withdrawals, _signatures)
+func (_Gateway *GatewayTransactorSession) BulkSubmitWithdrawalSignatures(_withdrawals []*big.Int, _signatures [][]byte) (*types.Transaction, error) {
+	return _Gateway.Contract.BulkSubmitWithdrawalSignatures(&_Gateway.TransactOpts, _withdrawals, _signatures)
 }
 
 // DepositFor is a paid mutator transaction binding the contract method 0x109679ef.
 //
 // Solidity: function depositFor((uint256,uint8,(address,address,uint256),(address,address,uint256),(uint8,uint256,uint256)) _receipt) returns()
-func (_Ronin *RoninTransactor) DepositFor(opts *bind.TransactOpts, _receipt TransferReceipt) (*types.Transaction, error) {
-	return _Ronin.contract.Transact(opts, "depositFor", _receipt)
+func (_Gateway *GatewayTransactor) DepositFor(opts *bind.TransactOpts, _receipt TransferReceipt) (*types.Transaction, error) {
+	return _Gateway.contract.Transact(opts, "depositFor", _receipt)
 }
 
 // DepositFor is a paid mutator transaction binding the contract method 0x109679ef.
 //
 // Solidity: function depositFor((uint256,uint8,(address,address,uint256),(address,address,uint256),(uint8,uint256,uint256)) _receipt) returns()
-func (_Ronin *RoninSession) DepositFor(_receipt TransferReceipt) (*types.Transaction, error) {
-	return _Ronin.Contract.DepositFor(&_Ronin.TransactOpts, _receipt)
+func (_Gateway *GatewaySession) DepositFor(_receipt TransferReceipt) (*types.Transaction, error) {
+	return _Gateway.Contract.DepositFor(&_Gateway.TransactOpts, _receipt)
 }
 
 // DepositFor is a paid mutator transaction binding the contract method 0x109679ef.
 //
 // Solidity: function depositFor((uint256,uint8,(address,address,uint256),(address,address,uint256),(uint8,uint256,uint256)) _receipt) returns()
-func (_Ronin *RoninTransactorSession) DepositFor(_receipt TransferReceipt) (*types.Transaction, error) {
-	return _Ronin.Contract.DepositFor(&_Ronin.TransactOpts, _receipt)
+func (_Gateway *GatewayTransactorSession) DepositFor(_receipt TransferReceipt) (*types.Transaction, error) {
+	return _Gateway.Contract.DepositFor(&_Gateway.TransactOpts, _receipt)
 }
 
 // GrantRole is a paid mutator transaction binding the contract method 0x2f2ff15d.
 //
 // Solidity: function grantRole(bytes32 role, address account) returns()
-func (_Ronin *RoninTransactor) GrantRole(opts *bind.TransactOpts, role [32]byte, account common.Address) (*types.Transaction, error) {
-	return _Ronin.contract.Transact(opts, "grantRole", role, account)
+func (_Gateway *GatewayTransactor) GrantRole(opts *bind.TransactOpts, role [32]byte, account common.Address) (*types.Transaction, error) {
+	return _Gateway.contract.Transact(opts, "grantRole", role, account)
 }
 
 // GrantRole is a paid mutator transaction binding the contract method 0x2f2ff15d.
 //
 // Solidity: function grantRole(bytes32 role, address account) returns()
-func (_Ronin *RoninSession) GrantRole(role [32]byte, account common.Address) (*types.Transaction, error) {
-	return _Ronin.Contract.GrantRole(&_Ronin.TransactOpts, role, account)
+func (_Gateway *GatewaySession) GrantRole(role [32]byte, account common.Address) (*types.Transaction, error) {
+	return _Gateway.Contract.GrantRole(&_Gateway.TransactOpts, role, account)
 }
 
 // GrantRole is a paid mutator transaction binding the contract method 0x2f2ff15d.
 //
 // Solidity: function grantRole(bytes32 role, address account) returns()
-func (_Ronin *RoninTransactorSession) GrantRole(role [32]byte, account common.Address) (*types.Transaction, error) {
-	return _Ronin.Contract.GrantRole(&_Ronin.TransactOpts, role, account)
+func (_Gateway *GatewayTransactorSession) GrantRole(role [32]byte, account common.Address) (*types.Transaction, error) {
+	return _Gateway.Contract.GrantRole(&_Gateway.TransactOpts, role, account)
 }
 
 // Initialize is a paid mutator transaction binding the contract method 0x1e5bc9ce.
 //
 // Solidity: function initialize(address _roleSetter, address _validatorContract, uint256 _numerator, uint256 _denominator, address[] _withdrawalMigrators, address[] _roninTokens, address[] _mainchainTokens, uint256[][2] _packedNumbers) returns()
-func (_Ronin *RoninTransactor) Initialize(opts *bind.TransactOpts, _roleSetter common.Address, _validatorContract common.Address, _numerator *big.Int, _denominator *big.Int, _withdrawalMigrators []common.Address, _roninTokens []common.Address, _mainchainTokens []common.Address, _packedNumbers [2][]*big.Int) (*types.Transaction, error) {
-	return _Ronin.contract.Transact(opts, "initialize", _roleSetter, _validatorContract, _numerator, _denominator, _withdrawalMigrators, _roninTokens, _mainchainTokens, _packedNumbers)
+func (_Gateway *GatewayTransactor) Initialize(opts *bind.TransactOpts, _roleSetter common.Address, _validatorContract common.Address, _numerator *big.Int, _denominator *big.Int, _withdrawalMigrators []common.Address, _roninTokens []common.Address, _mainchainTokens []common.Address, _packedNumbers [2][]*big.Int) (*types.Transaction, error) {
+	return _Gateway.contract.Transact(opts, "initialize", _roleSetter, _validatorContract, _numerator, _denominator, _withdrawalMigrators, _roninTokens, _mainchainTokens, _packedNumbers)
 }
 
 // Initialize is a paid mutator transaction binding the contract method 0x1e5bc9ce.
 //
 // Solidity: function initialize(address _roleSetter, address _validatorContract, uint256 _numerator, uint256 _denominator, address[] _withdrawalMigrators, address[] _roninTokens, address[] _mainchainTokens, uint256[][2] _packedNumbers) returns()
-func (_Ronin *RoninSession) Initialize(_roleSetter common.Address, _validatorContract common.Address, _numerator *big.Int, _denominator *big.Int, _withdrawalMigrators []common.Address, _roninTokens []common.Address, _mainchainTokens []common.Address, _packedNumbers [2][]*big.Int) (*types.Transaction, error) {
-	return _Ronin.Contract.Initialize(&_Ronin.TransactOpts, _roleSetter, _validatorContract, _numerator, _denominator, _withdrawalMigrators, _roninTokens, _mainchainTokens, _packedNumbers)
+func (_Gateway *GatewaySession) Initialize(_roleSetter common.Address, _validatorContract common.Address, _numerator *big.Int, _denominator *big.Int, _withdrawalMigrators []common.Address, _roninTokens []common.Address, _mainchainTokens []common.Address, _packedNumbers [2][]*big.Int) (*types.Transaction, error) {
+	return _Gateway.Contract.Initialize(&_Gateway.TransactOpts, _roleSetter, _validatorContract, _numerator, _denominator, _withdrawalMigrators, _roninTokens, _mainchainTokens, _packedNumbers)
 }
 
 // Initialize is a paid mutator transaction binding the contract method 0x1e5bc9ce.
 //
 // Solidity: function initialize(address _roleSetter, address _validatorContract, uint256 _numerator, uint256 _denominator, address[] _withdrawalMigrators, address[] _roninTokens, address[] _mainchainTokens, uint256[][2] _packedNumbers) returns()
-func (_Ronin *RoninTransactorSession) Initialize(_roleSetter common.Address, _validatorContract common.Address, _numerator *big.Int, _denominator *big.Int, _withdrawalMigrators []common.Address, _roninTokens []common.Address, _mainchainTokens []common.Address, _packedNumbers [2][]*big.Int) (*types.Transaction, error) {
-	return _Ronin.Contract.Initialize(&_Ronin.TransactOpts, _roleSetter, _validatorContract, _numerator, _denominator, _withdrawalMigrators, _roninTokens, _mainchainTokens, _packedNumbers)
+func (_Gateway *GatewayTransactorSession) Initialize(_roleSetter common.Address, _validatorContract common.Address, _numerator *big.Int, _denominator *big.Int, _withdrawalMigrators []common.Address, _roninTokens []common.Address, _mainchainTokens []common.Address, _packedNumbers [2][]*big.Int) (*types.Transaction, error) {
+	return _Gateway.Contract.Initialize(&_Gateway.TransactOpts, _roleSetter, _validatorContract, _numerator, _denominator, _withdrawalMigrators, _roninTokens, _mainchainTokens, _packedNumbers)
 }
 
 // MapTokens is a paid mutator transaction binding the contract method 0x6598c1bd.
 //
 // Solidity: function mapTokens(address[] _roninTokens, address[] _mainchainTokens, uint256[] _chainIds) returns()
-func (_Ronin *RoninTransactor) MapTokens(opts *bind.TransactOpts, _roninTokens []common.Address, _mainchainTokens []common.Address, _chainIds []*big.Int) (*types.Transaction, error) {
-	return _Ronin.contract.Transact(opts, "mapTokens", _roninTokens, _mainchainTokens, _chainIds)
+func (_Gateway *GatewayTransactor) MapTokens(opts *bind.TransactOpts, _roninTokens []common.Address, _mainchainTokens []common.Address, _chainIds []*big.Int) (*types.Transaction, error) {
+	return _Gateway.contract.Transact(opts, "mapTokens", _roninTokens, _mainchainTokens, _chainIds)
 }
 
 // MapTokens is a paid mutator transaction binding the contract method 0x6598c1bd.
 //
 // Solidity: function mapTokens(address[] _roninTokens, address[] _mainchainTokens, uint256[] _chainIds) returns()
-func (_Ronin *RoninSession) MapTokens(_roninTokens []common.Address, _mainchainTokens []common.Address, _chainIds []*big.Int) (*types.Transaction, error) {
-	return _Ronin.Contract.MapTokens(&_Ronin.TransactOpts, _roninTokens, _mainchainTokens, _chainIds)
+func (_Gateway *GatewaySession) MapTokens(_roninTokens []common.Address, _mainchainTokens []common.Address, _chainIds []*big.Int) (*types.Transaction, error) {
+	return _Gateway.Contract.MapTokens(&_Gateway.TransactOpts, _roninTokens, _mainchainTokens, _chainIds)
 }
 
 // MapTokens is a paid mutator transaction binding the contract method 0x6598c1bd.
 //
 // Solidity: function mapTokens(address[] _roninTokens, address[] _mainchainTokens, uint256[] _chainIds) returns()
-func (_Ronin *RoninTransactorSession) MapTokens(_roninTokens []common.Address, _mainchainTokens []common.Address, _chainIds []*big.Int) (*types.Transaction, error) {
-	return _Ronin.Contract.MapTokens(&_Ronin.TransactOpts, _roninTokens, _mainchainTokens, _chainIds)
+func (_Gateway *GatewayTransactorSession) MapTokens(_roninTokens []common.Address, _mainchainTokens []common.Address, _chainIds []*big.Int) (*types.Transaction, error) {
+	return _Gateway.Contract.MapTokens(&_Gateway.TransactOpts, _roninTokens, _mainchainTokens, _chainIds)
 }
 
 // MarkWithdrawalMigrated is a paid mutator transaction binding the contract method 0x3b5afc22.
 //
 // Solidity: function markWithdrawalMigrated() returns()
-func (_Ronin *RoninTransactor) MarkWithdrawalMigrated(opts *bind.TransactOpts) (*types.Transaction, error) {
-	return _Ronin.contract.Transact(opts, "markWithdrawalMigrated")
+func (_Gateway *GatewayTransactor) MarkWithdrawalMigrated(opts *bind.TransactOpts) (*types.Transaction, error) {
+	return _Gateway.contract.Transact(opts, "markWithdrawalMigrated")
 }
 
 // MarkWithdrawalMigrated is a paid mutator transaction binding the contract method 0x3b5afc22.
 //
 // Solidity: function markWithdrawalMigrated() returns()
-func (_Ronin *RoninSession) MarkWithdrawalMigrated() (*types.Transaction, error) {
-	return _Ronin.Contract.MarkWithdrawalMigrated(&_Ronin.TransactOpts)
+func (_Gateway *GatewaySession) MarkWithdrawalMigrated() (*types.Transaction, error) {
+	return _Gateway.Contract.MarkWithdrawalMigrated(&_Gateway.TransactOpts)
 }
 
 // MarkWithdrawalMigrated is a paid mutator transaction binding the contract method 0x3b5afc22.
 //
 // Solidity: function markWithdrawalMigrated() returns()
-func (_Ronin *RoninTransactorSession) MarkWithdrawalMigrated() (*types.Transaction, error) {
-	return _Ronin.Contract.MarkWithdrawalMigrated(&_Ronin.TransactOpts)
+func (_Gateway *GatewayTransactorSession) MarkWithdrawalMigrated() (*types.Transaction, error) {
+	return _Gateway.Contract.MarkWithdrawalMigrated(&_Gateway.TransactOpts)
 }
 
 // MigrateWithdrawals is a paid mutator transaction binding the contract method 0x931ec987.
 //
 // Solidity: function migrateWithdrawals((address,address,(uint8,uint256,uint256))[] _requests, address[] _requesters) returns()
-func (_Ronin *RoninTransactor) MigrateWithdrawals(opts *bind.TransactOpts, _requests []TransferRequest, _requesters []common.Address) (*types.Transaction, error) {
-	return _Ronin.contract.Transact(opts, "migrateWithdrawals", _requests, _requesters)
+func (_Gateway *GatewayTransactor) MigrateWithdrawals(opts *bind.TransactOpts, _requests []TransferRequest, _requesters []common.Address) (*types.Transaction, error) {
+	return _Gateway.contract.Transact(opts, "migrateWithdrawals", _requests, _requesters)
 }
 
 // MigrateWithdrawals is a paid mutator transaction binding the contract method 0x931ec987.
 //
 // Solidity: function migrateWithdrawals((address,address,(uint8,uint256,uint256))[] _requests, address[] _requesters) returns()
-func (_Ronin *RoninSession) MigrateWithdrawals(_requests []TransferRequest, _requesters []common.Address) (*types.Transaction, error) {
-	return _Ronin.Contract.MigrateWithdrawals(&_Ronin.TransactOpts, _requests, _requesters)
+func (_Gateway *GatewaySession) MigrateWithdrawals(_requests []TransferRequest, _requesters []common.Address) (*types.Transaction, error) {
+	return _Gateway.Contract.MigrateWithdrawals(&_Gateway.TransactOpts, _requests, _requesters)
 }
 
 // MigrateWithdrawals is a paid mutator transaction binding the contract method 0x931ec987.
 //
 // Solidity: function migrateWithdrawals((address,address,(uint8,uint256,uint256))[] _requests, address[] _requesters) returns()
-func (_Ronin *RoninTransactorSession) MigrateWithdrawals(_requests []TransferRequest, _requesters []common.Address) (*types.Transaction, error) {
-	return _Ronin.Contract.MigrateWithdrawals(&_Ronin.TransactOpts, _requests, _requesters)
+func (_Gateway *GatewayTransactorSession) MigrateWithdrawals(_requests []TransferRequest, _requesters []common.Address) (*types.Transaction, error) {
+	return _Gateway.Contract.MigrateWithdrawals(&_Gateway.TransactOpts, _requests, _requesters)
 }
 
 // Pause is a paid mutator transaction binding the contract method 0x8456cb59.
 //
 // Solidity: function pause() returns()
-func (_Ronin *RoninTransactor) Pause(opts *bind.TransactOpts) (*types.Transaction, error) {
-	return _Ronin.contract.Transact(opts, "pause")
+func (_Gateway *GatewayTransactor) Pause(opts *bind.TransactOpts) (*types.Transaction, error) {
+	return _Gateway.contract.Transact(opts, "pause")
 }
 
 // Pause is a paid mutator transaction binding the contract method 0x8456cb59.
 //
 // Solidity: function pause() returns()
-func (_Ronin *RoninSession) Pause() (*types.Transaction, error) {
-	return _Ronin.Contract.Pause(&_Ronin.TransactOpts)
+func (_Gateway *GatewaySession) Pause() (*types.Transaction, error) {
+	return _Gateway.Contract.Pause(&_Gateway.TransactOpts)
 }
 
 // Pause is a paid mutator transaction binding the contract method 0x8456cb59.
 //
 // Solidity: function pause() returns()
-func (_Ronin *RoninTransactorSession) Pause() (*types.Transaction, error) {
-	return _Ronin.Contract.Pause(&_Ronin.TransactOpts)
+func (_Gateway *GatewayTransactorSession) Pause() (*types.Transaction, error) {
+	return _Gateway.Contract.Pause(&_Gateway.TransactOpts)
 }
 
 // RenounceRole is a paid mutator transaction binding the contract method 0x36568abe.
 //
 // Solidity: function renounceRole(bytes32 role, address account) returns()
-func (_Ronin *RoninTransactor) RenounceRole(opts *bind.TransactOpts, role [32]byte, account common.Address) (*types.Transaction, error) {
-	return _Ronin.contract.Transact(opts, "renounceRole", role, account)
+func (_Gateway *GatewayTransactor) RenounceRole(opts *bind.TransactOpts, role [32]byte, account common.Address) (*types.Transaction, error) {
+	return _Gateway.contract.Transact(opts, "renounceRole", role, account)
 }
 
 // RenounceRole is a paid mutator transaction binding the contract method 0x36568abe.
 //
 // Solidity: function renounceRole(bytes32 role, address account) returns()
-func (_Ronin *RoninSession) RenounceRole(role [32]byte, account common.Address) (*types.Transaction, error) {
-	return _Ronin.Contract.RenounceRole(&_Ronin.TransactOpts, role, account)
+func (_Gateway *GatewaySession) RenounceRole(role [32]byte, account common.Address) (*types.Transaction, error) {
+	return _Gateway.Contract.RenounceRole(&_Gateway.TransactOpts, role, account)
 }
 
 // RenounceRole is a paid mutator transaction binding the contract method 0x36568abe.
 //
 // Solidity: function renounceRole(bytes32 role, address account) returns()
-func (_Ronin *RoninTransactorSession) RenounceRole(role [32]byte, account common.Address) (*types.Transaction, error) {
-	return _Ronin.Contract.RenounceRole(&_Ronin.TransactOpts, role, account)
+func (_Gateway *GatewayTransactorSession) RenounceRole(role [32]byte, account common.Address) (*types.Transaction, error) {
+	return _Gateway.Contract.RenounceRole(&_Gateway.TransactOpts, role, account)
 }
 
 // RequestWithdrawalFor is a paid mutator transaction binding the contract method 0x0b1ff17f.
 //
 // Solidity: function requestWithdrawalFor((address,address,(uint8,uint256,uint256)) _request, uint256 _chainId) returns()
-func (_Ronin *RoninTransactor) RequestWithdrawalFor(opts *bind.TransactOpts, _request TransferRequest, _chainId *big.Int) (*types.Transaction, error) {
-	return _Ronin.contract.Transact(opts, "requestWithdrawalFor", _request, _chainId)
+func (_Gateway *GatewayTransactor) RequestWithdrawalFor(opts *bind.TransactOpts, _request TransferRequest, _chainId *big.Int) (*types.Transaction, error) {
+	return _Gateway.contract.Transact(opts, "requestWithdrawalFor", _request, _chainId)
 }
 
 // RequestWithdrawalFor is a paid mutator transaction binding the contract method 0x0b1ff17f.
 //
 // Solidity: function requestWithdrawalFor((address,address,(uint8,uint256,uint256)) _request, uint256 _chainId) returns()
-func (_Ronin *RoninSession) RequestWithdrawalFor(_request TransferRequest, _chainId *big.Int) (*types.Transaction, error) {
-	return _Ronin.Contract.RequestWithdrawalFor(&_Ronin.TransactOpts, _request, _chainId)
+func (_Gateway *GatewaySession) RequestWithdrawalFor(_request TransferRequest, _chainId *big.Int) (*types.Transaction, error) {
+	return _Gateway.Contract.RequestWithdrawalFor(&_Gateway.TransactOpts, _request, _chainId)
 }
 
 // RequestWithdrawalFor is a paid mutator transaction binding the contract method 0x0b1ff17f.
 //
 // Solidity: function requestWithdrawalFor((address,address,(uint8,uint256,uint256)) _request, uint256 _chainId) returns()
-func (_Ronin *RoninTransactorSession) RequestWithdrawalFor(_request TransferRequest, _chainId *big.Int) (*types.Transaction, error) {
-	return _Ronin.Contract.RequestWithdrawalFor(&_Ronin.TransactOpts, _request, _chainId)
+func (_Gateway *GatewayTransactorSession) RequestWithdrawalFor(_request TransferRequest, _chainId *big.Int) (*types.Transaction, error) {
+	return _Gateway.Contract.RequestWithdrawalFor(&_Gateway.TransactOpts, _request, _chainId)
 }
 
 // RequestWithdrawalSignatures is a paid mutator transaction binding the contract method 0x47b56b2c.
 //
 // Solidity: function requestWithdrawalSignatures(uint256 _withdrawalId) returns()
-func (_Ronin *RoninTransactor) RequestWithdrawalSignatures(opts *bind.TransactOpts, _withdrawalId *big.Int) (*types.Transaction, error) {
-	return _Ronin.contract.Transact(opts, "requestWithdrawalSignatures", _withdrawalId)
+func (_Gateway *GatewayTransactor) RequestWithdrawalSignatures(opts *bind.TransactOpts, _withdrawalId *big.Int) (*types.Transaction, error) {
+	return _Gateway.contract.Transact(opts, "requestWithdrawalSignatures", _withdrawalId)
 }
 
 // RequestWithdrawalSignatures is a paid mutator transaction binding the contract method 0x47b56b2c.
 //
 // Solidity: function requestWithdrawalSignatures(uint256 _withdrawalId) returns()
-func (_Ronin *RoninSession) RequestWithdrawalSignatures(_withdrawalId *big.Int) (*types.Transaction, error) {
-	return _Ronin.Contract.RequestWithdrawalSignatures(&_Ronin.TransactOpts, _withdrawalId)
+func (_Gateway *GatewaySession) RequestWithdrawalSignatures(_withdrawalId *big.Int) (*types.Transaction, error) {
+	return _Gateway.Contract.RequestWithdrawalSignatures(&_Gateway.TransactOpts, _withdrawalId)
 }
 
 // RequestWithdrawalSignatures is a paid mutator transaction binding the contract method 0x47b56b2c.
 //
 // Solidity: function requestWithdrawalSignatures(uint256 _withdrawalId) returns()
-func (_Ronin *RoninTransactorSession) RequestWithdrawalSignatures(_withdrawalId *big.Int) (*types.Transaction, error) {
-	return _Ronin.Contract.RequestWithdrawalSignatures(&_Ronin.TransactOpts, _withdrawalId)
+func (_Gateway *GatewayTransactorSession) RequestWithdrawalSignatures(_withdrawalId *big.Int) (*types.Transaction, error) {
+	return _Gateway.Contract.RequestWithdrawalSignatures(&_Gateway.TransactOpts, _withdrawalId)
 }
 
 // RevokeRole is a paid mutator transaction binding the contract method 0xd547741f.
 //
 // Solidity: function revokeRole(bytes32 role, address account) returns()
-func (_Ronin *RoninTransactor) RevokeRole(opts *bind.TransactOpts, role [32]byte, account common.Address) (*types.Transaction, error) {
-	return _Ronin.contract.Transact(opts, "revokeRole", role, account)
+func (_Gateway *GatewayTransactor) RevokeRole(opts *bind.TransactOpts, role [32]byte, account common.Address) (*types.Transaction, error) {
+	return _Gateway.contract.Transact(opts, "revokeRole", role, account)
 }
 
 // RevokeRole is a paid mutator transaction binding the contract method 0xd547741f.
 //
 // Solidity: function revokeRole(bytes32 role, address account) returns()
-func (_Ronin *RoninSession) RevokeRole(role [32]byte, account common.Address) (*types.Transaction, error) {
-	return _Ronin.Contract.RevokeRole(&_Ronin.TransactOpts, role, account)
+func (_Gateway *GatewaySession) RevokeRole(role [32]byte, account common.Address) (*types.Transaction, error) {
+	return _Gateway.Contract.RevokeRole(&_Gateway.TransactOpts, role, account)
 }
 
 // RevokeRole is a paid mutator transaction binding the contract method 0xd547741f.
 //
 // Solidity: function revokeRole(bytes32 role, address account) returns()
-func (_Ronin *RoninTransactorSession) RevokeRole(role [32]byte, account common.Address) (*types.Transaction, error) {
-	return _Ronin.Contract.RevokeRole(&_Ronin.TransactOpts, role, account)
+func (_Gateway *GatewayTransactorSession) RevokeRole(role [32]byte, account common.Address) (*types.Transaction, error) {
+	return _Gateway.Contract.RevokeRole(&_Gateway.TransactOpts, role, account)
 }
 
 // SetMinimumThresholds is a paid mutator transaction binding the contract method 0x64363f78.
 //
 // Solidity: function setMinimumThresholds(address[] _tokens, uint256[] _thresholds) returns()
-func (_Ronin *RoninTransactor) SetMinimumThresholds(opts *bind.TransactOpts, _tokens []common.Address, _thresholds []*big.Int) (*types.Transaction, error) {
-	return _Ronin.contract.Transact(opts, "setMinimumThresholds", _tokens, _thresholds)
+func (_Gateway *GatewayTransactor) SetMinimumThresholds(opts *bind.TransactOpts, _tokens []common.Address, _thresholds []*big.Int) (*types.Transaction, error) {
+	return _Gateway.contract.Transact(opts, "setMinimumThresholds", _tokens, _thresholds)
 }
 
 // SetMinimumThresholds is a paid mutator transaction binding the contract method 0x64363f78.
 //
 // Solidity: function setMinimumThresholds(address[] _tokens, uint256[] _thresholds) returns()
-func (_Ronin *RoninSession) SetMinimumThresholds(_tokens []common.Address, _thresholds []*big.Int) (*types.Transaction, error) {
-	return _Ronin.Contract.SetMinimumThresholds(&_Ronin.TransactOpts, _tokens, _thresholds)
+func (_Gateway *GatewaySession) SetMinimumThresholds(_tokens []common.Address, _thresholds []*big.Int) (*types.Transaction, error) {
+	return _Gateway.Contract.SetMinimumThresholds(&_Gateway.TransactOpts, _tokens, _thresholds)
 }
 
 // SetMinimumThresholds is a paid mutator transaction binding the contract method 0x64363f78.
 //
 // Solidity: function setMinimumThresholds(address[] _tokens, uint256[] _thresholds) returns()
-func (_Ronin *RoninTransactorSession) SetMinimumThresholds(_tokens []common.Address, _thresholds []*big.Int) (*types.Transaction, error) {
-	return _Ronin.Contract.SetMinimumThresholds(&_Ronin.TransactOpts, _tokens, _thresholds)
+func (_Gateway *GatewayTransactorSession) SetMinimumThresholds(_tokens []common.Address, _thresholds []*big.Int) (*types.Transaction, error) {
+	return _Gateway.Contract.SetMinimumThresholds(&_Gateway.TransactOpts, _tokens, _thresholds)
 }
 
 // SetThreshold is a paid mutator transaction binding the contract method 0xb9c36209.
 //
 // Solidity: function setThreshold(uint256 _numerator, uint256 _denominator) returns(uint256, uint256)
-func (_Ronin *RoninTransactor) SetThreshold(opts *bind.TransactOpts, _numerator *big.Int, _denominator *big.Int) (*types.Transaction, error) {
-	return _Ronin.contract.Transact(opts, "setThreshold", _numerator, _denominator)
+func (_Gateway *GatewayTransactor) SetThreshold(opts *bind.TransactOpts, _numerator *big.Int, _denominator *big.Int) (*types.Transaction, error) {
+	return _Gateway.contract.Transact(opts, "setThreshold", _numerator, _denominator)
 }
 
 // SetThreshold is a paid mutator transaction binding the contract method 0xb9c36209.
 //
 // Solidity: function setThreshold(uint256 _numerator, uint256 _denominator) returns(uint256, uint256)
-func (_Ronin *RoninSession) SetThreshold(_numerator *big.Int, _denominator *big.Int) (*types.Transaction, error) {
-	return _Ronin.Contract.SetThreshold(&_Ronin.TransactOpts, _numerator, _denominator)
+func (_Gateway *GatewaySession) SetThreshold(_numerator *big.Int, _denominator *big.Int) (*types.Transaction, error) {
+	return _Gateway.Contract.SetThreshold(&_Gateway.TransactOpts, _numerator, _denominator)
 }
 
 // SetThreshold is a paid mutator transaction binding the contract method 0xb9c36209.
 //
 // Solidity: function setThreshold(uint256 _numerator, uint256 _denominator) returns(uint256, uint256)
-func (_Ronin *RoninTransactorSession) SetThreshold(_numerator *big.Int, _denominator *big.Int) (*types.Transaction, error) {
-	return _Ronin.Contract.SetThreshold(&_Ronin.TransactOpts, _numerator, _denominator)
+func (_Gateway *GatewayTransactorSession) SetThreshold(_numerator *big.Int, _denominator *big.Int) (*types.Transaction, error) {
+	return _Gateway.Contract.SetThreshold(&_Gateway.TransactOpts, _numerator, _denominator)
 }
 
 // SetValidatorContract is a paid mutator transaction binding the contract method 0xcdf64a76.
 //
 // Solidity: function setValidatorContract(address _validatorContract) returns()
-func (_Ronin *RoninTransactor) SetValidatorContract(opts *bind.TransactOpts, _validatorContract common.Address) (*types.Transaction, error) {
-	return _Ronin.contract.Transact(opts, "setValidatorContract", _validatorContract)
+func (_Gateway *GatewayTransactor) SetValidatorContract(opts *bind.TransactOpts, _validatorContract common.Address) (*types.Transaction, error) {
+	return _Gateway.contract.Transact(opts, "setValidatorContract", _validatorContract)
 }
 
 // SetValidatorContract is a paid mutator transaction binding the contract method 0xcdf64a76.
 //
 // Solidity: function setValidatorContract(address _validatorContract) returns()
-func (_Ronin *RoninSession) SetValidatorContract(_validatorContract common.Address) (*types.Transaction, error) {
-	return _Ronin.Contract.SetValidatorContract(&_Ronin.TransactOpts, _validatorContract)
+func (_Gateway *GatewaySession) SetValidatorContract(_validatorContract common.Address) (*types.Transaction, error) {
+	return _Gateway.Contract.SetValidatorContract(&_Gateway.TransactOpts, _validatorContract)
 }
 
 // SetValidatorContract is a paid mutator transaction binding the contract method 0xcdf64a76.
 //
 // Solidity: function setValidatorContract(address _validatorContract) returns()
-func (_Ronin *RoninTransactorSession) SetValidatorContract(_validatorContract common.Address) (*types.Transaction, error) {
-	return _Ronin.Contract.SetValidatorContract(&_Ronin.TransactOpts, _validatorContract)
+func (_Gateway *GatewayTransactorSession) SetValidatorContract(_validatorContract common.Address) (*types.Transaction, error) {
+	return _Gateway.Contract.SetValidatorContract(&_Gateway.TransactOpts, _validatorContract)
 }
 
 // Unpause is a paid mutator transaction binding the contract method 0x3f4ba83a.
 //
 // Solidity: function unpause() returns()
-func (_Ronin *RoninTransactor) Unpause(opts *bind.TransactOpts) (*types.Transaction, error) {
-	return _Ronin.contract.Transact(opts, "unpause")
+func (_Gateway *GatewayTransactor) Unpause(opts *bind.TransactOpts) (*types.Transaction, error) {
+	return _Gateway.contract.Transact(opts, "unpause")
 }
 
 // Unpause is a paid mutator transaction binding the contract method 0x3f4ba83a.
 //
 // Solidity: function unpause() returns()
-func (_Ronin *RoninSession) Unpause() (*types.Transaction, error) {
-	return _Ronin.Contract.Unpause(&_Ronin.TransactOpts)
+func (_Gateway *GatewaySession) Unpause() (*types.Transaction, error) {
+	return _Gateway.Contract.Unpause(&_Gateway.TransactOpts)
 }
 
 // Unpause is a paid mutator transaction binding the contract method 0x3f4ba83a.
 //
 // Solidity: function unpause() returns()
-func (_Ronin *RoninTransactorSession) Unpause() (*types.Transaction, error) {
-	return _Ronin.Contract.Unpause(&_Ronin.TransactOpts)
+func (_Gateway *GatewayTransactorSession) Unpause() (*types.Transaction, error) {
+	return _Gateway.Contract.Unpause(&_Gateway.TransactOpts)
 }
 
-// RoninDepositedIterator is returned from FilterDeposited and is used to iterate over the raw logs and unpacked data for Deposited events raised by the Ronin contract.
-type RoninDepositedIterator struct {
-	Event *RoninDeposited // Event containing the contract specifics and raw log
+// GatewayDepositedIterator is returned from FilterDeposited and is used to iterate over the raw logs and unpacked data for Deposited events raised by the Gateway contract.
+type GatewayDepositedIterator struct {
+	Event *GatewayDeposited // Event containing the contract specifics and raw log
 
 	contract *bind.BoundContract // Generic contract to use for unpacking event data
 	event    string              // Event name to use for unpacking event data
@@ -1267,7 +1319,7 @@ type RoninDepositedIterator struct {
 // Next advances the iterator to the subsequent event, returning whether there
 // are any more events found. In case of a retrieval or parsing error, false is
 // returned and Error() can be queried for the exact failure.
-func (it *RoninDepositedIterator) Next() bool {
+func (it *GatewayDepositedIterator) Next() bool {
 	// If the iterator failed, stop iterating
 	if it.fail != nil {
 		return false
@@ -1276,7 +1328,7 @@ func (it *RoninDepositedIterator) Next() bool {
 	if it.done {
 		select {
 		case log := <-it.logs:
-			it.Event = new(RoninDeposited)
+			it.Event = new(GatewayDeposited)
 			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 				it.fail = err
 				return false
@@ -1291,7 +1343,7 @@ func (it *RoninDepositedIterator) Next() bool {
 	// Iterator still in progress, wait for either a data or an error event
 	select {
 	case log := <-it.logs:
-		it.Event = new(RoninDeposited)
+		it.Event = new(GatewayDeposited)
 		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 			it.fail = err
 			return false
@@ -1307,19 +1359,19 @@ func (it *RoninDepositedIterator) Next() bool {
 }
 
 // Error returns any retrieval or parsing error occurred during filtering.
-func (it *RoninDepositedIterator) Error() error {
+func (it *GatewayDepositedIterator) Error() error {
 	return it.fail
 }
 
 // Close terminates the iteration process, releasing any pending underlying
 // resources.
-func (it *RoninDepositedIterator) Close() error {
+func (it *GatewayDepositedIterator) Close() error {
 	it.sub.Unsubscribe()
 	return nil
 }
 
-// RoninDeposited represents a Deposited event raised by the Ronin contract.
-type RoninDeposited struct {
+// GatewayDeposited represents a Deposited event raised by the Gateway contract.
+type GatewayDeposited struct {
 	ReceiptHash [32]byte
 	Receipt     TransferReceipt
 	Raw         types.Log // Blockchain specific contextual infos
@@ -1328,21 +1380,21 @@ type RoninDeposited struct {
 // FilterDeposited is a free log retrieval operation binding the contract event 0x8d20d8121a34dded9035ff5b43e901c142824f7a22126392992c353c37890524.
 //
 // Solidity: event Deposited(bytes32 receiptHash, (uint256,uint8,(address,address,uint256),(address,address,uint256),(uint8,uint256,uint256)) receipt)
-func (_Ronin *RoninFilterer) FilterDeposited(opts *bind.FilterOpts) (*RoninDepositedIterator, error) {
+func (_Gateway *GatewayFilterer) FilterDeposited(opts *bind.FilterOpts) (*GatewayDepositedIterator, error) {
 
-	logs, sub, err := _Ronin.contract.FilterLogs(opts, "Deposited")
+	logs, sub, err := _Gateway.contract.FilterLogs(opts, "Deposited")
 	if err != nil {
 		return nil, err
 	}
-	return &RoninDepositedIterator{contract: _Ronin.contract, event: "Deposited", logs: logs, sub: sub}, nil
+	return &GatewayDepositedIterator{contract: _Gateway.contract, event: "Deposited", logs: logs, sub: sub}, nil
 }
 
 // WatchDeposited is a free log subscription operation binding the contract event 0x8d20d8121a34dded9035ff5b43e901c142824f7a22126392992c353c37890524.
 //
 // Solidity: event Deposited(bytes32 receiptHash, (uint256,uint8,(address,address,uint256),(address,address,uint256),(uint8,uint256,uint256)) receipt)
-func (_Ronin *RoninFilterer) WatchDeposited(opts *bind.WatchOpts, sink chan<- *RoninDeposited) (event.Subscription, error) {
+func (_Gateway *GatewayFilterer) WatchDeposited(opts *bind.WatchOpts, sink chan<- *GatewayDeposited) (event.Subscription, error) {
 
-	logs, sub, err := _Ronin.contract.WatchLogs(opts, "Deposited")
+	logs, sub, err := _Gateway.contract.WatchLogs(opts, "Deposited")
 	if err != nil {
 		return nil, err
 	}
@@ -1352,8 +1404,8 @@ func (_Ronin *RoninFilterer) WatchDeposited(opts *bind.WatchOpts, sink chan<- *R
 			select {
 			case log := <-logs:
 				// New log arrived, parse the event and forward to the user
-				event := new(RoninDeposited)
-				if err := _Ronin.contract.UnpackLog(event, "Deposited", log); err != nil {
+				event := new(GatewayDeposited)
+				if err := _Gateway.contract.UnpackLog(event, "Deposited", log); err != nil {
 					return err
 				}
 				event.Raw = log
@@ -1377,18 +1429,18 @@ func (_Ronin *RoninFilterer) WatchDeposited(opts *bind.WatchOpts, sink chan<- *R
 // ParseDeposited is a log parse operation binding the contract event 0x8d20d8121a34dded9035ff5b43e901c142824f7a22126392992c353c37890524.
 //
 // Solidity: event Deposited(bytes32 receiptHash, (uint256,uint8,(address,address,uint256),(address,address,uint256),(uint8,uint256,uint256)) receipt)
-func (_Ronin *RoninFilterer) ParseDeposited(log types.Log) (*RoninDeposited, error) {
-	event := new(RoninDeposited)
-	if err := _Ronin.contract.UnpackLog(event, "Deposited", log); err != nil {
+func (_Gateway *GatewayFilterer) ParseDeposited(log types.Log) (*GatewayDeposited, error) {
+	event := new(GatewayDeposited)
+	if err := _Gateway.contract.UnpackLog(event, "Deposited", log); err != nil {
 		return nil, err
 	}
 	event.Raw = log
 	return event, nil
 }
 
-// RoninMinimumThresholdsUpdatedIterator is returned from FilterMinimumThresholdsUpdated and is used to iterate over the raw logs and unpacked data for MinimumThresholdsUpdated events raised by the Ronin contract.
-type RoninMinimumThresholdsUpdatedIterator struct {
-	Event *RoninMinimumThresholdsUpdated // Event containing the contract specifics and raw log
+// GatewayMainchainWithdrewIterator is returned from FilterMainchainWithdrew and is used to iterate over the raw logs and unpacked data for MainchainWithdrew events raised by the Gateway contract.
+type GatewayMainchainWithdrewIterator struct {
+	Event *GatewayMainchainWithdrew // Event containing the contract specifics and raw log
 
 	contract *bind.BoundContract // Generic contract to use for unpacking event data
 	event    string              // Event name to use for unpacking event data
@@ -1402,7 +1454,7 @@ type RoninMinimumThresholdsUpdatedIterator struct {
 // Next advances the iterator to the subsequent event, returning whether there
 // are any more events found. In case of a retrieval or parsing error, false is
 // returned and Error() can be queried for the exact failure.
-func (it *RoninMinimumThresholdsUpdatedIterator) Next() bool {
+func (it *GatewayMainchainWithdrewIterator) Next() bool {
 	// If the iterator failed, stop iterating
 	if it.fail != nil {
 		return false
@@ -1411,7 +1463,7 @@ func (it *RoninMinimumThresholdsUpdatedIterator) Next() bool {
 	if it.done {
 		select {
 		case log := <-it.logs:
-			it.Event = new(RoninMinimumThresholdsUpdated)
+			it.Event = new(GatewayMainchainWithdrew)
 			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 				it.fail = err
 				return false
@@ -1426,7 +1478,7 @@ func (it *RoninMinimumThresholdsUpdatedIterator) Next() bool {
 	// Iterator still in progress, wait for either a data or an error event
 	select {
 	case log := <-it.logs:
-		it.Event = new(RoninMinimumThresholdsUpdated)
+		it.Event = new(GatewayMainchainWithdrew)
 		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 			it.fail = err
 			return false
@@ -1442,42 +1494,42 @@ func (it *RoninMinimumThresholdsUpdatedIterator) Next() bool {
 }
 
 // Error returns any retrieval or parsing error occurred during filtering.
-func (it *RoninMinimumThresholdsUpdatedIterator) Error() error {
+func (it *GatewayMainchainWithdrewIterator) Error() error {
 	return it.fail
 }
 
 // Close terminates the iteration process, releasing any pending underlying
 // resources.
-func (it *RoninMinimumThresholdsUpdatedIterator) Close() error {
+func (it *GatewayMainchainWithdrewIterator) Close() error {
 	it.sub.Unsubscribe()
 	return nil
 }
 
-// RoninMinimumThresholdsUpdated represents a MinimumThresholdsUpdated event raised by the Ronin contract.
-type RoninMinimumThresholdsUpdated struct {
-	Tokens    []common.Address
-	Threshold []*big.Int
-	Raw       types.Log // Blockchain specific contextual infos
+// GatewayMainchainWithdrew represents a MainchainWithdrew event raised by the Gateway contract.
+type GatewayMainchainWithdrew struct {
+	ReceiptHash [32]byte
+	Receipt     TransferReceipt
+	Raw         types.Log // Blockchain specific contextual infos
 }
 
-// FilterMinimumThresholdsUpdated is a free log retrieval operation binding the contract event 0x6f52f53a938df83439fa4c6055c7df0a6906d621aa6dfa4708187037fdfc41da.
+// FilterMainchainWithdrew is a free log retrieval operation binding the contract event 0x62520d049932cdee872e9b3c59c0f6073637147e5e9bc8b050b062430eaf5c9f.
 //
-// Solidity: event MinimumThresholdsUpdated(address[] tokens, uint256[] threshold)
-func (_Ronin *RoninFilterer) FilterMinimumThresholdsUpdated(opts *bind.FilterOpts) (*RoninMinimumThresholdsUpdatedIterator, error) {
+// Solidity: event MainchainWithdrew(bytes32 receiptHash, (uint256,uint8,(address,address,uint256),(address,address,uint256),(uint8,uint256,uint256)) receipt)
+func (_Gateway *GatewayFilterer) FilterMainchainWithdrew(opts *bind.FilterOpts) (*GatewayMainchainWithdrewIterator, error) {
 
-	logs, sub, err := _Ronin.contract.FilterLogs(opts, "MinimumThresholdsUpdated")
+	logs, sub, err := _Gateway.contract.FilterLogs(opts, "MainchainWithdrew")
 	if err != nil {
 		return nil, err
 	}
-	return &RoninMinimumThresholdsUpdatedIterator{contract: _Ronin.contract, event: "MinimumThresholdsUpdated", logs: logs, sub: sub}, nil
+	return &GatewayMainchainWithdrewIterator{contract: _Gateway.contract, event: "MainchainWithdrew", logs: logs, sub: sub}, nil
 }
 
-// WatchMinimumThresholdsUpdated is a free log subscription operation binding the contract event 0x6f52f53a938df83439fa4c6055c7df0a6906d621aa6dfa4708187037fdfc41da.
+// WatchMainchainWithdrew is a free log subscription operation binding the contract event 0x62520d049932cdee872e9b3c59c0f6073637147e5e9bc8b050b062430eaf5c9f.
 //
-// Solidity: event MinimumThresholdsUpdated(address[] tokens, uint256[] threshold)
-func (_Ronin *RoninFilterer) WatchMinimumThresholdsUpdated(opts *bind.WatchOpts, sink chan<- *RoninMinimumThresholdsUpdated) (event.Subscription, error) {
+// Solidity: event MainchainWithdrew(bytes32 receiptHash, (uint256,uint8,(address,address,uint256),(address,address,uint256),(uint8,uint256,uint256)) receipt)
+func (_Gateway *GatewayFilterer) WatchMainchainWithdrew(opts *bind.WatchOpts, sink chan<- *GatewayMainchainWithdrew) (event.Subscription, error) {
 
-	logs, sub, err := _Ronin.contract.WatchLogs(opts, "MinimumThresholdsUpdated")
+	logs, sub, err := _Gateway.contract.WatchLogs(opts, "MainchainWithdrew")
 	if err != nil {
 		return nil, err
 	}
@@ -1487,8 +1539,143 @@ func (_Ronin *RoninFilterer) WatchMinimumThresholdsUpdated(opts *bind.WatchOpts,
 			select {
 			case log := <-logs:
 				// New log arrived, parse the event and forward to the user
-				event := new(RoninMinimumThresholdsUpdated)
-				if err := _Ronin.contract.UnpackLog(event, "MinimumThresholdsUpdated", log); err != nil {
+				event := new(GatewayMainchainWithdrew)
+				if err := _Gateway.contract.UnpackLog(event, "MainchainWithdrew", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// ParseMainchainWithdrew is a log parse operation binding the contract event 0x62520d049932cdee872e9b3c59c0f6073637147e5e9bc8b050b062430eaf5c9f.
+//
+// Solidity: event MainchainWithdrew(bytes32 receiptHash, (uint256,uint8,(address,address,uint256),(address,address,uint256),(uint8,uint256,uint256)) receipt)
+func (_Gateway *GatewayFilterer) ParseMainchainWithdrew(log types.Log) (*GatewayMainchainWithdrew, error) {
+	event := new(GatewayMainchainWithdrew)
+	if err := _Gateway.contract.UnpackLog(event, "MainchainWithdrew", log); err != nil {
+		return nil, err
+	}
+	event.Raw = log
+	return event, nil
+}
+
+// GatewayMinimumThresholdsUpdatedIterator is returned from FilterMinimumThresholdsUpdated and is used to iterate over the raw logs and unpacked data for MinimumThresholdsUpdated events raised by the Gateway contract.
+type GatewayMinimumThresholdsUpdatedIterator struct {
+	Event *GatewayMinimumThresholdsUpdated // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *GatewayMinimumThresholdsUpdatedIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(GatewayMinimumThresholdsUpdated)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(GatewayMinimumThresholdsUpdated)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *GatewayMinimumThresholdsUpdatedIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *GatewayMinimumThresholdsUpdatedIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// GatewayMinimumThresholdsUpdated represents a MinimumThresholdsUpdated event raised by the Gateway contract.
+type GatewayMinimumThresholdsUpdated struct {
+	Tokens    []common.Address
+	Threshold []*big.Int
+	Raw       types.Log // Blockchain specific contextual infos
+}
+
+// FilterMinimumThresholdsUpdated is a free log retrieval operation binding the contract event 0x6f52f53a938df83439fa4c6055c7df0a6906d621aa6dfa4708187037fdfc41da.
+//
+// Solidity: event MinimumThresholdsUpdated(address[] tokens, uint256[] threshold)
+func (_Gateway *GatewayFilterer) FilterMinimumThresholdsUpdated(opts *bind.FilterOpts) (*GatewayMinimumThresholdsUpdatedIterator, error) {
+
+	logs, sub, err := _Gateway.contract.FilterLogs(opts, "MinimumThresholdsUpdated")
+	if err != nil {
+		return nil, err
+	}
+	return &GatewayMinimumThresholdsUpdatedIterator{contract: _Gateway.contract, event: "MinimumThresholdsUpdated", logs: logs, sub: sub}, nil
+}
+
+// WatchMinimumThresholdsUpdated is a free log subscription operation binding the contract event 0x6f52f53a938df83439fa4c6055c7df0a6906d621aa6dfa4708187037fdfc41da.
+//
+// Solidity: event MinimumThresholdsUpdated(address[] tokens, uint256[] threshold)
+func (_Gateway *GatewayFilterer) WatchMinimumThresholdsUpdated(opts *bind.WatchOpts, sink chan<- *GatewayMinimumThresholdsUpdated) (event.Subscription, error) {
+
+	logs, sub, err := _Gateway.contract.WatchLogs(opts, "MinimumThresholdsUpdated")
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(GatewayMinimumThresholdsUpdated)
+				if err := _Gateway.contract.UnpackLog(event, "MinimumThresholdsUpdated", log); err != nil {
 					return err
 				}
 				event.Raw = log
@@ -1512,18 +1699,18 @@ func (_Ronin *RoninFilterer) WatchMinimumThresholdsUpdated(opts *bind.WatchOpts,
 // ParseMinimumThresholdsUpdated is a log parse operation binding the contract event 0x6f52f53a938df83439fa4c6055c7df0a6906d621aa6dfa4708187037fdfc41da.
 //
 // Solidity: event MinimumThresholdsUpdated(address[] tokens, uint256[] threshold)
-func (_Ronin *RoninFilterer) ParseMinimumThresholdsUpdated(log types.Log) (*RoninMinimumThresholdsUpdated, error) {
-	event := new(RoninMinimumThresholdsUpdated)
-	if err := _Ronin.contract.UnpackLog(event, "MinimumThresholdsUpdated", log); err != nil {
+func (_Gateway *GatewayFilterer) ParseMinimumThresholdsUpdated(log types.Log) (*GatewayMinimumThresholdsUpdated, error) {
+	event := new(GatewayMinimumThresholdsUpdated)
+	if err := _Gateway.contract.UnpackLog(event, "MinimumThresholdsUpdated", log); err != nil {
 		return nil, err
 	}
 	event.Raw = log
 	return event, nil
 }
 
-// RoninPausedIterator is returned from FilterPaused and is used to iterate over the raw logs and unpacked data for Paused events raised by the Ronin contract.
-type RoninPausedIterator struct {
-	Event *RoninPaused // Event containing the contract specifics and raw log
+// GatewayPausedIterator is returned from FilterPaused and is used to iterate over the raw logs and unpacked data for Paused events raised by the Gateway contract.
+type GatewayPausedIterator struct {
+	Event *GatewayPaused // Event containing the contract specifics and raw log
 
 	contract *bind.BoundContract // Generic contract to use for unpacking event data
 	event    string              // Event name to use for unpacking event data
@@ -1537,7 +1724,7 @@ type RoninPausedIterator struct {
 // Next advances the iterator to the subsequent event, returning whether there
 // are any more events found. In case of a retrieval or parsing error, false is
 // returned and Error() can be queried for the exact failure.
-func (it *RoninPausedIterator) Next() bool {
+func (it *GatewayPausedIterator) Next() bool {
 	// If the iterator failed, stop iterating
 	if it.fail != nil {
 		return false
@@ -1546,7 +1733,7 @@ func (it *RoninPausedIterator) Next() bool {
 	if it.done {
 		select {
 		case log := <-it.logs:
-			it.Event = new(RoninPaused)
+			it.Event = new(GatewayPaused)
 			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 				it.fail = err
 				return false
@@ -1561,7 +1748,7 @@ func (it *RoninPausedIterator) Next() bool {
 	// Iterator still in progress, wait for either a data or an error event
 	select {
 	case log := <-it.logs:
-		it.Event = new(RoninPaused)
+		it.Event = new(GatewayPaused)
 		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 			it.fail = err
 			return false
@@ -1577,19 +1764,19 @@ func (it *RoninPausedIterator) Next() bool {
 }
 
 // Error returns any retrieval or parsing error occurred during filtering.
-func (it *RoninPausedIterator) Error() error {
+func (it *GatewayPausedIterator) Error() error {
 	return it.fail
 }
 
 // Close terminates the iteration process, releasing any pending underlying
 // resources.
-func (it *RoninPausedIterator) Close() error {
+func (it *GatewayPausedIterator) Close() error {
 	it.sub.Unsubscribe()
 	return nil
 }
 
-// RoninPaused represents a Paused event raised by the Ronin contract.
-type RoninPaused struct {
+// GatewayPaused represents a Paused event raised by the Gateway contract.
+type GatewayPaused struct {
 	Account common.Address
 	Raw     types.Log // Blockchain specific contextual infos
 }
@@ -1597,21 +1784,21 @@ type RoninPaused struct {
 // FilterPaused is a free log retrieval operation binding the contract event 0x62e78cea01bee320cd4e420270b5ea74000d11b0c9f74754ebdbfc544b05a258.
 //
 // Solidity: event Paused(address account)
-func (_Ronin *RoninFilterer) FilterPaused(opts *bind.FilterOpts) (*RoninPausedIterator, error) {
+func (_Gateway *GatewayFilterer) FilterPaused(opts *bind.FilterOpts) (*GatewayPausedIterator, error) {
 
-	logs, sub, err := _Ronin.contract.FilterLogs(opts, "Paused")
+	logs, sub, err := _Gateway.contract.FilterLogs(opts, "Paused")
 	if err != nil {
 		return nil, err
 	}
-	return &RoninPausedIterator{contract: _Ronin.contract, event: "Paused", logs: logs, sub: sub}, nil
+	return &GatewayPausedIterator{contract: _Gateway.contract, event: "Paused", logs: logs, sub: sub}, nil
 }
 
 // WatchPaused is a free log subscription operation binding the contract event 0x62e78cea01bee320cd4e420270b5ea74000d11b0c9f74754ebdbfc544b05a258.
 //
 // Solidity: event Paused(address account)
-func (_Ronin *RoninFilterer) WatchPaused(opts *bind.WatchOpts, sink chan<- *RoninPaused) (event.Subscription, error) {
+func (_Gateway *GatewayFilterer) WatchPaused(opts *bind.WatchOpts, sink chan<- *GatewayPaused) (event.Subscription, error) {
 
-	logs, sub, err := _Ronin.contract.WatchLogs(opts, "Paused")
+	logs, sub, err := _Gateway.contract.WatchLogs(opts, "Paused")
 	if err != nil {
 		return nil, err
 	}
@@ -1621,8 +1808,8 @@ func (_Ronin *RoninFilterer) WatchPaused(opts *bind.WatchOpts, sink chan<- *Roni
 			select {
 			case log := <-logs:
 				// New log arrived, parse the event and forward to the user
-				event := new(RoninPaused)
-				if err := _Ronin.contract.UnpackLog(event, "Paused", log); err != nil {
+				event := new(GatewayPaused)
+				if err := _Gateway.contract.UnpackLog(event, "Paused", log); err != nil {
 					return err
 				}
 				event.Raw = log
@@ -1646,18 +1833,18 @@ func (_Ronin *RoninFilterer) WatchPaused(opts *bind.WatchOpts, sink chan<- *Roni
 // ParsePaused is a log parse operation binding the contract event 0x62e78cea01bee320cd4e420270b5ea74000d11b0c9f74754ebdbfc544b05a258.
 //
 // Solidity: event Paused(address account)
-func (_Ronin *RoninFilterer) ParsePaused(log types.Log) (*RoninPaused, error) {
-	event := new(RoninPaused)
-	if err := _Ronin.contract.UnpackLog(event, "Paused", log); err != nil {
+func (_Gateway *GatewayFilterer) ParsePaused(log types.Log) (*GatewayPaused, error) {
+	event := new(GatewayPaused)
+	if err := _Gateway.contract.UnpackLog(event, "Paused", log); err != nil {
 		return nil, err
 	}
 	event.Raw = log
 	return event, nil
 }
 
-// RoninRoleAdminChangedIterator is returned from FilterRoleAdminChanged and is used to iterate over the raw logs and unpacked data for RoleAdminChanged events raised by the Ronin contract.
-type RoninRoleAdminChangedIterator struct {
-	Event *RoninRoleAdminChanged // Event containing the contract specifics and raw log
+// GatewayRoleAdminChangedIterator is returned from FilterRoleAdminChanged and is used to iterate over the raw logs and unpacked data for RoleAdminChanged events raised by the Gateway contract.
+type GatewayRoleAdminChangedIterator struct {
+	Event *GatewayRoleAdminChanged // Event containing the contract specifics and raw log
 
 	contract *bind.BoundContract // Generic contract to use for unpacking event data
 	event    string              // Event name to use for unpacking event data
@@ -1671,7 +1858,7 @@ type RoninRoleAdminChangedIterator struct {
 // Next advances the iterator to the subsequent event, returning whether there
 // are any more events found. In case of a retrieval or parsing error, false is
 // returned and Error() can be queried for the exact failure.
-func (it *RoninRoleAdminChangedIterator) Next() bool {
+func (it *GatewayRoleAdminChangedIterator) Next() bool {
 	// If the iterator failed, stop iterating
 	if it.fail != nil {
 		return false
@@ -1680,7 +1867,7 @@ func (it *RoninRoleAdminChangedIterator) Next() bool {
 	if it.done {
 		select {
 		case log := <-it.logs:
-			it.Event = new(RoninRoleAdminChanged)
+			it.Event = new(GatewayRoleAdminChanged)
 			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 				it.fail = err
 				return false
@@ -1695,7 +1882,7 @@ func (it *RoninRoleAdminChangedIterator) Next() bool {
 	// Iterator still in progress, wait for either a data or an error event
 	select {
 	case log := <-it.logs:
-		it.Event = new(RoninRoleAdminChanged)
+		it.Event = new(GatewayRoleAdminChanged)
 		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 			it.fail = err
 			return false
@@ -1711,19 +1898,19 @@ func (it *RoninRoleAdminChangedIterator) Next() bool {
 }
 
 // Error returns any retrieval or parsing error occurred during filtering.
-func (it *RoninRoleAdminChangedIterator) Error() error {
+func (it *GatewayRoleAdminChangedIterator) Error() error {
 	return it.fail
 }
 
 // Close terminates the iteration process, releasing any pending underlying
 // resources.
-func (it *RoninRoleAdminChangedIterator) Close() error {
+func (it *GatewayRoleAdminChangedIterator) Close() error {
 	it.sub.Unsubscribe()
 	return nil
 }
 
-// RoninRoleAdminChanged represents a RoleAdminChanged event raised by the Ronin contract.
-type RoninRoleAdminChanged struct {
+// GatewayRoleAdminChanged represents a RoleAdminChanged event raised by the Gateway contract.
+type GatewayRoleAdminChanged struct {
 	Role              [32]byte
 	PreviousAdminRole [32]byte
 	NewAdminRole      [32]byte
@@ -1733,7 +1920,7 @@ type RoninRoleAdminChanged struct {
 // FilterRoleAdminChanged is a free log retrieval operation binding the contract event 0xbd79b86ffe0ab8e8776151514217cd7cacd52c909f66475c3af44e129f0b00ff.
 //
 // Solidity: event RoleAdminChanged(bytes32 indexed role, bytes32 indexed previousAdminRole, bytes32 indexed newAdminRole)
-func (_Ronin *RoninFilterer) FilterRoleAdminChanged(opts *bind.FilterOpts, role [][32]byte, previousAdminRole [][32]byte, newAdminRole [][32]byte) (*RoninRoleAdminChangedIterator, error) {
+func (_Gateway *GatewayFilterer) FilterRoleAdminChanged(opts *bind.FilterOpts, role [][32]byte, previousAdminRole [][32]byte, newAdminRole [][32]byte) (*GatewayRoleAdminChangedIterator, error) {
 
 	var roleRule []interface{}
 	for _, roleItem := range role {
@@ -1748,17 +1935,17 @@ func (_Ronin *RoninFilterer) FilterRoleAdminChanged(opts *bind.FilterOpts, role 
 		newAdminRoleRule = append(newAdminRoleRule, newAdminRoleItem)
 	}
 
-	logs, sub, err := _Ronin.contract.FilterLogs(opts, "RoleAdminChanged", roleRule, previousAdminRoleRule, newAdminRoleRule)
+	logs, sub, err := _Gateway.contract.FilterLogs(opts, "RoleAdminChanged", roleRule, previousAdminRoleRule, newAdminRoleRule)
 	if err != nil {
 		return nil, err
 	}
-	return &RoninRoleAdminChangedIterator{contract: _Ronin.contract, event: "RoleAdminChanged", logs: logs, sub: sub}, nil
+	return &GatewayRoleAdminChangedIterator{contract: _Gateway.contract, event: "RoleAdminChanged", logs: logs, sub: sub}, nil
 }
 
 // WatchRoleAdminChanged is a free log subscription operation binding the contract event 0xbd79b86ffe0ab8e8776151514217cd7cacd52c909f66475c3af44e129f0b00ff.
 //
 // Solidity: event RoleAdminChanged(bytes32 indexed role, bytes32 indexed previousAdminRole, bytes32 indexed newAdminRole)
-func (_Ronin *RoninFilterer) WatchRoleAdminChanged(opts *bind.WatchOpts, sink chan<- *RoninRoleAdminChanged, role [][32]byte, previousAdminRole [][32]byte, newAdminRole [][32]byte) (event.Subscription, error) {
+func (_Gateway *GatewayFilterer) WatchRoleAdminChanged(opts *bind.WatchOpts, sink chan<- *GatewayRoleAdminChanged, role [][32]byte, previousAdminRole [][32]byte, newAdminRole [][32]byte) (event.Subscription, error) {
 
 	var roleRule []interface{}
 	for _, roleItem := range role {
@@ -1773,7 +1960,7 @@ func (_Ronin *RoninFilterer) WatchRoleAdminChanged(opts *bind.WatchOpts, sink ch
 		newAdminRoleRule = append(newAdminRoleRule, newAdminRoleItem)
 	}
 
-	logs, sub, err := _Ronin.contract.WatchLogs(opts, "RoleAdminChanged", roleRule, previousAdminRoleRule, newAdminRoleRule)
+	logs, sub, err := _Gateway.contract.WatchLogs(opts, "RoleAdminChanged", roleRule, previousAdminRoleRule, newAdminRoleRule)
 	if err != nil {
 		return nil, err
 	}
@@ -1783,8 +1970,8 @@ func (_Ronin *RoninFilterer) WatchRoleAdminChanged(opts *bind.WatchOpts, sink ch
 			select {
 			case log := <-logs:
 				// New log arrived, parse the event and forward to the user
-				event := new(RoninRoleAdminChanged)
-				if err := _Ronin.contract.UnpackLog(event, "RoleAdminChanged", log); err != nil {
+				event := new(GatewayRoleAdminChanged)
+				if err := _Gateway.contract.UnpackLog(event, "RoleAdminChanged", log); err != nil {
 					return err
 				}
 				event.Raw = log
@@ -1808,18 +1995,18 @@ func (_Ronin *RoninFilterer) WatchRoleAdminChanged(opts *bind.WatchOpts, sink ch
 // ParseRoleAdminChanged is a log parse operation binding the contract event 0xbd79b86ffe0ab8e8776151514217cd7cacd52c909f66475c3af44e129f0b00ff.
 //
 // Solidity: event RoleAdminChanged(bytes32 indexed role, bytes32 indexed previousAdminRole, bytes32 indexed newAdminRole)
-func (_Ronin *RoninFilterer) ParseRoleAdminChanged(log types.Log) (*RoninRoleAdminChanged, error) {
-	event := new(RoninRoleAdminChanged)
-	if err := _Ronin.contract.UnpackLog(event, "RoleAdminChanged", log); err != nil {
+func (_Gateway *GatewayFilterer) ParseRoleAdminChanged(log types.Log) (*GatewayRoleAdminChanged, error) {
+	event := new(GatewayRoleAdminChanged)
+	if err := _Gateway.contract.UnpackLog(event, "RoleAdminChanged", log); err != nil {
 		return nil, err
 	}
 	event.Raw = log
 	return event, nil
 }
 
-// RoninRoleGrantedIterator is returned from FilterRoleGranted and is used to iterate over the raw logs and unpacked data for RoleGranted events raised by the Ronin contract.
-type RoninRoleGrantedIterator struct {
-	Event *RoninRoleGranted // Event containing the contract specifics and raw log
+// GatewayRoleGrantedIterator is returned from FilterRoleGranted and is used to iterate over the raw logs and unpacked data for RoleGranted events raised by the Gateway contract.
+type GatewayRoleGrantedIterator struct {
+	Event *GatewayRoleGranted // Event containing the contract specifics and raw log
 
 	contract *bind.BoundContract // Generic contract to use for unpacking event data
 	event    string              // Event name to use for unpacking event data
@@ -1833,7 +2020,7 @@ type RoninRoleGrantedIterator struct {
 // Next advances the iterator to the subsequent event, returning whether there
 // are any more events found. In case of a retrieval or parsing error, false is
 // returned and Error() can be queried for the exact failure.
-func (it *RoninRoleGrantedIterator) Next() bool {
+func (it *GatewayRoleGrantedIterator) Next() bool {
 	// If the iterator failed, stop iterating
 	if it.fail != nil {
 		return false
@@ -1842,7 +2029,7 @@ func (it *RoninRoleGrantedIterator) Next() bool {
 	if it.done {
 		select {
 		case log := <-it.logs:
-			it.Event = new(RoninRoleGranted)
+			it.Event = new(GatewayRoleGranted)
 			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 				it.fail = err
 				return false
@@ -1857,7 +2044,7 @@ func (it *RoninRoleGrantedIterator) Next() bool {
 	// Iterator still in progress, wait for either a data or an error event
 	select {
 	case log := <-it.logs:
-		it.Event = new(RoninRoleGranted)
+		it.Event = new(GatewayRoleGranted)
 		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 			it.fail = err
 			return false
@@ -1873,19 +2060,19 @@ func (it *RoninRoleGrantedIterator) Next() bool {
 }
 
 // Error returns any retrieval or parsing error occurred during filtering.
-func (it *RoninRoleGrantedIterator) Error() error {
+func (it *GatewayRoleGrantedIterator) Error() error {
 	return it.fail
 }
 
 // Close terminates the iteration process, releasing any pending underlying
 // resources.
-func (it *RoninRoleGrantedIterator) Close() error {
+func (it *GatewayRoleGrantedIterator) Close() error {
 	it.sub.Unsubscribe()
 	return nil
 }
 
-// RoninRoleGranted represents a RoleGranted event raised by the Ronin contract.
-type RoninRoleGranted struct {
+// GatewayRoleGranted represents a RoleGranted event raised by the Gateway contract.
+type GatewayRoleGranted struct {
 	Role    [32]byte
 	Account common.Address
 	Sender  common.Address
@@ -1895,7 +2082,7 @@ type RoninRoleGranted struct {
 // FilterRoleGranted is a free log retrieval operation binding the contract event 0x2f8788117e7eff1d82e926ec794901d17c78024a50270940304540a733656f0d.
 //
 // Solidity: event RoleGranted(bytes32 indexed role, address indexed account, address indexed sender)
-func (_Ronin *RoninFilterer) FilterRoleGranted(opts *bind.FilterOpts, role [][32]byte, account []common.Address, sender []common.Address) (*RoninRoleGrantedIterator, error) {
+func (_Gateway *GatewayFilterer) FilterRoleGranted(opts *bind.FilterOpts, role [][32]byte, account []common.Address, sender []common.Address) (*GatewayRoleGrantedIterator, error) {
 
 	var roleRule []interface{}
 	for _, roleItem := range role {
@@ -1910,17 +2097,17 @@ func (_Ronin *RoninFilterer) FilterRoleGranted(opts *bind.FilterOpts, role [][32
 		senderRule = append(senderRule, senderItem)
 	}
 
-	logs, sub, err := _Ronin.contract.FilterLogs(opts, "RoleGranted", roleRule, accountRule, senderRule)
+	logs, sub, err := _Gateway.contract.FilterLogs(opts, "RoleGranted", roleRule, accountRule, senderRule)
 	if err != nil {
 		return nil, err
 	}
-	return &RoninRoleGrantedIterator{contract: _Ronin.contract, event: "RoleGranted", logs: logs, sub: sub}, nil
+	return &GatewayRoleGrantedIterator{contract: _Gateway.contract, event: "RoleGranted", logs: logs, sub: sub}, nil
 }
 
 // WatchRoleGranted is a free log subscription operation binding the contract event 0x2f8788117e7eff1d82e926ec794901d17c78024a50270940304540a733656f0d.
 //
 // Solidity: event RoleGranted(bytes32 indexed role, address indexed account, address indexed sender)
-func (_Ronin *RoninFilterer) WatchRoleGranted(opts *bind.WatchOpts, sink chan<- *RoninRoleGranted, role [][32]byte, account []common.Address, sender []common.Address) (event.Subscription, error) {
+func (_Gateway *GatewayFilterer) WatchRoleGranted(opts *bind.WatchOpts, sink chan<- *GatewayRoleGranted, role [][32]byte, account []common.Address, sender []common.Address) (event.Subscription, error) {
 
 	var roleRule []interface{}
 	for _, roleItem := range role {
@@ -1935,7 +2122,7 @@ func (_Ronin *RoninFilterer) WatchRoleGranted(opts *bind.WatchOpts, sink chan<- 
 		senderRule = append(senderRule, senderItem)
 	}
 
-	logs, sub, err := _Ronin.contract.WatchLogs(opts, "RoleGranted", roleRule, accountRule, senderRule)
+	logs, sub, err := _Gateway.contract.WatchLogs(opts, "RoleGranted", roleRule, accountRule, senderRule)
 	if err != nil {
 		return nil, err
 	}
@@ -1945,8 +2132,8 @@ func (_Ronin *RoninFilterer) WatchRoleGranted(opts *bind.WatchOpts, sink chan<- 
 			select {
 			case log := <-logs:
 				// New log arrived, parse the event and forward to the user
-				event := new(RoninRoleGranted)
-				if err := _Ronin.contract.UnpackLog(event, "RoleGranted", log); err != nil {
+				event := new(GatewayRoleGranted)
+				if err := _Gateway.contract.UnpackLog(event, "RoleGranted", log); err != nil {
 					return err
 				}
 				event.Raw = log
@@ -1970,18 +2157,18 @@ func (_Ronin *RoninFilterer) WatchRoleGranted(opts *bind.WatchOpts, sink chan<- 
 // ParseRoleGranted is a log parse operation binding the contract event 0x2f8788117e7eff1d82e926ec794901d17c78024a50270940304540a733656f0d.
 //
 // Solidity: event RoleGranted(bytes32 indexed role, address indexed account, address indexed sender)
-func (_Ronin *RoninFilterer) ParseRoleGranted(log types.Log) (*RoninRoleGranted, error) {
-	event := new(RoninRoleGranted)
-	if err := _Ronin.contract.UnpackLog(event, "RoleGranted", log); err != nil {
+func (_Gateway *GatewayFilterer) ParseRoleGranted(log types.Log) (*GatewayRoleGranted, error) {
+	event := new(GatewayRoleGranted)
+	if err := _Gateway.contract.UnpackLog(event, "RoleGranted", log); err != nil {
 		return nil, err
 	}
 	event.Raw = log
 	return event, nil
 }
 
-// RoninRoleRevokedIterator is returned from FilterRoleRevoked and is used to iterate over the raw logs and unpacked data for RoleRevoked events raised by the Ronin contract.
-type RoninRoleRevokedIterator struct {
-	Event *RoninRoleRevoked // Event containing the contract specifics and raw log
+// GatewayRoleRevokedIterator is returned from FilterRoleRevoked and is used to iterate over the raw logs and unpacked data for RoleRevoked events raised by the Gateway contract.
+type GatewayRoleRevokedIterator struct {
+	Event *GatewayRoleRevoked // Event containing the contract specifics and raw log
 
 	contract *bind.BoundContract // Generic contract to use for unpacking event data
 	event    string              // Event name to use for unpacking event data
@@ -1995,7 +2182,7 @@ type RoninRoleRevokedIterator struct {
 // Next advances the iterator to the subsequent event, returning whether there
 // are any more events found. In case of a retrieval or parsing error, false is
 // returned and Error() can be queried for the exact failure.
-func (it *RoninRoleRevokedIterator) Next() bool {
+func (it *GatewayRoleRevokedIterator) Next() bool {
 	// If the iterator failed, stop iterating
 	if it.fail != nil {
 		return false
@@ -2004,7 +2191,7 @@ func (it *RoninRoleRevokedIterator) Next() bool {
 	if it.done {
 		select {
 		case log := <-it.logs:
-			it.Event = new(RoninRoleRevoked)
+			it.Event = new(GatewayRoleRevoked)
 			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 				it.fail = err
 				return false
@@ -2019,7 +2206,7 @@ func (it *RoninRoleRevokedIterator) Next() bool {
 	// Iterator still in progress, wait for either a data or an error event
 	select {
 	case log := <-it.logs:
-		it.Event = new(RoninRoleRevoked)
+		it.Event = new(GatewayRoleRevoked)
 		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 			it.fail = err
 			return false
@@ -2035,19 +2222,19 @@ func (it *RoninRoleRevokedIterator) Next() bool {
 }
 
 // Error returns any retrieval or parsing error occurred during filtering.
-func (it *RoninRoleRevokedIterator) Error() error {
+func (it *GatewayRoleRevokedIterator) Error() error {
 	return it.fail
 }
 
 // Close terminates the iteration process, releasing any pending underlying
 // resources.
-func (it *RoninRoleRevokedIterator) Close() error {
+func (it *GatewayRoleRevokedIterator) Close() error {
 	it.sub.Unsubscribe()
 	return nil
 }
 
-// RoninRoleRevoked represents a RoleRevoked event raised by the Ronin contract.
-type RoninRoleRevoked struct {
+// GatewayRoleRevoked represents a RoleRevoked event raised by the Gateway contract.
+type GatewayRoleRevoked struct {
 	Role    [32]byte
 	Account common.Address
 	Sender  common.Address
@@ -2057,7 +2244,7 @@ type RoninRoleRevoked struct {
 // FilterRoleRevoked is a free log retrieval operation binding the contract event 0xf6391f5c32d9c69d2a47ea670b442974b53935d1edc7fd64eb21e047a839171b.
 //
 // Solidity: event RoleRevoked(bytes32 indexed role, address indexed account, address indexed sender)
-func (_Ronin *RoninFilterer) FilterRoleRevoked(opts *bind.FilterOpts, role [][32]byte, account []common.Address, sender []common.Address) (*RoninRoleRevokedIterator, error) {
+func (_Gateway *GatewayFilterer) FilterRoleRevoked(opts *bind.FilterOpts, role [][32]byte, account []common.Address, sender []common.Address) (*GatewayRoleRevokedIterator, error) {
 
 	var roleRule []interface{}
 	for _, roleItem := range role {
@@ -2072,17 +2259,17 @@ func (_Ronin *RoninFilterer) FilterRoleRevoked(opts *bind.FilterOpts, role [][32
 		senderRule = append(senderRule, senderItem)
 	}
 
-	logs, sub, err := _Ronin.contract.FilterLogs(opts, "RoleRevoked", roleRule, accountRule, senderRule)
+	logs, sub, err := _Gateway.contract.FilterLogs(opts, "RoleRevoked", roleRule, accountRule, senderRule)
 	if err != nil {
 		return nil, err
 	}
-	return &RoninRoleRevokedIterator{contract: _Ronin.contract, event: "RoleRevoked", logs: logs, sub: sub}, nil
+	return &GatewayRoleRevokedIterator{contract: _Gateway.contract, event: "RoleRevoked", logs: logs, sub: sub}, nil
 }
 
 // WatchRoleRevoked is a free log subscription operation binding the contract event 0xf6391f5c32d9c69d2a47ea670b442974b53935d1edc7fd64eb21e047a839171b.
 //
 // Solidity: event RoleRevoked(bytes32 indexed role, address indexed account, address indexed sender)
-func (_Ronin *RoninFilterer) WatchRoleRevoked(opts *bind.WatchOpts, sink chan<- *RoninRoleRevoked, role [][32]byte, account []common.Address, sender []common.Address) (event.Subscription, error) {
+func (_Gateway *GatewayFilterer) WatchRoleRevoked(opts *bind.WatchOpts, sink chan<- *GatewayRoleRevoked, role [][32]byte, account []common.Address, sender []common.Address) (event.Subscription, error) {
 
 	var roleRule []interface{}
 	for _, roleItem := range role {
@@ -2097,7 +2284,7 @@ func (_Ronin *RoninFilterer) WatchRoleRevoked(opts *bind.WatchOpts, sink chan<- 
 		senderRule = append(senderRule, senderItem)
 	}
 
-	logs, sub, err := _Ronin.contract.WatchLogs(opts, "RoleRevoked", roleRule, accountRule, senderRule)
+	logs, sub, err := _Gateway.contract.WatchLogs(opts, "RoleRevoked", roleRule, accountRule, senderRule)
 	if err != nil {
 		return nil, err
 	}
@@ -2107,8 +2294,8 @@ func (_Ronin *RoninFilterer) WatchRoleRevoked(opts *bind.WatchOpts, sink chan<- 
 			select {
 			case log := <-logs:
 				// New log arrived, parse the event and forward to the user
-				event := new(RoninRoleRevoked)
-				if err := _Ronin.contract.UnpackLog(event, "RoleRevoked", log); err != nil {
+				event := new(GatewayRoleRevoked)
+				if err := _Gateway.contract.UnpackLog(event, "RoleRevoked", log); err != nil {
 					return err
 				}
 				event.Raw = log
@@ -2132,18 +2319,18 @@ func (_Ronin *RoninFilterer) WatchRoleRevoked(opts *bind.WatchOpts, sink chan<- 
 // ParseRoleRevoked is a log parse operation binding the contract event 0xf6391f5c32d9c69d2a47ea670b442974b53935d1edc7fd64eb21e047a839171b.
 //
 // Solidity: event RoleRevoked(bytes32 indexed role, address indexed account, address indexed sender)
-func (_Ronin *RoninFilterer) ParseRoleRevoked(log types.Log) (*RoninRoleRevoked, error) {
-	event := new(RoninRoleRevoked)
-	if err := _Ronin.contract.UnpackLog(event, "RoleRevoked", log); err != nil {
+func (_Gateway *GatewayFilterer) ParseRoleRevoked(log types.Log) (*GatewayRoleRevoked, error) {
+	event := new(GatewayRoleRevoked)
+	if err := _Gateway.contract.UnpackLog(event, "RoleRevoked", log); err != nil {
 		return nil, err
 	}
 	event.Raw = log
 	return event, nil
 }
 
-// RoninThresholdUpdatedIterator is returned from FilterThresholdUpdated and is used to iterate over the raw logs and unpacked data for ThresholdUpdated events raised by the Ronin contract.
-type RoninThresholdUpdatedIterator struct {
-	Event *RoninThresholdUpdated // Event containing the contract specifics and raw log
+// GatewayThresholdUpdatedIterator is returned from FilterThresholdUpdated and is used to iterate over the raw logs and unpacked data for ThresholdUpdated events raised by the Gateway contract.
+type GatewayThresholdUpdatedIterator struct {
+	Event *GatewayThresholdUpdated // Event containing the contract specifics and raw log
 
 	contract *bind.BoundContract // Generic contract to use for unpacking event data
 	event    string              // Event name to use for unpacking event data
@@ -2157,7 +2344,7 @@ type RoninThresholdUpdatedIterator struct {
 // Next advances the iterator to the subsequent event, returning whether there
 // are any more events found. In case of a retrieval or parsing error, false is
 // returned and Error() can be queried for the exact failure.
-func (it *RoninThresholdUpdatedIterator) Next() bool {
+func (it *GatewayThresholdUpdatedIterator) Next() bool {
 	// If the iterator failed, stop iterating
 	if it.fail != nil {
 		return false
@@ -2166,7 +2353,7 @@ func (it *RoninThresholdUpdatedIterator) Next() bool {
 	if it.done {
 		select {
 		case log := <-it.logs:
-			it.Event = new(RoninThresholdUpdated)
+			it.Event = new(GatewayThresholdUpdated)
 			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 				it.fail = err
 				return false
@@ -2181,7 +2368,7 @@ func (it *RoninThresholdUpdatedIterator) Next() bool {
 	// Iterator still in progress, wait for either a data or an error event
 	select {
 	case log := <-it.logs:
-		it.Event = new(RoninThresholdUpdated)
+		it.Event = new(GatewayThresholdUpdated)
 		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 			it.fail = err
 			return false
@@ -2197,19 +2384,19 @@ func (it *RoninThresholdUpdatedIterator) Next() bool {
 }
 
 // Error returns any retrieval or parsing error occurred during filtering.
-func (it *RoninThresholdUpdatedIterator) Error() error {
+func (it *GatewayThresholdUpdatedIterator) Error() error {
 	return it.fail
 }
 
 // Close terminates the iteration process, releasing any pending underlying
 // resources.
-func (it *RoninThresholdUpdatedIterator) Close() error {
+func (it *GatewayThresholdUpdatedIterator) Close() error {
 	it.sub.Unsubscribe()
 	return nil
 }
 
-// RoninThresholdUpdated represents a ThresholdUpdated event raised by the Ronin contract.
-type RoninThresholdUpdated struct {
+// GatewayThresholdUpdated represents a ThresholdUpdated event raised by the Gateway contract.
+type GatewayThresholdUpdated struct {
 	Nonce               *big.Int
 	Numerator           *big.Int
 	Denominator         *big.Int
@@ -2221,7 +2408,7 @@ type RoninThresholdUpdated struct {
 // FilterThresholdUpdated is a free log retrieval operation binding the contract event 0x976f8a9c5bdf8248dec172376d6e2b80a8e3df2f0328e381c6db8e1cf138c0f8.
 //
 // Solidity: event ThresholdUpdated(uint256 indexed _nonce, uint256 indexed _numerator, uint256 indexed _denominator, uint256 _previousNumerator, uint256 _previousDenominator)
-func (_Ronin *RoninFilterer) FilterThresholdUpdated(opts *bind.FilterOpts, _nonce []*big.Int, _numerator []*big.Int, _denominator []*big.Int) (*RoninThresholdUpdatedIterator, error) {
+func (_Gateway *GatewayFilterer) FilterThresholdUpdated(opts *bind.FilterOpts, _nonce []*big.Int, _numerator []*big.Int, _denominator []*big.Int) (*GatewayThresholdUpdatedIterator, error) {
 
 	var _nonceRule []interface{}
 	for _, _nonceItem := range _nonce {
@@ -2236,17 +2423,17 @@ func (_Ronin *RoninFilterer) FilterThresholdUpdated(opts *bind.FilterOpts, _nonc
 		_denominatorRule = append(_denominatorRule, _denominatorItem)
 	}
 
-	logs, sub, err := _Ronin.contract.FilterLogs(opts, "ThresholdUpdated", _nonceRule, _numeratorRule, _denominatorRule)
+	logs, sub, err := _Gateway.contract.FilterLogs(opts, "ThresholdUpdated", _nonceRule, _numeratorRule, _denominatorRule)
 	if err != nil {
 		return nil, err
 	}
-	return &RoninThresholdUpdatedIterator{contract: _Ronin.contract, event: "ThresholdUpdated", logs: logs, sub: sub}, nil
+	return &GatewayThresholdUpdatedIterator{contract: _Gateway.contract, event: "ThresholdUpdated", logs: logs, sub: sub}, nil
 }
 
 // WatchThresholdUpdated is a free log subscription operation binding the contract event 0x976f8a9c5bdf8248dec172376d6e2b80a8e3df2f0328e381c6db8e1cf138c0f8.
 //
 // Solidity: event ThresholdUpdated(uint256 indexed _nonce, uint256 indexed _numerator, uint256 indexed _denominator, uint256 _previousNumerator, uint256 _previousDenominator)
-func (_Ronin *RoninFilterer) WatchThresholdUpdated(opts *bind.WatchOpts, sink chan<- *RoninThresholdUpdated, _nonce []*big.Int, _numerator []*big.Int, _denominator []*big.Int) (event.Subscription, error) {
+func (_Gateway *GatewayFilterer) WatchThresholdUpdated(opts *bind.WatchOpts, sink chan<- *GatewayThresholdUpdated, _nonce []*big.Int, _numerator []*big.Int, _denominator []*big.Int) (event.Subscription, error) {
 
 	var _nonceRule []interface{}
 	for _, _nonceItem := range _nonce {
@@ -2261,7 +2448,7 @@ func (_Ronin *RoninFilterer) WatchThresholdUpdated(opts *bind.WatchOpts, sink ch
 		_denominatorRule = append(_denominatorRule, _denominatorItem)
 	}
 
-	logs, sub, err := _Ronin.contract.WatchLogs(opts, "ThresholdUpdated", _nonceRule, _numeratorRule, _denominatorRule)
+	logs, sub, err := _Gateway.contract.WatchLogs(opts, "ThresholdUpdated", _nonceRule, _numeratorRule, _denominatorRule)
 	if err != nil {
 		return nil, err
 	}
@@ -2271,8 +2458,8 @@ func (_Ronin *RoninFilterer) WatchThresholdUpdated(opts *bind.WatchOpts, sink ch
 			select {
 			case log := <-logs:
 				// New log arrived, parse the event and forward to the user
-				event := new(RoninThresholdUpdated)
-				if err := _Ronin.contract.UnpackLog(event, "ThresholdUpdated", log); err != nil {
+				event := new(GatewayThresholdUpdated)
+				if err := _Gateway.contract.UnpackLog(event, "ThresholdUpdated", log); err != nil {
 					return err
 				}
 				event.Raw = log
@@ -2296,18 +2483,18 @@ func (_Ronin *RoninFilterer) WatchThresholdUpdated(opts *bind.WatchOpts, sink ch
 // ParseThresholdUpdated is a log parse operation binding the contract event 0x976f8a9c5bdf8248dec172376d6e2b80a8e3df2f0328e381c6db8e1cf138c0f8.
 //
 // Solidity: event ThresholdUpdated(uint256 indexed _nonce, uint256 indexed _numerator, uint256 indexed _denominator, uint256 _previousNumerator, uint256 _previousDenominator)
-func (_Ronin *RoninFilterer) ParseThresholdUpdated(log types.Log) (*RoninThresholdUpdated, error) {
-	event := new(RoninThresholdUpdated)
-	if err := _Ronin.contract.UnpackLog(event, "ThresholdUpdated", log); err != nil {
+func (_Gateway *GatewayFilterer) ParseThresholdUpdated(log types.Log) (*GatewayThresholdUpdated, error) {
+	event := new(GatewayThresholdUpdated)
+	if err := _Gateway.contract.UnpackLog(event, "ThresholdUpdated", log); err != nil {
 		return nil, err
 	}
 	event.Raw = log
 	return event, nil
 }
 
-// RoninTokenMappedIterator is returned from FilterTokenMapped and is used to iterate over the raw logs and unpacked data for TokenMapped events raised by the Ronin contract.
-type RoninTokenMappedIterator struct {
-	Event *RoninTokenMapped // Event containing the contract specifics and raw log
+// GatewayTokenMappedIterator is returned from FilterTokenMapped and is used to iterate over the raw logs and unpacked data for TokenMapped events raised by the Gateway contract.
+type GatewayTokenMappedIterator struct {
+	Event *GatewayTokenMapped // Event containing the contract specifics and raw log
 
 	contract *bind.BoundContract // Generic contract to use for unpacking event data
 	event    string              // Event name to use for unpacking event data
@@ -2321,7 +2508,7 @@ type RoninTokenMappedIterator struct {
 // Next advances the iterator to the subsequent event, returning whether there
 // are any more events found. In case of a retrieval or parsing error, false is
 // returned and Error() can be queried for the exact failure.
-func (it *RoninTokenMappedIterator) Next() bool {
+func (it *GatewayTokenMappedIterator) Next() bool {
 	// If the iterator failed, stop iterating
 	if it.fail != nil {
 		return false
@@ -2330,7 +2517,7 @@ func (it *RoninTokenMappedIterator) Next() bool {
 	if it.done {
 		select {
 		case log := <-it.logs:
-			it.Event = new(RoninTokenMapped)
+			it.Event = new(GatewayTokenMapped)
 			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 				it.fail = err
 				return false
@@ -2345,7 +2532,7 @@ func (it *RoninTokenMappedIterator) Next() bool {
 	// Iterator still in progress, wait for either a data or an error event
 	select {
 	case log := <-it.logs:
-		it.Event = new(RoninTokenMapped)
+		it.Event = new(GatewayTokenMapped)
 		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 			it.fail = err
 			return false
@@ -2361,19 +2548,19 @@ func (it *RoninTokenMappedIterator) Next() bool {
 }
 
 // Error returns any retrieval or parsing error occurred during filtering.
-func (it *RoninTokenMappedIterator) Error() error {
+func (it *GatewayTokenMappedIterator) Error() error {
 	return it.fail
 }
 
 // Close terminates the iteration process, releasing any pending underlying
 // resources.
-func (it *RoninTokenMappedIterator) Close() error {
+func (it *GatewayTokenMappedIterator) Close() error {
 	it.sub.Unsubscribe()
 	return nil
 }
 
-// RoninTokenMapped represents a TokenMapped event raised by the Ronin contract.
-type RoninTokenMapped struct {
+// GatewayTokenMapped represents a TokenMapped event raised by the Gateway contract.
+type GatewayTokenMapped struct {
 	RoninTokens     []common.Address
 	MainchainTokens []common.Address
 	ChainIds        []*big.Int
@@ -2383,21 +2570,21 @@ type RoninTokenMapped struct {
 // FilterTokenMapped is a free log retrieval operation binding the contract event 0x332d1046c291868dcf6424605d8c4f46a10977395d49f764b86b8d441ba82bd3.
 //
 // Solidity: event TokenMapped(address[] roninTokens, address[] mainchainTokens, uint256[] chainIds)
-func (_Ronin *RoninFilterer) FilterTokenMapped(opts *bind.FilterOpts) (*RoninTokenMappedIterator, error) {
+func (_Gateway *GatewayFilterer) FilterTokenMapped(opts *bind.FilterOpts) (*GatewayTokenMappedIterator, error) {
 
-	logs, sub, err := _Ronin.contract.FilterLogs(opts, "TokenMapped")
+	logs, sub, err := _Gateway.contract.FilterLogs(opts, "TokenMapped")
 	if err != nil {
 		return nil, err
 	}
-	return &RoninTokenMappedIterator{contract: _Ronin.contract, event: "TokenMapped", logs: logs, sub: sub}, nil
+	return &GatewayTokenMappedIterator{contract: _Gateway.contract, event: "TokenMapped", logs: logs, sub: sub}, nil
 }
 
 // WatchTokenMapped is a free log subscription operation binding the contract event 0x332d1046c291868dcf6424605d8c4f46a10977395d49f764b86b8d441ba82bd3.
 //
 // Solidity: event TokenMapped(address[] roninTokens, address[] mainchainTokens, uint256[] chainIds)
-func (_Ronin *RoninFilterer) WatchTokenMapped(opts *bind.WatchOpts, sink chan<- *RoninTokenMapped) (event.Subscription, error) {
+func (_Gateway *GatewayFilterer) WatchTokenMapped(opts *bind.WatchOpts, sink chan<- *GatewayTokenMapped) (event.Subscription, error) {
 
-	logs, sub, err := _Ronin.contract.WatchLogs(opts, "TokenMapped")
+	logs, sub, err := _Gateway.contract.WatchLogs(opts, "TokenMapped")
 	if err != nil {
 		return nil, err
 	}
@@ -2407,8 +2594,8 @@ func (_Ronin *RoninFilterer) WatchTokenMapped(opts *bind.WatchOpts, sink chan<- 
 			select {
 			case log := <-logs:
 				// New log arrived, parse the event and forward to the user
-				event := new(RoninTokenMapped)
-				if err := _Ronin.contract.UnpackLog(event, "TokenMapped", log); err != nil {
+				event := new(GatewayTokenMapped)
+				if err := _Gateway.contract.UnpackLog(event, "TokenMapped", log); err != nil {
 					return err
 				}
 				event.Raw = log
@@ -2432,18 +2619,18 @@ func (_Ronin *RoninFilterer) WatchTokenMapped(opts *bind.WatchOpts, sink chan<- 
 // ParseTokenMapped is a log parse operation binding the contract event 0x332d1046c291868dcf6424605d8c4f46a10977395d49f764b86b8d441ba82bd3.
 //
 // Solidity: event TokenMapped(address[] roninTokens, address[] mainchainTokens, uint256[] chainIds)
-func (_Ronin *RoninFilterer) ParseTokenMapped(log types.Log) (*RoninTokenMapped, error) {
-	event := new(RoninTokenMapped)
-	if err := _Ronin.contract.UnpackLog(event, "TokenMapped", log); err != nil {
+func (_Gateway *GatewayFilterer) ParseTokenMapped(log types.Log) (*GatewayTokenMapped, error) {
+	event := new(GatewayTokenMapped)
+	if err := _Gateway.contract.UnpackLog(event, "TokenMapped", log); err != nil {
 		return nil, err
 	}
 	event.Raw = log
 	return event, nil
 }
 
-// RoninUnpausedIterator is returned from FilterUnpaused and is used to iterate over the raw logs and unpacked data for Unpaused events raised by the Ronin contract.
-type RoninUnpausedIterator struct {
-	Event *RoninUnpaused // Event containing the contract specifics and raw log
+// GatewayUnpausedIterator is returned from FilterUnpaused and is used to iterate over the raw logs and unpacked data for Unpaused events raised by the Gateway contract.
+type GatewayUnpausedIterator struct {
+	Event *GatewayUnpaused // Event containing the contract specifics and raw log
 
 	contract *bind.BoundContract // Generic contract to use for unpacking event data
 	event    string              // Event name to use for unpacking event data
@@ -2457,7 +2644,7 @@ type RoninUnpausedIterator struct {
 // Next advances the iterator to the subsequent event, returning whether there
 // are any more events found. In case of a retrieval or parsing error, false is
 // returned and Error() can be queried for the exact failure.
-func (it *RoninUnpausedIterator) Next() bool {
+func (it *GatewayUnpausedIterator) Next() bool {
 	// If the iterator failed, stop iterating
 	if it.fail != nil {
 		return false
@@ -2466,7 +2653,7 @@ func (it *RoninUnpausedIterator) Next() bool {
 	if it.done {
 		select {
 		case log := <-it.logs:
-			it.Event = new(RoninUnpaused)
+			it.Event = new(GatewayUnpaused)
 			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 				it.fail = err
 				return false
@@ -2481,7 +2668,7 @@ func (it *RoninUnpausedIterator) Next() bool {
 	// Iterator still in progress, wait for either a data or an error event
 	select {
 	case log := <-it.logs:
-		it.Event = new(RoninUnpaused)
+		it.Event = new(GatewayUnpaused)
 		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 			it.fail = err
 			return false
@@ -2497,19 +2684,19 @@ func (it *RoninUnpausedIterator) Next() bool {
 }
 
 // Error returns any retrieval or parsing error occurred during filtering.
-func (it *RoninUnpausedIterator) Error() error {
+func (it *GatewayUnpausedIterator) Error() error {
 	return it.fail
 }
 
 // Close terminates the iteration process, releasing any pending underlying
 // resources.
-func (it *RoninUnpausedIterator) Close() error {
+func (it *GatewayUnpausedIterator) Close() error {
 	it.sub.Unsubscribe()
 	return nil
 }
 
-// RoninUnpaused represents a Unpaused event raised by the Ronin contract.
-type RoninUnpaused struct {
+// GatewayUnpaused represents a Unpaused event raised by the Gateway contract.
+type GatewayUnpaused struct {
 	Account common.Address
 	Raw     types.Log // Blockchain specific contextual infos
 }
@@ -2517,21 +2704,21 @@ type RoninUnpaused struct {
 // FilterUnpaused is a free log retrieval operation binding the contract event 0x5db9ee0a495bf2e6ff9c91a7834c1ba4fdd244a5e8aa4e537bd38aeae4b073aa.
 //
 // Solidity: event Unpaused(address account)
-func (_Ronin *RoninFilterer) FilterUnpaused(opts *bind.FilterOpts) (*RoninUnpausedIterator, error) {
+func (_Gateway *GatewayFilterer) FilterUnpaused(opts *bind.FilterOpts) (*GatewayUnpausedIterator, error) {
 
-	logs, sub, err := _Ronin.contract.FilterLogs(opts, "Unpaused")
+	logs, sub, err := _Gateway.contract.FilterLogs(opts, "Unpaused")
 	if err != nil {
 		return nil, err
 	}
-	return &RoninUnpausedIterator{contract: _Ronin.contract, event: "Unpaused", logs: logs, sub: sub}, nil
+	return &GatewayUnpausedIterator{contract: _Gateway.contract, event: "Unpaused", logs: logs, sub: sub}, nil
 }
 
 // WatchUnpaused is a free log subscription operation binding the contract event 0x5db9ee0a495bf2e6ff9c91a7834c1ba4fdd244a5e8aa4e537bd38aeae4b073aa.
 //
 // Solidity: event Unpaused(address account)
-func (_Ronin *RoninFilterer) WatchUnpaused(opts *bind.WatchOpts, sink chan<- *RoninUnpaused) (event.Subscription, error) {
+func (_Gateway *GatewayFilterer) WatchUnpaused(opts *bind.WatchOpts, sink chan<- *GatewayUnpaused) (event.Subscription, error) {
 
-	logs, sub, err := _Ronin.contract.WatchLogs(opts, "Unpaused")
+	logs, sub, err := _Gateway.contract.WatchLogs(opts, "Unpaused")
 	if err != nil {
 		return nil, err
 	}
@@ -2541,8 +2728,8 @@ func (_Ronin *RoninFilterer) WatchUnpaused(opts *bind.WatchOpts, sink chan<- *Ro
 			select {
 			case log := <-logs:
 				// New log arrived, parse the event and forward to the user
-				event := new(RoninUnpaused)
-				if err := _Ronin.contract.UnpackLog(event, "Unpaused", log); err != nil {
+				event := new(GatewayUnpaused)
+				if err := _Gateway.contract.UnpackLog(event, "Unpaused", log); err != nil {
 					return err
 				}
 				event.Raw = log
@@ -2566,18 +2753,18 @@ func (_Ronin *RoninFilterer) WatchUnpaused(opts *bind.WatchOpts, sink chan<- *Ro
 // ParseUnpaused is a log parse operation binding the contract event 0x5db9ee0a495bf2e6ff9c91a7834c1ba4fdd244a5e8aa4e537bd38aeae4b073aa.
 //
 // Solidity: event Unpaused(address account)
-func (_Ronin *RoninFilterer) ParseUnpaused(log types.Log) (*RoninUnpaused, error) {
-	event := new(RoninUnpaused)
-	if err := _Ronin.contract.UnpackLog(event, "Unpaused", log); err != nil {
+func (_Gateway *GatewayFilterer) ParseUnpaused(log types.Log) (*GatewayUnpaused, error) {
+	event := new(GatewayUnpaused)
+	if err := _Gateway.contract.UnpackLog(event, "Unpaused", log); err != nil {
 		return nil, err
 	}
 	event.Raw = log
 	return event, nil
 }
 
-// RoninValidatorContractUpdatedIterator is returned from FilterValidatorContractUpdated and is used to iterate over the raw logs and unpacked data for ValidatorContractUpdated events raised by the Ronin contract.
-type RoninValidatorContractUpdatedIterator struct {
-	Event *RoninValidatorContractUpdated // Event containing the contract specifics and raw log
+// GatewayValidatorContractUpdatedIterator is returned from FilterValidatorContractUpdated and is used to iterate over the raw logs and unpacked data for ValidatorContractUpdated events raised by the Gateway contract.
+type GatewayValidatorContractUpdatedIterator struct {
+	Event *GatewayValidatorContractUpdated // Event containing the contract specifics and raw log
 
 	contract *bind.BoundContract // Generic contract to use for unpacking event data
 	event    string              // Event name to use for unpacking event data
@@ -2591,7 +2778,7 @@ type RoninValidatorContractUpdatedIterator struct {
 // Next advances the iterator to the subsequent event, returning whether there
 // are any more events found. In case of a retrieval or parsing error, false is
 // returned and Error() can be queried for the exact failure.
-func (it *RoninValidatorContractUpdatedIterator) Next() bool {
+func (it *GatewayValidatorContractUpdatedIterator) Next() bool {
 	// If the iterator failed, stop iterating
 	if it.fail != nil {
 		return false
@@ -2600,7 +2787,7 @@ func (it *RoninValidatorContractUpdatedIterator) Next() bool {
 	if it.done {
 		select {
 		case log := <-it.logs:
-			it.Event = new(RoninValidatorContractUpdated)
+			it.Event = new(GatewayValidatorContractUpdated)
 			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 				it.fail = err
 				return false
@@ -2615,7 +2802,7 @@ func (it *RoninValidatorContractUpdatedIterator) Next() bool {
 	// Iterator still in progress, wait for either a data or an error event
 	select {
 	case log := <-it.logs:
-		it.Event = new(RoninValidatorContractUpdated)
+		it.Event = new(GatewayValidatorContractUpdated)
 		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 			it.fail = err
 			return false
@@ -2631,19 +2818,19 @@ func (it *RoninValidatorContractUpdatedIterator) Next() bool {
 }
 
 // Error returns any retrieval or parsing error occurred during filtering.
-func (it *RoninValidatorContractUpdatedIterator) Error() error {
+func (it *GatewayValidatorContractUpdatedIterator) Error() error {
 	return it.fail
 }
 
 // Close terminates the iteration process, releasing any pending underlying
 // resources.
-func (it *RoninValidatorContractUpdatedIterator) Close() error {
+func (it *GatewayValidatorContractUpdatedIterator) Close() error {
 	it.sub.Unsubscribe()
 	return nil
 }
 
-// RoninValidatorContractUpdated represents a ValidatorContractUpdated event raised by the Ronin contract.
-type RoninValidatorContractUpdated struct {
+// GatewayValidatorContractUpdated represents a ValidatorContractUpdated event raised by the Gateway contract.
+type GatewayValidatorContractUpdated struct {
 	Arg0 common.Address
 	Raw  types.Log // Blockchain specific contextual infos
 }
@@ -2651,21 +2838,21 @@ type RoninValidatorContractUpdated struct {
 // FilterValidatorContractUpdated is a free log retrieval operation binding the contract event 0xef40dc07567635f84f5edbd2f8dbc16b40d9d282dd8e7e6f4ff58236b6836169.
 //
 // Solidity: event ValidatorContractUpdated(address arg0)
-func (_Ronin *RoninFilterer) FilterValidatorContractUpdated(opts *bind.FilterOpts) (*RoninValidatorContractUpdatedIterator, error) {
+func (_Gateway *GatewayFilterer) FilterValidatorContractUpdated(opts *bind.FilterOpts) (*GatewayValidatorContractUpdatedIterator, error) {
 
-	logs, sub, err := _Ronin.contract.FilterLogs(opts, "ValidatorContractUpdated")
+	logs, sub, err := _Gateway.contract.FilterLogs(opts, "ValidatorContractUpdated")
 	if err != nil {
 		return nil, err
 	}
-	return &RoninValidatorContractUpdatedIterator{contract: _Ronin.contract, event: "ValidatorContractUpdated", logs: logs, sub: sub}, nil
+	return &GatewayValidatorContractUpdatedIterator{contract: _Gateway.contract, event: "ValidatorContractUpdated", logs: logs, sub: sub}, nil
 }
 
 // WatchValidatorContractUpdated is a free log subscription operation binding the contract event 0xef40dc07567635f84f5edbd2f8dbc16b40d9d282dd8e7e6f4ff58236b6836169.
 //
 // Solidity: event ValidatorContractUpdated(address arg0)
-func (_Ronin *RoninFilterer) WatchValidatorContractUpdated(opts *bind.WatchOpts, sink chan<- *RoninValidatorContractUpdated) (event.Subscription, error) {
+func (_Gateway *GatewayFilterer) WatchValidatorContractUpdated(opts *bind.WatchOpts, sink chan<- *GatewayValidatorContractUpdated) (event.Subscription, error) {
 
-	logs, sub, err := _Ronin.contract.WatchLogs(opts, "ValidatorContractUpdated")
+	logs, sub, err := _Gateway.contract.WatchLogs(opts, "ValidatorContractUpdated")
 	if err != nil {
 		return nil, err
 	}
@@ -2675,8 +2862,8 @@ func (_Ronin *RoninFilterer) WatchValidatorContractUpdated(opts *bind.WatchOpts,
 			select {
 			case log := <-logs:
 				// New log arrived, parse the event and forward to the user
-				event := new(RoninValidatorContractUpdated)
-				if err := _Ronin.contract.UnpackLog(event, "ValidatorContractUpdated", log); err != nil {
+				event := new(GatewayValidatorContractUpdated)
+				if err := _Gateway.contract.UnpackLog(event, "ValidatorContractUpdated", log); err != nil {
 					return err
 				}
 				event.Raw = log
@@ -2700,18 +2887,18 @@ func (_Ronin *RoninFilterer) WatchValidatorContractUpdated(opts *bind.WatchOpts,
 // ParseValidatorContractUpdated is a log parse operation binding the contract event 0xef40dc07567635f84f5edbd2f8dbc16b40d9d282dd8e7e6f4ff58236b6836169.
 //
 // Solidity: event ValidatorContractUpdated(address arg0)
-func (_Ronin *RoninFilterer) ParseValidatorContractUpdated(log types.Log) (*RoninValidatorContractUpdated, error) {
-	event := new(RoninValidatorContractUpdated)
-	if err := _Ronin.contract.UnpackLog(event, "ValidatorContractUpdated", log); err != nil {
+func (_Gateway *GatewayFilterer) ParseValidatorContractUpdated(log types.Log) (*GatewayValidatorContractUpdated, error) {
+	event := new(GatewayValidatorContractUpdated)
+	if err := _Gateway.contract.UnpackLog(event, "ValidatorContractUpdated", log); err != nil {
 		return nil, err
 	}
 	event.Raw = log
 	return event, nil
 }
 
-// RoninWithdrawalRequestedIterator is returned from FilterWithdrawalRequested and is used to iterate over the raw logs and unpacked data for WithdrawalRequested events raised by the Ronin contract.
-type RoninWithdrawalRequestedIterator struct {
-	Event *RoninWithdrawalRequested // Event containing the contract specifics and raw log
+// GatewayWithdrawalRequestedIterator is returned from FilterWithdrawalRequested and is used to iterate over the raw logs and unpacked data for WithdrawalRequested events raised by the Gateway contract.
+type GatewayWithdrawalRequestedIterator struct {
+	Event *GatewayWithdrawalRequested // Event containing the contract specifics and raw log
 
 	contract *bind.BoundContract // Generic contract to use for unpacking event data
 	event    string              // Event name to use for unpacking event data
@@ -2725,7 +2912,7 @@ type RoninWithdrawalRequestedIterator struct {
 // Next advances the iterator to the subsequent event, returning whether there
 // are any more events found. In case of a retrieval or parsing error, false is
 // returned and Error() can be queried for the exact failure.
-func (it *RoninWithdrawalRequestedIterator) Next() bool {
+func (it *GatewayWithdrawalRequestedIterator) Next() bool {
 	// If the iterator failed, stop iterating
 	if it.fail != nil {
 		return false
@@ -2734,7 +2921,7 @@ func (it *RoninWithdrawalRequestedIterator) Next() bool {
 	if it.done {
 		select {
 		case log := <-it.logs:
-			it.Event = new(RoninWithdrawalRequested)
+			it.Event = new(GatewayWithdrawalRequested)
 			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 				it.fail = err
 				return false
@@ -2749,7 +2936,7 @@ func (it *RoninWithdrawalRequestedIterator) Next() bool {
 	// Iterator still in progress, wait for either a data or an error event
 	select {
 	case log := <-it.logs:
-		it.Event = new(RoninWithdrawalRequested)
+		it.Event = new(GatewayWithdrawalRequested)
 		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 			it.fail = err
 			return false
@@ -2765,19 +2952,19 @@ func (it *RoninWithdrawalRequestedIterator) Next() bool {
 }
 
 // Error returns any retrieval or parsing error occurred during filtering.
-func (it *RoninWithdrawalRequestedIterator) Error() error {
+func (it *GatewayWithdrawalRequestedIterator) Error() error {
 	return it.fail
 }
 
 // Close terminates the iteration process, releasing any pending underlying
 // resources.
-func (it *RoninWithdrawalRequestedIterator) Close() error {
+func (it *GatewayWithdrawalRequestedIterator) Close() error {
 	it.sub.Unsubscribe()
 	return nil
 }
 
-// RoninWithdrawalRequested represents a WithdrawalRequested event raised by the Ronin contract.
-type RoninWithdrawalRequested struct {
+// GatewayWithdrawalRequested represents a WithdrawalRequested event raised by the Gateway contract.
+type GatewayWithdrawalRequested struct {
 	ReceiptHash [32]byte
 	Arg1        TransferReceipt
 	Raw         types.Log // Blockchain specific contextual infos
@@ -2786,21 +2973,21 @@ type RoninWithdrawalRequested struct {
 // FilterWithdrawalRequested is a free log retrieval operation binding the contract event 0xf313c253a5be72c29d0deb2c8768a9543744ac03d6b3cafd50cc976f1c2632fc.
 //
 // Solidity: event WithdrawalRequested(bytes32 receiptHash, (uint256,uint8,(address,address,uint256),(address,address,uint256),(uint8,uint256,uint256)) arg1)
-func (_Ronin *RoninFilterer) FilterWithdrawalRequested(opts *bind.FilterOpts) (*RoninWithdrawalRequestedIterator, error) {
+func (_Gateway *GatewayFilterer) FilterWithdrawalRequested(opts *bind.FilterOpts) (*GatewayWithdrawalRequestedIterator, error) {
 
-	logs, sub, err := _Ronin.contract.FilterLogs(opts, "WithdrawalRequested")
+	logs, sub, err := _Gateway.contract.FilterLogs(opts, "WithdrawalRequested")
 	if err != nil {
 		return nil, err
 	}
-	return &RoninWithdrawalRequestedIterator{contract: _Ronin.contract, event: "WithdrawalRequested", logs: logs, sub: sub}, nil
+	return &GatewayWithdrawalRequestedIterator{contract: _Gateway.contract, event: "WithdrawalRequested", logs: logs, sub: sub}, nil
 }
 
 // WatchWithdrawalRequested is a free log subscription operation binding the contract event 0xf313c253a5be72c29d0deb2c8768a9543744ac03d6b3cafd50cc976f1c2632fc.
 //
 // Solidity: event WithdrawalRequested(bytes32 receiptHash, (uint256,uint8,(address,address,uint256),(address,address,uint256),(uint8,uint256,uint256)) arg1)
-func (_Ronin *RoninFilterer) WatchWithdrawalRequested(opts *bind.WatchOpts, sink chan<- *RoninWithdrawalRequested) (event.Subscription, error) {
+func (_Gateway *GatewayFilterer) WatchWithdrawalRequested(opts *bind.WatchOpts, sink chan<- *GatewayWithdrawalRequested) (event.Subscription, error) {
 
-	logs, sub, err := _Ronin.contract.WatchLogs(opts, "WithdrawalRequested")
+	logs, sub, err := _Gateway.contract.WatchLogs(opts, "WithdrawalRequested")
 	if err != nil {
 		return nil, err
 	}
@@ -2810,8 +2997,8 @@ func (_Ronin *RoninFilterer) WatchWithdrawalRequested(opts *bind.WatchOpts, sink
 			select {
 			case log := <-logs:
 				// New log arrived, parse the event and forward to the user
-				event := new(RoninWithdrawalRequested)
-				if err := _Ronin.contract.UnpackLog(event, "WithdrawalRequested", log); err != nil {
+				event := new(GatewayWithdrawalRequested)
+				if err := _Gateway.contract.UnpackLog(event, "WithdrawalRequested", log); err != nil {
 					return err
 				}
 				event.Raw = log
@@ -2835,18 +3022,18 @@ func (_Ronin *RoninFilterer) WatchWithdrawalRequested(opts *bind.WatchOpts, sink
 // ParseWithdrawalRequested is a log parse operation binding the contract event 0xf313c253a5be72c29d0deb2c8768a9543744ac03d6b3cafd50cc976f1c2632fc.
 //
 // Solidity: event WithdrawalRequested(bytes32 receiptHash, (uint256,uint8,(address,address,uint256),(address,address,uint256),(uint8,uint256,uint256)) arg1)
-func (_Ronin *RoninFilterer) ParseWithdrawalRequested(log types.Log) (*RoninWithdrawalRequested, error) {
-	event := new(RoninWithdrawalRequested)
-	if err := _Ronin.contract.UnpackLog(event, "WithdrawalRequested", log); err != nil {
+func (_Gateway *GatewayFilterer) ParseWithdrawalRequested(log types.Log) (*GatewayWithdrawalRequested, error) {
+	event := new(GatewayWithdrawalRequested)
+	if err := _Gateway.contract.UnpackLog(event, "WithdrawalRequested", log); err != nil {
 		return nil, err
 	}
 	event.Raw = log
 	return event, nil
 }
 
-// RoninWithdrawalSignaturesRequestedIterator is returned from FilterWithdrawalSignaturesRequested and is used to iterate over the raw logs and unpacked data for WithdrawalSignaturesRequested events raised by the Ronin contract.
-type RoninWithdrawalSignaturesRequestedIterator struct {
-	Event *RoninWithdrawalSignaturesRequested // Event containing the contract specifics and raw log
+// GatewayWithdrawalSignaturesRequestedIterator is returned from FilterWithdrawalSignaturesRequested and is used to iterate over the raw logs and unpacked data for WithdrawalSignaturesRequested events raised by the Gateway contract.
+type GatewayWithdrawalSignaturesRequestedIterator struct {
+	Event *GatewayWithdrawalSignaturesRequested // Event containing the contract specifics and raw log
 
 	contract *bind.BoundContract // Generic contract to use for unpacking event data
 	event    string              // Event name to use for unpacking event data
@@ -2860,7 +3047,7 @@ type RoninWithdrawalSignaturesRequestedIterator struct {
 // Next advances the iterator to the subsequent event, returning whether there
 // are any more events found. In case of a retrieval or parsing error, false is
 // returned and Error() can be queried for the exact failure.
-func (it *RoninWithdrawalSignaturesRequestedIterator) Next() bool {
+func (it *GatewayWithdrawalSignaturesRequestedIterator) Next() bool {
 	// If the iterator failed, stop iterating
 	if it.fail != nil {
 		return false
@@ -2869,7 +3056,7 @@ func (it *RoninWithdrawalSignaturesRequestedIterator) Next() bool {
 	if it.done {
 		select {
 		case log := <-it.logs:
-			it.Event = new(RoninWithdrawalSignaturesRequested)
+			it.Event = new(GatewayWithdrawalSignaturesRequested)
 			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 				it.fail = err
 				return false
@@ -2884,7 +3071,7 @@ func (it *RoninWithdrawalSignaturesRequestedIterator) Next() bool {
 	// Iterator still in progress, wait for either a data or an error event
 	select {
 	case log := <-it.logs:
-		it.Event = new(RoninWithdrawalSignaturesRequested)
+		it.Event = new(GatewayWithdrawalSignaturesRequested)
 		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 			it.fail = err
 			return false
@@ -2900,19 +3087,19 @@ func (it *RoninWithdrawalSignaturesRequestedIterator) Next() bool {
 }
 
 // Error returns any retrieval or parsing error occurred during filtering.
-func (it *RoninWithdrawalSignaturesRequestedIterator) Error() error {
+func (it *GatewayWithdrawalSignaturesRequestedIterator) Error() error {
 	return it.fail
 }
 
 // Close terminates the iteration process, releasing any pending underlying
 // resources.
-func (it *RoninWithdrawalSignaturesRequestedIterator) Close() error {
+func (it *GatewayWithdrawalSignaturesRequestedIterator) Close() error {
 	it.sub.Unsubscribe()
 	return nil
 }
 
-// RoninWithdrawalSignaturesRequested represents a WithdrawalSignaturesRequested event raised by the Ronin contract.
-type RoninWithdrawalSignaturesRequested struct {
+// GatewayWithdrawalSignaturesRequested represents a WithdrawalSignaturesRequested event raised by the Gateway contract.
+type GatewayWithdrawalSignaturesRequested struct {
 	ReceiptHash [32]byte
 	Arg1        TransferReceipt
 	Raw         types.Log // Blockchain specific contextual infos
@@ -2921,21 +3108,21 @@ type RoninWithdrawalSignaturesRequested struct {
 // FilterWithdrawalSignaturesRequested is a free log retrieval operation binding the contract event 0x04e8cbd836dea43a2dc7eb19de345cca3a8e6978a2ef5225d924775500f67c7c.
 //
 // Solidity: event WithdrawalSignaturesRequested(bytes32 receiptHash, (uint256,uint8,(address,address,uint256),(address,address,uint256),(uint8,uint256,uint256)) arg1)
-func (_Ronin *RoninFilterer) FilterWithdrawalSignaturesRequested(opts *bind.FilterOpts) (*RoninWithdrawalSignaturesRequestedIterator, error) {
+func (_Gateway *GatewayFilterer) FilterWithdrawalSignaturesRequested(opts *bind.FilterOpts) (*GatewayWithdrawalSignaturesRequestedIterator, error) {
 
-	logs, sub, err := _Ronin.contract.FilterLogs(opts, "WithdrawalSignaturesRequested")
+	logs, sub, err := _Gateway.contract.FilterLogs(opts, "WithdrawalSignaturesRequested")
 	if err != nil {
 		return nil, err
 	}
-	return &RoninWithdrawalSignaturesRequestedIterator{contract: _Ronin.contract, event: "WithdrawalSignaturesRequested", logs: logs, sub: sub}, nil
+	return &GatewayWithdrawalSignaturesRequestedIterator{contract: _Gateway.contract, event: "WithdrawalSignaturesRequested", logs: logs, sub: sub}, nil
 }
 
 // WatchWithdrawalSignaturesRequested is a free log subscription operation binding the contract event 0x04e8cbd836dea43a2dc7eb19de345cca3a8e6978a2ef5225d924775500f67c7c.
 //
 // Solidity: event WithdrawalSignaturesRequested(bytes32 receiptHash, (uint256,uint8,(address,address,uint256),(address,address,uint256),(uint8,uint256,uint256)) arg1)
-func (_Ronin *RoninFilterer) WatchWithdrawalSignaturesRequested(opts *bind.WatchOpts, sink chan<- *RoninWithdrawalSignaturesRequested) (event.Subscription, error) {
+func (_Gateway *GatewayFilterer) WatchWithdrawalSignaturesRequested(opts *bind.WatchOpts, sink chan<- *GatewayWithdrawalSignaturesRequested) (event.Subscription, error) {
 
-	logs, sub, err := _Ronin.contract.WatchLogs(opts, "WithdrawalSignaturesRequested")
+	logs, sub, err := _Gateway.contract.WatchLogs(opts, "WithdrawalSignaturesRequested")
 	if err != nil {
 		return nil, err
 	}
@@ -2945,8 +3132,8 @@ func (_Ronin *RoninFilterer) WatchWithdrawalSignaturesRequested(opts *bind.Watch
 			select {
 			case log := <-logs:
 				// New log arrived, parse the event and forward to the user
-				event := new(RoninWithdrawalSignaturesRequested)
-				if err := _Ronin.contract.UnpackLog(event, "WithdrawalSignaturesRequested", log); err != nil {
+				event := new(GatewayWithdrawalSignaturesRequested)
+				if err := _Gateway.contract.UnpackLog(event, "WithdrawalSignaturesRequested", log); err != nil {
 					return err
 				}
 				event.Raw = log
@@ -2970,9 +3157,9 @@ func (_Ronin *RoninFilterer) WatchWithdrawalSignaturesRequested(opts *bind.Watch
 // ParseWithdrawalSignaturesRequested is a log parse operation binding the contract event 0x04e8cbd836dea43a2dc7eb19de345cca3a8e6978a2ef5225d924775500f67c7c.
 //
 // Solidity: event WithdrawalSignaturesRequested(bytes32 receiptHash, (uint256,uint8,(address,address,uint256),(address,address,uint256),(uint8,uint256,uint256)) arg1)
-func (_Ronin *RoninFilterer) ParseWithdrawalSignaturesRequested(log types.Log) (*RoninWithdrawalSignaturesRequested, error) {
-	event := new(RoninWithdrawalSignaturesRequested)
-	if err := _Ronin.contract.UnpackLog(event, "WithdrawalSignaturesRequested", log); err != nil {
+func (_Gateway *GatewayFilterer) ParseWithdrawalSignaturesRequested(log types.Log) (*GatewayWithdrawalSignaturesRequested, error) {
+	event := new(GatewayWithdrawalSignaturesRequested)
+	if err := _Gateway.contract.UnpackLog(event, "WithdrawalSignaturesRequested", log); err != nil {
 		return nil, err
 	}
 	event.Raw = log

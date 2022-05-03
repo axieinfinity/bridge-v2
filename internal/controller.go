@@ -1,22 +1,20 @@
-package listener
+package internal
 
 import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/axieinfinity/bridge-v2/internal/stores"
+	"github.com/axieinfinity/bridge-v2/internal/types"
 	"github.com/axieinfinity/bridge-v2/internal/utils"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/log"
+	"gorm.io/gorm"
 	"os"
 	"os/signal"
 	"sync"
 	"syscall"
 	"time"
-)
-
-const (
-	TxEvent = iota
-	LogEvent
 )
 
 const (
@@ -26,11 +24,11 @@ const (
 )
 
 type Controller struct {
-	once       sync.Once
+	lock       sync.Mutex
 	ctx        context.Context
 	cancelFunc context.CancelFunc
 
-	listeners   map[string]IListener
+	listeners   map[string]types.IListener
 	HandlerABIs map[string]*abi.ABI
 	utilWrapper utils.IUtils
 
@@ -44,77 +42,33 @@ type Controller struct {
 	coolDownDuration int
 
 	// Queue holds a list of worker
-	Queue chan chan IJob
+	Queue chan chan types.IJob
 
 	// JobChan receives new job
-	JobChan chan IJob
-
-	PrepareJobChan chan IJob
+	JobChan        chan types.IJob
+	SuccessJobChan chan types.IJob
+	FailedJobChan  chan types.IJob
+	PrepareJobChan chan types.IJob
 
 	jobId         int32
 	processedJobs sync.Map
 
 	MaxQueueSize int
+	cfg          *types.Config
+
+	store types.IMainStore
 }
 
-type Config struct {
-	Listeners       map[string]*LsConfig `json:"listeners"`
-	NumberOfWorkers int                  `json:"numberOfWorkers"`
-}
-
-type LsConfig struct {
-	Name           string        `json:"-"`
-	RpcUrl         string        `json:"rpcUrl"`
-	LoadInterval   time.Duration `json:"blockTime"`
-	SafeBlockRange uint64        `json:"safeBlockRange"`
-	FromHeight     uint64        `json:"fromHeight"`
-
-	// TODO: apply more ways to get privatekey. such as: PLAINTEXT, KMS, etc.
-	Secret        Secret                `json:"secret"`
-	Subscriptions map[string]*Subscribe `json:"subscriptions"`
-}
-
-type Secret struct {
-	Validator string `json:"validator"`
-	Relayer   string `json:"relayer"`
-}
-
-type Subscribe struct {
-	From string `json:"from"`
-	To   string `json:"to"`
-
-	// Type can be either TxEvent or LogEvent
-	Type int `json:"type"`
-
-	Handler   *Handler              `json:"handler"`
-	CallBacks map[string][]*Handler `json:"callbacks"`
-}
-
-type Handler struct {
-	// ABIPath specifies path to abi file
-	ABIPath string `json:"abi"`
-
-	// Name is method/event name
-	Name string `json:"name"`
-
-	// ContractAddress is used in callback case
-	ContractAddress string `json:"contractAddress"`
-
-	// Listener who triggers callback event
-	Listener string `json:"listener"`
-
-	ABI *abi.ABI `json:"-"`
-}
-
-func New(cfg *Config) (*Controller, error) {
+func New(cfg *types.Config, db *gorm.DB, helpers utils.IUtils) (*Controller, error) {
 	if cfg.NumberOfWorkers <= 0 {
 		cfg.NumberOfWorkers = defaultWorkers
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 	c := &Controller{
+		cfg:              cfg,
 		ctx:              ctx,
 		cancelFunc:       cancel,
-		listeners:        make(map[string]IListener),
+		listeners:        make(map[string]types.IListener),
 		HandlerABIs:      make(map[string]*abi.ABI),
 		utilWrapper:      &utils.Utils{},
 		Workers:          make([]*Worker, 0),
@@ -122,13 +76,19 @@ func New(cfg *Config) (*Controller, error) {
 		BackOff:          5,
 		MaxQueueSize:     defaultMaxQueueSize,
 		coolDownDuration: defaultCoolDownDuration,
+		store:            stores.NewMainStore(db),
 	}
-	c.JobChan = make(chan IJob, c.MaxQueueSize*cfg.NumberOfWorkers)
-	c.PrepareJobChan = make(chan IJob, c.MaxQueueSize)
-	c.Queue = make(chan chan IJob, c.MaxQueueSize)
+	if helpers != nil {
+		c.utilWrapper = helpers
+	}
+	c.JobChan = make(chan types.IJob, c.MaxQueueSize*cfg.NumberOfWorkers)
+	c.PrepareJobChan = make(chan types.IJob, c.MaxQueueSize)
+	c.SuccessJobChan = make(chan types.IJob, c.MaxQueueSize)
+	c.FailedJobChan = make(chan types.IJob, c.MaxQueueSize)
+	c.Queue = make(chan chan types.IJob, c.MaxQueueSize)
 
 	// add listeners from config
-	for name, lsConfig := range cfg.Listeners {
+	for name, lsConfig := range c.cfg.Listeners {
 		if lsConfig.LoadInterval <= 0 {
 			continue
 		}
@@ -140,26 +100,29 @@ func New(cfg *Config) (*Controller, error) {
 		}
 		// Invoke init function which is based on listener's name
 		initFuncName := fmt.Sprintf("Init%s", name)
-		val, err := c.utilWrapper.Invoke(c, initFuncName, c.ctx, lsConfig)
+		val, err := c.utilWrapper.Invoke(c, initFuncName, c.ctx, lsConfig, c.store)
 		if err != nil {
 			return nil, err
 		}
-		listener, ok := val.Interface().(IListener)
+		l, ok := val.Interface().(types.IListener)
 		if !ok {
 			return nil, errors.New("cannot cast invoke result to IListener")
 		}
-		c.listeners[name] = listener
+		if l == nil {
+			return nil, errors.New("listener is nil")
+		}
+		c.listeners[name] = l
 	}
 
 	// init workers
 	for i := 0; i < cfg.NumberOfWorkers; i++ {
-		c.Workers = append(c.Workers, NewWorker(ctx, i, c.JobChan, c.Queue, c.MaxQueueSize, c.listeners))
+		c.Workers = append(c.Workers, NewWorker(ctx, i, c.PrepareJobChan, c.FailedJobChan, c.SuccessJobChan, c.Queue, c.MaxQueueSize, c.listeners))
 	}
 	return c, nil
 }
 
 // LoadABIsFromConfig loads all ABIPath and add results to Handler.ABI
-func (c *Controller) LoadABIsFromConfig(lsConfig *LsConfig) (err error) {
+func (c *Controller) LoadABIsFromConfig(lsConfig *types.LsConfig) (err error) {
 	for _, subscription := range lsConfig.Subscriptions {
 		if subscription.Handler.ABIPath == "" {
 			continue
@@ -168,32 +131,32 @@ func (c *Controller) LoadABIsFromConfig(lsConfig *LsConfig) (err error) {
 		if subscription.Handler.ABI, err = c.LoadAbi(subscription.Handler.ABIPath); err != nil {
 			return
 		}
-		// load abi for callbacks handler
-		for _, cbs := range subscription.CallBacks {
-			for _, cb := range cbs {
-				if cb.ABI, err = c.LoadAbi(cb.ABIPath); err != nil {
-					return
-				}
-			}
-		}
 	}
 	return
+}
+
+func (c *Controller) prepareJob(job types.IJob) error {
+	return nil
 }
 
 func (c *Controller) Start() error {
 	for _, worker := range c.Workers {
 		go worker.start()
 	}
-	for _, listener := range c.listeners {
-		go listener.Start()
-		go c.startListener(listener, 0)
-	}
-	// run all events listeners
+	// TODO: load jobs from database and reprocess before start listener
 	go func() {
 		for {
 			select {
+			case job := <-c.SuccessJobChan:
+				log.Info("process job success", "id", job.GetID())
+			case job := <-c.FailedJobChan:
+				log.Info("process job failed", "id", job.GetID())
 			case job := <-c.PrepareJobChan:
 				// TODO: add job into database before sending job to jobChan
+				if err := c.prepareJob(job); err != nil {
+					// TODO: log here...
+					continue
+				}
 				c.JobChan <- job
 			case job := <-c.JobChan:
 				// get 1 workerCh from queue and push job to this channel
@@ -206,14 +169,43 @@ func (c *Controller) Start() error {
 				workerCh := <-c.Queue
 				workerCh <- job
 			case <-c.ctx.Done():
-				c.once.Do(func() {
-					close(c.Queue)
-					close(c.JobChan)
-				})
+				c.lock.Lock()
+				jobs := make([]types.IJob, 0)
+				for job := range c.PrepareJobChan {
+					// TODO: store all jobs to database via prepare ...
+					c.prepareJob(job)
+					jobs = append(jobs, job)
+				}
+				close(c.PrepareJobChan)
+				c.lock.Unlock()
+
+				// wait until all jobs are handled
+				for len(c.JobChan) > 0 {
+				}
+
+				// wait until all success jobs are handled
+				for len(c.SuccessJobChan) > 0 {
+				}
+
+				// wait until all failed jobs are handled
+				for len(c.FailedJobChan) > 0 {
+				}
+
+				close(c.JobChan)
+				close(c.SuccessJobChan)
+				close(c.FailedJobChan)
+				close(c.Queue)
 				break
 			}
 		}
 	}()
+
+	// run all events listeners
+	for _, listener := range c.listeners {
+		go listener.Start()
+		go c.startListener(listener, 0)
+	}
+
 	go func() {
 		sigc := make(chan os.Signal, 1)
 		signal.Notify(sigc, syscall.SIGINT, syscall.SIGTERM)
@@ -226,7 +218,7 @@ func (c *Controller) Start() error {
 	return nil
 }
 
-func (c *Controller) startListener(listener IListener, tryCount int) {
+func (c *Controller) startListener(listener types.IListener, tryCount int) {
 	// panic when tryCount reaches 10 times panic
 	if tryCount >= 10 {
 		log.Error("[Controller][startListener] maximum try has been reached, close listener", "listener", listener.GetName())
@@ -243,11 +235,11 @@ func (c *Controller) startListener(listener IListener, tryCount int) {
 		go c.startListener(listener, tryCount+1)
 		return
 	}
-
+	log.Info("[Controller] Latest Block", "height", latestBlock.GetHeight(), "listener", listener.GetName())
 	// start processing past blocks
 	currentBlock := listener.GetCurrentBlock()
 	if currentBlock != nil {
-		for currentBlock.GetHeight() <= latestBlock.GetHeight() {
+		for currentBlock.GetHeight() < latestBlock.GetHeight() {
 			block, err := listener.GetBlock(currentBlock.GetHeight() + 1)
 			if err != nil {
 				log.Error("[Controller][startListener] error while get latest block", "err", err, "listener", listener.GetName())
@@ -266,7 +258,8 @@ func (c *Controller) startListener(listener IListener, tryCount int) {
 		case <-listener.Context().Done():
 			return
 		case <-tick.C:
-			block, err := listener.GetLatestBlock()
+			currentBlock = listener.GetCurrentBlock()
+			block, err := listener.GetBlock(currentBlock.GetHeight() + 1)
 			if err != nil {
 				log.Error("[Controller][Process] error while get latest block", "err", err, "listener", listener.GetName())
 				continue
@@ -276,7 +269,8 @@ func (c *Controller) startListener(listener IListener, tryCount int) {
 	}
 }
 
-func (c *Controller) Process(listener IListener, latestBlock IBlock) {
+func (c *Controller) Process(listener types.IListener, latestBlock types.IBlock) {
+	log.Info("[Controller][Process] start processing block", "height", latestBlock.GetHeight())
 	// if latest block has been processed then do nothing
 	if listener.GetCurrentBlock() != nil && latestBlock.GetHeight() == listener.GetCurrentBlock().GetHeight() {
 		return
@@ -296,8 +290,9 @@ func (c *Controller) Process(listener IListener, latestBlock IBlock) {
 		if subscribe.Handler == nil {
 			continue
 		}
+		log.Info("[Controller][Process] processing block", "block", latestBlock.GetHeight(), "txs", len(txs), "receipts", len(receipts), "subscribeType", subscribe.Type)
 		switch subscribe.Type {
-		case TxEvent:
+		case types.TxEvent:
 			for _, tx := range txs {
 				if (subscribe.From != "" && subscribe.From != tx.GetFromAddress()) ||
 					(subscribe.To != "" && subscribe.To != tx.GetToAddress()) {
@@ -308,21 +303,23 @@ func (c *Controller) Process(listener IListener, latestBlock IBlock) {
 					continue
 				}
 				if job := listener.GetListenHandleJob(name, tx, tx.GetData()); job != nil {
-					c.JobChan <- job
+					c.PrepareJobChan <- job
 				}
 			}
-		case LogEvent:
+		case types.LogEvent:
 			for _, receipt := range receipts {
+				log.Info("[Controller][Process] processing log Event", "receipt status", receipt.GetStatus(), "logs", len(receipt.GetLogs()))
 				if !receipt.GetStatus() {
 					continue
 				}
 				tx := receipt.GetTransaction()
-				if subscribe.To != "" && subscribe.To != tx.GetToAddress() {
+				if subscribe.To != tx.GetToAddress() {
 					continue
 				}
+				log.Info("[Controller][Process] generating event job", "height", latestBlock.GetHeight())
 				for _, logData := range receipt.GetLogs() {
 					if job := listener.GetListenHandleJob(name, tx, logData.GetData()); job != nil {
-						c.JobChan <- job
+						c.PrepareJobChan <- job
 					}
 				}
 			}

@@ -30,6 +30,7 @@ var (
 
 // BridgeProposalGlobalProposal is an auto generated low-level Go binding around an user-defined struct.
 type BridgeProposalGlobalProposal struct {
+	Nonce         *big.Int
 	TargetOptions []uint8
 	Values        []*big.Int
 	Calldatas     [][]byte
@@ -37,6 +38,7 @@ type BridgeProposalGlobalProposal struct {
 
 // ProposalProposalDetail is an auto generated low-level Go binding around an user-defined struct.
 type ProposalProposalDetail struct {
+	Nonce     *big.Int
 	ChainId   *big.Int
 	Targets   []common.Address
 	Values    []*big.Int
@@ -52,7 +54,7 @@ type SignatureConsumerSignature struct {
 
 // CommonMetaData contains all meta data concerning the Common contract.
 var CommonMetaData = &bind.MetaData{
-	ABI: "[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_validatorContract\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_gatewayContract\",\"type\":\"address\"},{\"internalType\":\"address[]\",\"name\":\"_relayers\",\"type\":\"address[]\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"GatewayContractUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"round\",\"type\":\"uint256\"},{\"components\":[{\"internalType\":\"enumBridgeProposal.TargetOption[]\",\"name\":\"targetOptions\",\"type\":\"uint8[]\"},{\"internalType\":\"uint256[]\",\"name\":\"values\",\"type\":\"uint256[]\"},{\"internalType\":\"bytes[]\",\"name\":\"calldatas\",\"type\":\"bytes[]\"}],\"indexed\":false,\"internalType\":\"structBridgeProposal.GlobalProposal\",\"name\":\"\",\"type\":\"tuple\"}],\"name\":\"GlobalProposalApproved\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"round\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"hash\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"voteWeight\",\"type\":\"uint256\"},{\"components\":[{\"internalType\":\"uint256\",\"name\":\"chainId\",\"type\":\"uint256\"},{\"internalType\":\"address[]\",\"name\":\"targets\",\"type\":\"address[]\"},{\"internalType\":\"uint256[]\",\"name\":\"values\",\"type\":\"uint256[]\"},{\"internalType\":\"bytes[]\",\"name\":\"calldatas\",\"type\":\"bytes[]\"}],\"indexed\":false,\"internalType\":\"structProposal.ProposalDetail\",\"name\":\"\",\"type\":\"tuple\"}],\"name\":\"ProposalApproved\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"round\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"hash\",\"type\":\"bytes32\"}],\"name\":\"ProposalExecuted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"round\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"voter\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"weight\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"hash\",\"type\":\"bytes32\"}],\"name\":\"ProposalVoted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"previousAdminRole\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"newAdminRole\",\"type\":\"bytes32\"}],\"name\":\"RoleAdminChanged\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"}],\"name\":\"RoleGranted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"}],\"name\":\"RoleRevoked\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"ValidatorContractUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"round\",\"type\":\"uint256\"}],\"name\":\"VoteRejected\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"DEFAULT_ADMIN_ROLE\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"DOMAIN_SEPARATOR\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"RELAYER_ROLE\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_proxy\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_newAdmin\",\"type\":\"address\"}],\"name\":\"changeProxyAdmin\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"gatewayContract\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_proxy\",\"type\":\"address\"}],\"name\":\"getProxyAdmin\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_proxy\",\"type\":\"address\"}],\"name\":\"getProxyImplementation\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"}],\"name\":\"getRoleAdmin\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"index\",\"type\":\"uint256\"}],\"name\":\"getRoleMember\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"}],\"name\":\"getRoleMemberCount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_round\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"_voter\",\"type\":\"address\"}],\"name\":\"getVotingSignature\",\"outputs\":[{\"components\":[{\"internalType\":\"uint8\",\"name\":\"v\",\"type\":\"uint8\"},{\"internalType\":\"bytes32\",\"name\":\"r\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"s\",\"type\":\"bytes32\"}],\"internalType\":\"structSignatureConsumer.Signature\",\"name\":\"_sig\",\"type\":\"tuple\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"grantRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"hasRole\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"rejectCurrentVote\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"renounceRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"revokeRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"round\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_gatewayContract\",\"type\":\"address\"}],\"name\":\"setGatewayContract\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_contract\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_num\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_denom\",\"type\":\"uint256\"}],\"name\":\"setThreshold\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_validatorContract\",\"type\":\"address\"}],\"name\":\"setValidatorContract\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"interfaceId\",\"type\":\"bytes4\"}],\"name\":\"supportsInterface\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_proxy\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_implementation\",\"type\":\"address\"},{\"internalType\":\"bytes\",\"name\":\"_data\",\"type\":\"bytes\"}],\"name\":\"upgradeAndCall\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_proxy\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_implementation\",\"type\":\"address\"}],\"name\":\"upgradeTo\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"validatorContract\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"vote\",\"outputs\":[{\"internalType\":\"enumGovernorCore.VoteStatus\",\"name\":\"status\",\"type\":\"uint8\"},{\"internalType\":\"bytes32\",\"name\":\"finalHash\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_round\",\"type\":\"uint256\"},{\"components\":[{\"internalType\":\"enumBridgeProposal.TargetOption[]\",\"name\":\"targetOptions\",\"type\":\"uint8[]\"},{\"internalType\":\"uint256[]\",\"name\":\"values\",\"type\":\"uint256[]\"},{\"internalType\":\"bytes[]\",\"name\":\"calldatas\",\"type\":\"bytes[]\"}],\"internalType\":\"structBridgeProposal.GlobalProposal\",\"name\":\"_bridgeGlobalProposal\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"uint8\",\"name\":\"v\",\"type\":\"uint8\"},{\"internalType\":\"bytes32\",\"name\":\"r\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"s\",\"type\":\"bytes32\"}],\"internalType\":\"structSignatureConsumer.Signature[]\",\"name\":\"_signatures\",\"type\":\"tuple[]\"}],\"name\":\"voteGlobalProposalBySignatures\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_round\",\"type\":\"uint256\"},{\"components\":[{\"internalType\":\"uint256\",\"name\":\"chainId\",\"type\":\"uint256\"},{\"internalType\":\"address[]\",\"name\":\"targets\",\"type\":\"address[]\"},{\"internalType\":\"uint256[]\",\"name\":\"values\",\"type\":\"uint256[]\"},{\"internalType\":\"bytes[]\",\"name\":\"calldatas\",\"type\":\"bytes[]\"}],\"internalType\":\"structProposal.ProposalDetail\",\"name\":\"_proposal\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"uint8\",\"name\":\"v\",\"type\":\"uint8\"},{\"internalType\":\"bytes32\",\"name\":\"r\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"s\",\"type\":\"bytes32\"}],\"internalType\":\"structSignatureConsumer.Signature[]\",\"name\":\"_signatures\",\"type\":\"tuple[]\"}],\"name\":\"voteProposalBySignatures\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]",
+	ABI: "[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_validatorContract\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_gatewayContract\",\"type\":\"address\"},{\"internalType\":\"address[]\",\"name\":\"_relayers\",\"type\":\"address[]\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"GatewayContractUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"round\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"proposalHash\",\"type\":\"bytes32\"},{\"components\":[{\"internalType\":\"uint256\",\"name\":\"nonce\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"chainId\",\"type\":\"uint256\"},{\"internalType\":\"address[]\",\"name\":\"targets\",\"type\":\"address[]\"},{\"internalType\":\"uint256[]\",\"name\":\"values\",\"type\":\"uint256[]\"},{\"internalType\":\"bytes[]\",\"name\":\"calldatas\",\"type\":\"bytes[]\"}],\"indexed\":false,\"internalType\":\"structProposal.ProposalDetail\",\"name\":\"\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"uint256\",\"name\":\"nonce\",\"type\":\"uint256\"},{\"internalType\":\"enumBridgeProposal.TargetOption[]\",\"name\":\"targetOptions\",\"type\":\"uint8[]\"},{\"internalType\":\"uint256[]\",\"name\":\"values\",\"type\":\"uint256[]\"},{\"internalType\":\"bytes[]\",\"name\":\"calldatas\",\"type\":\"bytes[]\"}],\"indexed\":false,\"internalType\":\"structBridgeProposal.GlobalProposal\",\"name\":\"\",\"type\":\"tuple\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"creator\",\"type\":\"address\"}],\"name\":\"GlobalProposalCreated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"proposalHash\",\"type\":\"bytes32\"}],\"name\":\"ProposalApproved\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"chainId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"round\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"proposalHash\",\"type\":\"bytes32\"},{\"components\":[{\"internalType\":\"uint256\",\"name\":\"nonce\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"chainId\",\"type\":\"uint256\"},{\"internalType\":\"address[]\",\"name\":\"targets\",\"type\":\"address[]\"},{\"internalType\":\"uint256[]\",\"name\":\"values\",\"type\":\"uint256[]\"},{\"internalType\":\"bytes[]\",\"name\":\"calldatas\",\"type\":\"bytes[]\"}],\"indexed\":false,\"internalType\":\"structProposal.ProposalDetail\",\"name\":\"\",\"type\":\"tuple\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"creator\",\"type\":\"address\"}],\"name\":\"ProposalCreated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"proposalHash\",\"type\":\"bytes32\"}],\"name\":\"ProposalExecuted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"proposalHash\",\"type\":\"bytes32\"}],\"name\":\"ProposalRejected\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"proposalHash\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"voter\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"enumBallot.VoteType\",\"name\":\"support\",\"type\":\"uint8\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"weight\",\"type\":\"uint256\"}],\"name\":\"ProposalVoted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"previousAdminRole\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"newAdminRole\",\"type\":\"bytes32\"}],\"name\":\"RoleAdminChanged\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"}],\"name\":\"RoleGranted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"}],\"name\":\"RoleRevoked\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"ValidatorContractUpdated\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"DEFAULT_ADMIN_ROLE\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"DOMAIN_SEPARATOR\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"RELAYER_ROLE\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"nonce\",\"type\":\"uint256\"},{\"internalType\":\"enumBridgeProposal.TargetOption[]\",\"name\":\"targetOptions\",\"type\":\"uint8[]\"},{\"internalType\":\"uint256[]\",\"name\":\"values\",\"type\":\"uint256[]\"},{\"internalType\":\"bytes[]\",\"name\":\"calldatas\",\"type\":\"bytes[]\"}],\"internalType\":\"structBridgeProposal.GlobalProposal\",\"name\":\"_globalProposal\",\"type\":\"tuple\"},{\"internalType\":\"enumBallot.VoteType[]\",\"name\":\"_supports\",\"type\":\"uint8[]\"},{\"components\":[{\"internalType\":\"uint8\",\"name\":\"v\",\"type\":\"uint8\"},{\"internalType\":\"bytes32\",\"name\":\"r\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"s\",\"type\":\"bytes32\"}],\"internalType\":\"structSignatureConsumer.Signature[]\",\"name\":\"_signatures\",\"type\":\"tuple[]\"}],\"name\":\"castGlobalProposalBySignatures\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"nonce\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"chainId\",\"type\":\"uint256\"},{\"internalType\":\"address[]\",\"name\":\"targets\",\"type\":\"address[]\"},{\"internalType\":\"uint256[]\",\"name\":\"values\",\"type\":\"uint256[]\"},{\"internalType\":\"bytes[]\",\"name\":\"calldatas\",\"type\":\"bytes[]\"}],\"internalType\":\"structProposal.ProposalDetail\",\"name\":\"_proposal\",\"type\":\"tuple\"},{\"internalType\":\"enumBallot.VoteType[]\",\"name\":\"_supports\",\"type\":\"uint8[]\"},{\"components\":[{\"internalType\":\"uint8\",\"name\":\"v\",\"type\":\"uint8\"},{\"internalType\":\"bytes32\",\"name\":\"r\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"s\",\"type\":\"bytes32\"}],\"internalType\":\"structSignatureConsumer.Signature[]\",\"name\":\"_signatures\",\"type\":\"tuple[]\"}],\"name\":\"castProposalBySignatures\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_proxy\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_newAdmin\",\"type\":\"address\"}],\"name\":\"changeProxyAdmin\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"gatewayContract\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_proxy\",\"type\":\"address\"}],\"name\":\"getProxyAdmin\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_proxy\",\"type\":\"address\"}],\"name\":\"getProxyImplementation\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"}],\"name\":\"getRoleAdmin\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"index\",\"type\":\"uint256\"}],\"name\":\"getRoleMember\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"}],\"name\":\"getRoleMemberCount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_chainId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_round\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"_voter\",\"type\":\"address\"}],\"name\":\"getVotingSignature\",\"outputs\":[{\"internalType\":\"enumBallot.VoteType\",\"name\":\"_support\",\"type\":\"uint8\"},{\"components\":[{\"internalType\":\"uint8\",\"name\":\"v\",\"type\":\"uint8\"},{\"internalType\":\"bytes32\",\"name\":\"r\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"s\",\"type\":\"bytes32\"}],\"internalType\":\"structSignatureConsumer.Signature\",\"name\":\"_sig\",\"type\":\"tuple\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"grantRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"hasRole\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_chainId\",\"type\":\"uint256\"},{\"internalType\":\"address[]\",\"name\":\"_targets\",\"type\":\"address[]\"},{\"internalType\":\"uint256[]\",\"name\":\"_values\",\"type\":\"uint256[]\"},{\"internalType\":\"bytes[]\",\"name\":\"_calldatas\",\"type\":\"bytes[]\"}],\"name\":\"propose\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"enumBridgeProposal.TargetOption[]\",\"name\":\"_targetOptions\",\"type\":\"uint8[]\"},{\"internalType\":\"uint256[]\",\"name\":\"_values\",\"type\":\"uint256[]\"},{\"internalType\":\"bytes[]\",\"name\":\"_calldatas\",\"type\":\"bytes[]\"}],\"name\":\"proposeGlobal\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"nonce\",\"type\":\"uint256\"},{\"internalType\":\"enumBridgeProposal.TargetOption[]\",\"name\":\"targetOptions\",\"type\":\"uint8[]\"},{\"internalType\":\"uint256[]\",\"name\":\"values\",\"type\":\"uint256[]\"},{\"internalType\":\"bytes[]\",\"name\":\"calldatas\",\"type\":\"bytes[]\"}],\"internalType\":\"structBridgeProposal.GlobalProposal\",\"name\":\"_globalProposal\",\"type\":\"tuple\"},{\"internalType\":\"enumBallot.VoteType[]\",\"name\":\"_supports\",\"type\":\"uint8[]\"},{\"components\":[{\"internalType\":\"uint8\",\"name\":\"v\",\"type\":\"uint8\"},{\"internalType\":\"bytes32\",\"name\":\"r\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"s\",\"type\":\"bytes32\"}],\"internalType\":\"structSignatureConsumer.Signature[]\",\"name\":\"_signatures\",\"type\":\"tuple[]\"}],\"name\":\"proposeGlobalProposalStructAndCastVotes\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"nonce\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"chainId\",\"type\":\"uint256\"},{\"internalType\":\"address[]\",\"name\":\"targets\",\"type\":\"address[]\"},{\"internalType\":\"uint256[]\",\"name\":\"values\",\"type\":\"uint256[]\"},{\"internalType\":\"bytes[]\",\"name\":\"calldatas\",\"type\":\"bytes[]\"}],\"internalType\":\"structProposal.ProposalDetail\",\"name\":\"_proposal\",\"type\":\"tuple\"},{\"internalType\":\"enumBallot.VoteType[]\",\"name\":\"_supports\",\"type\":\"uint8[]\"},{\"components\":[{\"internalType\":\"uint8\",\"name\":\"v\",\"type\":\"uint8\"},{\"internalType\":\"bytes32\",\"name\":\"r\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"s\",\"type\":\"bytes32\"}],\"internalType\":\"structSignatureConsumer.Signature[]\",\"name\":\"_signatures\",\"type\":\"tuple[]\"}],\"name\":\"proposeProposalStructAndCastVotes\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"nonce\",\"type\":\"uint256\"},{\"internalType\":\"enumBridgeProposal.TargetOption[]\",\"name\":\"targetOptions\",\"type\":\"uint8[]\"},{\"internalType\":\"uint256[]\",\"name\":\"values\",\"type\":\"uint256[]\"},{\"internalType\":\"bytes[]\",\"name\":\"calldatas\",\"type\":\"bytes[]\"}],\"internalType\":\"structBridgeProposal.GlobalProposal\",\"name\":\"_globalProposal\",\"type\":\"tuple\"},{\"internalType\":\"enumBallot.VoteType[]\",\"name\":\"_supports\",\"type\":\"uint8[]\"},{\"components\":[{\"internalType\":\"uint8\",\"name\":\"v\",\"type\":\"uint8\"},{\"internalType\":\"bytes32\",\"name\":\"r\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"s\",\"type\":\"bytes32\"}],\"internalType\":\"structSignatureConsumer.Signature[]\",\"name\":\"_signatures\",\"type\":\"tuple[]\"}],\"name\":\"relayGlobalProposal\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"nonce\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"chainId\",\"type\":\"uint256\"},{\"internalType\":\"address[]\",\"name\":\"targets\",\"type\":\"address[]\"},{\"internalType\":\"uint256[]\",\"name\":\"values\",\"type\":\"uint256[]\"},{\"internalType\":\"bytes[]\",\"name\":\"calldatas\",\"type\":\"bytes[]\"}],\"internalType\":\"structProposal.ProposalDetail\",\"name\":\"_proposal\",\"type\":\"tuple\"},{\"internalType\":\"enumBallot.VoteType[]\",\"name\":\"_supports\",\"type\":\"uint8[]\"},{\"components\":[{\"internalType\":\"uint8\",\"name\":\"v\",\"type\":\"uint8\"},{\"internalType\":\"bytes32\",\"name\":\"r\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"s\",\"type\":\"bytes32\"}],\"internalType\":\"structSignatureConsumer.Signature[]\",\"name\":\"_signatures\",\"type\":\"tuple[]\"}],\"name\":\"relayProposal\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"renounceRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"revokeRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"round\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_gatewayContract\",\"type\":\"address\"}],\"name\":\"setGatewayContract\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_validatorContract\",\"type\":\"address\"}],\"name\":\"setValidatorContract\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"interfaceId\",\"type\":\"bytes4\"}],\"name\":\"supportsInterface\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"validatorContract\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"vote\",\"outputs\":[{\"internalType\":\"enumGovernance.VoteStatus\",\"name\":\"status\",\"type\":\"uint8\"},{\"internalType\":\"bytes32\",\"name\":\"hash\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"againstVoteWeight\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"forVoteWeight\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"}]",
 }
 
 // CommonABI is the input ABI used to generate the binding from.
@@ -480,35 +482,49 @@ func (_Common *CommonCallerSession) GetRoleMemberCount(role [32]byte) (*big.Int,
 	return _Common.Contract.GetRoleMemberCount(&_Common.CallOpts, role)
 }
 
-// GetVotingSignature is a free data retrieval call binding the contract method 0xe6883cd3.
+// GetVotingSignature is a free data retrieval call binding the contract method 0x2e3fab41.
 //
-// Solidity: function getVotingSignature(uint256 _round, address _voter) view returns((uint8,bytes32,bytes32) _sig)
-func (_Common *CommonCaller) GetVotingSignature(opts *bind.CallOpts, _round *big.Int, _voter common.Address) (SignatureConsumerSignature, error) {
+// Solidity: function getVotingSignature(uint256 _chainId, uint256 _round, address _voter) view returns(uint8 _support, (uint8,bytes32,bytes32) _sig)
+func (_Common *CommonCaller) GetVotingSignature(opts *bind.CallOpts, _chainId *big.Int, _round *big.Int, _voter common.Address) (struct {
+	Support uint8
+	Sig     SignatureConsumerSignature
+}, error) {
 	var out []interface{}
-	err := _Common.contract.Call(opts, &out, "getVotingSignature", _round, _voter)
+	err := _Common.contract.Call(opts, &out, "getVotingSignature", _chainId, _round, _voter)
 
+	outstruct := new(struct {
+		Support uint8
+		Sig     SignatureConsumerSignature
+	})
 	if err != nil {
-		return *new(SignatureConsumerSignature), err
+		return *outstruct, err
 	}
 
-	out0 := *abi.ConvertType(out[0], new(SignatureConsumerSignature)).(*SignatureConsumerSignature)
+	outstruct.Support = *abi.ConvertType(out[0], new(uint8)).(*uint8)
+	outstruct.Sig = *abi.ConvertType(out[1], new(SignatureConsumerSignature)).(*SignatureConsumerSignature)
 
-	return out0, err
+	return *outstruct, err
 
 }
 
-// GetVotingSignature is a free data retrieval call binding the contract method 0xe6883cd3.
+// GetVotingSignature is a free data retrieval call binding the contract method 0x2e3fab41.
 //
-// Solidity: function getVotingSignature(uint256 _round, address _voter) view returns((uint8,bytes32,bytes32) _sig)
-func (_Common *CommonSession) GetVotingSignature(_round *big.Int, _voter common.Address) (SignatureConsumerSignature, error) {
-	return _Common.Contract.GetVotingSignature(&_Common.CallOpts, _round, _voter)
+// Solidity: function getVotingSignature(uint256 _chainId, uint256 _round, address _voter) view returns(uint8 _support, (uint8,bytes32,bytes32) _sig)
+func (_Common *CommonSession) GetVotingSignature(_chainId *big.Int, _round *big.Int, _voter common.Address) (struct {
+	Support uint8
+	Sig     SignatureConsumerSignature
+}, error) {
+	return _Common.Contract.GetVotingSignature(&_Common.CallOpts, _chainId, _round, _voter)
 }
 
-// GetVotingSignature is a free data retrieval call binding the contract method 0xe6883cd3.
+// GetVotingSignature is a free data retrieval call binding the contract method 0x2e3fab41.
 //
-// Solidity: function getVotingSignature(uint256 _round, address _voter) view returns((uint8,bytes32,bytes32) _sig)
-func (_Common *CommonCallerSession) GetVotingSignature(_round *big.Int, _voter common.Address) (SignatureConsumerSignature, error) {
-	return _Common.Contract.GetVotingSignature(&_Common.CallOpts, _round, _voter)
+// Solidity: function getVotingSignature(uint256 _chainId, uint256 _round, address _voter) view returns(uint8 _support, (uint8,bytes32,bytes32) _sig)
+func (_Common *CommonCallerSession) GetVotingSignature(_chainId *big.Int, _round *big.Int, _voter common.Address) (struct {
+	Support uint8
+	Sig     SignatureConsumerSignature
+}, error) {
+	return _Common.Contract.GetVotingSignature(&_Common.CallOpts, _chainId, _round, _voter)
 }
 
 // HasRole is a free data retrieval call binding the contract method 0x91d14854.
@@ -542,12 +558,12 @@ func (_Common *CommonCallerSession) HasRole(role [32]byte, account common.Addres
 	return _Common.Contract.HasRole(&_Common.CallOpts, role, account)
 }
 
-// Round is a free data retrieval call binding the contract method 0x146ca531.
+// Round is a free data retrieval call binding the contract method 0x34d5f37b.
 //
-// Solidity: function round() view returns(uint256)
-func (_Common *CommonCaller) Round(opts *bind.CallOpts) (*big.Int, error) {
+// Solidity: function round(uint256 ) view returns(uint256)
+func (_Common *CommonCaller) Round(opts *bind.CallOpts, arg0 *big.Int) (*big.Int, error) {
 	var out []interface{}
-	err := _Common.contract.Call(opts, &out, "round")
+	err := _Common.contract.Call(opts, &out, "round", arg0)
 
 	if err != nil {
 		return *new(*big.Int), err
@@ -559,18 +575,18 @@ func (_Common *CommonCaller) Round(opts *bind.CallOpts) (*big.Int, error) {
 
 }
 
-// Round is a free data retrieval call binding the contract method 0x146ca531.
+// Round is a free data retrieval call binding the contract method 0x34d5f37b.
 //
-// Solidity: function round() view returns(uint256)
-func (_Common *CommonSession) Round() (*big.Int, error) {
-	return _Common.Contract.Round(&_Common.CallOpts)
+// Solidity: function round(uint256 ) view returns(uint256)
+func (_Common *CommonSession) Round(arg0 *big.Int) (*big.Int, error) {
+	return _Common.Contract.Round(&_Common.CallOpts, arg0)
 }
 
-// Round is a free data retrieval call binding the contract method 0x146ca531.
+// Round is a free data retrieval call binding the contract method 0x34d5f37b.
 //
-// Solidity: function round() view returns(uint256)
-func (_Common *CommonCallerSession) Round() (*big.Int, error) {
-	return _Common.Contract.Round(&_Common.CallOpts)
+// Solidity: function round(uint256 ) view returns(uint256)
+func (_Common *CommonCallerSession) Round(arg0 *big.Int) (*big.Int, error) {
+	return _Common.Contract.Round(&_Common.CallOpts, arg0)
 }
 
 // SupportsInterface is a free data retrieval call binding the contract method 0x01ffc9a7.
@@ -635,49 +651,101 @@ func (_Common *CommonCallerSession) ValidatorContract() (common.Address, error) 
 	return _Common.Contract.ValidatorContract(&_Common.CallOpts)
 }
 
-// Vote is a free data retrieval call binding the contract method 0x0121b93f.
+// Vote is a free data retrieval call binding the contract method 0xb384abef.
 //
-// Solidity: function vote(uint256 ) view returns(uint8 status, bytes32 finalHash)
-func (_Common *CommonCaller) Vote(opts *bind.CallOpts, arg0 *big.Int) (struct {
-	Status    uint8
-	FinalHash [32]byte
+// Solidity: function vote(uint256 , uint256 ) view returns(uint8 status, bytes32 hash, uint256 againstVoteWeight, uint256 forVoteWeight)
+func (_Common *CommonCaller) Vote(opts *bind.CallOpts, arg0 *big.Int, arg1 *big.Int) (struct {
+	Status            uint8
+	Hash              [32]byte
+	AgainstVoteWeight *big.Int
+	ForVoteWeight     *big.Int
 }, error) {
 	var out []interface{}
-	err := _Common.contract.Call(opts, &out, "vote", arg0)
+	err := _Common.contract.Call(opts, &out, "vote", arg0, arg1)
 
 	outstruct := new(struct {
-		Status    uint8
-		FinalHash [32]byte
+		Status            uint8
+		Hash              [32]byte
+		AgainstVoteWeight *big.Int
+		ForVoteWeight     *big.Int
 	})
 	if err != nil {
 		return *outstruct, err
 	}
 
 	outstruct.Status = *abi.ConvertType(out[0], new(uint8)).(*uint8)
-	outstruct.FinalHash = *abi.ConvertType(out[1], new([32]byte)).(*[32]byte)
+	outstruct.Hash = *abi.ConvertType(out[1], new([32]byte)).(*[32]byte)
+	outstruct.AgainstVoteWeight = *abi.ConvertType(out[2], new(*big.Int)).(**big.Int)
+	outstruct.ForVoteWeight = *abi.ConvertType(out[3], new(*big.Int)).(**big.Int)
 
 	return *outstruct, err
 
 }
 
-// Vote is a free data retrieval call binding the contract method 0x0121b93f.
+// Vote is a free data retrieval call binding the contract method 0xb384abef.
 //
-// Solidity: function vote(uint256 ) view returns(uint8 status, bytes32 finalHash)
-func (_Common *CommonSession) Vote(arg0 *big.Int) (struct {
-	Status    uint8
-	FinalHash [32]byte
+// Solidity: function vote(uint256 , uint256 ) view returns(uint8 status, bytes32 hash, uint256 againstVoteWeight, uint256 forVoteWeight)
+func (_Common *CommonSession) Vote(arg0 *big.Int, arg1 *big.Int) (struct {
+	Status            uint8
+	Hash              [32]byte
+	AgainstVoteWeight *big.Int
+	ForVoteWeight     *big.Int
 }, error) {
-	return _Common.Contract.Vote(&_Common.CallOpts, arg0)
+	return _Common.Contract.Vote(&_Common.CallOpts, arg0, arg1)
 }
 
-// Vote is a free data retrieval call binding the contract method 0x0121b93f.
+// Vote is a free data retrieval call binding the contract method 0xb384abef.
 //
-// Solidity: function vote(uint256 ) view returns(uint8 status, bytes32 finalHash)
-func (_Common *CommonCallerSession) Vote(arg0 *big.Int) (struct {
-	Status    uint8
-	FinalHash [32]byte
+// Solidity: function vote(uint256 , uint256 ) view returns(uint8 status, bytes32 hash, uint256 againstVoteWeight, uint256 forVoteWeight)
+func (_Common *CommonCallerSession) Vote(arg0 *big.Int, arg1 *big.Int) (struct {
+	Status            uint8
+	Hash              [32]byte
+	AgainstVoteWeight *big.Int
+	ForVoteWeight     *big.Int
 }, error) {
-	return _Common.Contract.Vote(&_Common.CallOpts, arg0)
+	return _Common.Contract.Vote(&_Common.CallOpts, arg0, arg1)
+}
+
+// CastGlobalProposalBySignatures is a paid mutator transaction binding the contract method 0x647ecb50.
+//
+// Solidity: function castGlobalProposalBySignatures((uint256,uint8[],uint256[],bytes[]) _globalProposal, uint8[] _supports, (uint8,bytes32,bytes32)[] _signatures) returns()
+func (_Common *CommonTransactor) CastGlobalProposalBySignatures(opts *bind.TransactOpts, _globalProposal BridgeProposalGlobalProposal, _supports []uint8, _signatures []SignatureConsumerSignature) (*types.Transaction, error) {
+	return _Common.contract.Transact(opts, "castGlobalProposalBySignatures", _globalProposal, _supports, _signatures)
+}
+
+// CastGlobalProposalBySignatures is a paid mutator transaction binding the contract method 0x647ecb50.
+//
+// Solidity: function castGlobalProposalBySignatures((uint256,uint8[],uint256[],bytes[]) _globalProposal, uint8[] _supports, (uint8,bytes32,bytes32)[] _signatures) returns()
+func (_Common *CommonSession) CastGlobalProposalBySignatures(_globalProposal BridgeProposalGlobalProposal, _supports []uint8, _signatures []SignatureConsumerSignature) (*types.Transaction, error) {
+	return _Common.Contract.CastGlobalProposalBySignatures(&_Common.TransactOpts, _globalProposal, _supports, _signatures)
+}
+
+// CastGlobalProposalBySignatures is a paid mutator transaction binding the contract method 0x647ecb50.
+//
+// Solidity: function castGlobalProposalBySignatures((uint256,uint8[],uint256[],bytes[]) _globalProposal, uint8[] _supports, (uint8,bytes32,bytes32)[] _signatures) returns()
+func (_Common *CommonTransactorSession) CastGlobalProposalBySignatures(_globalProposal BridgeProposalGlobalProposal, _supports []uint8, _signatures []SignatureConsumerSignature) (*types.Transaction, error) {
+	return _Common.Contract.CastGlobalProposalBySignatures(&_Common.TransactOpts, _globalProposal, _supports, _signatures)
+}
+
+// CastProposalBySignatures is a paid mutator transaction binding the contract method 0xeb72d5f4.
+//
+// Solidity: function castProposalBySignatures((uint256,uint256,address[],uint256[],bytes[]) _proposal, uint8[] _supports, (uint8,bytes32,bytes32)[] _signatures) returns()
+func (_Common *CommonTransactor) CastProposalBySignatures(opts *bind.TransactOpts, _proposal ProposalProposalDetail, _supports []uint8, _signatures []SignatureConsumerSignature) (*types.Transaction, error) {
+	return _Common.contract.Transact(opts, "castProposalBySignatures", _proposal, _supports, _signatures)
+}
+
+// CastProposalBySignatures is a paid mutator transaction binding the contract method 0xeb72d5f4.
+//
+// Solidity: function castProposalBySignatures((uint256,uint256,address[],uint256[],bytes[]) _proposal, uint8[] _supports, (uint8,bytes32,bytes32)[] _signatures) returns()
+func (_Common *CommonSession) CastProposalBySignatures(_proposal ProposalProposalDetail, _supports []uint8, _signatures []SignatureConsumerSignature) (*types.Transaction, error) {
+	return _Common.Contract.CastProposalBySignatures(&_Common.TransactOpts, _proposal, _supports, _signatures)
+}
+
+// CastProposalBySignatures is a paid mutator transaction binding the contract method 0xeb72d5f4.
+//
+// Solidity: function castProposalBySignatures((uint256,uint256,address[],uint256[],bytes[]) _proposal, uint8[] _supports, (uint8,bytes32,bytes32)[] _signatures) returns()
+func (_Common *CommonTransactorSession) CastProposalBySignatures(_proposal ProposalProposalDetail, _supports []uint8, _signatures []SignatureConsumerSignature) (*types.Transaction, error) {
+	return _Common.Contract.CastProposalBySignatures(&_Common.TransactOpts, _proposal, _supports, _signatures)
 }
 
 // ChangeProxyAdmin is a paid mutator transaction binding the contract method 0x7eff275e.
@@ -722,25 +790,130 @@ func (_Common *CommonTransactorSession) GrantRole(role [32]byte, account common.
 	return _Common.Contract.GrantRole(&_Common.TransactOpts, role, account)
 }
 
-// RejectCurrentVote is a paid mutator transaction binding the contract method 0xa159974c.
+// Propose is a paid mutator transaction binding the contract method 0x5f9df13f.
 //
-// Solidity: function rejectCurrentVote() returns()
-func (_Common *CommonTransactor) RejectCurrentVote(opts *bind.TransactOpts) (*types.Transaction, error) {
-	return _Common.contract.Transact(opts, "rejectCurrentVote")
+// Solidity: function propose(uint256 _chainId, address[] _targets, uint256[] _values, bytes[] _calldatas) returns()
+func (_Common *CommonTransactor) Propose(opts *bind.TransactOpts, _chainId *big.Int, _targets []common.Address, _values []*big.Int, _calldatas [][]byte) (*types.Transaction, error) {
+	return _Common.contract.Transact(opts, "propose", _chainId, _targets, _values, _calldatas)
 }
 
-// RejectCurrentVote is a paid mutator transaction binding the contract method 0xa159974c.
+// Propose is a paid mutator transaction binding the contract method 0x5f9df13f.
 //
-// Solidity: function rejectCurrentVote() returns()
-func (_Common *CommonSession) RejectCurrentVote() (*types.Transaction, error) {
-	return _Common.Contract.RejectCurrentVote(&_Common.TransactOpts)
+// Solidity: function propose(uint256 _chainId, address[] _targets, uint256[] _values, bytes[] _calldatas) returns()
+func (_Common *CommonSession) Propose(_chainId *big.Int, _targets []common.Address, _values []*big.Int, _calldatas [][]byte) (*types.Transaction, error) {
+	return _Common.Contract.Propose(&_Common.TransactOpts, _chainId, _targets, _values, _calldatas)
 }
 
-// RejectCurrentVote is a paid mutator transaction binding the contract method 0xa159974c.
+// Propose is a paid mutator transaction binding the contract method 0x5f9df13f.
 //
-// Solidity: function rejectCurrentVote() returns()
-func (_Common *CommonTransactorSession) RejectCurrentVote() (*types.Transaction, error) {
-	return _Common.Contract.RejectCurrentVote(&_Common.TransactOpts)
+// Solidity: function propose(uint256 _chainId, address[] _targets, uint256[] _values, bytes[] _calldatas) returns()
+func (_Common *CommonTransactorSession) Propose(_chainId *big.Int, _targets []common.Address, _values []*big.Int, _calldatas [][]byte) (*types.Transaction, error) {
+	return _Common.Contract.Propose(&_Common.TransactOpts, _chainId, _targets, _values, _calldatas)
+}
+
+// ProposeGlobal is a paid mutator transaction binding the contract method 0x92f283c0.
+//
+// Solidity: function proposeGlobal(uint8[] _targetOptions, uint256[] _values, bytes[] _calldatas) returns()
+func (_Common *CommonTransactor) ProposeGlobal(opts *bind.TransactOpts, _targetOptions []uint8, _values []*big.Int, _calldatas [][]byte) (*types.Transaction, error) {
+	return _Common.contract.Transact(opts, "proposeGlobal", _targetOptions, _values, _calldatas)
+}
+
+// ProposeGlobal is a paid mutator transaction binding the contract method 0x92f283c0.
+//
+// Solidity: function proposeGlobal(uint8[] _targetOptions, uint256[] _values, bytes[] _calldatas) returns()
+func (_Common *CommonSession) ProposeGlobal(_targetOptions []uint8, _values []*big.Int, _calldatas [][]byte) (*types.Transaction, error) {
+	return _Common.Contract.ProposeGlobal(&_Common.TransactOpts, _targetOptions, _values, _calldatas)
+}
+
+// ProposeGlobal is a paid mutator transaction binding the contract method 0x92f283c0.
+//
+// Solidity: function proposeGlobal(uint8[] _targetOptions, uint256[] _values, bytes[] _calldatas) returns()
+func (_Common *CommonTransactorSession) ProposeGlobal(_targetOptions []uint8, _values []*big.Int, _calldatas [][]byte) (*types.Transaction, error) {
+	return _Common.Contract.ProposeGlobal(&_Common.TransactOpts, _targetOptions, _values, _calldatas)
+}
+
+// ProposeGlobalProposalStructAndCastVotes is a paid mutator transaction binding the contract method 0x5f844b98.
+//
+// Solidity: function proposeGlobalProposalStructAndCastVotes((uint256,uint8[],uint256[],bytes[]) _globalProposal, uint8[] _supports, (uint8,bytes32,bytes32)[] _signatures) returns()
+func (_Common *CommonTransactor) ProposeGlobalProposalStructAndCastVotes(opts *bind.TransactOpts, _globalProposal BridgeProposalGlobalProposal, _supports []uint8, _signatures []SignatureConsumerSignature) (*types.Transaction, error) {
+	return _Common.contract.Transact(opts, "proposeGlobalProposalStructAndCastVotes", _globalProposal, _supports, _signatures)
+}
+
+// ProposeGlobalProposalStructAndCastVotes is a paid mutator transaction binding the contract method 0x5f844b98.
+//
+// Solidity: function proposeGlobalProposalStructAndCastVotes((uint256,uint8[],uint256[],bytes[]) _globalProposal, uint8[] _supports, (uint8,bytes32,bytes32)[] _signatures) returns()
+func (_Common *CommonSession) ProposeGlobalProposalStructAndCastVotes(_globalProposal BridgeProposalGlobalProposal, _supports []uint8, _signatures []SignatureConsumerSignature) (*types.Transaction, error) {
+	return _Common.Contract.ProposeGlobalProposalStructAndCastVotes(&_Common.TransactOpts, _globalProposal, _supports, _signatures)
+}
+
+// ProposeGlobalProposalStructAndCastVotes is a paid mutator transaction binding the contract method 0x5f844b98.
+//
+// Solidity: function proposeGlobalProposalStructAndCastVotes((uint256,uint8[],uint256[],bytes[]) _globalProposal, uint8[] _supports, (uint8,bytes32,bytes32)[] _signatures) returns()
+func (_Common *CommonTransactorSession) ProposeGlobalProposalStructAndCastVotes(_globalProposal BridgeProposalGlobalProposal, _supports []uint8, _signatures []SignatureConsumerSignature) (*types.Transaction, error) {
+	return _Common.Contract.ProposeGlobalProposalStructAndCastVotes(&_Common.TransactOpts, _globalProposal, _supports, _signatures)
+}
+
+// ProposeProposalStructAndCastVotes is a paid mutator transaction binding the contract method 0x6a35891b.
+//
+// Solidity: function proposeProposalStructAndCastVotes((uint256,uint256,address[],uint256[],bytes[]) _proposal, uint8[] _supports, (uint8,bytes32,bytes32)[] _signatures) returns()
+func (_Common *CommonTransactor) ProposeProposalStructAndCastVotes(opts *bind.TransactOpts, _proposal ProposalProposalDetail, _supports []uint8, _signatures []SignatureConsumerSignature) (*types.Transaction, error) {
+	return _Common.contract.Transact(opts, "proposeProposalStructAndCastVotes", _proposal, _supports, _signatures)
+}
+
+// ProposeProposalStructAndCastVotes is a paid mutator transaction binding the contract method 0x6a35891b.
+//
+// Solidity: function proposeProposalStructAndCastVotes((uint256,uint256,address[],uint256[],bytes[]) _proposal, uint8[] _supports, (uint8,bytes32,bytes32)[] _signatures) returns()
+func (_Common *CommonSession) ProposeProposalStructAndCastVotes(_proposal ProposalProposalDetail, _supports []uint8, _signatures []SignatureConsumerSignature) (*types.Transaction, error) {
+	return _Common.Contract.ProposeProposalStructAndCastVotes(&_Common.TransactOpts, _proposal, _supports, _signatures)
+}
+
+// ProposeProposalStructAndCastVotes is a paid mutator transaction binding the contract method 0x6a35891b.
+//
+// Solidity: function proposeProposalStructAndCastVotes((uint256,uint256,address[],uint256[],bytes[]) _proposal, uint8[] _supports, (uint8,bytes32,bytes32)[] _signatures) returns()
+func (_Common *CommonTransactorSession) ProposeProposalStructAndCastVotes(_proposal ProposalProposalDetail, _supports []uint8, _signatures []SignatureConsumerSignature) (*types.Transaction, error) {
+	return _Common.Contract.ProposeProposalStructAndCastVotes(&_Common.TransactOpts, _proposal, _supports, _signatures)
+}
+
+// RelayGlobalProposal is a paid mutator transaction binding the contract method 0xd0b6cd04.
+//
+// Solidity: function relayGlobalProposal((uint256,uint8[],uint256[],bytes[]) _globalProposal, uint8[] _supports, (uint8,bytes32,bytes32)[] _signatures) returns()
+func (_Common *CommonTransactor) RelayGlobalProposal(opts *bind.TransactOpts, _globalProposal BridgeProposalGlobalProposal, _supports []uint8, _signatures []SignatureConsumerSignature) (*types.Transaction, error) {
+	return _Common.contract.Transact(opts, "relayGlobalProposal", _globalProposal, _supports, _signatures)
+}
+
+// RelayGlobalProposal is a paid mutator transaction binding the contract method 0xd0b6cd04.
+//
+// Solidity: function relayGlobalProposal((uint256,uint8[],uint256[],bytes[]) _globalProposal, uint8[] _supports, (uint8,bytes32,bytes32)[] _signatures) returns()
+func (_Common *CommonSession) RelayGlobalProposal(_globalProposal BridgeProposalGlobalProposal, _supports []uint8, _signatures []SignatureConsumerSignature) (*types.Transaction, error) {
+	return _Common.Contract.RelayGlobalProposal(&_Common.TransactOpts, _globalProposal, _supports, _signatures)
+}
+
+// RelayGlobalProposal is a paid mutator transaction binding the contract method 0xd0b6cd04.
+//
+// Solidity: function relayGlobalProposal((uint256,uint8[],uint256[],bytes[]) _globalProposal, uint8[] _supports, (uint8,bytes32,bytes32)[] _signatures) returns()
+func (_Common *CommonTransactorSession) RelayGlobalProposal(_globalProposal BridgeProposalGlobalProposal, _supports []uint8, _signatures []SignatureConsumerSignature) (*types.Transaction, error) {
+	return _Common.Contract.RelayGlobalProposal(&_Common.TransactOpts, _globalProposal, _supports, _signatures)
+}
+
+// RelayProposal is a paid mutator transaction binding the contract method 0xeb45b978.
+//
+// Solidity: function relayProposal((uint256,uint256,address[],uint256[],bytes[]) _proposal, uint8[] _supports, (uint8,bytes32,bytes32)[] _signatures) returns()
+func (_Common *CommonTransactor) RelayProposal(opts *bind.TransactOpts, _proposal ProposalProposalDetail, _supports []uint8, _signatures []SignatureConsumerSignature) (*types.Transaction, error) {
+	return _Common.contract.Transact(opts, "relayProposal", _proposal, _supports, _signatures)
+}
+
+// RelayProposal is a paid mutator transaction binding the contract method 0xeb45b978.
+//
+// Solidity: function relayProposal((uint256,uint256,address[],uint256[],bytes[]) _proposal, uint8[] _supports, (uint8,bytes32,bytes32)[] _signatures) returns()
+func (_Common *CommonSession) RelayProposal(_proposal ProposalProposalDetail, _supports []uint8, _signatures []SignatureConsumerSignature) (*types.Transaction, error) {
+	return _Common.Contract.RelayProposal(&_Common.TransactOpts, _proposal, _supports, _signatures)
+}
+
+// RelayProposal is a paid mutator transaction binding the contract method 0xeb45b978.
+//
+// Solidity: function relayProposal((uint256,uint256,address[],uint256[],bytes[]) _proposal, uint8[] _supports, (uint8,bytes32,bytes32)[] _signatures) returns()
+func (_Common *CommonTransactorSession) RelayProposal(_proposal ProposalProposalDetail, _supports []uint8, _signatures []SignatureConsumerSignature) (*types.Transaction, error) {
+	return _Common.Contract.RelayProposal(&_Common.TransactOpts, _proposal, _supports, _signatures)
 }
 
 // RenounceRole is a paid mutator transaction binding the contract method 0x36568abe.
@@ -806,27 +979,6 @@ func (_Common *CommonTransactorSession) SetGatewayContract(_gatewayContract comm
 	return _Common.Contract.SetGatewayContract(&_Common.TransactOpts, _gatewayContract)
 }
 
-// SetThreshold is a paid mutator transaction binding the contract method 0xa4e35076.
-//
-// Solidity: function setThreshold(address _contract, uint256 _num, uint256 _denom) returns()
-func (_Common *CommonTransactor) SetThreshold(opts *bind.TransactOpts, _contract common.Address, _num *big.Int, _denom *big.Int) (*types.Transaction, error) {
-	return _Common.contract.Transact(opts, "setThreshold", _contract, _num, _denom)
-}
-
-// SetThreshold is a paid mutator transaction binding the contract method 0xa4e35076.
-//
-// Solidity: function setThreshold(address _contract, uint256 _num, uint256 _denom) returns()
-func (_Common *CommonSession) SetThreshold(_contract common.Address, _num *big.Int, _denom *big.Int) (*types.Transaction, error) {
-	return _Common.Contract.SetThreshold(&_Common.TransactOpts, _contract, _num, _denom)
-}
-
-// SetThreshold is a paid mutator transaction binding the contract method 0xa4e35076.
-//
-// Solidity: function setThreshold(address _contract, uint256 _num, uint256 _denom) returns()
-func (_Common *CommonTransactorSession) SetThreshold(_contract common.Address, _num *big.Int, _denom *big.Int) (*types.Transaction, error) {
-	return _Common.Contract.SetThreshold(&_Common.TransactOpts, _contract, _num, _denom)
-}
-
 // SetValidatorContract is a paid mutator transaction binding the contract method 0xcdf64a76.
 //
 // Solidity: function setValidatorContract(address _validatorContract) returns()
@@ -846,90 +998,6 @@ func (_Common *CommonSession) SetValidatorContract(_validatorContract common.Add
 // Solidity: function setValidatorContract(address _validatorContract) returns()
 func (_Common *CommonTransactorSession) SetValidatorContract(_validatorContract common.Address) (*types.Transaction, error) {
 	return _Common.Contract.SetValidatorContract(&_Common.TransactOpts, _validatorContract)
-}
-
-// UpgradeAndCall is a paid mutator transaction binding the contract method 0x9623609d.
-//
-// Solidity: function upgradeAndCall(address _proxy, address _implementation, bytes _data) payable returns()
-func (_Common *CommonTransactor) UpgradeAndCall(opts *bind.TransactOpts, _proxy common.Address, _implementation common.Address, _data []byte) (*types.Transaction, error) {
-	return _Common.contract.Transact(opts, "upgradeAndCall", _proxy, _implementation, _data)
-}
-
-// UpgradeAndCall is a paid mutator transaction binding the contract method 0x9623609d.
-//
-// Solidity: function upgradeAndCall(address _proxy, address _implementation, bytes _data) payable returns()
-func (_Common *CommonSession) UpgradeAndCall(_proxy common.Address, _implementation common.Address, _data []byte) (*types.Transaction, error) {
-	return _Common.Contract.UpgradeAndCall(&_Common.TransactOpts, _proxy, _implementation, _data)
-}
-
-// UpgradeAndCall is a paid mutator transaction binding the contract method 0x9623609d.
-//
-// Solidity: function upgradeAndCall(address _proxy, address _implementation, bytes _data) payable returns()
-func (_Common *CommonTransactorSession) UpgradeAndCall(_proxy common.Address, _implementation common.Address, _data []byte) (*types.Transaction, error) {
-	return _Common.Contract.UpgradeAndCall(&_Common.TransactOpts, _proxy, _implementation, _data)
-}
-
-// UpgradeTo is a paid mutator transaction binding the contract method 0x132d807e.
-//
-// Solidity: function upgradeTo(address _proxy, address _implementation) returns()
-func (_Common *CommonTransactor) UpgradeTo(opts *bind.TransactOpts, _proxy common.Address, _implementation common.Address) (*types.Transaction, error) {
-	return _Common.contract.Transact(opts, "upgradeTo", _proxy, _implementation)
-}
-
-// UpgradeTo is a paid mutator transaction binding the contract method 0x132d807e.
-//
-// Solidity: function upgradeTo(address _proxy, address _implementation) returns()
-func (_Common *CommonSession) UpgradeTo(_proxy common.Address, _implementation common.Address) (*types.Transaction, error) {
-	return _Common.Contract.UpgradeTo(&_Common.TransactOpts, _proxy, _implementation)
-}
-
-// UpgradeTo is a paid mutator transaction binding the contract method 0x132d807e.
-//
-// Solidity: function upgradeTo(address _proxy, address _implementation) returns()
-func (_Common *CommonTransactorSession) UpgradeTo(_proxy common.Address, _implementation common.Address) (*types.Transaction, error) {
-	return _Common.Contract.UpgradeTo(&_Common.TransactOpts, _proxy, _implementation)
-}
-
-// VoteGlobalProposalBySignatures is a paid mutator transaction binding the contract method 0xca11511e.
-//
-// Solidity: function voteGlobalProposalBySignatures(uint256 _round, (uint8[],uint256[],bytes[]) _bridgeGlobalProposal, (uint8,bytes32,bytes32)[] _signatures) returns()
-func (_Common *CommonTransactor) VoteGlobalProposalBySignatures(opts *bind.TransactOpts, _round *big.Int, _bridgeGlobalProposal BridgeProposalGlobalProposal, _signatures []SignatureConsumerSignature) (*types.Transaction, error) {
-	return _Common.contract.Transact(opts, "voteGlobalProposalBySignatures", _round, _bridgeGlobalProposal, _signatures)
-}
-
-// VoteGlobalProposalBySignatures is a paid mutator transaction binding the contract method 0xca11511e.
-//
-// Solidity: function voteGlobalProposalBySignatures(uint256 _round, (uint8[],uint256[],bytes[]) _bridgeGlobalProposal, (uint8,bytes32,bytes32)[] _signatures) returns()
-func (_Common *CommonSession) VoteGlobalProposalBySignatures(_round *big.Int, _bridgeGlobalProposal BridgeProposalGlobalProposal, _signatures []SignatureConsumerSignature) (*types.Transaction, error) {
-	return _Common.Contract.VoteGlobalProposalBySignatures(&_Common.TransactOpts, _round, _bridgeGlobalProposal, _signatures)
-}
-
-// VoteGlobalProposalBySignatures is a paid mutator transaction binding the contract method 0xca11511e.
-//
-// Solidity: function voteGlobalProposalBySignatures(uint256 _round, (uint8[],uint256[],bytes[]) _bridgeGlobalProposal, (uint8,bytes32,bytes32)[] _signatures) returns()
-func (_Common *CommonTransactorSession) VoteGlobalProposalBySignatures(_round *big.Int, _bridgeGlobalProposal BridgeProposalGlobalProposal, _signatures []SignatureConsumerSignature) (*types.Transaction, error) {
-	return _Common.Contract.VoteGlobalProposalBySignatures(&_Common.TransactOpts, _round, _bridgeGlobalProposal, _signatures)
-}
-
-// VoteProposalBySignatures is a paid mutator transaction binding the contract method 0xf956d303.
-//
-// Solidity: function voteProposalBySignatures(uint256 _round, (uint256,address[],uint256[],bytes[]) _proposal, (uint8,bytes32,bytes32)[] _signatures) returns()
-func (_Common *CommonTransactor) VoteProposalBySignatures(opts *bind.TransactOpts, _round *big.Int, _proposal ProposalProposalDetail, _signatures []SignatureConsumerSignature) (*types.Transaction, error) {
-	return _Common.contract.Transact(opts, "voteProposalBySignatures", _round, _proposal, _signatures)
-}
-
-// VoteProposalBySignatures is a paid mutator transaction binding the contract method 0xf956d303.
-//
-// Solidity: function voteProposalBySignatures(uint256 _round, (uint256,address[],uint256[],bytes[]) _proposal, (uint8,bytes32,bytes32)[] _signatures) returns()
-func (_Common *CommonSession) VoteProposalBySignatures(_round *big.Int, _proposal ProposalProposalDetail, _signatures []SignatureConsumerSignature) (*types.Transaction, error) {
-	return _Common.Contract.VoteProposalBySignatures(&_Common.TransactOpts, _round, _proposal, _signatures)
-}
-
-// VoteProposalBySignatures is a paid mutator transaction binding the contract method 0xf956d303.
-//
-// Solidity: function voteProposalBySignatures(uint256 _round, (uint256,address[],uint256[],bytes[]) _proposal, (uint8,bytes32,bytes32)[] _signatures) returns()
-func (_Common *CommonTransactorSession) VoteProposalBySignatures(_round *big.Int, _proposal ProposalProposalDetail, _signatures []SignatureConsumerSignature) (*types.Transaction, error) {
-	return _Common.Contract.VoteProposalBySignatures(&_Common.TransactOpts, _round, _proposal, _signatures)
 }
 
 // CommonGatewayContractUpdatedIterator is returned from FilterGatewayContractUpdated and is used to iterate over the raw logs and unpacked data for GatewayContractUpdated events raised by the Common contract.
@@ -1066,9 +1134,9 @@ func (_Common *CommonFilterer) ParseGatewayContractUpdated(log types.Log) (*Comm
 	return event, nil
 }
 
-// CommonGlobalProposalApprovedIterator is returned from FilterGlobalProposalApproved and is used to iterate over the raw logs and unpacked data for GlobalProposalApproved events raised by the Common contract.
-type CommonGlobalProposalApprovedIterator struct {
-	Event *CommonGlobalProposalApproved // Event containing the contract specifics and raw log
+// CommonGlobalProposalCreatedIterator is returned from FilterGlobalProposalCreated and is used to iterate over the raw logs and unpacked data for GlobalProposalCreated events raised by the Common contract.
+type CommonGlobalProposalCreatedIterator struct {
+	Event *CommonGlobalProposalCreated // Event containing the contract specifics and raw log
 
 	contract *bind.BoundContract // Generic contract to use for unpacking event data
 	event    string              // Event name to use for unpacking event data
@@ -1082,7 +1150,7 @@ type CommonGlobalProposalApprovedIterator struct {
 // Next advances the iterator to the subsequent event, returning whether there
 // are any more events found. In case of a retrieval or parsing error, false is
 // returned and Error() can be queried for the exact failure.
-func (it *CommonGlobalProposalApprovedIterator) Next() bool {
+func (it *CommonGlobalProposalCreatedIterator) Next() bool {
 	// If the iterator failed, stop iterating
 	if it.fail != nil {
 		return false
@@ -1091,7 +1159,7 @@ func (it *CommonGlobalProposalApprovedIterator) Next() bool {
 	if it.done {
 		select {
 		case log := <-it.logs:
-			it.Event = new(CommonGlobalProposalApproved)
+			it.Event = new(CommonGlobalProposalCreated)
 			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 				it.fail = err
 				return false
@@ -1106,7 +1174,7 @@ func (it *CommonGlobalProposalApprovedIterator) Next() bool {
 	// Iterator still in progress, wait for either a data or an error event
 	select {
 	case log := <-it.logs:
-		it.Event = new(CommonGlobalProposalApproved)
+		it.Event = new(CommonGlobalProposalCreated)
 		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 			it.fail = err
 			return false
@@ -1122,52 +1190,63 @@ func (it *CommonGlobalProposalApprovedIterator) Next() bool {
 }
 
 // Error returns any retrieval or parsing error occurred during filtering.
-func (it *CommonGlobalProposalApprovedIterator) Error() error {
+func (it *CommonGlobalProposalCreatedIterator) Error() error {
 	return it.fail
 }
 
 // Close terminates the iteration process, releasing any pending underlying
 // resources.
-func (it *CommonGlobalProposalApprovedIterator) Close() error {
+func (it *CommonGlobalProposalCreatedIterator) Close() error {
 	it.sub.Unsubscribe()
 	return nil
 }
 
-// CommonGlobalProposalApproved represents a GlobalProposalApproved event raised by the Common contract.
-type CommonGlobalProposalApproved struct {
-	Round *big.Int
-	Arg1  BridgeProposalGlobalProposal
-	Raw   types.Log // Blockchain specific contextual infos
+// CommonGlobalProposalCreated represents a GlobalProposalCreated event raised by the Common contract.
+type CommonGlobalProposalCreated struct {
+	Round        *big.Int
+	ProposalHash [32]byte
+	Arg2         ProposalProposalDetail
+	Arg3         BridgeProposalGlobalProposal
+	Creator      common.Address
+	Raw          types.Log // Blockchain specific contextual infos
 }
 
-// FilterGlobalProposalApproved is a free log retrieval operation binding the contract event 0x4e2691a301841dfedf72fbf93e4913da3cea0002fa205049ce326d14e514b07f.
+// FilterGlobalProposalCreated is a free log retrieval operation binding the contract event 0x82ee0ad0758ee805d42e19ed61c32161ac3890848c4711fbe4f35b5081607217.
 //
-// Solidity: event GlobalProposalApproved(uint256 indexed round, (uint8[],uint256[],bytes[]) arg1)
-func (_Common *CommonFilterer) FilterGlobalProposalApproved(opts *bind.FilterOpts, round []*big.Int) (*CommonGlobalProposalApprovedIterator, error) {
+// Solidity: event GlobalProposalCreated(uint256 indexed round, bytes32 indexed proposalHash, (uint256,uint256,address[],uint256[],bytes[]) arg2, (uint256,uint8[],uint256[],bytes[]) arg3, address creator)
+func (_Common *CommonFilterer) FilterGlobalProposalCreated(opts *bind.FilterOpts, round []*big.Int, proposalHash [][32]byte) (*CommonGlobalProposalCreatedIterator, error) {
 
 	var roundRule []interface{}
 	for _, roundItem := range round {
 		roundRule = append(roundRule, roundItem)
 	}
+	var proposalHashRule []interface{}
+	for _, proposalHashItem := range proposalHash {
+		proposalHashRule = append(proposalHashRule, proposalHashItem)
+	}
 
-	logs, sub, err := _Common.contract.FilterLogs(opts, "GlobalProposalApproved", roundRule)
+	logs, sub, err := _Common.contract.FilterLogs(opts, "GlobalProposalCreated", roundRule, proposalHashRule)
 	if err != nil {
 		return nil, err
 	}
-	return &CommonGlobalProposalApprovedIterator{contract: _Common.contract, event: "GlobalProposalApproved", logs: logs, sub: sub}, nil
+	return &CommonGlobalProposalCreatedIterator{contract: _Common.contract, event: "GlobalProposalCreated", logs: logs, sub: sub}, nil
 }
 
-// WatchGlobalProposalApproved is a free log subscription operation binding the contract event 0x4e2691a301841dfedf72fbf93e4913da3cea0002fa205049ce326d14e514b07f.
+// WatchGlobalProposalCreated is a free log subscription operation binding the contract event 0x82ee0ad0758ee805d42e19ed61c32161ac3890848c4711fbe4f35b5081607217.
 //
-// Solidity: event GlobalProposalApproved(uint256 indexed round, (uint8[],uint256[],bytes[]) arg1)
-func (_Common *CommonFilterer) WatchGlobalProposalApproved(opts *bind.WatchOpts, sink chan<- *CommonGlobalProposalApproved, round []*big.Int) (event.Subscription, error) {
+// Solidity: event GlobalProposalCreated(uint256 indexed round, bytes32 indexed proposalHash, (uint256,uint256,address[],uint256[],bytes[]) arg2, (uint256,uint8[],uint256[],bytes[]) arg3, address creator)
+func (_Common *CommonFilterer) WatchGlobalProposalCreated(opts *bind.WatchOpts, sink chan<- *CommonGlobalProposalCreated, round []*big.Int, proposalHash [][32]byte) (event.Subscription, error) {
 
 	var roundRule []interface{}
 	for _, roundItem := range round {
 		roundRule = append(roundRule, roundItem)
 	}
+	var proposalHashRule []interface{}
+	for _, proposalHashItem := range proposalHash {
+		proposalHashRule = append(proposalHashRule, proposalHashItem)
+	}
 
-	logs, sub, err := _Common.contract.WatchLogs(opts, "GlobalProposalApproved", roundRule)
+	logs, sub, err := _Common.contract.WatchLogs(opts, "GlobalProposalCreated", roundRule, proposalHashRule)
 	if err != nil {
 		return nil, err
 	}
@@ -1177,8 +1256,8 @@ func (_Common *CommonFilterer) WatchGlobalProposalApproved(opts *bind.WatchOpts,
 			select {
 			case log := <-logs:
 				// New log arrived, parse the event and forward to the user
-				event := new(CommonGlobalProposalApproved)
-				if err := _Common.contract.UnpackLog(event, "GlobalProposalApproved", log); err != nil {
+				event := new(CommonGlobalProposalCreated)
+				if err := _Common.contract.UnpackLog(event, "GlobalProposalCreated", log); err != nil {
 					return err
 				}
 				event.Raw = log
@@ -1199,12 +1278,12 @@ func (_Common *CommonFilterer) WatchGlobalProposalApproved(opts *bind.WatchOpts,
 	}), nil
 }
 
-// ParseGlobalProposalApproved is a log parse operation binding the contract event 0x4e2691a301841dfedf72fbf93e4913da3cea0002fa205049ce326d14e514b07f.
+// ParseGlobalProposalCreated is a log parse operation binding the contract event 0x82ee0ad0758ee805d42e19ed61c32161ac3890848c4711fbe4f35b5081607217.
 //
-// Solidity: event GlobalProposalApproved(uint256 indexed round, (uint8[],uint256[],bytes[]) arg1)
-func (_Common *CommonFilterer) ParseGlobalProposalApproved(log types.Log) (*CommonGlobalProposalApproved, error) {
-	event := new(CommonGlobalProposalApproved)
-	if err := _Common.contract.UnpackLog(event, "GlobalProposalApproved", log); err != nil {
+// Solidity: event GlobalProposalCreated(uint256 indexed round, bytes32 indexed proposalHash, (uint256,uint256,address[],uint256[],bytes[]) arg2, (uint256,uint8[],uint256[],bytes[]) arg3, address creator)
+func (_Common *CommonFilterer) ParseGlobalProposalCreated(log types.Log) (*CommonGlobalProposalCreated, error) {
+	event := new(CommonGlobalProposalCreated)
+	if err := _Common.contract.UnpackLog(event, "GlobalProposalCreated", log); err != nil {
 		return nil, err
 	}
 	event.Raw = log
@@ -1280,41 +1359,38 @@ func (it *CommonProposalApprovedIterator) Close() error {
 
 // CommonProposalApproved represents a ProposalApproved event raised by the Common contract.
 type CommonProposalApproved struct {
-	Round      *big.Int
-	Hash       [32]byte
-	VoteWeight *big.Int
-	Arg3       ProposalProposalDetail
-	Raw        types.Log // Blockchain specific contextual infos
+	ProposalHash [32]byte
+	Raw          types.Log // Blockchain specific contextual infos
 }
 
-// FilterProposalApproved is a free log retrieval operation binding the contract event 0xbbfc341e57f906c936469ad77d94e3cc961c66e90dbc68529b5fb4be2c97b421.
+// FilterProposalApproved is a free log retrieval operation binding the contract event 0x5c819725ea53655a3b898f3df59b66489761935454e9212ca1e5ebd759953d0b.
 //
-// Solidity: event ProposalApproved(uint256 indexed round, bytes32 hash, uint256 voteWeight, (uint256,address[],uint256[],bytes[]) arg3)
-func (_Common *CommonFilterer) FilterProposalApproved(opts *bind.FilterOpts, round []*big.Int) (*CommonProposalApprovedIterator, error) {
+// Solidity: event ProposalApproved(bytes32 indexed proposalHash)
+func (_Common *CommonFilterer) FilterProposalApproved(opts *bind.FilterOpts, proposalHash [][32]byte) (*CommonProposalApprovedIterator, error) {
 
-	var roundRule []interface{}
-	for _, roundItem := range round {
-		roundRule = append(roundRule, roundItem)
+	var proposalHashRule []interface{}
+	for _, proposalHashItem := range proposalHash {
+		proposalHashRule = append(proposalHashRule, proposalHashItem)
 	}
 
-	logs, sub, err := _Common.contract.FilterLogs(opts, "ProposalApproved", roundRule)
+	logs, sub, err := _Common.contract.FilterLogs(opts, "ProposalApproved", proposalHashRule)
 	if err != nil {
 		return nil, err
 	}
 	return &CommonProposalApprovedIterator{contract: _Common.contract, event: "ProposalApproved", logs: logs, sub: sub}, nil
 }
 
-// WatchProposalApproved is a free log subscription operation binding the contract event 0xbbfc341e57f906c936469ad77d94e3cc961c66e90dbc68529b5fb4be2c97b421.
+// WatchProposalApproved is a free log subscription operation binding the contract event 0x5c819725ea53655a3b898f3df59b66489761935454e9212ca1e5ebd759953d0b.
 //
-// Solidity: event ProposalApproved(uint256 indexed round, bytes32 hash, uint256 voteWeight, (uint256,address[],uint256[],bytes[]) arg3)
-func (_Common *CommonFilterer) WatchProposalApproved(opts *bind.WatchOpts, sink chan<- *CommonProposalApproved, round []*big.Int) (event.Subscription, error) {
+// Solidity: event ProposalApproved(bytes32 indexed proposalHash)
+func (_Common *CommonFilterer) WatchProposalApproved(opts *bind.WatchOpts, sink chan<- *CommonProposalApproved, proposalHash [][32]byte) (event.Subscription, error) {
 
-	var roundRule []interface{}
-	for _, roundItem := range round {
-		roundRule = append(roundRule, roundItem)
+	var proposalHashRule []interface{}
+	for _, proposalHashItem := range proposalHash {
+		proposalHashRule = append(proposalHashRule, proposalHashItem)
 	}
 
-	logs, sub, err := _Common.contract.WatchLogs(opts, "ProposalApproved", roundRule)
+	logs, sub, err := _Common.contract.WatchLogs(opts, "ProposalApproved", proposalHashRule)
 	if err != nil {
 		return nil, err
 	}
@@ -1346,12 +1422,176 @@ func (_Common *CommonFilterer) WatchProposalApproved(opts *bind.WatchOpts, sink 
 	}), nil
 }
 
-// ParseProposalApproved is a log parse operation binding the contract event 0xbbfc341e57f906c936469ad77d94e3cc961c66e90dbc68529b5fb4be2c97b421.
+// ParseProposalApproved is a log parse operation binding the contract event 0x5c819725ea53655a3b898f3df59b66489761935454e9212ca1e5ebd759953d0b.
 //
-// Solidity: event ProposalApproved(uint256 indexed round, bytes32 hash, uint256 voteWeight, (uint256,address[],uint256[],bytes[]) arg3)
+// Solidity: event ProposalApproved(bytes32 indexed proposalHash)
 func (_Common *CommonFilterer) ParseProposalApproved(log types.Log) (*CommonProposalApproved, error) {
 	event := new(CommonProposalApproved)
 	if err := _Common.contract.UnpackLog(event, "ProposalApproved", log); err != nil {
+		return nil, err
+	}
+	event.Raw = log
+	return event, nil
+}
+
+// CommonProposalCreatedIterator is returned from FilterProposalCreated and is used to iterate over the raw logs and unpacked data for ProposalCreated events raised by the Common contract.
+type CommonProposalCreatedIterator struct {
+	Event *CommonProposalCreated // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *CommonProposalCreatedIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(CommonProposalCreated)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(CommonProposalCreated)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *CommonProposalCreatedIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *CommonProposalCreatedIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// CommonProposalCreated represents a ProposalCreated event raised by the Common contract.
+type CommonProposalCreated struct {
+	ChainId      *big.Int
+	Round        *big.Int
+	ProposalHash [32]byte
+	Arg3         ProposalProposalDetail
+	Creator      common.Address
+	Raw          types.Log // Blockchain specific contextual infos
+}
+
+// FilterProposalCreated is a free log retrieval operation binding the contract event 0x3d53769dd1253e37ceefb20fe16fbc7ff25d98e2d0f8c4730236e18500ca9b8c.
+//
+// Solidity: event ProposalCreated(uint256 indexed chainId, uint256 indexed round, bytes32 indexed proposalHash, (uint256,uint256,address[],uint256[],bytes[]) arg3, address creator)
+func (_Common *CommonFilterer) FilterProposalCreated(opts *bind.FilterOpts, chainId []*big.Int, round []*big.Int, proposalHash [][32]byte) (*CommonProposalCreatedIterator, error) {
+
+	var chainIdRule []interface{}
+	for _, chainIdItem := range chainId {
+		chainIdRule = append(chainIdRule, chainIdItem)
+	}
+	var roundRule []interface{}
+	for _, roundItem := range round {
+		roundRule = append(roundRule, roundItem)
+	}
+	var proposalHashRule []interface{}
+	for _, proposalHashItem := range proposalHash {
+		proposalHashRule = append(proposalHashRule, proposalHashItem)
+	}
+
+	logs, sub, err := _Common.contract.FilterLogs(opts, "ProposalCreated", chainIdRule, roundRule, proposalHashRule)
+	if err != nil {
+		return nil, err
+	}
+	return &CommonProposalCreatedIterator{contract: _Common.contract, event: "ProposalCreated", logs: logs, sub: sub}, nil
+}
+
+// WatchProposalCreated is a free log subscription operation binding the contract event 0x3d53769dd1253e37ceefb20fe16fbc7ff25d98e2d0f8c4730236e18500ca9b8c.
+//
+// Solidity: event ProposalCreated(uint256 indexed chainId, uint256 indexed round, bytes32 indexed proposalHash, (uint256,uint256,address[],uint256[],bytes[]) arg3, address creator)
+func (_Common *CommonFilterer) WatchProposalCreated(opts *bind.WatchOpts, sink chan<- *CommonProposalCreated, chainId []*big.Int, round []*big.Int, proposalHash [][32]byte) (event.Subscription, error) {
+
+	var chainIdRule []interface{}
+	for _, chainIdItem := range chainId {
+		chainIdRule = append(chainIdRule, chainIdItem)
+	}
+	var roundRule []interface{}
+	for _, roundItem := range round {
+		roundRule = append(roundRule, roundItem)
+	}
+	var proposalHashRule []interface{}
+	for _, proposalHashItem := range proposalHash {
+		proposalHashRule = append(proposalHashRule, proposalHashItem)
+	}
+
+	logs, sub, err := _Common.contract.WatchLogs(opts, "ProposalCreated", chainIdRule, roundRule, proposalHashRule)
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(CommonProposalCreated)
+				if err := _Common.contract.UnpackLog(event, "ProposalCreated", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// ParseProposalCreated is a log parse operation binding the contract event 0x3d53769dd1253e37ceefb20fe16fbc7ff25d98e2d0f8c4730236e18500ca9b8c.
+//
+// Solidity: event ProposalCreated(uint256 indexed chainId, uint256 indexed round, bytes32 indexed proposalHash, (uint256,uint256,address[],uint256[],bytes[]) arg3, address creator)
+func (_Common *CommonFilterer) ParseProposalCreated(log types.Log) (*CommonProposalCreated, error) {
+	event := new(CommonProposalCreated)
+	if err := _Common.contract.UnpackLog(event, "ProposalCreated", log); err != nil {
 		return nil, err
 	}
 	event.Raw = log
@@ -1427,39 +1667,38 @@ func (it *CommonProposalExecutedIterator) Close() error {
 
 // CommonProposalExecuted represents a ProposalExecuted event raised by the Common contract.
 type CommonProposalExecuted struct {
-	Round *big.Int
-	Hash  [32]byte
-	Raw   types.Log // Blockchain specific contextual infos
+	ProposalHash [32]byte
+	Raw          types.Log // Blockchain specific contextual infos
 }
 
-// FilterProposalExecuted is a free log retrieval operation binding the contract event 0x56a007d3eea04bd347e571f3451382cb2a33ef5fd102b9a63846ff8d787f43cf.
+// FilterProposalExecuted is a free log retrieval operation binding the contract event 0x7b1bcf1ccf901a11589afff5504d59fd0a53780eed2a952adade0348985139e0.
 //
-// Solidity: event ProposalExecuted(uint256 indexed round, bytes32 hash)
-func (_Common *CommonFilterer) FilterProposalExecuted(opts *bind.FilterOpts, round []*big.Int) (*CommonProposalExecutedIterator, error) {
+// Solidity: event ProposalExecuted(bytes32 indexed proposalHash)
+func (_Common *CommonFilterer) FilterProposalExecuted(opts *bind.FilterOpts, proposalHash [][32]byte) (*CommonProposalExecutedIterator, error) {
 
-	var roundRule []interface{}
-	for _, roundItem := range round {
-		roundRule = append(roundRule, roundItem)
+	var proposalHashRule []interface{}
+	for _, proposalHashItem := range proposalHash {
+		proposalHashRule = append(proposalHashRule, proposalHashItem)
 	}
 
-	logs, sub, err := _Common.contract.FilterLogs(opts, "ProposalExecuted", roundRule)
+	logs, sub, err := _Common.contract.FilterLogs(opts, "ProposalExecuted", proposalHashRule)
 	if err != nil {
 		return nil, err
 	}
 	return &CommonProposalExecutedIterator{contract: _Common.contract, event: "ProposalExecuted", logs: logs, sub: sub}, nil
 }
 
-// WatchProposalExecuted is a free log subscription operation binding the contract event 0x56a007d3eea04bd347e571f3451382cb2a33ef5fd102b9a63846ff8d787f43cf.
+// WatchProposalExecuted is a free log subscription operation binding the contract event 0x7b1bcf1ccf901a11589afff5504d59fd0a53780eed2a952adade0348985139e0.
 //
-// Solidity: event ProposalExecuted(uint256 indexed round, bytes32 hash)
-func (_Common *CommonFilterer) WatchProposalExecuted(opts *bind.WatchOpts, sink chan<- *CommonProposalExecuted, round []*big.Int) (event.Subscription, error) {
+// Solidity: event ProposalExecuted(bytes32 indexed proposalHash)
+func (_Common *CommonFilterer) WatchProposalExecuted(opts *bind.WatchOpts, sink chan<- *CommonProposalExecuted, proposalHash [][32]byte) (event.Subscription, error) {
 
-	var roundRule []interface{}
-	for _, roundItem := range round {
-		roundRule = append(roundRule, roundItem)
+	var proposalHashRule []interface{}
+	for _, proposalHashItem := range proposalHash {
+		proposalHashRule = append(proposalHashRule, proposalHashItem)
 	}
 
-	logs, sub, err := _Common.contract.WatchLogs(opts, "ProposalExecuted", roundRule)
+	logs, sub, err := _Common.contract.WatchLogs(opts, "ProposalExecuted", proposalHashRule)
 	if err != nil {
 		return nil, err
 	}
@@ -1491,12 +1730,156 @@ func (_Common *CommonFilterer) WatchProposalExecuted(opts *bind.WatchOpts, sink 
 	}), nil
 }
 
-// ParseProposalExecuted is a log parse operation binding the contract event 0x56a007d3eea04bd347e571f3451382cb2a33ef5fd102b9a63846ff8d787f43cf.
+// ParseProposalExecuted is a log parse operation binding the contract event 0x7b1bcf1ccf901a11589afff5504d59fd0a53780eed2a952adade0348985139e0.
 //
-// Solidity: event ProposalExecuted(uint256 indexed round, bytes32 hash)
+// Solidity: event ProposalExecuted(bytes32 indexed proposalHash)
 func (_Common *CommonFilterer) ParseProposalExecuted(log types.Log) (*CommonProposalExecuted, error) {
 	event := new(CommonProposalExecuted)
 	if err := _Common.contract.UnpackLog(event, "ProposalExecuted", log); err != nil {
+		return nil, err
+	}
+	event.Raw = log
+	return event, nil
+}
+
+// CommonProposalRejectedIterator is returned from FilterProposalRejected and is used to iterate over the raw logs and unpacked data for ProposalRejected events raised by the Common contract.
+type CommonProposalRejectedIterator struct {
+	Event *CommonProposalRejected // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *CommonProposalRejectedIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(CommonProposalRejected)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(CommonProposalRejected)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *CommonProposalRejectedIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *CommonProposalRejectedIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// CommonProposalRejected represents a ProposalRejected event raised by the Common contract.
+type CommonProposalRejected struct {
+	ProposalHash [32]byte
+	Raw          types.Log // Blockchain specific contextual infos
+}
+
+// FilterProposalRejected is a free log retrieval operation binding the contract event 0x55295d4ce992922fa2e5ffbf3a3dcdb367de0a15e125ace083456017fd22060f.
+//
+// Solidity: event ProposalRejected(bytes32 indexed proposalHash)
+func (_Common *CommonFilterer) FilterProposalRejected(opts *bind.FilterOpts, proposalHash [][32]byte) (*CommonProposalRejectedIterator, error) {
+
+	var proposalHashRule []interface{}
+	for _, proposalHashItem := range proposalHash {
+		proposalHashRule = append(proposalHashRule, proposalHashItem)
+	}
+
+	logs, sub, err := _Common.contract.FilterLogs(opts, "ProposalRejected", proposalHashRule)
+	if err != nil {
+		return nil, err
+	}
+	return &CommonProposalRejectedIterator{contract: _Common.contract, event: "ProposalRejected", logs: logs, sub: sub}, nil
+}
+
+// WatchProposalRejected is a free log subscription operation binding the contract event 0x55295d4ce992922fa2e5ffbf3a3dcdb367de0a15e125ace083456017fd22060f.
+//
+// Solidity: event ProposalRejected(bytes32 indexed proposalHash)
+func (_Common *CommonFilterer) WatchProposalRejected(opts *bind.WatchOpts, sink chan<- *CommonProposalRejected, proposalHash [][32]byte) (event.Subscription, error) {
+
+	var proposalHashRule []interface{}
+	for _, proposalHashItem := range proposalHash {
+		proposalHashRule = append(proposalHashRule, proposalHashItem)
+	}
+
+	logs, sub, err := _Common.contract.WatchLogs(opts, "ProposalRejected", proposalHashRule)
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(CommonProposalRejected)
+				if err := _Common.contract.UnpackLog(event, "ProposalRejected", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// ParseProposalRejected is a log parse operation binding the contract event 0x55295d4ce992922fa2e5ffbf3a3dcdb367de0a15e125ace083456017fd22060f.
+//
+// Solidity: event ProposalRejected(bytes32 indexed proposalHash)
+func (_Common *CommonFilterer) ParseProposalRejected(log types.Log) (*CommonProposalRejected, error) {
+	event := new(CommonProposalRejected)
+	if err := _Common.contract.UnpackLog(event, "ProposalRejected", log); err != nil {
 		return nil, err
 	}
 	event.Raw = log
@@ -1572,49 +1955,49 @@ func (it *CommonProposalVotedIterator) Close() error {
 
 // CommonProposalVoted represents a ProposalVoted event raised by the Common contract.
 type CommonProposalVoted struct {
-	Round  *big.Int
-	Voter  common.Address
-	Weight *big.Int
-	Hash   [32]byte
-	Raw    types.Log // Blockchain specific contextual infos
+	ProposalHash [32]byte
+	Voter        common.Address
+	Support      uint8
+	Weight       *big.Int
+	Raw          types.Log // Blockchain specific contextual infos
 }
 
-// FilterProposalVoted is a free log retrieval operation binding the contract event 0x013b7e97889f4f50a50bc1f07e7b7921414afd8a4c1a43fe8b9afb60ffbd8544.
+// FilterProposalVoted is a free log retrieval operation binding the contract event 0x1203f9e81c814a35f5f4cc24087b2a24c6fb7986a9f1406b68a9484882c93a23.
 //
-// Solidity: event ProposalVoted(uint256 indexed round, address indexed voter, uint256 weight, bytes32 hash)
-func (_Common *CommonFilterer) FilterProposalVoted(opts *bind.FilterOpts, round []*big.Int, voter []common.Address) (*CommonProposalVotedIterator, error) {
+// Solidity: event ProposalVoted(bytes32 indexed proposalHash, address indexed voter, uint8 support, uint256 weight)
+func (_Common *CommonFilterer) FilterProposalVoted(opts *bind.FilterOpts, proposalHash [][32]byte, voter []common.Address) (*CommonProposalVotedIterator, error) {
 
-	var roundRule []interface{}
-	for _, roundItem := range round {
-		roundRule = append(roundRule, roundItem)
+	var proposalHashRule []interface{}
+	for _, proposalHashItem := range proposalHash {
+		proposalHashRule = append(proposalHashRule, proposalHashItem)
 	}
 	var voterRule []interface{}
 	for _, voterItem := range voter {
 		voterRule = append(voterRule, voterItem)
 	}
 
-	logs, sub, err := _Common.contract.FilterLogs(opts, "ProposalVoted", roundRule, voterRule)
+	logs, sub, err := _Common.contract.FilterLogs(opts, "ProposalVoted", proposalHashRule, voterRule)
 	if err != nil {
 		return nil, err
 	}
 	return &CommonProposalVotedIterator{contract: _Common.contract, event: "ProposalVoted", logs: logs, sub: sub}, nil
 }
 
-// WatchProposalVoted is a free log subscription operation binding the contract event 0x013b7e97889f4f50a50bc1f07e7b7921414afd8a4c1a43fe8b9afb60ffbd8544.
+// WatchProposalVoted is a free log subscription operation binding the contract event 0x1203f9e81c814a35f5f4cc24087b2a24c6fb7986a9f1406b68a9484882c93a23.
 //
-// Solidity: event ProposalVoted(uint256 indexed round, address indexed voter, uint256 weight, bytes32 hash)
-func (_Common *CommonFilterer) WatchProposalVoted(opts *bind.WatchOpts, sink chan<- *CommonProposalVoted, round []*big.Int, voter []common.Address) (event.Subscription, error) {
+// Solidity: event ProposalVoted(bytes32 indexed proposalHash, address indexed voter, uint8 support, uint256 weight)
+func (_Common *CommonFilterer) WatchProposalVoted(opts *bind.WatchOpts, sink chan<- *CommonProposalVoted, proposalHash [][32]byte, voter []common.Address) (event.Subscription, error) {
 
-	var roundRule []interface{}
-	for _, roundItem := range round {
-		roundRule = append(roundRule, roundItem)
+	var proposalHashRule []interface{}
+	for _, proposalHashItem := range proposalHash {
+		proposalHashRule = append(proposalHashRule, proposalHashItem)
 	}
 	var voterRule []interface{}
 	for _, voterItem := range voter {
 		voterRule = append(voterRule, voterItem)
 	}
 
-	logs, sub, err := _Common.contract.WatchLogs(opts, "ProposalVoted", roundRule, voterRule)
+	logs, sub, err := _Common.contract.WatchLogs(opts, "ProposalVoted", proposalHashRule, voterRule)
 	if err != nil {
 		return nil, err
 	}
@@ -1646,9 +2029,9 @@ func (_Common *CommonFilterer) WatchProposalVoted(opts *bind.WatchOpts, sink cha
 	}), nil
 }
 
-// ParseProposalVoted is a log parse operation binding the contract event 0x013b7e97889f4f50a50bc1f07e7b7921414afd8a4c1a43fe8b9afb60ffbd8544.
+// ParseProposalVoted is a log parse operation binding the contract event 0x1203f9e81c814a35f5f4cc24087b2a24c6fb7986a9f1406b68a9484882c93a23.
 //
-// Solidity: event ProposalVoted(uint256 indexed round, address indexed voter, uint256 weight, bytes32 hash)
+// Solidity: event ProposalVoted(bytes32 indexed proposalHash, address indexed voter, uint8 support, uint256 weight)
 func (_Common *CommonFilterer) ParseProposalVoted(log types.Log) (*CommonProposalVoted, error) {
 	event := new(CommonProposalVoted)
 	if err := _Common.contract.UnpackLog(event, "ProposalVoted", log); err != nil {
@@ -2272,150 +2655,6 @@ func (_Common *CommonFilterer) WatchValidatorContractUpdated(opts *bind.WatchOpt
 func (_Common *CommonFilterer) ParseValidatorContractUpdated(log types.Log) (*CommonValidatorContractUpdated, error) {
 	event := new(CommonValidatorContractUpdated)
 	if err := _Common.contract.UnpackLog(event, "ValidatorContractUpdated", log); err != nil {
-		return nil, err
-	}
-	event.Raw = log
-	return event, nil
-}
-
-// CommonVoteRejectedIterator is returned from FilterVoteRejected and is used to iterate over the raw logs and unpacked data for VoteRejected events raised by the Common contract.
-type CommonVoteRejectedIterator struct {
-	Event *CommonVoteRejected // Event containing the contract specifics and raw log
-
-	contract *bind.BoundContract // Generic contract to use for unpacking event data
-	event    string              // Event name to use for unpacking event data
-
-	logs chan types.Log        // Log channel receiving the found contract events
-	sub  ethereum.Subscription // Subscription for errors, completion and termination
-	done bool                  // Whether the subscription completed delivering logs
-	fail error                 // Occurred error to stop iteration
-}
-
-// Next advances the iterator to the subsequent event, returning whether there
-// are any more events found. In case of a retrieval or parsing error, false is
-// returned and Error() can be queried for the exact failure.
-func (it *CommonVoteRejectedIterator) Next() bool {
-	// If the iterator failed, stop iterating
-	if it.fail != nil {
-		return false
-	}
-	// If the iterator completed, deliver directly whatever's available
-	if it.done {
-		select {
-		case log := <-it.logs:
-			it.Event = new(CommonVoteRejected)
-			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-				it.fail = err
-				return false
-			}
-			it.Event.Raw = log
-			return true
-
-		default:
-			return false
-		}
-	}
-	// Iterator still in progress, wait for either a data or an error event
-	select {
-	case log := <-it.logs:
-		it.Event = new(CommonVoteRejected)
-		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-			it.fail = err
-			return false
-		}
-		it.Event.Raw = log
-		return true
-
-	case err := <-it.sub.Err():
-		it.done = true
-		it.fail = err
-		return it.Next()
-	}
-}
-
-// Error returns any retrieval or parsing error occurred during filtering.
-func (it *CommonVoteRejectedIterator) Error() error {
-	return it.fail
-}
-
-// Close terminates the iteration process, releasing any pending underlying
-// resources.
-func (it *CommonVoteRejectedIterator) Close() error {
-	it.sub.Unsubscribe()
-	return nil
-}
-
-// CommonVoteRejected represents a VoteRejected event raised by the Common contract.
-type CommonVoteRejected struct {
-	Round *big.Int
-	Raw   types.Log // Blockchain specific contextual infos
-}
-
-// FilterVoteRejected is a free log retrieval operation binding the contract event 0xfb95c258b2a6900dbb6e469bc9d1162239d1f3df76bbf1c01b0524123b2e5740.
-//
-// Solidity: event VoteRejected(uint256 indexed round)
-func (_Common *CommonFilterer) FilterVoteRejected(opts *bind.FilterOpts, round []*big.Int) (*CommonVoteRejectedIterator, error) {
-
-	var roundRule []interface{}
-	for _, roundItem := range round {
-		roundRule = append(roundRule, roundItem)
-	}
-
-	logs, sub, err := _Common.contract.FilterLogs(opts, "VoteRejected", roundRule)
-	if err != nil {
-		return nil, err
-	}
-	return &CommonVoteRejectedIterator{contract: _Common.contract, event: "VoteRejected", logs: logs, sub: sub}, nil
-}
-
-// WatchVoteRejected is a free log subscription operation binding the contract event 0xfb95c258b2a6900dbb6e469bc9d1162239d1f3df76bbf1c01b0524123b2e5740.
-//
-// Solidity: event VoteRejected(uint256 indexed round)
-func (_Common *CommonFilterer) WatchVoteRejected(opts *bind.WatchOpts, sink chan<- *CommonVoteRejected, round []*big.Int) (event.Subscription, error) {
-
-	var roundRule []interface{}
-	for _, roundItem := range round {
-		roundRule = append(roundRule, roundItem)
-	}
-
-	logs, sub, err := _Common.contract.WatchLogs(opts, "VoteRejected", roundRule)
-	if err != nil {
-		return nil, err
-	}
-	return event.NewSubscription(func(quit <-chan struct{}) error {
-		defer sub.Unsubscribe()
-		for {
-			select {
-			case log := <-logs:
-				// New log arrived, parse the event and forward to the user
-				event := new(CommonVoteRejected)
-				if err := _Common.contract.UnpackLog(event, "VoteRejected", log); err != nil {
-					return err
-				}
-				event.Raw = log
-
-				select {
-				case sink <- event:
-				case err := <-sub.Err():
-					return err
-				case <-quit:
-					return nil
-				}
-			case err := <-sub.Err():
-				return err
-			case <-quit:
-				return nil
-			}
-		}
-	}), nil
-}
-
-// ParseVoteRejected is a log parse operation binding the contract event 0xfb95c258b2a6900dbb6e469bc9d1162239d1f3df76bbf1c01b0524123b2e5740.
-//
-// Solidity: event VoteRejected(uint256 indexed round)
-func (_Common *CommonFilterer) ParseVoteRejected(log types.Log) (*CommonVoteRejected, error) {
-	event := new(CommonVoteRejected)
-	if err := _Common.contract.UnpackLog(event, "VoteRejected", log); err != nil {
 		return nil, err
 	}
 	event.Raw = log
