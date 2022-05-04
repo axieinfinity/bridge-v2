@@ -2,20 +2,19 @@
   "listeners": {
     "RoninListener": {
       "rpcUrl": "",
-      "blockTime": 15,
-      "safeBlockRange": 0,
+      "blockTime": 3,
+      "safeBlockRange": 3,
       "secret": {
         "validator": "",
         "relayer": ""
       },
-      "fromHeight": 11500000,
+      "fromHeight": 6508284,
       "contracts": {
-        "Gateway": "0x00...RoninGatewayV2...00",
-        "BrigeAdmin": "0x4567"
+        "Gateway": "0x03d1F13c7391F6B5A651143a31034cf728A93694"
       },
       "subscriptions": {
         "MainchainWithdrewSubscription": {
-          "address": "0x00...RoninGatewayV2...00",
+          "address": "0x03d1F13c7391F6B5A651143a31034cf728A93694",
           "type": 0,
           "handler": {
             "abi": "./contracts/ronin/RoninGatewayV2.abi",
@@ -26,7 +25,7 @@
           }
         },
         "WithdrawalRequestedSubscription": {
-          "address": "0x00...RoninGatewayV2...00",
+          "address": "0x03d1F13c7391F6B5A651143a31034cf728A93694",
           "type": 0,
           "handler": {
             "abi": "./contracts/ronin/RoninGatewayV2.abi",
@@ -37,7 +36,7 @@
           }
         },
         "WithdrawalSignaturesRequestedSubscription": {
-          "address": "0x00...RoninGatewayV2...00",
+          "address": "0x03d1F13c7391F6B5A651143a31034cf728A93694",
           "type": 0,
           "handler": {
             "abi": "./contracts/ronin/RoninGatewayV2.abi",
@@ -50,9 +49,20 @@
       }
     },
     "EthereumListener": {
+      "rpcUrl": "",
+      "blockTime": 15,
+      "safeBlockRange": 8,
+      "secret": {
+        "validator": "",
+        "relayer": ""
+      },
+      "fromHeight": 12234008,
+      "contracts": {
+        "Gateway": "0x03d1F13c7391F6B5A651143a31034cf728A93694"
+      },
       "subscriptions": {
         "DepositRequestedSubscription": {
-          "address": "0x00...MainchainGatewayV2...00",
+          "address": "0x3b6371EB912bFd5C0E249A16000ffbC6B881555A",
           "type": 0,
           "handler": {
             "abi": "./contracts/mainchain/MainchainGatewayV2.abi",
@@ -63,7 +73,7 @@
           }
         },
         "WithdrewSubscription": {
-          "address": "0x00...MainchainGatewayV2...00",
+          "address": "0x3b6371EB912bFd5C0E249A16000ffbC6B881555A",
           "type": 0,
           "handler": {
             "abi": "./contracts/mainchain/MainchainGatewayV2.abi",
