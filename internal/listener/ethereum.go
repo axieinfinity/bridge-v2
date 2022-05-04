@@ -159,6 +159,7 @@ func (e *EthereumListener) GetSubscriptions() map[string]*types.Subscribe {
 func (e *EthereumListener) UpdateCurrentBlock(block types.IBlock) error {
 	if e.GetCurrentBlock().GetHash().Hex() != block.GetHash().Hex() {
 		e.currentBlock.Store(block)
+		return e.SaveCurrentBlockToDB()
 	}
 	return nil
 }
