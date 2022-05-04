@@ -3,11 +3,14 @@ package listener
 import (
 	"context"
 	"fmt"
+	"github.com/axieinfinity/bridge-v2/internal/models"
 	"github.com/axieinfinity/bridge-v2/internal/types"
 	"github.com/axieinfinity/bridge-v2/internal/utils"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"math/big"
+	"time"
 )
 
 type EthBlock struct {
@@ -247,18 +250,55 @@ func (e *BaseJob) GetTransaction() types.ITransaction {
 	return e.tx
 }
 
+func (e *BaseJob) Save() error {
+	job := &models.Job{
+		Listener:         e.listener.GetName(),
+		SubscriptionName: e.subscriptionName,
+		Type:             e.jobType,
+		RetryCount:       e.retryCount,
+		Status:           types.STATUS_PENDING,
+		Data:             common.Bytes2Hex(e.data),
+		Transaction:      e.tx.GetHash().Hex(),
+		CreatedAt:        time.Now().Unix(),
+		FromChainId:      hexutil.EncodeBig(e.fromChainID),
+	}
+	if err := e.listener.GetStore().GetJobStore().Save(job); err != nil {
+		return err
+	}
+	e.id = int32(job.ID)
+	return nil
+}
+
+func (e *BaseJob) Update(status string) error {
+	job := &models.Job{
+		ID:               int(e.id),
+		Listener:         e.listener.GetName(),
+		SubscriptionName: e.subscriptionName,
+		Type:             e.jobType,
+		RetryCount:       e.retryCount,
+		Status:           status,
+		Data:             common.Bytes2Hex(e.data),
+		Transaction:      e.tx.GetHash().Hex(),
+		CreatedAt:        time.Now().Unix(),
+		FromChainId:      hexutil.EncodeBig(e.fromChainID),
+	}
+	if err := e.listener.GetStore().GetJobStore().Save(job); err != nil {
+		return err
+	}
+	return nil
+}
+
 type EthListenJob struct {
 	*BaseJob
 }
 
-func NewEthListenJob(id int32, jobType int, listener types.IListener, subscriptionName string, tx types.ITransaction, data []byte) *EthListenJob {
+func NewEthListenJob(jobType int, listener types.IListener, subscriptionName string, tx types.ITransaction, data []byte) *EthListenJob {
 	chainId, err := listener.GetChainID()
 	if err != nil {
 		return nil
 	}
 	return &EthListenJob{
 		&BaseJob{
-			id:               id,
 			jobType:          jobType,
 			retryCount:       0,
 			maxTry:           20,
@@ -286,14 +326,13 @@ type EthCallbackJob struct {
 	method string
 }
 
-func NewEthCallbackJob(id int32, listener types.IListener, method string, tx types.ITransaction, data []byte, fromChainID *big.Int, helpers utils.IUtils) *EthCallbackJob {
+func NewEthCallbackJob(listener types.IListener, method string, tx types.ITransaction, data []byte, fromChainID *big.Int, helpers utils.IUtils) *EthCallbackJob {
 	if helpers == nil {
 		helpers = &utils.Utils{}
 	}
 	return &EthCallbackJob{
 		BaseJob: &BaseJob{
 			utilsWrapper: helpers,
-			id:           id,
 			jobType:      types.CallbackHandler,
 			retryCount:   0,
 			maxTry:       20,

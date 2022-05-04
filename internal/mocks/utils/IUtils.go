@@ -3,15 +3,18 @@
 package mocks
 
 import (
-	big "math/big"
-
 	abi "github.com/ethereum/go-ethereum/accounts/abi"
+	apitypes "github.com/ethereum/go-ethereum/signer/core/apitypes"
+
+	big "math/big"
 
 	bind "github.com/ethereum/go-ethereum/accounts/abi/bind"
 
 	ecdsa "crypto/ecdsa"
 
 	ethclient "github.com/ethereum/go-ethereum/ethclient"
+
+	hexutil "github.com/ethereum/go-ethereum/common/hexutil"
 
 	mock "github.com/stretchr/testify/mock"
 
@@ -140,6 +143,29 @@ func (_m *IUtils) SendContractTransaction(key *ecdsa.PrivateKey, chainId *big.In
 	var r1 error
 	if rf, ok := ret.Get(1).(func(*ecdsa.PrivateKey, *big.Int, func(*bind.TransactOpts) (*types.Transaction, error)) error); ok {
 		r1 = rf(key, chainId, fn)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// SignTypedData provides a mock function with given fields: typedData, privateKey
+func (_m *IUtils) SignTypedData(typedData apitypes.TypedData, privateKey *ecdsa.PrivateKey) (hexutil.Bytes, error) {
+	ret := _m.Called(typedData, privateKey)
+
+	var r0 hexutil.Bytes
+	if rf, ok := ret.Get(0).(func(apitypes.TypedData, *ecdsa.PrivateKey) hexutil.Bytes); ok {
+		r0 = rf(typedData, privateKey)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(hexutil.Bytes)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(apitypes.TypedData, *ecdsa.PrivateKey) error); ok {
+		r1 = rf(typedData, privateKey)
 	} else {
 		r1 = ret.Error(1)
 	}

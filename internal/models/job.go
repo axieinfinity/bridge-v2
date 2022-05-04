@@ -14,6 +14,10 @@ type Job struct {
 	Data             string `json:"data" gorm:"column:data;not null"`
 	Transaction      string `json:"transaction" gorm:"column:transaction;index:idx_job_transaction;not null"`
 	CreatedAt        int64  `json:"created_at" gorm:"column:created_at;type:bigint;index:idx_job_created_at;not null"`
+	FromChainId      string `json:"fromChainId" gorm:"column:from_chain_id;not null"`
+
+	// Method is used to execute function in `callback` job
+	Method string `json:"method" gorm:"column:method;not null"`
 }
 
 func (m Job) BeforeCreate(tx *gorm.DB) (err error) {

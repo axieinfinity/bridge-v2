@@ -6,7 +6,7 @@ import (
 
 type Task struct {
 	ID        int    `json:"id" gorm:"primary_key:true;column:id;auto_increment;not null"`
-	Chain     string `json:"chain" gorm:"column:chain;index:idx_job_chain_name;not null"`
+	ChainId   string `json:"chainId" gorm:"column:chain_id;index:idx_job_chain_id;not null"`
 	Type      string `json:"type" gorm:"column:task_type;not null"`
 	Data      string `json:"data" gorm:"column:data;not null"`
 	Retries   int    `json:"retries" gorm:"column:retries;not null"`

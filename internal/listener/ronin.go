@@ -87,11 +87,11 @@ func (l *RoninListener) ProvideReceiptSignatureCallback(tx types.ITransaction, d
 	}
 	// create task and store to database
 	withdrawalTask := &models.Task{
-		Chain:     hexutil.EncodeBig(chainId),
+		ChainId:   hexutil.EncodeBig(chainId),
 		Type:      types.WITHDRAWAL_TASK,
 		Data:      common.Bytes2Hex(data),
 		Retries:   0,
-		Status:    types.STATUS_PROCESSING,
+		Status:    types.STATUS_PENDING,
 		LastError: "",
 		CreatedAt: time.Now().Unix(),
 	}
@@ -129,11 +129,11 @@ func (l *RoninListener) DepositRequestedCallback(tx types.ITransaction, data []b
 	}
 	// create task and store to database
 	depositTask := &models.Task{
-		Chain:     hexutil.EncodeBig(chainId),
+		ChainId:   hexutil.EncodeBig(chainId),
 		Type:      types.DEPOSIT_TASK,
 		Data:      common.Bytes2Hex(data),
 		Retries:   0,
-		Status:    types.STATUS_PROCESSING,
+		Status:    types.STATUS_PENDING,
 		LastError: "",
 		CreatedAt: time.Now().Unix(),
 	}
@@ -168,11 +168,11 @@ func (l *RoninListener) WithdrewCallback(tx types.ITransaction, data []byte) err
 			return err
 		}
 		return l.store.GetTaskStore().Save(&models.Task{
-			Chain:     hexutil.EncodeBig(chainId),
+			ChainId:   hexutil.EncodeBig(chainId),
 			Type:      types.ACK_WITHDREW_TASK,
 			Data:      common.Bytes2Hex(data),
 			Retries:   0,
-			Status:    types.STATUS_PROCESSING,
+			Status:    types.STATUS_PENDING,
 			LastError: "",
 			CreatedAt: time.Now().Unix(),
 		})

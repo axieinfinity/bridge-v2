@@ -6,15 +6,23 @@ import (
 )
 
 type WithdrawalStore struct {
-	db *gorm.DB
+	*gorm.DB
 }
 
 func NewWithdrawalStore(db *gorm.DB) *WithdrawalStore {
-	return &WithdrawalStore{db: db}
+	return &WithdrawalStore{db}
 }
 
-func (w *WithdrawalStore) Save(withdraw *models.Withdrawal) error   { return nil }
-func (w *WithdrawalStore) Update(withdraw *models.Withdrawal) error { return nil }
+func (w *WithdrawalStore) Save(withdraw *models.Withdrawal) error {
+	return w.Create(withdraw).Error
+}
+
+func (w *WithdrawalStore) Update(withdraw *models.Withdrawal) error {
+	return w.Updates(withdraw).Error
+}
+
 func (w *WithdrawalStore) GetWithdrawalById(withdrawalId int64) (*models.Withdrawal, error) {
-	return nil, nil
+	var withdraw *models.Withdrawal
+	err := w.Model(&models.Withdrawal{}).Where("withdrawal_id = ?", withdrawalId).First(withdraw).Error
+	return withdraw, err
 }

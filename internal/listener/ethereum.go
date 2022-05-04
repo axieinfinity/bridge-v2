@@ -3,9 +3,12 @@ package listener
 import (
 	"context"
 	"crypto/ecdsa"
+	"errors"
+	"github.com/axieinfinity/bridge-v2/internal/models"
 	"github.com/axieinfinity/bridge-v2/internal/types"
 	"github.com/axieinfinity/bridge-v2/internal/utils"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/log"
 	"math/big"
@@ -101,7 +104,7 @@ func (e *EthereumListener) GetCurrentBlock() types.IBlock {
 		if e.fromHeight > 0 {
 			block, err = e.GetBlock(e.fromHeight)
 		} else {
-			block, err = e.GetLatestBlock()
+			block, err = e.GetProcessedBlock()
 		}
 		if err != nil {
 			return nil
@@ -112,8 +115,25 @@ func (e *EthereumListener) GetCurrentBlock() types.IBlock {
 	return e.currentBlock.Load().(types.IBlock)
 }
 
+func (e *EthereumListener) GetProcessedBlock() (types.IBlock, error) {
+	chainId, err := e.GetChainID()
+	if err != nil {
+		log.Error("[EthereumListener][GetLatestBlock] error while getting chainId", "err", err)
+		return nil, err
+	}
+	encodedChainId := hexutil.EncodeBig(chainId)
+	height, err := e.store.GetProcessedBlockStore().GetLatestBlock(encodedChainId)
+	if err != nil {
+		log.Error("[EthereumListener][GetLatestBlock] error while getting latest height from database", "err", err, "chainId", encodedChainId)
+	}
+	block, err := e.client.BlockByNumber(e.ctx, big.NewInt(height))
+	if err != nil {
+		return nil, err
+	}
+	return NewEthBlock(e.client, block)
+}
+
 func (e *EthereumListener) GetLatestBlock() (types.IBlock, error) {
-	// TODO: if apply ronin, lib change nil to -1
 	block, err := e.client.BlockByNumber(e.ctx, nil)
 	if err != nil {
 		return nil, err
@@ -152,7 +172,11 @@ func (e *EthereumListener) GetRelayerKey() *ecdsa.PrivateKey {
 }
 
 func (e *EthereumListener) SaveCurrentBlockToDB() error {
-	return e.store.GetProcessedBlockStore().Save(int64(e.GetCurrentBlock().GetHeight()))
+	chainId, err := e.GetChainID()
+	if err != nil {
+		return err
+	}
+	return e.store.GetProcessedBlockStore().Save(hexutil.EncodeBig(chainId), int64(e.GetCurrentBlock().GetHeight()))
 }
 
 func (e *EthereumListener) SaveTransactionsToDB(txs []types.ITransaction) error {
@@ -185,8 +209,7 @@ func (e *EthereumListener) GetListenHandleJob(subscriptionName string, tx types.
 	} else {
 		return nil
 	}
-	jobId := atomic.AddInt32(&e.jobId, 1)
-	return NewEthListenJob(jobId, types.ListenHandler, e, subscriptionName, tx, data)
+	return NewEthListenJob(types.ListenHandler, e, subscriptionName, tx, data)
 }
 
 func (e *EthereumListener) SendCallbackJobs(listeners map[string]types.IListener, subscriptionName string, tx types.ITransaction, inputData []byte, jobChan chan<- types.IJob) {
@@ -202,8 +225,7 @@ func (e *EthereumListener) SendCallbackJobs(listeners map[string]types.IListener
 	for listenerName, methodName := range subscription.CallBacks {
 		log.Info("[EthereumListener][SendCallbackJobs] Loop through callbacks", "subscriptionName", subscriptionName, "listenerName", listenerName, "methodName", methodName)
 		l := listeners[listenerName]
-		jobId := atomic.AddInt32(&e.jobId, 1)
-		job := NewEthCallbackJob(jobId, l, methodName, tx, inputData, chainId, e.utilsWrapper)
+		job := NewEthCallbackJob(l, methodName, tx, inputData, chainId, e.utilsWrapper)
 		if job != nil {
 			jobChan <- job
 		}
@@ -216,6 +238,58 @@ func (e *EthereumListener) GetBlock(height uint64) (types.IBlock, error) {
 		return nil, err
 	}
 	return NewEthBlock(e.client, block)
+}
+
+func (e *EthereumListener) NewJobFromDB(job *models.Job) (types.IJob, error) {
+	chainId, err := hexutil.DecodeBig(job.FromChainId)
+	if err != nil {
+		return nil, err
+	}
+	// get transaction from hash
+	tx, _, err := e.client.TransactionByHash(e.ctx, common.HexToHash(job.Transaction))
+	if err != nil {
+		return nil, err
+	}
+	transaction, err := NewEthTransaction(e.client, tx)
+	if err != nil {
+		return nil, err
+	}
+
+	switch job.Type {
+	case types.ListenHandler:
+		return &EthListenJob{
+			&BaseJob{
+				jobType:          types.ListenHandler,
+				retryCount:       job.RetryCount,
+				maxTry:           20,
+				nextTry:          time.Now().Unix(),
+				backOff:          5,
+				data:             common.Hex2Bytes(job.Data),
+				tx:               transaction,
+				subscriptionName: job.SubscriptionName,
+				listener:         e,
+				utilsWrapper:     e.utilsWrapper,
+				fromChainID:      chainId,
+			},
+		}, nil
+	case types.CallbackHandler:
+		return &EthCallbackJob{
+			BaseJob: &BaseJob{
+				utilsWrapper: e.utilsWrapper,
+				jobType:      types.CallbackHandler,
+				retryCount:   job.RetryCount,
+				maxTry:       20,
+				nextTry:      time.Now().Unix(),
+				backOff:      5,
+				data:         common.Hex2Bytes(job.Data),
+				tx:           transaction,
+				listener:     e,
+				fromChainID:  chainId,
+			},
+			method: job.Method,
+		}, nil
+	}
+	return nil, errors.New("jobType does not match")
 }
 
 func (e *EthereumListener) Close() {

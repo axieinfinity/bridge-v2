@@ -8,6 +8,8 @@ import (
 
 	mock "github.com/stretchr/testify/mock"
 
+	models "github.com/axieinfinity/bridge-v2/internal/models"
+
 	testing "testing"
 
 	time "time"
@@ -216,6 +218,29 @@ func (_m *IListener) GetSubscriptions() map[string]*types.Subscribe {
 	}
 
 	return r0
+}
+
+// NewJobFromDB provides a mock function with given fields: job
+func (_m *IListener) NewJobFromDB(job *models.Job) (types.IJob, error) {
+	ret := _m.Called(job)
+
+	var r0 types.IJob
+	if rf, ok := ret.Get(0).(func(*models.Job) types.IJob); ok {
+		r0 = rf(job)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(types.IJob)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(*models.Job) error); ok {
+		r1 = rf(job)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
 // Period provides a mock function with given fields:

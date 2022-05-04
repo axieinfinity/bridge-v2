@@ -32,9 +32,9 @@ const (
 	DEPOSIT_TASK      = "deposit"
 	WITHDRAWAL_TASK   = "withdrawal"
 
-	STATUS_PROCESSING = "processing"
-	STATUS_FAILED     = "failed"
-	STATUS_DONE       = "done"
+	STATUS_PENDING = "pending"
+	STATUS_FAILED  = "failed"
+	STATUS_DONE    = "done"
 
 	GATEWAY_CONTRACT     = "Gateway"
 	BRIDGEADMIN_CONTRACT = "BridgeAdmin"
@@ -62,6 +62,8 @@ type IListener interface {
 
 	GetListenHandleJob(subscriptionName string, tx ITransaction, data []byte) IJob
 	SendCallbackJobs(listeners map[string]IListener, subscriptionName string, tx ITransaction, inputData []byte, jobChan chan<- IJob)
+
+	NewJobFromDB(job *models.Job) (IJob, error)
 
 	Start()
 	Close()
@@ -124,6 +126,9 @@ type IJob interface {
 	GetTransaction() ITransaction
 
 	FromChainID() *big.Int
+
+	Save() error
+	Update(string) error
 }
 
 type ITask interface {
@@ -139,8 +144,8 @@ type IJobStore interface {
 }
 
 type IProcessedBlockStore interface {
-	Save(height int64) error
-	GetLatestBlock() (int64, error)
+	Save(chainId string, height int64) error
+	GetLatestBlock(chainId string) (int64, error)
 }
 
 type ITaskStore interface {

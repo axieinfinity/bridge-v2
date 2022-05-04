@@ -136,6 +136,9 @@ func (c *Controller) LoadABIsFromConfig(lsConfig *types.LsConfig) (err error) {
 }
 
 func (c *Controller) prepareJob(job types.IJob) error {
+	if job.GetID() == 0 {
+		return job.Save()
+	}
 	return nil
 }
 
@@ -149,12 +152,22 @@ func (c *Controller) Start() error {
 			select {
 			case job := <-c.SuccessJobChan:
 				log.Info("process job success", "id", job.GetID())
+				if err := job.Update(types.STATUS_DONE); err != nil {
+					log.Error("[Controller] failed on updating success job", "err", err, "jobType", job.GetType(), "tx", job.GetTransaction().GetHash().Hex())
+					// send back job to successJobChan
+					c.SuccessJobChan <- job
+				}
 			case job := <-c.FailedJobChan:
 				log.Info("process job failed", "id", job.GetID())
+				if err := job.Update(types.STATUS_FAILED); err != nil {
+					log.Error("[Controller] failed on updating failed job", "err", err, "jobType", job.GetType(), "tx", job.GetTransaction().GetHash().Hex())
+					// send back job to failedJobChan
+					c.FailedJobChan <- job
+				}
 			case job := <-c.PrepareJobChan:
-				// TODO: add job into database before sending job to jobChan
+				// add new job to database before processing
 				if err := c.prepareJob(job); err != nil {
-					// TODO: log here...
+					log.Error("[Controller] failed on preparing job", "err", err, "jobType", job.GetType(), "tx", job.GetTransaction().GetHash().Hex())
 					continue
 				}
 				c.JobChan <- job
@@ -165,15 +178,17 @@ func (c *Controller) Start() error {
 					continue
 				}
 				c.processedJobs.Store(hash, struct{}{})
-				log.Info("jobChan received a job", "jobId", job.GetID(), "nextTry", job.GetNextTry(), "type", job.GetType())
+				log.Info("[Controller] jobChan received a job", "jobId", job.GetID(), "nextTry", job.GetNextTry(), "type", job.GetType())
 				workerCh := <-c.Queue
 				workerCh <- job
 			case <-c.ctx.Done():
 				c.lock.Lock()
 				jobs := make([]types.IJob, 0)
 				for job := range c.PrepareJobChan {
-					// TODO: store all jobs to database via prepare ...
-					c.prepareJob(job)
+					if err := c.prepareJob(job); err != nil {
+						log.Error("[Controller] error while storing all jobs from prepareJobChan to database in closing step", "err", err, "jobType", job.GetType(), "tx", job.GetTransaction().GetHash().Hex())
+						continue
+					}
 					jobs = append(jobs, job)
 				}
 				close(c.PrepareJobChan)
@@ -200,6 +215,26 @@ func (c *Controller) Start() error {
 		}
 	}()
 
+	// load all pending jobs from database
+	jobs, err := c.store.GetJobStore().GetPendingJobs()
+	if err != nil {
+		// just log and do nothing.
+		log.Error("[Controller] error while getting pending jobs from database", "err", err)
+	}
+	for _, job := range jobs {
+		listener, ok := c.listeners[job.Listener]
+		if !ok {
+			continue
+		}
+		j, err := listener.NewJobFromDB(job)
+		if err != nil {
+			log.Error("[Controller] error while init job from db", "err", err, "jobId", job.ID)
+			continue
+		}
+		// add job to jobChan
+		c.JobChan <- j
+	}
+
 	// run all events listeners
 	for _, listener := range c.listeners {
 		go listener.Start()
@@ -218,6 +253,7 @@ func (c *Controller) Start() error {
 	return nil
 }
 
+// startListener starts listening events for a listener, it comes with a tryCount which close this listener if tryCount reaches 10 times
 func (c *Controller) startListener(listener types.IListener, tryCount int) {
 	// panic when tryCount reaches 10 times panic
 	if tryCount >= 10 {
@@ -251,7 +287,7 @@ func (c *Controller) startListener(listener types.IListener, tryCount int) {
 			currentBlock = listener.GetCurrentBlock()
 		}
 	}
-
+	// start listening to block's events
 	tick := time.NewTicker(listener.Period())
 	for {
 		select {
