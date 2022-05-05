@@ -1,23 +1,24 @@
 {
   "listeners": {
     "RoninListener": {
-      "rpcUrl": "",
+      "chainId": "0x7e5",
+      "rpcUrl": "https://ronin-node.skymavis.com/rpc",
       "blockTime": 3,
       "safeBlockRange": 3,
       "secret": {
         "validator": "",
         "relayer": ""
       },
-      "fromHeight": 6508284,
+      "fromHeight": 6541440,
       "contracts": {
         "Gateway": "0x03d1F13c7391F6B5A651143a31034cf728A93694"
       },
       "subscriptions": {
         "MainchainWithdrewSubscription": {
-          "address": "0x03d1F13c7391F6B5A651143a31034cf728A93694",
-          "type": 0,
+          "to": "0x03d1F13c7391F6B5A651143a31034cf728A93694",
+          "type": 1,
           "handler": {
-            "abi": "./contracts/ronin/RoninGatewayV2.abi",
+            "abi": "contracts/ronin/RoninGatewayV2.abi",
             "name": "MainchainWithdrew"
           },
           "callbacks": {
@@ -25,10 +26,10 @@
           }
         },
         "WithdrawalRequestedSubscription": {
-          "address": "0x03d1F13c7391F6B5A651143a31034cf728A93694",
-          "type": 0,
+          "to": "0x03d1F13c7391F6B5A651143a31034cf728A93694",
+          "type": 1,
           "handler": {
-            "abi": "./contracts/ronin/RoninGatewayV2.abi",
+            "abi": "contracts/ronin/RoninGatewayV2.abi",
             "name": "WithdrawalRequested"
           },
           "callbacks": {
@@ -36,10 +37,10 @@
           }
         },
         "WithdrawalSignaturesRequestedSubscription": {
-          "address": "0x03d1F13c7391F6B5A651143a31034cf728A93694",
-          "type": 0,
+          "to": "0x03d1F13c7391F6B5A651143a31034cf728A93694",
+          "type": 1,
           "handler": {
-            "abi": "./contracts/ronin/RoninGatewayV2.abi",
+            "abi": "contracts/ronin/RoninGatewayV2.abi",
             "name": "WithdrawalSignaturesRequested"
           },
           "callbacks": {
@@ -47,44 +48,14 @@
           }
         }
       }
-    },
-    "EthereumListener": {
-      "rpcUrl": "",
-      "blockTime": 15,
-      "safeBlockRange": 8,
-      "secret": {
-        "validator": "",
-        "relayer": ""
-      },
-      "fromHeight": 12234008,
-      "contracts": {
-        "Gateway": "0x03d1F13c7391F6B5A651143a31034cf728A93694"
-      },
-      "subscriptions": {
-        "DepositRequestedSubscription": {
-          "address": "0x3b6371EB912bFd5C0E249A16000ffbC6B881555A",
-          "type": 0,
-          "handler": {
-            "abi": "./contracts/mainchain/MainchainGatewayV2.abi",
-            "name": "DepositRequested"
-          },
-          "callbacks": {
-            "RoninListener": "DepositRequestedCallback"
-          }
-        },
-        "WithdrewSubscription": {
-          "address": "0x3b6371EB912bFd5C0E249A16000ffbC6B881555A",
-          "type": 0,
-          "handler": {
-            "abi": "./contracts/mainchain/MainchainGatewayV2.abi",
-            "name": "Withdrew"
-          },
-          "callbacks": {
-            "RoninListener": "WithdrewCallback"
-          }
-        }
-      }
     }
   },
-  "numberOfWorkers": 1024
+  "numberOfWorkers": 1024,
+  "database": {
+    "host": "localhost",
+    "user": "postgres",
+    "password": "example",
+    "dbName": "bridge",
+    "port": 5432
+  }
 }
