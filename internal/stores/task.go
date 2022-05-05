@@ -29,6 +29,6 @@ func (t *TaskStore) GetPendingTasks(chain string, limit int) ([]*models.Task, er
 	err := t.Model(&models.Task{}).
 		Where("chain_id = ? AND status = ?", chain, types.STATUS_PENDING).
 		Order("created_at + POWER(2, retries) * 10 ASC").
-		Limit(limit).Find(tasks).Error
+		Limit(limit).Find(&tasks).Error
 	return tasks, err
 }

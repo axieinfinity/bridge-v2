@@ -19,12 +19,12 @@ func (j *JobStore) Save(job *models.Job) error {
 }
 
 func (j *JobStore) Update(job *models.Job) error {
-	return j.Updates(job).Error
+	return j.Model(models.Job{}).Where("id = ?", job.ID).Updates(job).Error
 }
 
 func (j *JobStore) GetPendingJobs() ([]*models.Job, error) {
 	// query all pending jobs
 	var jobs []*models.Job
-	err := j.Model(&models.Job{}).Where("status = ?", types.STATUS_PENDING).Find(jobs).Error
+	err := j.Model(&models.Job{}).Where("status = ?", types.STATUS_PENDING).Find(&jobs).Error
 	return jobs, err
 }

@@ -23,6 +23,6 @@ func (w *WithdrawalStore) Update(withdraw *models.Withdrawal) error {
 
 func (w *WithdrawalStore) GetWithdrawalById(withdrawalId int64) (*models.Withdrawal, error) {
 	var withdraw *models.Withdrawal
-	err := w.Model(&models.Withdrawal{}).Where("withdrawal_id = ?", withdrawalId).First(withdraw).Error
+	err := w.Model(&models.Withdrawal{}).Where("withdrawal_id = ?", withdrawalId).First(&withdraw).Error
 	return withdraw, err
 }

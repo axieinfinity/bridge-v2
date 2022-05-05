@@ -28,6 +28,7 @@ func NewMainStore(db *gorm.DB) *MainStore {
 		TaskStore:           NewTaskStore(db),
 		ProcessedBlockStore: NewProcessedBlockStore(db),
 		DepositStore:        NewDepositStore(db),
+		WithdrawalStore:     NewWithdrawalStore(db),
 	}
 	m := []interface{}{
 		&models.Deposit{},

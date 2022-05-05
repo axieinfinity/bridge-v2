@@ -19,7 +19,7 @@ func (b *ProcessedBlockStore) Save(chainId string, height int64) error {
 
 func (b *ProcessedBlockStore) GetLatestBlock(chainId string) (int64, error) {
 	var block *models.ProcessedBlock
-	if err := b.Model(&models.ProcessedBlock{}).Where("chain_id = ?", chainId).Last(block).Error; err != nil {
+	if err := b.Model(&models.ProcessedBlock{}).Where("chain_id = ?", chainId).Last(&block).Error; err != nil {
 		return -1, err
 	}
 	return block.Block, nil
