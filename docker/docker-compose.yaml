@@ -1,0 +1,40 @@
+# Use postgres/example user/password credentials
+version: '3.1'
+
+services:
+
+  db:
+    image: postgres
+    restart: always
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_PASSWORD: example
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+
+  bridge:
+    build:
+      context: ../../
+      dockerfile: docker/chainnode/Dockerfile
+    restart: always
+    environment:
+      - RONIN_RPC=${RONIN_RPC}
+      - RONIN_VALIDATOR_KEY=${RONIN_VALIDATOR_KEY}
+      - RONIN_RELAYER_KEY=${RONIN_RELAYER_KEY}
+      - ETHEREUM_RPC=${ETHEREUM_RPC}
+      - ETHEREUM_VALIDATOR_KEY=${ETHEREUM_VALIDATOR_KEY}
+      - ETHEREUM_RELAYER_KEY=${ETHEREUM_RELAYER_KEY}
+      - DB_NAME=${DB_NAME}
+      - DB_PORT=${DB_PORT}
+      - DB_NAME=${DB_NAME}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - VERBOSITY=${VERBOSITY}
+      - CONFIG_PATH=${CONFIG_PATH}
+    depends_on:
+      - db

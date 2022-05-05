@@ -1,7 +1,3 @@
-GOBIN = ./build/bin
-GO ?= latest
-GORUN = go run
-
 mock: ## generate mock
 	mockery --output internal/mocks/types --dir internal/types --name IListener
 	mockery --output internal/mocks/types --dir internal/types --name ITransaction
@@ -18,3 +14,9 @@ abigen:
 	abigen --abi=./contracts/ethereum/MainchainGatewayV2.abi --pkg=gateway --out=./generated_contracts/ethereum/gateway/mainchain_gateway_v2.go
 	abigen --abi=./contracts/ronin/RoninGatewayV2.abi --pkg=gateway --out=./generated_contracts/ronin/gateway/ronin_gateway_v2.go
 	abigen --abi=./contracts/common/RoninValidator.abi --pkg=validator --out=./generated_contracts/ronin/validator/ronin_validator.go
+
+bridge:
+	go install ./cmd/bridge
+	@echo "Done building."
+	@echo "Run \"bridge\" to launch bridge."
+

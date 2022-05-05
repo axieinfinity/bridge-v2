@@ -21,7 +21,7 @@ var (
 		Usage: "path to config file",
 	}
 	LogLvlFlag = cli.IntFlag{
-		Name:  "logLvl",
+		Name:  "verbosity",
 		Usage: "log level",
 	}
 )

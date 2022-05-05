@@ -1,0 +1,32 @@
+# Build Geth in a stock Go builder container
+FROM golang:1.17.0-alpine3.13 as builder
+
+RUN apk add --no-cache make gcc musl-dev linux-headers git
+
+COPY . /opt
+RUN cd /opt && make bridge
+
+FROM alpine:3.13
+
+RUN apk add --no-cache ca-certificates
+WORKDIR "/opt"
+
+ENV CONFIG_PATH ''
+ENV RONIN_RPC ''
+ENV RONIN_VALIDATOR_KEY ''
+ENV RONIN_RELAYER_KEY ''
+ENV ETHEREUM_RPC ''
+ENV ETHEREUM_VALIDATOR_KEY ''
+ENV ETHEREUM_RELAYER_KEY ''
+ENV VERBOSITY 3
+
+ENV DB_HOST ''
+ENV DB_PORT ''
+ENV DB_NAME ''
+ENV DB_USERNAME ''
+ENV DB_PASSWORD ''
+
+COPY --from=builder /opt/config/ ./
+COPY --from=builder /opt/docker/entrypoint.sh ./
+
+ENTRYPOINT ["./entrypoint.sh"]
