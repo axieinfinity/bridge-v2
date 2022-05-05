@@ -1,22 +1,69 @@
 package main
 
 import (
+	"encoding/json"
+	"fmt"
+	"github.com/axieinfinity/bridge-v2/internal"
 	"github.com/axieinfinity/bridge-v2/internal/stores"
 	"github.com/axieinfinity/bridge-v2/internal/types"
+	"gopkg.in/urfave/cli.v1"
+	"io/ioutil"
+	"os"
+	"os/signal"
+	"syscall"
 )
 
-func main() {
-	cfg := &types.Config{
-		DB: types.Database{
-			Host:     "localhost",
-			User:     "postgres",
-			Password: "example",
-			DBName:   "bridge",
-			Port:     5432,
-		}}
+var (
+	app        = NewApp("", "", "the bridge-v2 command interface")
+	ConfigFlag = cli.StringFlag{
+		Name:  "config",
+		Usage: "path to config file",
+	}
+)
+
+func init() {
+	app.Action = bridge
+	app.HideVersion = true // we have a command to print the version
+	app.Copyright = "Copyright 2022 The Sky Mavis Authors"
+	app.Flags = append(app.Flags, ConfigFlag)
+}
+
+func bridge(ctx *cli.Context) {
+	if !ctx.GlobalIsSet(ConfigFlag.Name) {
+		panic("config path must be defined")
+	}
+	plan, _ := ioutil.ReadFile(ctx.GlobalString(ConfigFlag.Name))
+	var cfg *types.Config
+	if err := json.Unmarshal(plan, &cfg); err != nil {
+		panic(err)
+	}
+	// init db
 	db, err := stores.MustConnectDatabase(cfg)
 	if err != nil {
 		panic(err)
 	}
-	stores.NewMainStore(db)
+	controller, err := internal.New(cfg, db, nil)
+	if err != nil {
+		panic(err)
+	}
+	if err = controller.Start(); err != nil {
+		panic(err)
+	}
+	go func() {
+		sigc := make(chan os.Signal, 1)
+		signal.Notify(sigc, syscall.SIGINT, syscall.SIGTERM)
+		defer signal.Stop(sigc)
+		select {
+		case <-sigc:
+			controller.Close()
+		}
+	}()
+	controller.Wait()
+}
+
+func main() {
+	if err := app.Run(os.Args); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
 }
