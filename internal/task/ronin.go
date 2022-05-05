@@ -185,86 +185,117 @@ func (r *BulkTask) send() (errCh chan error) {
 	)
 	switch r.taskType {
 	case types.DEPOSIT_TASK:
-		successTasks, failedTasks, err = r.sendDepositTransaction()
+		successTasks, failedTasks = r.sendDepositTransaction()
 	case types.WITHDRAWAL_TASK:
-		successTasks, failedTasks, err = r.sendWithdrawalSignaturesTransaction()
+		successTasks, failedTasks = r.sendWithdrawalSignaturesTransaction()
 	case types.ACK_WITHDREW_TASK:
-		successTasks, failedTasks, err = r.SendAckTransactions()
+		successTasks, failedTasks = r.SendAckTransactions()
 	}
 	errCh <- err
-	if err = updateTasks(r.store, successTasks, types.STATUS_DONE, ""); err != nil {
+	if err = updateTasks(r.store, successTasks, types.STATUS_DONE); err != nil {
 		// TODO: log here...
 	}
-	if err = updateTasks(r.store, failedTasks, types.STATUS_FAILED, err.Error()); err != nil {
+	if err = updateTasks(r.store, failedTasks, types.STATUS_FAILED); err != nil {
 		// TODO: log here...
 	}
 	return
 }
 
-func (r *BulkTask) sendDepositTransaction() ([]*models.Task, []*models.Task, error) {
-	receipts := make([]gateway2.TransferReceipt, 0)
+func (r *BulkTask) sendDepositTransaction() ([]*models.Task, []*models.Task) {
+	var (
+		successTasks, failedTasks []*models.Task
+		receipts                  []gateway2.TransferReceipt
+	)
+
 	for _, t := range r.tasks {
 		ethEvent := new(gateway.GatewayDepositRequested)
 		ethGatewayAbi, err := gateway.GatewayMetaData.GetAbi()
 		if err != nil {
-			return nil, r.tasks, err
+			t.LastError = err.Error()
+			failedTasks = append(failedTasks, t)
+			continue
 		}
 
 		data := common.Hex2Bytes(t.Data)
 		if err = ethGatewayAbi.UnpackIntoInterface(ethEvent, "DepositRequested", data); err != nil {
-			return nil, r.tasks, err
+			t.LastError = err.Error()
+			failedTasks = append(failedTasks, t)
+			continue
 		}
+		// append task into success tasks
+		successTasks = append(successTasks, t)
 
+		// append new receipt into receipts slice
 		receipts = append(receipts, gateway2.TransferReceipt{
-			Id:   ethEvent.Arg1.Id,
-			Kind: ethEvent.Arg1.Kind,
+			Id:   ethEvent.Receipt.Id,
+			Kind: ethEvent.Receipt.Kind,
 			Mainchain: gateway2.TokenOwner{
-				Addr:      ethEvent.Arg1.Mainchain.Addr,
-				TokenAddr: ethEvent.Arg1.Mainchain.TokenAddr,
-				ChainId:   ethEvent.Arg1.Mainchain.ChainId,
+				Addr:      ethEvent.Receipt.Mainchain.Addr,
+				TokenAddr: ethEvent.Receipt.Mainchain.TokenAddr,
+				ChainId:   ethEvent.Receipt.Mainchain.ChainId,
 			},
 			Ronin: gateway2.TokenOwner{
-				Addr:      ethEvent.Arg1.Ronin.Addr,
-				TokenAddr: ethEvent.Arg1.Ronin.TokenAddr,
-				ChainId:   ethEvent.Arg1.Ronin.ChainId,
+				Addr:      ethEvent.Receipt.Ronin.Addr,
+				TokenAddr: ethEvent.Receipt.Ronin.TokenAddr,
+				ChainId:   ethEvent.Receipt.Ronin.ChainId,
 			},
 			Info: gateway2.TokenInfo{
-				Erc:      ethEvent.Arg1.Info.Erc,
-				Id:       ethEvent.Arg1.Info.Id,
-				Quantity: ethEvent.Arg1.Info.Quantity,
+				Erc:      ethEvent.Receipt.Info.Erc,
+				Id:       ethEvent.Receipt.Info.Id,
+				Quantity: ethEvent.Receipt.Info.Quantity,
 			},
 		})
 	}
 	// send tx with above receipts
 	c, err := gateway2.NewGatewayTransactor(r.contractAddress, r.client)
 	if err != nil {
-		return nil, r.tasks, err
+		// append all success tasks into failed tasks
+		for _, t := range successTasks {
+			t.LastError = err.Error()
+			failedTasks = append(failedTasks, t)
+		}
+		return nil, failedTasks
 	}
 	tx, err := r.util.SendContractTransaction(r.validator, r.chainId, func(opts *bind.TransactOpts) (*ethtypes.Transaction, error) {
 		return c.BulkDepositFor(opts, receipts)
 	})
 	if err != nil {
-		return nil, r.tasks, err
+		for _, t := range successTasks {
+			t.LastError = err.Error()
+			failedTasks = append(failedTasks, t)
+		}
+		return nil, failedTasks
 	}
 	if err = r.util.SubscribeTransactionReceipt(r.client, tx, r.ticker, r.maxTry); err != nil {
-		return nil, r.tasks, err
+		for _, t := range successTasks {
+			t.LastError = err.Error()
+			failedTasks = append(failedTasks, t)
+		}
+		return nil, failedTasks
 	}
-	return r.tasks, nil, err
+	return successTasks, failedTasks
 }
 
-func (r *BulkTask) sendWithdrawalSignaturesTransaction() ([]*models.Task, []*models.Task, error) {
-	ids := make([]*big.Int, 0)
-	signatures := make([][]byte, 0)
+func (r *BulkTask) sendWithdrawalSignaturesTransaction() (successTasks []*models.Task, failedTasks []*models.Task) {
+
+	var (
+		ids        []*big.Int
+		signatures [][]byte
+	)
 
 	for _, t := range r.tasks {
 		// Unpack event from data
 		ronEvent := new(gateway2.GatewayMainchainWithdrew)
 		ronGatewayAbi, err := gateway2.GatewayMetaData.GetAbi()
 		if err != nil {
-			return nil, r.tasks, err
+			t.LastError = err.Error()
+			failedTasks = append(failedTasks, t)
+			continue
 		}
 		if err = ronGatewayAbi.UnpackIntoInterface(ronEvent, "MainchainWithdrew", common.Hex2Bytes(t.Data)); err != nil {
-			return nil, r.tasks, err
+			t.LastError = err.Error()
+			failedTasks = append(failedTasks, t)
+			continue
 		}
 		receipt := ronEvent.Receipt
 		typedData := apitypes.TypedData{
@@ -284,75 +315,96 @@ func (r *BulkTask) sendWithdrawalSignaturesTransaction() ([]*models.Task, []*mod
 		}
 		sigs, err := r.util.SignTypedData(typedData, r.validator)
 		if err != nil {
-			return nil, r.tasks, err
+			t.LastError = err.Error()
+			failedTasks = append(failedTasks, t)
+			continue
 		}
 		signatures = append(signatures, sigs)
 		ids = append(ids, receipt.Id)
+		successTasks = append(successTasks, t)
 	}
 	c, err := gateway2.NewGatewayTransactor(r.contractAddress, r.client)
 	if err != nil {
-		return nil, r.tasks, err
+		// append all success tasks into failed tasks
+		for _, t := range successTasks {
+			t.LastError = err.Error()
+			failedTasks = append(failedTasks, t)
+		}
+		return nil, failedTasks
 	}
 	tx, err := r.util.SendContractTransaction(r.validator, r.chainId, func(opts *bind.TransactOpts) (*ethtypes.Transaction, error) {
 		return c.BulkSubmitWithdrawalSignatures(opts, ids, signatures)
 	})
 	if err != nil {
-		return nil, r.tasks, err
+		// append all success tasks into failed tasks
+		for _, t := range successTasks {
+			t.LastError = err.Error()
+			failedTasks = append(failedTasks, t)
+		}
+		return nil, failedTasks
 	}
 	if err = r.util.SubscribeTransactionReceipt(r.client, tx, r.ticker, r.maxTry); err != nil {
-		return nil, r.tasks, err
+		// append all success tasks into failed tasks
+		for _, t := range successTasks {
+			t.LastError = err.Error()
+			failedTasks = append(failedTasks, t)
+		}
+		return nil, failedTasks
 	}
-	return r.tasks, nil, r.util.SubscribeTransactionReceipt(r.client, tx, r.ticker, r.maxTry)
+	return
 }
 
-func (r *BulkTask) SendAckTransactions() ([]*models.Task, []*models.Task, error) {
-	var (
-		success = make([]*models.Task, 0)
-		failed  = make([]*models.Task, 0)
-		err     error
-	)
+func (r *BulkTask) SendAckTransactions() (successTasks []*models.Task, failedTasks []*models.Task) {
+	var ids []*big.Int
 	c, err := gateway2.NewGatewayTransactor(r.contractAddress, r.client)
 	if err != nil {
-		return nil, r.tasks, err
+		for _, t := range r.tasks {
+			t.LastError = err.Error()
+		}
+		return nil, r.tasks
 	}
 	for _, t := range r.tasks {
 		// Unpack event data
 		ethEvent := new(gateway.GatewayWithdrew)
 		ethGatewayAbi, err := gateway.GatewayMetaData.GetAbi()
 		if err != nil {
-			// TODO: log here...
 			t.LastError = err.Error()
-			failed = append(failed, t)
+			failedTasks = append(failedTasks, t)
 			continue
 		}
 
 		if err = ethGatewayAbi.UnpackIntoInterface(ethEvent, "Withdrew", common.Hex2Bytes(t.Data)); err != nil {
 			// TODO: log here...
 			t.LastError = err.Error()
-			failed = append(failed, t)
+			failedTasks = append(failedTasks, t)
 			continue
 		}
-		tx, err := r.util.SendContractTransaction(r.validator, r.chainId, func(opts *bind.TransactOpts) (*ethtypes.Transaction, error) {
-			return c.AcknowledgeMainchainWithdrew(nil, ethEvent.Receipt.Id)
-		})
-		if err != nil {
-			// TODO: log here...
-			t.LastError = err.Error()
-			failed = append(failed, t)
-			continue
-		}
-		if err = r.util.SubscribeTransactionReceipt(r.client, tx, r.ticker, r.maxTry); err != nil {
-			// TODO: log here...
-			t.LastError = err.Error()
-			failed = append(failed, t)
-			continue
-		}
-		success = append(success, t)
+		ids = append(ids, ethEvent.Receipt.Id)
+		successTasks = append(successTasks, t)
 	}
-	return success, failed, err
+	tx, err := r.util.SendContractTransaction(r.validator, r.chainId, func(opts *bind.TransactOpts) (*ethtypes.Transaction, error) {
+		return c.BulkAcknowledgeMainchainWithdrew(nil, ids)
+	})
+	if err != nil {
+		// append all success tasks into failed tasks
+		for _, t := range successTasks {
+			t.LastError = err.Error()
+			failedTasks = append(failedTasks, t)
+		}
+		return nil, failedTasks
+	}
+	if err = r.util.SubscribeTransactionReceipt(r.client, tx, r.ticker, r.maxTry); err != nil {
+		// append all success tasks into failed tasks
+		for _, t := range successTasks {
+			t.LastError = err.Error()
+			failedTasks = append(failedTasks, t)
+		}
+		return nil, failedTasks
+	}
+	return
 }
 
-func updateTasks(store types.IMainStore, tasks []*models.Task, status, err string) error {
+func updateTasks(store types.IMainStore, tasks []*models.Task, status string) error {
 	// update tasks with given status
 	// note: if task.retries < 10 then retries++ and status still be processing
 	for _, t := range tasks {
@@ -361,9 +413,6 @@ func updateTasks(store types.IMainStore, tasks []*models.Task, status, err strin
 				t.Status = status
 			} else {
 				t.Retries += 1
-			}
-			if t.LastError == "" {
-				t.LastError = err
 			}
 		} else {
 			t.Status = status

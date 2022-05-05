@@ -192,6 +192,7 @@ type Database struct {
 }
 
 type LsConfig struct {
+	ChainId        string        `json:"chainId"`
 	Name           string        `json:"-"`
 	RpcUrl         string        `json:"rpcUrl"`
 	LoadInterval   time.Duration `json:"blockTime"`
