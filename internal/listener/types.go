@@ -9,6 +9,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/log"
 	"math/big"
 	"time"
 )
@@ -282,7 +283,7 @@ func (e *BaseJob) Update(status string) error {
 		CreatedAt:        time.Now().Unix(),
 		FromChainId:      hexutil.EncodeBig(e.fromChainID),
 	}
-	if err := e.listener.GetStore().GetJobStore().Save(job); err != nil {
+	if err := e.listener.GetStore().GetJobStore().Update(job); err != nil {
 		return err
 	}
 	return nil
@@ -348,6 +349,7 @@ func NewEthCallbackJob(listener types.IListener, method string, tx types.ITransa
 }
 
 func (e *EthCallbackJob) Process() ([]byte, error) {
+	log.Info("[EthCallbackJob] Start Process", "method", e.method, "jobId", e.id)
 	val, err := e.utilsWrapper.Invoke(e.listener, e.method, e.tx, e.data)
 	if err != nil {
 		return nil, err
@@ -357,4 +359,24 @@ func (e *EthCallbackJob) Process() ([]byte, error) {
 		return nil, invokeErr
 	}
 	return nil, nil
+}
+
+func (e *EthCallbackJob) Update(status string) error {
+	job := &models.Job{
+		ID:               int(e.id),
+		Listener:         e.listener.GetName(),
+		SubscriptionName: e.subscriptionName,
+		Type:             e.jobType,
+		RetryCount:       e.retryCount,
+		Status:           status,
+		Data:             common.Bytes2Hex(e.data),
+		Transaction:      e.tx.GetHash().Hex(),
+		CreatedAt:        time.Now().Unix(),
+		FromChainId:      hexutil.EncodeBig(e.fromChainID),
+		Method:           e.method,
+	}
+	if err := e.listener.GetStore().GetJobStore().Update(job); err != nil {
+		return err
+	}
+	return nil
 }

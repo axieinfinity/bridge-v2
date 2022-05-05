@@ -40,7 +40,7 @@ type IUtils interface {
 	Title(text string) string
 	NewEthClient(url string) (EthClient, error)
 	SendContractTransaction(key *ecdsa.PrivateKey, chainId *big.Int, fn func(opts *bind.TransactOpts) (*types.Transaction, error)) (*types.Transaction, error)
-	SubscribeTransactionReceipt(client *ethclient.Client, tx *types.Transaction, ticker *time.Ticker, maxTry int) (errCh chan error)
+	SubscribeTransactionReceipt(client *ethclient.Client, tx *types.Transaction, ticker *time.Ticker, maxTry int) error
 	SignTypedData(typedData apitypes.TypedData, privateKey *ecdsa.PrivateKey) (hexutil.Bytes, error)
 }
 
@@ -144,7 +144,7 @@ func (u *Utils) SendContractTransaction(key *ecdsa.PrivateKey, chainId *big.Int,
 	return fn(opts)
 }
 
-func (u *Utils) SubscribeTransactionReceipt(client *ethclient.Client, tx *types.Transaction, ticker *time.Ticker, maxTry int) (errCh chan error) {
+func (u *Utils) SubscribeTransactionReceipt(client *ethclient.Client, tx *types.Transaction, ticker *time.Ticker, maxTry int) error {
 	var (
 		receipt *types.Receipt
 		err     error
@@ -152,19 +152,27 @@ func (u *Utils) SubscribeTransactionReceipt(client *ethclient.Client, tx *types.
 	)
 	for count < maxTry {
 		<-ticker.C
-		receipt, err = client.TransactionReceipt(context.Background(), tx.Hash())
+		receipt, err = client.TransactionReceipt(context.Background(), tx.Hash()) // counter..
 		if receipt != nil {
-			if receipt.Status == 0 {
-				errCh <- errors.New("transaction failed")
-			} else {
-				errCh <- nil
+			// start confirmation step
+			// start 3 times confirmation
+			for i := 0; i < 3; i++ {
+				<-ticker.C
+				confirmedReceipt, _ := client.TransactionReceipt(context.Background(), tx.Hash())
+				if confirmedReceipt == nil { // receipt is not found, then reorg may happen then break and retry again
+					goto RETRY
+				}
 			}
-			return
+			// check receipt status
+			if receipt.Status == 0 {
+				return errors.New("transaction failed")
+			}
+			return nil
 		}
+	RETRY:
 		count++
 	}
-	errCh <- err
-	return
+	return err
 }
 
 // SignTypedData signs EIP-712 conformant typed data

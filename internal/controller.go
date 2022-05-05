@@ -10,10 +10,8 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/log"
 	"gorm.io/gorm"
-	"os"
-	"os/signal"
 	"sync"
-	"syscall"
+	"sync/atomic"
 	"time"
 )
 
@@ -56,7 +54,9 @@ type Controller struct {
 	MaxQueueSize int
 	cfg          *types.Config
 
-	store types.IMainStore
+	store    types.IMainStore
+	stop     chan struct{}
+	isClosed atomic.Value
 }
 
 func New(cfg *types.Config, db *gorm.DB, helpers utils.IUtils) (*Controller, error) {
@@ -77,7 +77,10 @@ func New(cfg *types.Config, db *gorm.DB, helpers utils.IUtils) (*Controller, err
 		MaxQueueSize:     defaultMaxQueueSize,
 		coolDownDuration: defaultCoolDownDuration,
 		store:            stores.NewMainStore(db),
+		stop:             make(chan struct{}),
+		isClosed:         atomic.Value{},
 	}
+	c.isClosed.Store(false)
 	if helpers != nil {
 		c.utilWrapper = helpers
 	}
@@ -142,6 +145,30 @@ func (c *Controller) prepareJob(job types.IJob) error {
 	return nil
 }
 
+func (c *Controller) processSuccessJob(job types.IJob) {
+	if job == nil {
+		return
+	}
+	log.Info("process job success", "id", job.GetID())
+	if err := job.Update(types.STATUS_DONE); err != nil {
+		log.Error("[Controller] failed on updating success job", "err", err, "jobType", job.GetType(), "tx", job.GetTransaction().GetHash().Hex())
+		// send back job to successJobChan
+		c.SuccessJobChan <- job
+	}
+}
+
+func (c *Controller) processFailedJob(job types.IJob) {
+	if job == nil {
+		return
+	}
+	log.Info("process job failed", "id", job.GetID())
+	if err := job.Update(types.STATUS_FAILED); err != nil {
+		log.Error("[Controller] failed on updating failed job", "err", err, "jobType", job.GetType(), "tx", job.GetTransaction().GetHash().Hex())
+		// send back job to failedJobChan
+		c.FailedJobChan <- job
+	}
+}
+
 func (c *Controller) Start() error {
 	for _, worker := range c.Workers {
 		go worker.start()
@@ -151,20 +178,14 @@ func (c *Controller) Start() error {
 		for {
 			select {
 			case job := <-c.SuccessJobChan:
-				log.Info("process job success", "id", job.GetID())
-				if err := job.Update(types.STATUS_DONE); err != nil {
-					log.Error("[Controller] failed on updating success job", "err", err, "jobType", job.GetType(), "tx", job.GetTransaction().GetHash().Hex())
-					// send back job to successJobChan
-					c.SuccessJobChan <- job
-				}
+				c.processSuccessJob(job)
 			case job := <-c.FailedJobChan:
-				log.Info("process job failed", "id", job.GetID())
-				if err := job.Update(types.STATUS_FAILED); err != nil {
-					log.Error("[Controller] failed on updating failed job", "err", err, "jobType", job.GetType(), "tx", job.GetTransaction().GetHash().Hex())
-					// send back job to failedJobChan
-					c.FailedJobChan <- job
-				}
+				c.processFailedJob(job)
 			case job := <-c.PrepareJobChan:
+				if job == nil {
+					continue
+				}
+				log.Info("receive new job", "isnil", job == nil)
 				// add new job to database before processing
 				if err := c.prepareJob(job); err != nil {
 					log.Error("[Controller] failed on preparing job", "err", err, "jobType", job.GetType(), "tx", job.GetTransaction().GetHash().Hex())
@@ -172,6 +193,9 @@ func (c *Controller) Start() error {
 				}
 				c.JobChan <- job
 			case job := <-c.JobChan:
+				if job == nil {
+					continue
+				}
 				// get 1 workerCh from queue and push job to this channel
 				hash := job.Hash()
 				if _, ok := c.processedJobs.Load(hash); ok {
@@ -182,34 +206,61 @@ func (c *Controller) Start() error {
 				workerCh := <-c.Queue
 				workerCh <- job
 			case <-c.ctx.Done():
-				c.lock.Lock()
-				jobs := make([]types.IJob, 0)
-				for job := range c.PrepareJobChan {
-					if err := c.prepareJob(job); err != nil {
-						log.Error("[Controller] error while storing all jobs from prepareJobChan to database in closing step", "err", err, "jobType", job.GetType(), "tx", job.GetTransaction().GetHash().Hex())
-						continue
-					}
-					jobs = append(jobs, job)
+				// prevent ctx.Done is called multiple times among routines.
+				if c.isClosed.Load().(bool) {
+					return
+				} else {
+					c.isClosed.Store(true)
 				}
+				// close all available channels
 				close(c.PrepareJobChan)
-				c.lock.Unlock()
-
-				// wait until all jobs are handled
-				for len(c.JobChan) > 0 {
-				}
-
-				// wait until all success jobs are handled
-				for len(c.SuccessJobChan) > 0 {
-				}
-
-				// wait until all failed jobs are handled
-				for len(c.FailedJobChan) > 0 {
-				}
-
 				close(c.JobChan)
 				close(c.SuccessJobChan)
 				close(c.FailedJobChan)
 				close(c.Queue)
+
+				for {
+					if len(c.PrepareJobChan) == 0 {
+						break
+					}
+					job, more := <-c.PrepareJobChan
+					if more {
+						if err := c.prepareJob(job); err != nil {
+							log.Error("[Controller] error while storing all jobs from prepareJobChan to database in closing step", "err", err, "jobType", job.GetType(), "tx", job.GetTransaction().GetHash().Hex())
+						}
+					} else {
+						break
+					}
+				}
+
+				// save all success jobs
+				for {
+					log.Info("checking successJobChan")
+					if len(c.SuccessJobChan) == 0 {
+						break
+					}
+					job, more := <-c.SuccessJobChan
+					if more {
+						c.processSuccessJob(job)
+					} else {
+						break
+					}
+				}
+
+				// wait until all failed jobs are handled
+				for {
+					if len(c.FailedJobChan) == 0 {
+						break
+					}
+					log.Info("checking failedJobChan")
+					job, more := <-c.FailedJobChan
+					if more {
+						c.processFailedJob(job)
+					} else {
+						break
+					}
+				}
+				c.stop <- struct{}{}
 				break
 			}
 		}
@@ -232,7 +283,9 @@ func (c *Controller) Start() error {
 			continue
 		}
 		// add job to jobChan
-		c.JobChan <- j
+		if j != nil {
+			c.JobChan <- j
+		}
 	}
 
 	// run all events listeners
@@ -240,17 +293,11 @@ func (c *Controller) Start() error {
 		go listener.Start()
 		go c.startListener(listener, 0)
 	}
-
-	go func() {
-		sigc := make(chan os.Signal, 1)
-		signal.Notify(sigc, syscall.SIGINT, syscall.SIGTERM)
-		defer signal.Stop(sigc)
-		select {
-		case <-sigc:
-			c.Close()
-		}
-	}()
 	return nil
+}
+
+func (c *Controller) Wait() {
+	<-c.stop
 }
 
 // startListener starts listening events for a listener, it comes with a tryCount which close this listener if tryCount reaches 10 times
@@ -376,5 +423,10 @@ func (c *Controller) LoadAbi(path string) (*abi.ABI, error) {
 }
 
 func (c *Controller) Close() {
-	c.cancelFunc()
+	// load isClosed
+	val := c.isClosed.Load().(bool)
+	if !val {
+		log.Info("closing")
+		c.cancelFunc()
+	}
 }

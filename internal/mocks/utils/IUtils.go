@@ -174,16 +174,14 @@ func (_m *IUtils) SignTypedData(typedData apitypes.TypedData, privateKey *ecdsa.
 }
 
 // SubscribeTransactionReceipt provides a mock function with given fields: client, tx, ticker, maxTry
-func (_m *IUtils) SubscribeTransactionReceipt(client *ethclient.Client, tx *types.Transaction, ticker *time.Ticker, maxTry int) chan error {
+func (_m *IUtils) SubscribeTransactionReceipt(client *ethclient.Client, tx *types.Transaction, ticker *time.Ticker, maxTry int) error {
 	ret := _m.Called(client, tx, ticker, maxTry)
 
-	var r0 chan error
-	if rf, ok := ret.Get(0).(func(*ethclient.Client, *types.Transaction, *time.Ticker, int) chan error); ok {
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*ethclient.Client, *types.Transaction, *time.Ticker, int) error); ok {
 		r0 = rf(client, tx, ticker, maxTry)
 	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(chan error)
-		}
+		r0 = ret.Error(0)
 	}
 
 	return r0

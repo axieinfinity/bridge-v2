@@ -246,7 +246,7 @@ func (r *BulkTask) sendDepositTransaction() ([]*models.Task, []*models.Task, err
 	if err != nil {
 		return nil, r.tasks, err
 	}
-	if err = <-r.util.SubscribeTransactionReceipt(r.client, tx, r.ticker, r.maxTry); err != nil {
+	if err = r.util.SubscribeTransactionReceipt(r.client, tx, r.ticker, r.maxTry); err != nil {
 		return nil, r.tasks, err
 	}
 	return r.tasks, nil, err
@@ -299,10 +299,10 @@ func (r *BulkTask) sendWithdrawalSignaturesTransaction() ([]*models.Task, []*mod
 	if err != nil {
 		return nil, r.tasks, err
 	}
-	if err = <-r.util.SubscribeTransactionReceipt(r.client, tx, r.ticker, r.maxTry); err != nil {
+	if err = r.util.SubscribeTransactionReceipt(r.client, tx, r.ticker, r.maxTry); err != nil {
 		return nil, r.tasks, err
 	}
-	return r.tasks, nil, <-r.util.SubscribeTransactionReceipt(r.client, tx, r.ticker, r.maxTry)
+	return r.tasks, nil, r.util.SubscribeTransactionReceipt(r.client, tx, r.ticker, r.maxTry)
 }
 
 func (r *BulkTask) SendAckTransactions() ([]*models.Task, []*models.Task, error) {
@@ -341,7 +341,7 @@ func (r *BulkTask) SendAckTransactions() ([]*models.Task, []*models.Task, error)
 			failed = append(failed, t)
 			continue
 		}
-		if err = <-r.util.SubscribeTransactionReceipt(r.client, tx, r.ticker, r.maxTry); err != nil {
+		if err = r.util.SubscribeTransactionReceipt(r.client, tx, r.ticker, r.maxTry); err != nil {
 			// TODO: log here...
 			t.LastError = err.Error()
 			failed = append(failed, t)

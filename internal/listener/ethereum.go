@@ -126,7 +126,11 @@ func (e *EthereumListener) GetProcessedBlock() (types.IBlock, error) {
 	if err != nil {
 		log.Error("[EthereumListener][GetLatestBlock] error while getting latest height from database", "err", err, "chainId", encodedChainId)
 	}
-	block, err := e.client.BlockByNumber(e.ctx, big.NewInt(height))
+	var blockNum *big.Int
+	if height > 0 {
+		blockNum = big.NewInt(height)
+	}
+	block, err := e.client.BlockByNumber(e.ctx, blockNum)
 	if err != nil {
 		return nil, err
 	}
@@ -221,8 +225,10 @@ func (e *EthereumListener) SendCallbackJobs(listeners map[string]types.IListener
 	}
 	subscription, ok := e.GetSubscriptions()[subscriptionName]
 	if !ok {
+		log.Info("[EthereumListener][SendCallbackJobs] cannot find subscription", "subscriptionName", subscriptionName)
 		return
 	}
+	log.Info("[EthereumListener][SendCallbackJobs] subscription found", "subscriptionName", subscriptionName, "numberOfCallbacks", len(subscription.CallBacks))
 	for listenerName, methodName := range subscription.CallBacks {
 		log.Info("[EthereumListener][SendCallbackJobs] Loop through callbacks", "subscriptionName", subscriptionName, "listenerName", listenerName, "methodName", methodName)
 		l := listeners[listenerName]
@@ -271,9 +277,13 @@ func (e *EthereumListener) NewJobFromDB(job *models.Job) (types.IJob, error) {
 				listener:         e,
 				utilsWrapper:     e.utilsWrapper,
 				fromChainID:      chainId,
+				id:               int32(job.ID),
 			},
 		}, nil
 	case types.CallbackHandler:
+		if job.Method != "" {
+			return nil, nil
+		}
 		return &EthCallbackJob{
 			BaseJob: &BaseJob{
 				utilsWrapper: e.utilsWrapper,
@@ -286,6 +296,7 @@ func (e *EthereumListener) NewJobFromDB(job *models.Job) (types.IJob, error) {
 				tx:           transaction,
 				listener:     e,
 				fromChainID:  chainId,
+				id:           int32(job.ID),
 			},
 			method: job.Method,
 		}, nil

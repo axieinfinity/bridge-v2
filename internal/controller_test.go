@@ -61,7 +61,7 @@ func LoadControllerConfig() *types.Config {
 			"TestListener": {
 				Name:           "firstListener",
 				RpcUrl:         "",
-				LoadInterval:   1,
+				LoadInterval:   3,
 				SafeBlockRange: uint64(0),
 				Secret: types.Secret{
 					Validator: "8843ebcb1021b00ae9a644db6617f9c6d870e5fd53624cefe374c1d2d710fd06",
@@ -156,6 +156,7 @@ func TestListenEvent(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	db.Debug()
 
 	// init controller
 	controller, err := New(cfg, db, helpers)
@@ -166,14 +167,15 @@ func TestListenEvent(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	for {
-		select {
-		case <-ch:
-			controller.Close()
-			return
+	go func() {
+		for {
+			select {
+			case <-ch:
+				controller.Close()
+			}
 		}
-	}
+	}()
+	controller.Wait()
 }
 
 // testHasher is the helper tool for transaction/receipt list hashing.
