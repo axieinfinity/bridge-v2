@@ -7,6 +7,7 @@ require (
 	github.com/stretchr/testify v1.7.1
 	golang.org/x/crypto v0.0.0-20220427172511-eb4f295cb31f
 	golang.org/x/text v0.3.7
+	gopkg.in/urfave/cli.v1 v1.20.0
 	gorm.io/driver/postgres v1.3.5
 	gorm.io/driver/sqlite v1.3.2
 	gorm.io/gorm v1.23.5

@@ -10,6 +10,7 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/log"
 	"gorm.io/gorm"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -173,7 +174,6 @@ func (c *Controller) Start() error {
 	for _, worker := range c.Workers {
 		go worker.start()
 	}
-	// TODO: load jobs from database and reprocess before start listener
 	go func() {
 		for {
 			select {
@@ -373,7 +373,7 @@ func (c *Controller) Process(listener types.IListener, latestBlock types.IBlock)
 		if subscribe.Handler == nil {
 			continue
 		}
-		log.Info("[Controller][Process] processing block", "block", latestBlock.GetHeight(), "txs", len(txs), "receipts", len(receipts), "subscribeType", subscribe.Type)
+		log.Info("[Controller][Process] processing block", "block", latestBlock.GetHeight(), "txs", len(txs), "receipts", len(receipts), "subscribeType", subscribe.Type, "name", name)
 		switch subscribe.Type {
 		case types.TxEvent:
 			for _, tx := range txs {
@@ -396,7 +396,7 @@ func (c *Controller) Process(listener types.IListener, latestBlock types.IBlock)
 					continue
 				}
 				tx := receipt.GetTransaction()
-				if subscribe.To != tx.GetToAddress() {
+				if !c.compareAddress(subscribe.To, tx.GetToAddress()) {
 					continue
 				}
 				log.Info("[Controller][Process] generating event job", "height", latestBlock.GetHeight())
@@ -408,6 +408,13 @@ func (c *Controller) Process(listener types.IListener, latestBlock types.IBlock)
 			}
 		}
 	}
+}
+
+func (c *Controller) compareAddress(src, dst string) bool {
+	// remove prefix (0x, ronin) and lower text
+	src = strings.ToLower(strings.Replace(strings.Replace(src, "0x", "", 1), "ronin:", "", 1))
+	dst = strings.ToLower(strings.Replace(strings.Replace(dst, "0x", "", 1), "ronin:", "", 1))
+	return src == dst
 }
 
 func (c *Controller) LoadAbi(path string) (*abi.ABI, error) {

@@ -8,7 +8,7 @@ import (
 
 func (c *Controller) InitEthereumListener(ctx context.Context, lsConfig *types.LsConfig, store types.IMainStore) *listener.EthereumListener {
 	ethListener, err := listener.NewEthereumListener(ctx, lsConfig, c.utilWrapper, store)
-	if err != nil || ethListener == nil {
+	if err != nil {
 		return nil
 	}
 	return ethListener
@@ -16,7 +16,7 @@ func (c *Controller) InitEthereumListener(ctx context.Context, lsConfig *types.L
 
 func (c *Controller) InitRoninListener(ctx context.Context, lsConfig *types.LsConfig, store types.IMainStore) *listener.RoninListener {
 	roninListener, err := listener.NewRoninListener(ctx, lsConfig, c.utilWrapper, store)
-	if err != nil || roninListener == nil {
+	if err != nil {
 		return nil
 	}
 	return roninListener

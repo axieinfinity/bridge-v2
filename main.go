@@ -6,6 +6,7 @@ import (
 	"github.com/axieinfinity/bridge-v2/internal"
 	"github.com/axieinfinity/bridge-v2/internal/stores"
 	"github.com/axieinfinity/bridge-v2/internal/types"
+	"github.com/ethereum/go-ethereum/log"
 	"gopkg.in/urfave/cli.v1"
 	"io/ioutil"
 	"os"
@@ -19,16 +20,28 @@ var (
 		Name:  "config",
 		Usage: "path to config file",
 	}
+	LogLvlFlag = cli.IntFlag{
+		Name:  "logLvl",
+		Usage: "log level",
+	}
 )
 
 func init() {
 	app.Action = bridge
 	app.HideVersion = true // we have a command to print the version
 	app.Copyright = "Copyright 2022 The Sky Mavis Authors"
-	app.Flags = append(app.Flags, ConfigFlag)
+	app.Flags = append(app.Flags, ConfigFlag, LogLvlFlag)
 }
 
 func bridge(ctx *cli.Context) {
+	// load log level
+	logLvl := log.LvlInfo
+	if ctx.GlobalIsSet(LogLvlFlag.Name) {
+		logLvl = log.Lvl(ctx.GlobalInt(LogLvlFlag.Name))
+	}
+	log.Root().SetHandler(log.LvlFilterHandler(logLvl, log.StreamHandler(os.Stdout, log.TerminalFormat(true))))
+
+	// load config file
 	if !ctx.GlobalIsSet(ConfigFlag.Name) {
 		panic("config path must be defined")
 	}
@@ -37,6 +50,7 @@ func bridge(ctx *cli.Context) {
 	if err := json.Unmarshal(plan, &cfg); err != nil {
 		panic(err)
 	}
+
 	// init db
 	db, err := stores.MustConnectDatabase(cfg)
 	if err != nil {

@@ -11,6 +11,7 @@ import (
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/log"
 	"math/big"
+	"sync"
 	"time"
 )
 
@@ -20,28 +21,53 @@ type EthBlock struct {
 	receipts []types.IReceipt
 }
 
-func NewEthBlock(client utils.EthClient, block *ethtypes.Block) (*EthBlock, error) {
+func NewEthBlock(client utils.EthClient, chainId *big.Int, block *ethtypes.Block) (*EthBlock, error) {
 	ethBlock := &EthBlock{
 		block:    block,
 		txs:      make([]types.ITransaction, len(block.Transactions())),
 		receipts: make([]types.IReceipt, len(block.Transactions())),
 	}
+	var (
+		wg   sync.WaitGroup
+		err  error
+		lock sync.Mutex
+	)
+	log.Info("Getting transaction receipts", "block", block.NumberU64(), "txs", len(block.Transactions()))
+	wg.Add(len(block.Transactions()))
 	for i, tx := range block.Transactions() {
-		// get receipt from tx Hash
-		receipt, err := client.TransactionReceipt(context.Background(), tx.Hash())
-		if err != nil {
-			return nil, err
-		}
-		ethTx, err := NewEthTransaction(client, tx)
-		if err != nil {
-			return nil, err
-		}
-		ethReceipt := &EthReceipt{
-			receipt: receipt,
-			tx:      ethTx,
-		}
-		ethBlock.txs[i] = ethTx
-		ethBlock.receipts[i] = ethReceipt
+		go func(wg *sync.WaitGroup, index int, tx *ethtypes.Transaction) {
+			log.Info("Getting receipt from rpc", "index", index, "tx", tx.Hash().Hex(), "block", block.NumberU64())
+			// get receipt from tx Hash
+			receipt, e := client.TransactionReceipt(context.Background(), tx.Hash())
+			if e != nil {
+				wg.Done()
+				lock.Lock()
+				defer lock.Unlock()
+				err = e
+				return
+			}
+			ethTx, e := NewEthTransaction(client, chainId, tx)
+			if e != nil {
+				wg.Done()
+				lock.Lock()
+				defer lock.Unlock()
+				err = e
+				return
+			}
+			ethReceipt := &EthReceipt{
+				receipt: receipt,
+				tx:      ethTx,
+			}
+			lock.Lock()
+			defer lock.Unlock()
+			ethBlock.txs[index] = ethTx
+			ethBlock.receipts[index] = ethReceipt
+			wg.Done()
+		}(&wg, i, tx)
+	}
+	wg.Wait()
+	if err != nil {
+		return nil, err
 	}
 	return ethBlock, nil
 }
@@ -70,11 +96,7 @@ type EthTransaction struct {
 	receipt types.IReceipt
 }
 
-func NewEthTransaction(client utils.EthClient, tx *ethtypes.Transaction) (*EthTransaction, error) {
-	chainId, err := client.ChainID(context.Background())
-	if err != nil {
-		return nil, err
-	}
+func NewEthTransaction(client utils.EthClient, chainId *big.Int, tx *ethtypes.Transaction) (*EthTransaction, error) {
 	sender, err := ethtypes.LatestSignerForChainID(chainId).Sender(tx)
 	if err != nil {
 		return nil, err

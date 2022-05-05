@@ -21,7 +21,7 @@ type RoninListener struct {
 func NewRoninListener(ctx context.Context, cfg *types.LsConfig, helpers utils.IUtils, store types.IMainStore) (*RoninListener, error) {
 	listener, err := NewEthereumListener(ctx, cfg, helpers, store)
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
 	l := &RoninListener{EthereumListener: listener}
 	l.task, err = task.NewRoninTask(l, l.utilsWrapper)
@@ -120,7 +120,7 @@ func (l *RoninListener) DepositRequestedCallback(tx types.ITransaction, data []b
 	if err != nil {
 		return err
 	}
-	result, err := caller.DepositVote(nil, chainId, ethEvent.Arg1.Id)
+	result, err := caller.DepositVote(nil, chainId, ethEvent.Receipt.Id)
 	if err != nil {
 		return err
 	}

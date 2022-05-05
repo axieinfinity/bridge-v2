@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/ecdsa"
 	"errors"
+	"fmt"
 	"github.com/axieinfinity/bridge-v2/internal/models"
 	"github.com/axieinfinity/bridge-v2/internal/types"
 	"github.com/axieinfinity/bridge-v2/internal/utils"
@@ -52,22 +53,30 @@ func NewEthereumListener(ctx context.Context, cfg *types.LsConfig, helpers utils
 		utilsWrapper: &utils.Utils{},
 		store:        store,
 		config:       cfg,
+		chainId:      hexutil.MustDecodeBig(cfg.ChainId),
 	}
 	if helpers != nil {
 		ethListener.utilsWrapper = helpers
 	}
 	client, err := ethListener.utilsWrapper.NewEthClient(cfg.RpcUrl)
 	if err != nil {
+		log.Error("[NewEthereumListener] error while dialing rpc client", "err", err, "url", cfg.RpcUrl)
 		return nil, err
 	}
 	ethListener.client = client
-	ethListener.validatorKey, err = crypto.HexToECDSA(cfg.Secret.Validator)
-	if err != nil {
-		return nil, err
+	if cfg.Secret.Validator != "" {
+		ethListener.validatorKey, err = crypto.HexToECDSA(cfg.Secret.Validator)
+		if err != nil {
+			log.Error("[NewEthereumListener] error while getting validator key", "err", err)
+			return nil, err
+		}
 	}
-	ethListener.relayerKey, err = crypto.HexToECDSA(cfg.Secret.Relayer)
-	if err != nil {
-		return nil, err
+	if cfg.Secret.Relayer != "" {
+		ethListener.relayerKey, err = crypto.HexToECDSA(cfg.Secret.Relayer)
+		if err != nil {
+			log.Error("[NewEthereumListener] error while getting relayer key", "err", err)
+			return nil, err
+		}
 	}
 	return ethListener, nil
 }
@@ -101,13 +110,23 @@ func (e *EthereumListener) GetCurrentBlock() types.IBlock {
 			block types.IBlock
 			err   error
 		)
-		if e.fromHeight > 0 {
-			block, err = e.GetBlock(e.fromHeight)
-		} else {
-			block, err = e.GetProcessedBlock()
-		}
+		block, err = e.GetProcessedBlock()
 		if err != nil {
-			return nil
+			log.Error(fmt.Sprintf("[%s] error on getting processed block from database", e.GetName()), "err", err)
+			if e.fromHeight > 0 {
+				block, err = e.GetBlock(e.fromHeight)
+				if err != nil {
+					log.Error(fmt.Sprintf("[%s] error on getting block from rpc", e.GetName()), "err", err, "fromHeight", e.fromHeight)
+				}
+			}
+		}
+		// if block is still nil, get latest block from rpc
+		if block == nil {
+			block, err = e.GetLatestBlock()
+			if err != nil {
+				log.Error(fmt.Sprintf("[%s] error on getting latest block from rpc", e.GetName()), "err", err)
+				return nil
+			}
 		}
 		e.currentBlock.Store(block)
 		return block
@@ -125,16 +144,13 @@ func (e *EthereumListener) GetProcessedBlock() (types.IBlock, error) {
 	height, err := e.store.GetProcessedBlockStore().GetLatestBlock(encodedChainId)
 	if err != nil {
 		log.Error("[EthereumListener][GetLatestBlock] error while getting latest height from database", "err", err, "chainId", encodedChainId)
+		return nil, err
 	}
-	var blockNum *big.Int
-	if height > 0 {
-		blockNum = big.NewInt(height)
-	}
-	block, err := e.client.BlockByNumber(e.ctx, blockNum)
+	block, err := e.client.BlockByNumber(e.ctx, big.NewInt(height))
 	if err != nil {
 		return nil, err
 	}
-	return NewEthBlock(e.client, block)
+	return NewEthBlock(e.client, chainId, block)
 }
 
 func (e *EthereumListener) GetLatestBlock() (types.IBlock, error) {
@@ -142,7 +158,7 @@ func (e *EthereumListener) GetLatestBlock() (types.IBlock, error) {
 	if err != nil {
 		return nil, err
 	}
-	return NewEthBlock(e.client, block)
+	return NewEthBlock(e.client, e.chainId, block)
 }
 
 func (e *EthereumListener) GetChainID() (*big.Int, error) {
@@ -189,6 +205,10 @@ func (e *EthereumListener) SaveTransactionsToDB(txs []types.ITransaction) error 
 }
 
 func (e *EthereumListener) GetListenHandleJob(subscriptionName string, tx types.ITransaction, data []byte) types.IJob {
+	if len(data) < 4 {
+		log.Warn(fmt.Sprintf("[%s] invalid data for unpacking", e.GetName()), "tx", tx.GetHash().Hex())
+		return nil
+	}
 	// validate if data contains subscribed name
 	subscription, ok := e.GetSubscriptions()[subscriptionName]
 	if !ok {
@@ -208,6 +228,7 @@ func (e *EthereumListener) GetListenHandleJob(subscriptionName string, tx types.
 		if !ok {
 			return nil
 		}
+		log.Info(fmt.Sprintf("[%s] comparing subscribed event name with log event", e.GetName()), "expect", common.Bytes2Hex(event.ID.Bytes()[0:4]), "got", common.Bytes2Hex(data[0:4]))
 		if common.Bytes2Hex(event.ID.Bytes()[0:4]) != common.Bytes2Hex(data[0:4]) {
 			return nil
 		}
@@ -244,7 +265,7 @@ func (e *EthereumListener) GetBlock(height uint64) (types.IBlock, error) {
 	if err != nil {
 		return nil, err
 	}
-	return NewEthBlock(e.client, block)
+	return NewEthBlock(e.client, e.chainId, block)
 }
 
 func (e *EthereumListener) NewJobFromDB(job *models.Job) (types.IJob, error) {
@@ -257,7 +278,7 @@ func (e *EthereumListener) NewJobFromDB(job *models.Job) (types.IJob, error) {
 	if err != nil {
 		return nil, err
 	}
-	transaction, err := NewEthTransaction(e.client, tx)
+	transaction, err := NewEthTransaction(e.client, e.chainId, tx)
 	if err != nil {
 		return nil, err
 	}
