@@ -37,7 +37,7 @@ type IWeightedValidatorWeightedValidator struct {
 
 // ValidatorMetaData contains all meta data concerning the Validator contract.
 var ValidatorMetaData = &bind.MetaData{
-	ABI: "[{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"_nonce\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"_numerator\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"_denominator\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"_previousNumerator\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"_previousDenominator\",\"type\":\"uint256\"}],\"name\":\"ThresholdUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"_nonce\",\"type\":\"uint256\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"validator\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"governor\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"weight\",\"type\":\"uint256\"}],\"indexed\":false,\"internalType\":\"structIWeightedValidator.WeightedValidator[]\",\"name\":\"_validators\",\"type\":\"tuple[]\"}],\"name\":\"ValidatorsAdded\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"_nonce\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"address[]\",\"name\":\"_validators\",\"type\":\"address[]\"}],\"name\":\"ValidatorsRemoved\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"_nonce\",\"type\":\"uint256\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"validator\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"governor\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"weight\",\"type\":\"uint256\"}],\"indexed\":false,\"internalType\":\"structIWeightedValidator.WeightedValidator[]\",\"name\":\"_validators\",\"type\":\"tuple[]\"}],\"name\":\"ValidatorsUpdated\",\"type\":\"event\"},{\"inputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"validator\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"governor\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"weight\",\"type\":\"uint256\"}],\"internalType\":\"structIWeightedValidator.WeightedValidator[]\",\"name\":\"_validatorList\",\"type\":\"tuple[]\"}],\"name\":\"addValidators\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_voteWeight\",\"type\":\"uint256\"}],\"name\":\"checkThreshold\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_validator\",\"type\":\"address\"}],\"name\":\"getGovernorWeight\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address[]\",\"name\":\"_addrList\",\"type\":\"address[]\"}],\"name\":\"getGovernorWeights\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"_weight\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getGovernors\",\"outputs\":[{\"internalType\":\"address[]\",\"name\":\"\",\"type\":\"address[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getThreshold\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getValidatorInfo\",\"outputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"validator\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"governor\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"weight\",\"type\":\"uint256\"}],\"internalType\":\"structIWeightedValidator.WeightedValidator[]\",\"name\":\"_list\",\"type\":\"tuple[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_validator\",\"type\":\"address\"}],\"name\":\"getValidatorWeight\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address[]\",\"name\":\"_addrList\",\"type\":\"address[]\"}],\"name\":\"getValidatorWeights\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"_weight\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getValidators\",\"outputs\":[{\"internalType\":\"address[]\",\"name\":\"\",\"type\":\"address[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"validator\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"governor\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"weight\",\"type\":\"uint256\"}],\"internalType\":\"structIWeightedValidator.WeightedValidator[]\",\"name\":\"_initValidators\",\"type\":\"tuple[]\"},{\"internalType\":\"uint256\",\"name\":\"_numerator\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_denominator\",\"type\":\"uint256\"}],\"name\":\"initialize\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"minimumVoteWeight\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"nonce\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address[]\",\"name\":\"_validatorList\",\"type\":\"address[]\"}],\"name\":\"removeValidators\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_numerator\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_denominator\",\"type\":\"uint256\"}],\"name\":\"setThreshold\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"_previousNum\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_previousDenom\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"totalValidators\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"totalWeights\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"validator\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"governor\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"weight\",\"type\":\"uint256\"}],\"internalType\":\"structIWeightedValidator.WeightedValidator[]\",\"name\":\"_validatorList\",\"type\":\"tuple[]\"}],\"name\":\"updateValidators\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_index\",\"type\":\"uint256\"}],\"name\":\"validators\",\"outputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"validator\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"governor\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"weight\",\"type\":\"uint256\"}],\"internalType\":\"structIWeightedValidator.WeightedValidator\",\"name\":\"\",\"type\":\"tuple\"}],\"stateMutability\":\"view\",\"type\":\"function\"}]",
+	ABI: "[{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"nonce\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"numerator\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"denominator\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"previousNumerator\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"previousDenominator\",\"type\":\"uint256\"}],\"name\":\"ThresholdUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"nonce\",\"type\":\"uint256\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"validator\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"governor\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"weight\",\"type\":\"uint256\"}],\"indexed\":false,\"internalType\":\"structIWeightedValidator.WeightedValidator[]\",\"name\":\"validators\",\"type\":\"tuple[]\"}],\"name\":\"ValidatorsAdded\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"nonce\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"address[]\",\"name\":\"validators\",\"type\":\"address[]\"}],\"name\":\"ValidatorsRemoved\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"nonce\",\"type\":\"uint256\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"validator\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"governor\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"weight\",\"type\":\"uint256\"}],\"indexed\":false,\"internalType\":\"structIWeightedValidator.WeightedValidator[]\",\"name\":\"validators\",\"type\":\"tuple[]\"}],\"name\":\"ValidatorsUpdated\",\"type\":\"event\"},{\"inputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"validator\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"governor\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"weight\",\"type\":\"uint256\"}],\"internalType\":\"structIWeightedValidator.WeightedValidator[]\",\"name\":\"_validatorList\",\"type\":\"tuple[]\"}],\"name\":\"addValidators\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_voteWeight\",\"type\":\"uint256\"}],\"name\":\"checkThreshold\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_validator\",\"type\":\"address\"}],\"name\":\"getGovernorWeight\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address[]\",\"name\":\"_addrList\",\"type\":\"address[]\"}],\"name\":\"getGovernorWeights\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"_weight\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getGovernors\",\"outputs\":[{\"internalType\":\"address[]\",\"name\":\"\",\"type\":\"address[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getThreshold\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getValidatorInfo\",\"outputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"validator\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"governor\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"weight\",\"type\":\"uint256\"}],\"internalType\":\"structIWeightedValidator.WeightedValidator[]\",\"name\":\"_list\",\"type\":\"tuple[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_validator\",\"type\":\"address\"}],\"name\":\"getValidatorWeight\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address[]\",\"name\":\"_addrList\",\"type\":\"address[]\"}],\"name\":\"getValidatorWeights\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"_weight\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getValidators\",\"outputs\":[{\"internalType\":\"address[]\",\"name\":\"\",\"type\":\"address[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"validator\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"governor\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"weight\",\"type\":\"uint256\"}],\"internalType\":\"structIWeightedValidator.WeightedValidator[]\",\"name\":\"_initValidators\",\"type\":\"tuple[]\"},{\"internalType\":\"uint256\",\"name\":\"_numerator\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_denominator\",\"type\":\"uint256\"}],\"name\":\"initialize\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"minimumVoteWeight\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"nonce\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address[]\",\"name\":\"_validatorList\",\"type\":\"address[]\"}],\"name\":\"removeValidators\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_numerator\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_denominator\",\"type\":\"uint256\"}],\"name\":\"setThreshold\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"_previousNum\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_previousDenom\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"totalValidators\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"totalWeights\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"validator\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"governor\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"weight\",\"type\":\"uint256\"}],\"internalType\":\"structIWeightedValidator.WeightedValidator[]\",\"name\":\"_validatorList\",\"type\":\"tuple[]\"}],\"name\":\"updateValidators\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_index\",\"type\":\"uint256\"}],\"name\":\"validators\",\"outputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"validator\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"governor\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"weight\",\"type\":\"uint256\"}],\"internalType\":\"structIWeightedValidator.WeightedValidator\",\"name\":\"\",\"type\":\"tuple\"}],\"stateMutability\":\"view\",\"type\":\"function\"}]",
 }
 
 // ValidatorABI is the input ABI used to generate the binding from.
@@ -805,23 +805,23 @@ type ValidatorThresholdUpdated struct {
 
 // FilterThresholdUpdated is a free log retrieval operation binding the contract event 0x976f8a9c5bdf8248dec172376d6e2b80a8e3df2f0328e381c6db8e1cf138c0f8.
 //
-// Solidity: event ThresholdUpdated(uint256 indexed _nonce, uint256 indexed _numerator, uint256 indexed _denominator, uint256 _previousNumerator, uint256 _previousDenominator)
-func (_Validator *ValidatorFilterer) FilterThresholdUpdated(opts *bind.FilterOpts, _nonce []*big.Int, _numerator []*big.Int, _denominator []*big.Int) (*ValidatorThresholdUpdatedIterator, error) {
+// Solidity: event ThresholdUpdated(uint256 indexed nonce, uint256 indexed numerator, uint256 indexed denominator, uint256 previousNumerator, uint256 previousDenominator)
+func (_Validator *ValidatorFilterer) FilterThresholdUpdated(opts *bind.FilterOpts, nonce []*big.Int, numerator []*big.Int, denominator []*big.Int) (*ValidatorThresholdUpdatedIterator, error) {
 
-	var _nonceRule []interface{}
-	for _, _nonceItem := range _nonce {
-		_nonceRule = append(_nonceRule, _nonceItem)
+	var nonceRule []interface{}
+	for _, nonceItem := range nonce {
+		nonceRule = append(nonceRule, nonceItem)
 	}
-	var _numeratorRule []interface{}
-	for _, _numeratorItem := range _numerator {
-		_numeratorRule = append(_numeratorRule, _numeratorItem)
+	var numeratorRule []interface{}
+	for _, numeratorItem := range numerator {
+		numeratorRule = append(numeratorRule, numeratorItem)
 	}
-	var _denominatorRule []interface{}
-	for _, _denominatorItem := range _denominator {
-		_denominatorRule = append(_denominatorRule, _denominatorItem)
+	var denominatorRule []interface{}
+	for _, denominatorItem := range denominator {
+		denominatorRule = append(denominatorRule, denominatorItem)
 	}
 
-	logs, sub, err := _Validator.contract.FilterLogs(opts, "ThresholdUpdated", _nonceRule, _numeratorRule, _denominatorRule)
+	logs, sub, err := _Validator.contract.FilterLogs(opts, "ThresholdUpdated", nonceRule, numeratorRule, denominatorRule)
 	if err != nil {
 		return nil, err
 	}
@@ -830,23 +830,23 @@ func (_Validator *ValidatorFilterer) FilterThresholdUpdated(opts *bind.FilterOpt
 
 // WatchThresholdUpdated is a free log subscription operation binding the contract event 0x976f8a9c5bdf8248dec172376d6e2b80a8e3df2f0328e381c6db8e1cf138c0f8.
 //
-// Solidity: event ThresholdUpdated(uint256 indexed _nonce, uint256 indexed _numerator, uint256 indexed _denominator, uint256 _previousNumerator, uint256 _previousDenominator)
-func (_Validator *ValidatorFilterer) WatchThresholdUpdated(opts *bind.WatchOpts, sink chan<- *ValidatorThresholdUpdated, _nonce []*big.Int, _numerator []*big.Int, _denominator []*big.Int) (event.Subscription, error) {
+// Solidity: event ThresholdUpdated(uint256 indexed nonce, uint256 indexed numerator, uint256 indexed denominator, uint256 previousNumerator, uint256 previousDenominator)
+func (_Validator *ValidatorFilterer) WatchThresholdUpdated(opts *bind.WatchOpts, sink chan<- *ValidatorThresholdUpdated, nonce []*big.Int, numerator []*big.Int, denominator []*big.Int) (event.Subscription, error) {
 
-	var _nonceRule []interface{}
-	for _, _nonceItem := range _nonce {
-		_nonceRule = append(_nonceRule, _nonceItem)
+	var nonceRule []interface{}
+	for _, nonceItem := range nonce {
+		nonceRule = append(nonceRule, nonceItem)
 	}
-	var _numeratorRule []interface{}
-	for _, _numeratorItem := range _numerator {
-		_numeratorRule = append(_numeratorRule, _numeratorItem)
+	var numeratorRule []interface{}
+	for _, numeratorItem := range numerator {
+		numeratorRule = append(numeratorRule, numeratorItem)
 	}
-	var _denominatorRule []interface{}
-	for _, _denominatorItem := range _denominator {
-		_denominatorRule = append(_denominatorRule, _denominatorItem)
+	var denominatorRule []interface{}
+	for _, denominatorItem := range denominator {
+		denominatorRule = append(denominatorRule, denominatorItem)
 	}
 
-	logs, sub, err := _Validator.contract.WatchLogs(opts, "ThresholdUpdated", _nonceRule, _numeratorRule, _denominatorRule)
+	logs, sub, err := _Validator.contract.WatchLogs(opts, "ThresholdUpdated", nonceRule, numeratorRule, denominatorRule)
 	if err != nil {
 		return nil, err
 	}
@@ -880,7 +880,7 @@ func (_Validator *ValidatorFilterer) WatchThresholdUpdated(opts *bind.WatchOpts,
 
 // ParseThresholdUpdated is a log parse operation binding the contract event 0x976f8a9c5bdf8248dec172376d6e2b80a8e3df2f0328e381c6db8e1cf138c0f8.
 //
-// Solidity: event ThresholdUpdated(uint256 indexed _nonce, uint256 indexed _numerator, uint256 indexed _denominator, uint256 _previousNumerator, uint256 _previousDenominator)
+// Solidity: event ThresholdUpdated(uint256 indexed nonce, uint256 indexed numerator, uint256 indexed denominator, uint256 previousNumerator, uint256 previousDenominator)
 func (_Validator *ValidatorFilterer) ParseThresholdUpdated(log types.Log) (*ValidatorThresholdUpdated, error) {
 	event := new(ValidatorThresholdUpdated)
 	if err := _Validator.contract.UnpackLog(event, "ThresholdUpdated", log); err != nil {
@@ -966,15 +966,15 @@ type ValidatorValidatorsAdded struct {
 
 // FilterValidatorsAdded is a free log retrieval operation binding the contract event 0x303829e73a17f7f10b38c9674206c790eed78f4602d56f940e0fe2c31389a9f1.
 //
-// Solidity: event ValidatorsAdded(uint256 indexed _nonce, (address,address,uint256)[] _validators)
-func (_Validator *ValidatorFilterer) FilterValidatorsAdded(opts *bind.FilterOpts, _nonce []*big.Int) (*ValidatorValidatorsAddedIterator, error) {
+// Solidity: event ValidatorsAdded(uint256 indexed nonce, (address,address,uint256)[] validators)
+func (_Validator *ValidatorFilterer) FilterValidatorsAdded(opts *bind.FilterOpts, nonce []*big.Int) (*ValidatorValidatorsAddedIterator, error) {
 
-	var _nonceRule []interface{}
-	for _, _nonceItem := range _nonce {
-		_nonceRule = append(_nonceRule, _nonceItem)
+	var nonceRule []interface{}
+	for _, nonceItem := range nonce {
+		nonceRule = append(nonceRule, nonceItem)
 	}
 
-	logs, sub, err := _Validator.contract.FilterLogs(opts, "ValidatorsAdded", _nonceRule)
+	logs, sub, err := _Validator.contract.FilterLogs(opts, "ValidatorsAdded", nonceRule)
 	if err != nil {
 		return nil, err
 	}
@@ -983,15 +983,15 @@ func (_Validator *ValidatorFilterer) FilterValidatorsAdded(opts *bind.FilterOpts
 
 // WatchValidatorsAdded is a free log subscription operation binding the contract event 0x303829e73a17f7f10b38c9674206c790eed78f4602d56f940e0fe2c31389a9f1.
 //
-// Solidity: event ValidatorsAdded(uint256 indexed _nonce, (address,address,uint256)[] _validators)
-func (_Validator *ValidatorFilterer) WatchValidatorsAdded(opts *bind.WatchOpts, sink chan<- *ValidatorValidatorsAdded, _nonce []*big.Int) (event.Subscription, error) {
+// Solidity: event ValidatorsAdded(uint256 indexed nonce, (address,address,uint256)[] validators)
+func (_Validator *ValidatorFilterer) WatchValidatorsAdded(opts *bind.WatchOpts, sink chan<- *ValidatorValidatorsAdded, nonce []*big.Int) (event.Subscription, error) {
 
-	var _nonceRule []interface{}
-	for _, _nonceItem := range _nonce {
-		_nonceRule = append(_nonceRule, _nonceItem)
+	var nonceRule []interface{}
+	for _, nonceItem := range nonce {
+		nonceRule = append(nonceRule, nonceItem)
 	}
 
-	logs, sub, err := _Validator.contract.WatchLogs(opts, "ValidatorsAdded", _nonceRule)
+	logs, sub, err := _Validator.contract.WatchLogs(opts, "ValidatorsAdded", nonceRule)
 	if err != nil {
 		return nil, err
 	}
@@ -1025,7 +1025,7 @@ func (_Validator *ValidatorFilterer) WatchValidatorsAdded(opts *bind.WatchOpts, 
 
 // ParseValidatorsAdded is a log parse operation binding the contract event 0x303829e73a17f7f10b38c9674206c790eed78f4602d56f940e0fe2c31389a9f1.
 //
-// Solidity: event ValidatorsAdded(uint256 indexed _nonce, (address,address,uint256)[] _validators)
+// Solidity: event ValidatorsAdded(uint256 indexed nonce, (address,address,uint256)[] validators)
 func (_Validator *ValidatorFilterer) ParseValidatorsAdded(log types.Log) (*ValidatorValidatorsAdded, error) {
 	event := new(ValidatorValidatorsAdded)
 	if err := _Validator.contract.UnpackLog(event, "ValidatorsAdded", log); err != nil {
@@ -1111,15 +1111,15 @@ type ValidatorValidatorsRemoved struct {
 
 // FilterValidatorsRemoved is a free log retrieval operation binding the contract event 0x100be0d21e2a3eeb62d3a8e929368953ff0bfd628dbe935d27006acb1c7c4772.
 //
-// Solidity: event ValidatorsRemoved(uint256 indexed _nonce, address[] _validators)
-func (_Validator *ValidatorFilterer) FilterValidatorsRemoved(opts *bind.FilterOpts, _nonce []*big.Int) (*ValidatorValidatorsRemovedIterator, error) {
+// Solidity: event ValidatorsRemoved(uint256 indexed nonce, address[] validators)
+func (_Validator *ValidatorFilterer) FilterValidatorsRemoved(opts *bind.FilterOpts, nonce []*big.Int) (*ValidatorValidatorsRemovedIterator, error) {
 
-	var _nonceRule []interface{}
-	for _, _nonceItem := range _nonce {
-		_nonceRule = append(_nonceRule, _nonceItem)
+	var nonceRule []interface{}
+	for _, nonceItem := range nonce {
+		nonceRule = append(nonceRule, nonceItem)
 	}
 
-	logs, sub, err := _Validator.contract.FilterLogs(opts, "ValidatorsRemoved", _nonceRule)
+	logs, sub, err := _Validator.contract.FilterLogs(opts, "ValidatorsRemoved", nonceRule)
 	if err != nil {
 		return nil, err
 	}
@@ -1128,15 +1128,15 @@ func (_Validator *ValidatorFilterer) FilterValidatorsRemoved(opts *bind.FilterOp
 
 // WatchValidatorsRemoved is a free log subscription operation binding the contract event 0x100be0d21e2a3eeb62d3a8e929368953ff0bfd628dbe935d27006acb1c7c4772.
 //
-// Solidity: event ValidatorsRemoved(uint256 indexed _nonce, address[] _validators)
-func (_Validator *ValidatorFilterer) WatchValidatorsRemoved(opts *bind.WatchOpts, sink chan<- *ValidatorValidatorsRemoved, _nonce []*big.Int) (event.Subscription, error) {
+// Solidity: event ValidatorsRemoved(uint256 indexed nonce, address[] validators)
+func (_Validator *ValidatorFilterer) WatchValidatorsRemoved(opts *bind.WatchOpts, sink chan<- *ValidatorValidatorsRemoved, nonce []*big.Int) (event.Subscription, error) {
 
-	var _nonceRule []interface{}
-	for _, _nonceItem := range _nonce {
-		_nonceRule = append(_nonceRule, _nonceItem)
+	var nonceRule []interface{}
+	for _, nonceItem := range nonce {
+		nonceRule = append(nonceRule, nonceItem)
 	}
 
-	logs, sub, err := _Validator.contract.WatchLogs(opts, "ValidatorsRemoved", _nonceRule)
+	logs, sub, err := _Validator.contract.WatchLogs(opts, "ValidatorsRemoved", nonceRule)
 	if err != nil {
 		return nil, err
 	}
@@ -1170,7 +1170,7 @@ func (_Validator *ValidatorFilterer) WatchValidatorsRemoved(opts *bind.WatchOpts
 
 // ParseValidatorsRemoved is a log parse operation binding the contract event 0x100be0d21e2a3eeb62d3a8e929368953ff0bfd628dbe935d27006acb1c7c4772.
 //
-// Solidity: event ValidatorsRemoved(uint256 indexed _nonce, address[] _validators)
+// Solidity: event ValidatorsRemoved(uint256 indexed nonce, address[] validators)
 func (_Validator *ValidatorFilterer) ParseValidatorsRemoved(log types.Log) (*ValidatorValidatorsRemoved, error) {
 	event := new(ValidatorValidatorsRemoved)
 	if err := _Validator.contract.UnpackLog(event, "ValidatorsRemoved", log); err != nil {
@@ -1256,15 +1256,15 @@ type ValidatorValidatorsUpdated struct {
 
 // FilterValidatorsUpdated is a free log retrieval operation binding the contract event 0x2109e19a2ea21d44706b43eef1d46e0bbebfa9dac226cf74435537be134939ab.
 //
-// Solidity: event ValidatorsUpdated(uint256 indexed _nonce, (address,address,uint256)[] _validators)
-func (_Validator *ValidatorFilterer) FilterValidatorsUpdated(opts *bind.FilterOpts, _nonce []*big.Int) (*ValidatorValidatorsUpdatedIterator, error) {
+// Solidity: event ValidatorsUpdated(uint256 indexed nonce, (address,address,uint256)[] validators)
+func (_Validator *ValidatorFilterer) FilterValidatorsUpdated(opts *bind.FilterOpts, nonce []*big.Int) (*ValidatorValidatorsUpdatedIterator, error) {
 
-	var _nonceRule []interface{}
-	for _, _nonceItem := range _nonce {
-		_nonceRule = append(_nonceRule, _nonceItem)
+	var nonceRule []interface{}
+	for _, nonceItem := range nonce {
+		nonceRule = append(nonceRule, nonceItem)
 	}
 
-	logs, sub, err := _Validator.contract.FilterLogs(opts, "ValidatorsUpdated", _nonceRule)
+	logs, sub, err := _Validator.contract.FilterLogs(opts, "ValidatorsUpdated", nonceRule)
 	if err != nil {
 		return nil, err
 	}
@@ -1273,15 +1273,15 @@ func (_Validator *ValidatorFilterer) FilterValidatorsUpdated(opts *bind.FilterOp
 
 // WatchValidatorsUpdated is a free log subscription operation binding the contract event 0x2109e19a2ea21d44706b43eef1d46e0bbebfa9dac226cf74435537be134939ab.
 //
-// Solidity: event ValidatorsUpdated(uint256 indexed _nonce, (address,address,uint256)[] _validators)
-func (_Validator *ValidatorFilterer) WatchValidatorsUpdated(opts *bind.WatchOpts, sink chan<- *ValidatorValidatorsUpdated, _nonce []*big.Int) (event.Subscription, error) {
+// Solidity: event ValidatorsUpdated(uint256 indexed nonce, (address,address,uint256)[] validators)
+func (_Validator *ValidatorFilterer) WatchValidatorsUpdated(opts *bind.WatchOpts, sink chan<- *ValidatorValidatorsUpdated, nonce []*big.Int) (event.Subscription, error) {
 
-	var _nonceRule []interface{}
-	for _, _nonceItem := range _nonce {
-		_nonceRule = append(_nonceRule, _nonceItem)
+	var nonceRule []interface{}
+	for _, nonceItem := range nonce {
+		nonceRule = append(nonceRule, nonceItem)
 	}
 
-	logs, sub, err := _Validator.contract.WatchLogs(opts, "ValidatorsUpdated", _nonceRule)
+	logs, sub, err := _Validator.contract.WatchLogs(opts, "ValidatorsUpdated", nonceRule)
 	if err != nil {
 		return nil, err
 	}
@@ -1315,7 +1315,7 @@ func (_Validator *ValidatorFilterer) WatchValidatorsUpdated(opts *bind.WatchOpts
 
 // ParseValidatorsUpdated is a log parse operation binding the contract event 0x2109e19a2ea21d44706b43eef1d46e0bbebfa9dac226cf74435537be134939ab.
 //
-// Solidity: event ValidatorsUpdated(uint256 indexed _nonce, (address,address,uint256)[] _validators)
+// Solidity: event ValidatorsUpdated(uint256 indexed nonce, (address,address,uint256)[] validators)
 func (_Validator *ValidatorFilterer) ParseValidatorsUpdated(log types.Log) (*ValidatorValidatorsUpdated, error) {
 	event := new(ValidatorValidatorsUpdated)
 	if err := _Validator.contract.UnpackLog(event, "ValidatorsUpdated", log); err != nil {
