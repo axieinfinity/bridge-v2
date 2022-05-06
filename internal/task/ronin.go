@@ -3,7 +3,7 @@ package task
 import (
 	"context"
 	"crypto/ecdsa"
-	"fmt"
+	"errors"
 	"github.com/axieinfinity/bridge-v2/generated_contracts/ethereum/gateway"
 	gateway2 "github.com/axieinfinity/bridge-v2/generated_contracts/ronin/gateway"
 	"github.com/axieinfinity/bridge-v2/internal/models"
@@ -11,6 +11,8 @@ import (
 	"github.com/axieinfinity/bridge-v2/internal/utils"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/ethereum/go-ethereum/common/math"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/log"
@@ -106,7 +108,11 @@ func (r *RoninTask) GetListener() types.IListener {
 }
 
 func (r *RoninTask) process() error {
-	tasks, err := r.store.GetTaskStore().GetPendingTasks(r.GetListener().GetName(), defaultLimitRecords)
+	chainId, err := r.GetListener().GetChainID()
+	if err != nil {
+		return err
+	}
+	tasks, err := r.store.GetTaskStore().GetPendingTasks(hexutil.EncodeBig(chainId), defaultLimitRecords)
 	if err != nil {
 		return err
 	}
@@ -125,17 +131,17 @@ func (r *RoninTask) process() error {
 		ackWithdrewTasks.collectTask(task)
 	}
 	// wait for bulk deposit finish
-	if err = <-bulkDepositTask.send(); err != nil {
+	if err = bulkDepositTask.send(); err != nil {
 		// TODO: log here...
 	}
 
 	// wait for bulk submit signatures finish
-	if err = <-bulkSubmitWithdrawalSignaturesTask.send(); err != nil {
+	if err = bulkSubmitWithdrawalSignaturesTask.send(); err != nil {
 		// TODO: log here...
 	}
 
 	// wait for all ack tasks be finished
-	if err = <-ackWithdrewTasks.send(); err != nil {
+	if err = ackWithdrewTasks.send(); err != nil {
 		// TODO: log here...
 	}
 
@@ -178,7 +184,7 @@ func (r *BulkTask) collectTask(t *models.Task) {
 	}
 }
 
-func (r *BulkTask) send() (errCh chan error) {
+func (r *BulkTask) send() error {
 	var (
 		successTasks, failedTasks []*models.Task
 		err                       error
@@ -191,14 +197,13 @@ func (r *BulkTask) send() (errCh chan error) {
 	case types.ACK_WITHDREW_TASK:
 		successTasks, failedTasks = r.SendAckTransactions()
 	}
-	errCh <- err
 	if err = updateTasks(r.store, successTasks, types.STATUS_DONE); err != nil {
 		// TODO: log here...
 	}
 	if err = updateTasks(r.store, failedTasks, types.STATUS_FAILED); err != nil {
 		// TODO: log here...
 	}
-	return
+	return err
 }
 
 func (r *BulkTask) sendDepositTransaction() ([]*models.Task, []*models.Task) {
@@ -302,7 +307,7 @@ func (r *BulkTask) sendWithdrawalSignaturesTransaction() (successTasks []*models
 			Types: apitypes.Types{
 				"EIP712Domain": []apitypes.Type{{Name: "verifyingContract", Type: "address"}},
 				"SubmitWithdrawalSignatures": []apitypes.Type{
-					{Name: "_withdrawal", Type: "uint256"},
+					{Name: "withdrawals", Type: "uint256"},
 				},
 			},
 			Domain: apitypes.TypedDataDomain{
@@ -310,7 +315,7 @@ func (r *BulkTask) sendWithdrawalSignaturesTransaction() (successTasks []*models
 			},
 			PrimaryType: "SubmitWithdrawalSignatures",
 			Message: apitypes.TypedDataMessage{
-				"_withdrawals": fmt.Sprintf("%#d", receipt.Id),
+				"withdrawals": math.NewHexOrDecimal256(receipt.Id.Int64()),
 			},
 		}
 		sigs, err := r.util.SignTypedData(typedData, r.validator)
@@ -383,7 +388,10 @@ func (r *BulkTask) SendAckTransactions() (successTasks []*models.Task, failedTas
 		successTasks = append(successTasks, t)
 	}
 	tx, err := r.util.SendContractTransaction(r.validator, r.chainId, func(opts *bind.TransactOpts) (*ethtypes.Transaction, error) {
-		return c.BulkAcknowledgeMainchainWithdrew(nil, ids)
+		if ids != nil {
+			return c.BulkAcknowledgeMainchainWithdrew(nil, ids)
+		}
+		return nil, errors.New("empty withdraw ids list")
 	})
 	if err != nil {
 		// append all success tasks into failed tasks

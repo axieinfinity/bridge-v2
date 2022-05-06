@@ -6,69 +6,49 @@ import (
 	"github.com/axieinfinity/bridge-v2/internal/models"
 	"github.com/axieinfinity/bridge-v2/internal/types"
 	"github.com/axieinfinity/bridge-v2/internal/utils"
+	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/log"
 	"math/big"
-	"sync"
 	"time"
 )
 
 type EthBlock struct {
-	block    *ethtypes.Block
-	txs      []types.ITransaction
-	receipts []types.IReceipt
+	block *ethtypes.Block
+	txs   []types.ITransaction
+	logs  []types.ILog
 }
 
 func NewEthBlock(client utils.EthClient, chainId *big.Int, block *ethtypes.Block) (*EthBlock, error) {
 	ethBlock := &EthBlock{
-		block:    block,
-		txs:      make([]types.ITransaction, len(block.Transactions())),
-		receipts: make([]types.IReceipt, len(block.Transactions())),
+		block: block,
 	}
-	var (
-		wg   sync.WaitGroup
-		err  error
-		lock sync.Mutex
-	)
-	log.Info("Getting transaction receipts", "block", block.NumberU64(), "txs", len(block.Transactions()))
-	wg.Add(len(block.Transactions()))
-	for i, tx := range block.Transactions() {
-		go func(wg *sync.WaitGroup, index int, tx *ethtypes.Transaction) {
-			log.Info("Getting receipt from rpc", "index", index, "tx", tx.Hash().Hex(), "block", block.NumberU64())
-			// get receipt from tx Hash
-			receipt, e := client.TransactionReceipt(context.Background(), tx.Hash())
-			if e != nil {
-				wg.Done()
-				lock.Lock()
-				defer lock.Unlock()
-				err = e
-				return
-			}
-			ethTx, e := NewEthTransaction(client, chainId, tx)
-			if e != nil {
-				wg.Done()
-				lock.Lock()
-				defer lock.Unlock()
-				err = e
-				return
-			}
-			ethReceipt := &EthReceipt{
-				receipt: receipt,
-				tx:      ethTx,
-			}
-			lock.Lock()
-			defer lock.Unlock()
-			ethBlock.txs[index] = ethTx
-			ethBlock.receipts[index] = ethReceipt
-			wg.Done()
-		}(&wg, i, tx)
-	}
-	wg.Wait()
+	log.Info("Getting logs from block hash", "block", block.NumberU64(), "hash", block.Hash().Hex())
+	blockHash := block.Hash()
+	logs, err := client.FilterLogs(context.Background(), ethereum.FilterQuery{BlockHash: &blockHash})
 	if err != nil {
+		log.Error("[NewEthBlock] error while getting logs", "err", err, "block", block.NumberU64(), "hash", block.Hash().Hex())
 		return nil, err
 	}
+
+	// convert txs into ILog
+	for _, tx := range block.Transactions() {
+		transaction, err := NewEthTransaction(chainId, tx)
+		if err != nil {
+			log.Error("[NewEthBlock] error while init new Eth Transaction", "err", err, "tx", tx.Hash().Hex())
+			return nil, err
+		}
+		ethBlock.txs = append(ethBlock.txs, transaction)
+	}
+
+	// convert logs to ILog
+	for _, l := range logs {
+		ethLog := EthLog(l)
+		ethBlock.logs = append(ethBlock.logs, &ethLog)
+	}
+	log.Info("[NewEthBlock] Finish getting eth block", "block", ethBlock.block.NumberU64(), "txs", len(ethBlock.txs), "logs", len(ethBlock.logs))
 	return ethBlock, nil
 }
 
@@ -79,42 +59,26 @@ func (b *EthBlock) GetTransactions() []types.ITransaction {
 	return b.txs
 }
 
-func (b *EthBlock) GetReceipts() []types.IReceipt {
-	if len(b.receipts) > 0 {
-		return b.receipts
-	}
-	for _, tx := range b.GetTransactions() {
-		b.receipts = append(b.receipts, tx.GetReceipt())
-	}
-	return b.receipts
+func (b *EthBlock) GetLogs() []types.ILog {
+	return b.logs
 }
 
 type EthTransaction struct {
 	chainId *big.Int
 	sender  common.Address
 	tx      *ethtypes.Transaction
-	receipt types.IReceipt
 }
 
-func NewEthTransaction(client utils.EthClient, chainId *big.Int, tx *ethtypes.Transaction) (*EthTransaction, error) {
+func NewEthTransaction(chainId *big.Int, tx *ethtypes.Transaction) (*EthTransaction, error) {
 	sender, err := ethtypes.LatestSignerForChainID(chainId).Sender(tx)
 	if err != nil {
 		return nil, err
 	}
-	ethTx := &EthTransaction{
+	return &EthTransaction{
 		chainId: chainId,
 		sender:  sender,
 		tx:      tx,
-	}
-	r, err := client.TransactionReceipt(context.Background(), tx.Hash())
-	if err != nil {
-		return nil, err
-	}
-	ethTx.receipt = &EthReceipt{
-		receipt: r,
-		tx:      ethTx,
-	}
-	return ethTx, nil
+	}, nil
 }
 
 func (b *EthTransaction) GetHash() common.Hash {
@@ -139,55 +103,29 @@ func (b *EthTransaction) GetValue() *big.Int {
 	return b.tx.Value()
 }
 
-func (b *EthTransaction) GetStatus() bool {
-	return b.receipt.GetStatus()
-}
-
-func (b *EthTransaction) GetReceipt() types.IReceipt {
-	return b.receipt
-}
-
-type EthReceipt struct {
-	receipt *ethtypes.Receipt
-	tx      *EthTransaction
-}
-
-func (r *EthReceipt) GetTransaction() types.ITransaction {
-	return r.tx
-}
-
-func (r *EthReceipt) GetStatus() bool {
-	return r.receipt.Status == 1
-}
-
-func (r *EthReceipt) GetLogs() (logs []types.ILog) {
-	for _, l := range r.receipt.Logs {
-		logs = append(logs, &EthLog{l})
-	}
-	return
-}
-
-type EthLog struct {
-	l *ethtypes.Log
-}
+type EthLog ethtypes.Log
 
 func (e *EthLog) GetContractAddress() string {
-	return e.l.Address.Hex()
+	return e.Address.Hex()
 }
 
 func (e *EthLog) GetTopics() (topics []string) {
-	for _, topic := range e.l.Topics {
+	for _, topic := range e.Topics {
 		topics = append(topics, topic.Hex())
 	}
 	return
 }
 
 func (e *EthLog) GetData() []byte {
-	return e.l.Data
+	return e.Data
 }
 
 func (e *EthLog) GetIndex() uint {
-	return e.l.Index
+	return e.Index
+}
+
+func (e *EthLog) GetTxIndex() uint {
+	return e.TxIndex
 }
 
 type BaseJob struct {
@@ -340,7 +278,7 @@ func NewEthListenJob(jobType int, listener types.IListener, subscriptionName str
 func (e *EthListenJob) Process() ([]byte, error) {
 	// TODO: implement handleMethod, if it is defined then process it and return its result.
 	// omit first 4 bytes which is method
-	return e.data[4:], nil
+	return e.data, nil
 }
 
 type EthCallbackJob struct {

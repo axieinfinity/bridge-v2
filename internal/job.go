@@ -92,6 +92,7 @@ func (w *Worker) processJob(job types.IJob) {
 	)
 	val, err = job.Process()
 	if err != nil {
+		log.Error("[Worker] failed while processing job", "id", job.GetID(), "err", err)
 		goto ERROR
 	}
 	if job.GetType() == types.ListenHandler {

@@ -10,6 +10,7 @@ import (
 	"github.com/axieinfinity/bridge-v2/internal/utils"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
+	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/log"
 	"math/big"
@@ -204,11 +205,7 @@ func (e *EthereumListener) SaveTransactionsToDB(txs []types.ITransaction) error 
 	return nil
 }
 
-func (e *EthereumListener) GetListenHandleJob(subscriptionName string, tx types.ITransaction, data []byte) types.IJob {
-	if len(data) < 4 {
-		log.Warn(fmt.Sprintf("[%s] invalid data for unpacking", e.GetName()), "tx", tx.GetHash().Hex())
-		return nil
-	}
+func (e *EthereumListener) GetListenHandleJob(subscriptionName string, tx types.ITransaction, eventId string, data []byte) types.IJob {
 	// validate if data contains subscribed name
 	subscription, ok := e.GetSubscriptions()[subscriptionName]
 	if !ok {
@@ -228,8 +225,7 @@ func (e *EthereumListener) GetListenHandleJob(subscriptionName string, tx types.
 		if !ok {
 			return nil
 		}
-		log.Info(fmt.Sprintf("[%s] comparing subscribed event name with log event", e.GetName()), "expect", common.Bytes2Hex(event.ID.Bytes()[0:4]), "got", common.Bytes2Hex(data[0:4]))
-		if common.Bytes2Hex(event.ID.Bytes()[0:4]) != common.Bytes2Hex(data[0:4]) {
+		if hexutil.Encode(event.ID.Bytes()) != eventId {
 			return nil
 		}
 	} else {
@@ -268,6 +264,10 @@ func (e *EthereumListener) GetBlock(height uint64) (types.IBlock, error) {
 	return NewEthBlock(e.client, e.chainId, block)
 }
 
+func (e *EthereumListener) GetReceipt(txHash common.Hash) (*ethtypes.Receipt, error) {
+	return e.client.TransactionReceipt(e.ctx, txHash)
+}
+
 func (e *EthereumListener) NewJobFromDB(job *models.Job) (types.IJob, error) {
 	chainId, err := hexutil.DecodeBig(job.FromChainId)
 	if err != nil {
@@ -278,7 +278,7 @@ func (e *EthereumListener) NewJobFromDB(job *models.Job) (types.IJob, error) {
 	if err != nil {
 		return nil, err
 	}
-	transaction, err := NewEthTransaction(e.client, e.chainId, tx)
+	transaction, err := NewEthTransaction(e.chainId, tx)
 	if err != nil {
 		return nil, err
 	}

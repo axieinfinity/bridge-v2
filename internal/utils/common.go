@@ -27,6 +27,7 @@ type EthClient interface {
 	ethereum.TransactionReader
 	ethereum.ChainStateReader
 	ethereum.ContractCaller
+	ethereum.LogFilterer
 
 	ChainID(ctx context.Context) (*big.Int, error)
 	Close()

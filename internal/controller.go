@@ -8,6 +8,7 @@ import (
 	"github.com/axieinfinity/bridge-v2/internal/types"
 	"github.com/axieinfinity/bridge-v2/internal/utils"
 	"github.com/ethereum/go-ethereum/accounts/abi"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/log"
 	"gorm.io/gorm"
 	"strings"
@@ -55,9 +56,10 @@ type Controller struct {
 	MaxQueueSize int
 	cfg          *types.Config
 
-	store    types.IMainStore
-	stop     chan struct{}
-	isClosed atomic.Value
+	store               types.IMainStore
+	stop                chan struct{}
+	isClosed            atomic.Value
+	hasSubscriptionType sync.Map
 }
 
 func New(cfg *types.Config, db *gorm.DB, helpers utils.IUtils) (*Controller, error) {
@@ -66,20 +68,21 @@ func New(cfg *types.Config, db *gorm.DB, helpers utils.IUtils) (*Controller, err
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 	c := &Controller{
-		cfg:              cfg,
-		ctx:              ctx,
-		cancelFunc:       cancel,
-		listeners:        make(map[string]types.IListener),
-		HandlerABIs:      make(map[string]*abi.ABI),
-		utilWrapper:      &utils.Utils{},
-		Workers:          make([]*Worker, 0),
-		MaxRetry:         100,
-		BackOff:          5,
-		MaxQueueSize:     defaultMaxQueueSize,
-		coolDownDuration: defaultCoolDownDuration,
-		store:            stores.NewMainStore(db),
-		stop:             make(chan struct{}),
-		isClosed:         atomic.Value{},
+		cfg:                 cfg,
+		ctx:                 ctx,
+		cancelFunc:          cancel,
+		listeners:           make(map[string]types.IListener),
+		HandlerABIs:         make(map[string]*abi.ABI),
+		utilWrapper:         &utils.Utils{},
+		Workers:             make([]*Worker, 0),
+		MaxRetry:            100,
+		BackOff:             5,
+		MaxQueueSize:        defaultMaxQueueSize,
+		coolDownDuration:    defaultCoolDownDuration,
+		store:               stores.NewMainStore(db),
+		stop:                make(chan struct{}),
+		isClosed:            atomic.Value{},
+		hasSubscriptionType: sync.Map{},
 	}
 	c.isClosed.Store(false)
 	if helpers != nil {
@@ -277,6 +280,14 @@ func (c *Controller) Start() error {
 		if !ok {
 			continue
 		}
+		if job.Type == types.CallbackHandler && job.Method == "" {
+			// invalid job, update it to failed
+			job.Status = types.STATUS_FAILED
+			if err = listener.GetStore().GetJobStore().Update(job); err != nil {
+				log.Error("[Controller] error while updating invalid job", "err", err, "id", job.ID)
+			}
+			continue
+		}
 		j, err := listener.NewJobFromDB(job)
 		if err != nil {
 			log.Error("[Controller] error while init job from db", "err", err, "jobId", job.ID)
@@ -362,49 +373,66 @@ func (c *Controller) Process(listener types.IListener, latestBlock types.IBlock)
 		log.Error("[Controller][Process] error while updating current block", "err", err, "listener", listener.GetName())
 		return
 	}
-	// get list of transactions in new block
-	txs := latestBlock.GetTransactions()
-	receipts := latestBlock.GetReceipts()
-	if len(txs) != len(receipts) {
-		log.Error("[Controller][Process] txs and receipts are mismatched", "txs", len(txs), "receipts", len(receipts))
+	if len(latestBlock.GetTransactions()) > 0 {
+		go c.processTxs(listener, latestBlock.GetTransactions())
+	}
+
+	if len(latestBlock.GetLogs()) > 0 {
+		go c.processLogs(listener, latestBlock)
+	}
+}
+
+func (c *Controller) processTxs(listener types.IListener, txs []types.ITransaction) {
+	val, ok := c.hasSubscriptionType.Load(types.TxEvent)
+	if ok && !val.(bool) {
 		return
 	}
-	for name, subscribe := range listener.GetSubscriptions() {
-		if subscribe.Handler == nil {
+	for _, tx := range txs {
+		if len(tx.GetData()) < 4 {
 			continue
 		}
-		log.Info("[Controller][Process] processing block", "block", latestBlock.GetHeight(), "txs", len(txs), "receipts", len(receipts), "subscribeType", subscribe.Type, "name", name)
-		switch subscribe.Type {
-		case types.TxEvent:
-			for _, tx := range txs {
-				if (subscribe.From != "" && subscribe.From != tx.GetFromAddress()) ||
-					(subscribe.To != "" && subscribe.To != tx.GetToAddress()) {
-					continue
-				}
-				receipt := tx.GetReceipt()
-				if !receipt.GetStatus() {
-					continue
-				}
-				if job := listener.GetListenHandleJob(name, tx, tx.GetData()); job != nil {
-					c.PrepareJobChan <- job
-				}
+		// get receipt and check tx status
+		receipt, err := listener.GetReceipt(tx.GetHash())
+		if err != nil || receipt.Status != 1 {
+			continue
+		}
+		for name, subscription := range listener.GetSubscriptions() {
+			if subscription.Handler == nil || subscription.Type != types.TxEvent {
+				continue
 			}
-		case types.LogEvent:
-			for _, receipt := range receipts {
-				log.Info("[Controller][Process] processing log Event", "receipt status", receipt.GetStatus(), "logs", len(receipt.GetLogs()))
-				if !receipt.GetStatus() {
-					continue
-				}
-				tx := receipt.GetTransaction()
-				if !c.compareAddress(subscribe.To, tx.GetToAddress()) {
-					continue
-				}
-				log.Info("[Controller][Process] generating event job", "height", latestBlock.GetHeight())
-				for _, logData := range receipt.GetLogs() {
-					if job := listener.GetListenHandleJob(name, tx, logData.GetData()); job != nil {
-						c.PrepareJobChan <- job
-					}
-				}
+			if val == nil {
+				c.hasSubscriptionType.Store(types.TxEvent, true)
+			}
+			eventId := tx.GetData()[0:4]
+			data := tx.GetData()[4:]
+			if job := listener.GetListenHandleJob(name, tx, common.Bytes2Hex(eventId), data); job != nil {
+				c.PrepareJobChan <- job
+			}
+		}
+	}
+}
+
+func (c *Controller) processLogs(listener types.IListener, block types.IBlock) {
+	val, ok := c.hasSubscriptionType.Load(types.LogEvent)
+	if ok && !val.(bool) {
+		return
+	}
+	for _, logData := range block.GetLogs() {
+		for name, subscription := range listener.GetSubscriptions() {
+			if subscription.Handler == nil || subscription.Type != types.LogEvent {
+				continue
+			}
+			if val == nil {
+				c.hasSubscriptionType.Store(types.LogEvent, true)
+			}
+			tx := block.GetTransactions()[logData.GetTxIndex()]
+			if !c.compareAddress(subscription.To, tx.GetToAddress()) {
+				continue
+			}
+			eventId := logData.GetTopics()[0]
+			data := logData.GetData()
+			if job := listener.GetListenHandleJob(name, tx, eventId, data); job != nil {
+				c.PrepareJobChan <- job
 			}
 		}
 	}

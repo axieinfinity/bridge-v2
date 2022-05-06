@@ -76,7 +76,7 @@ func (l *RoninListener) ProvideReceiptSignatureCallback(tx types.ITransaction, d
 
 	// try getting withdrawal data from database by receipt.id
 	withdrawal, _ := l.store.GetWithdrawalStore().GetWithdrawalById(receipt.Id.Int64())
-	if withdrawal != nil {
+	if withdrawal != nil && withdrawal.ID > 0 {
 		return nil
 	}
 	// otherwise, create a task for submitting signature

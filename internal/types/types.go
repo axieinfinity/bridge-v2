@@ -6,6 +6,7 @@ import (
 	"github.com/axieinfinity/bridge-v2/internal/models"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/types"
 	"gorm.io/gorm"
 	"math/big"
 	"time"
@@ -51,6 +52,7 @@ type IListener interface {
 	GetLatestBlock() (IBlock, error)
 	GetBlock(height uint64) (IBlock, error)
 	GetChainID() (*big.Int, error)
+	GetReceipt(common.Hash) (*types.Receipt, error)
 	Context() context.Context
 
 	GetSubscriptions() map[string]*Subscribe
@@ -60,7 +62,7 @@ type IListener interface {
 	SaveCurrentBlockToDB() error
 	SaveTransactionsToDB(txs []ITransaction) error
 
-	GetListenHandleJob(subscriptionName string, tx ITransaction, data []byte) IJob
+	GetListenHandleJob(subscriptionName string, tx ITransaction, eventId string, data []byte) IJob
 	SendCallbackJobs(listeners map[string]IListener, subscriptionName string, tx ITransaction, inputData []byte, jobChan chan<- IJob)
 
 	NewJobFromDB(job *models.Job) (IJob, error)
@@ -81,8 +83,6 @@ type ITransaction interface {
 	GetToAddress() string
 	GetData() []byte
 	GetValue() *big.Int
-	GetStatus() bool
-	GetReceipt() IReceipt
 }
 
 type ILog interface {
@@ -90,6 +90,7 @@ type ILog interface {
 	GetTopics() []string
 	GetData() []byte
 	GetIndex() uint
+	GetTxIndex() uint
 }
 
 type IReceipt interface {
@@ -102,7 +103,7 @@ type IBlock interface {
 	GetHash() common.Hash
 	GetHeight() uint64
 	GetTransactions() []ITransaction
-	GetReceipts() []IReceipt
+	GetLogs() []ILog
 }
 
 type IJob interface {
