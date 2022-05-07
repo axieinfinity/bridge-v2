@@ -186,6 +186,9 @@ func (r *BulkTask) collectTask(t *models.Task) {
 }
 
 func (r *BulkTask) send() error {
+	if len(r.tasks) == 0 {
+		return nil
+	}
 	var (
 		successTasks, failedTasks []*models.Task
 		err                       error
@@ -199,10 +202,10 @@ func (r *BulkTask) send() error {
 		successTasks, failedTasks = r.SendAckTransactions()
 	}
 	if err = updateTasks(r.store, successTasks, types.STATUS_DONE); err != nil {
-		// TODO: log here...
+		log.Error("[BulkTask][updateTasks] error while update success tasks", "err", err)
 	}
 	if err = updateTasks(r.store, failedTasks, types.STATUS_FAILED); err != nil {
-		// TODO: log here...
+		log.Error("[BulkTask][updateTasks] error while update failed tasks", "err", err)
 	}
 	return err
 }
@@ -304,6 +307,13 @@ func (r *BulkTask) sendWithdrawalSignaturesTransaction() (successTasks []*models
 			continue
 		}
 		receipt := ronEvent.Receipt
+
+		// try getting withdrawal data from database by receipt.id, do nothing if withdrawal is found
+		withdrawal, _ := r.store.GetWithdrawalStore().GetWithdrawalById(receipt.Id.Int64())
+		if withdrawal != nil && withdrawal.ID > 0 {
+			continue
+		}
+
 		typedData := apitypes.TypedData{
 			Types: apitypes.Types{
 				"EIP712Domain": []apitypes.Type{{Name: "verifyingContract", Type: "address"}},
@@ -338,24 +348,26 @@ func (r *BulkTask) sendWithdrawalSignaturesTransaction() (successTasks []*models
 		}
 		return nil, failedTasks
 	}
-	tx, err := r.util.SendContractTransaction(r.validator, r.chainId, func(opts *bind.TransactOpts) (*ethtypes.Transaction, error) {
-		return c.BulkSubmitWithdrawalSignatures(opts, ids, signatures)
-	})
-	if err != nil {
-		// append all success tasks into failed tasks
-		for _, t := range successTasks {
-			t.LastError = err.Error()
-			failedTasks = append(failedTasks, t)
+	if len(ids) > 0 {
+		tx, err := r.util.SendContractTransaction(r.validator, r.chainId, func(opts *bind.TransactOpts) (*ethtypes.Transaction, error) {
+			return c.BulkSubmitWithdrawalSignatures(opts, ids, signatures)
+		})
+		if err != nil {
+			// append all success tasks into failed tasks
+			for _, t := range successTasks {
+				t.LastError = err.Error()
+				failedTasks = append(failedTasks, t)
+			}
+			return nil, failedTasks
 		}
-		return nil, failedTasks
-	}
-	if err = r.util.SubscribeTransactionReceipt(r.client, tx, r.ticker, r.maxTry); err != nil {
-		// append all success tasks into failed tasks
-		for _, t := range successTasks {
-			t.LastError = err.Error()
-			failedTasks = append(failedTasks, t)
+		if err = r.util.SubscribeTransactionReceipt(r.client, tx, r.ticker, r.maxTry); err != nil {
+			// append all success tasks into failed tasks
+			for _, t := range successTasks {
+				t.LastError = err.Error()
+				failedTasks = append(failedTasks, t)
+			}
+			return nil, failedTasks
 		}
-		return nil, failedTasks
 	}
 	return
 }
@@ -380,7 +392,6 @@ func (r *BulkTask) SendAckTransactions() (successTasks []*models.Task, failedTas
 		}
 
 		if err = ethGatewayAbi.UnpackIntoInterface(ethEvent, "Withdrew", common.Hex2Bytes(t.Data)); err != nil {
-			// TODO: log here...
 			t.LastError = err.Error()
 			failedTasks = append(failedTasks, t)
 			continue
