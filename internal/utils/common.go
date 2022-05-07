@@ -29,6 +29,7 @@ type EthClient interface {
 	ethereum.ContractCaller
 	ethereum.LogFilterer
 
+	BlockNumber(ctx context.Context) (uint64, error)
 	ChainID(ctx context.Context) (*big.Int, error)
 	Close()
 }

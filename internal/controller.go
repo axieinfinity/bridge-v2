@@ -323,7 +323,7 @@ func (c *Controller) startListener(listener types.IListener, tryCount int) {
 	}
 
 	// check if listener is behind or not
-	latestBlock, err := listener.GetLatestBlock()
+	latestBlockHeight, err := listener.GetLatestBlockHeight()
 	if err != nil {
 		log.Error("[Controller][startListener] error while get latest block", "err", err, "listener", listener.GetName())
 		// otherwise retry startListener
@@ -331,11 +331,11 @@ func (c *Controller) startListener(listener types.IListener, tryCount int) {
 		go c.startListener(listener, tryCount+1)
 		return
 	}
-	log.Info("[Controller] Latest Block", "height", latestBlock.GetHeight(), "listener", listener.GetName())
+	log.Info("[Controller] Latest Block", "height", latestBlockHeight, "listener", listener.GetName())
 	// start processing past blocks
 	currentBlock := listener.GetCurrentBlock()
 	if currentBlock != nil {
-		for currentBlock.GetHeight() < latestBlock.GetHeight() {
+		for currentBlock.GetHeight() < latestBlockHeight {
 			block, err := listener.GetBlock(currentBlock.GetHeight() + 1)
 			if err != nil {
 				log.Error("[Controller][startListener] error while get latest block", "err", err, "listener", listener.GetName())
@@ -354,15 +354,35 @@ func (c *Controller) startListener(listener types.IListener, tryCount int) {
 		case <-listener.Context().Done():
 			return
 		case <-tick.C:
-			currentBlock = listener.GetCurrentBlock()
-			block, err := listener.GetBlock(currentBlock.GetHeight() + 1)
+			latest, err := listener.GetLatestBlockHeight()
 			if err != nil {
-				log.Error("[Controller][Process] error while get latest block", "err", err, "listener", listener.GetName())
+				log.Error("[Controller][Process] error while get latest block height")
+			}
+			currentBlock = listener.GetCurrentBlock()
+			// do nothing if currentBlock is within safe block range
+			if currentBlock.GetHeight() > latest-listener.GetSafeBlockRange() {
 				continue
 			}
-			c.Process(listener, block)
+			// if current block is behind safeBlockRange then process without waiting
+			if latest-listener.GetSafeBlockRange() > currentBlock.GetHeight()+1 {
+				currentHeight := currentBlock.GetHeight() + 1
+				for i := currentHeight; i < latest-listener.GetSafeBlockRange(); i++ {
+					c.processBlock(listener, i)
+				}
+				continue
+			}
+			c.processBlock(listener, currentBlock.GetHeight()+1)
 		}
 	}
+}
+
+func (c *Controller) processBlock(listener types.IListener, height uint64) {
+	block, err := listener.GetBlock(height)
+	if err != nil {
+		log.Error("[Controller][processBlock] error while get block", "err", err, "listener", listener.GetName(), "height", height)
+		return
+	}
+	c.Process(listener, block)
 }
 
 func (c *Controller) Process(listener types.IListener, latestBlock types.IBlock) {
@@ -398,18 +418,20 @@ func (c *Controller) processTxs(listener types.IListener, txs []types.ITransacti
 		if err != nil || receipt.Status != 1 {
 			continue
 		}
+		hasSubscriptionType := false
 		for name, subscription := range listener.GetSubscriptions() {
 			if subscription.Handler == nil || subscription.Type != types.TxEvent {
 				continue
 			}
-			if val == nil {
-				c.hasSubscriptionType.Store(types.TxEvent, true)
-			}
+			hasSubscriptionType = true
 			eventId := tx.GetData()[0:4]
 			data := tx.GetData()[4:]
 			if job := listener.GetListenHandleJob(name, tx, common.Bytes2Hex(eventId), data); job != nil {
 				c.PrepareJobChan <- job
 			}
+		}
+		if val == nil {
+			c.hasSubscriptionType.Store(types.TxEvent, hasSubscriptionType)
 		}
 	}
 }
@@ -419,14 +441,13 @@ func (c *Controller) processLogs(listener types.IListener, block types.IBlock) {
 	if ok && !val.(bool) {
 		return
 	}
+	hasSubscriptionType := false
 	for _, logData := range block.GetLogs() {
 		for name, subscription := range listener.GetSubscriptions() {
 			if subscription.Handler == nil || subscription.Type != types.LogEvent {
 				continue
 			}
-			if val == nil {
-				c.hasSubscriptionType.Store(types.LogEvent, true)
-			}
+			hasSubscriptionType = true
 			tx := block.GetTransactions()[logData.GetTxIndex()]
 			if !c.compareAddress(subscription.To, tx.GetToAddress()) {
 				continue
@@ -437,6 +458,9 @@ func (c *Controller) processLogs(listener types.IListener, block types.IBlock) {
 				c.PrepareJobChan <- job
 			}
 		}
+	}
+	if val == nil {
+		c.hasSubscriptionType.Store(types.LogEvent, hasSubscriptionType)
 	}
 }
 

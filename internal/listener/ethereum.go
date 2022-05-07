@@ -162,6 +162,10 @@ func (e *EthereumListener) GetLatestBlock() (types.IBlock, error) {
 	return NewEthBlock(e.client, e.chainId, block)
 }
 
+func (e *EthereumListener) GetLatestBlockHeight() (uint64, error) {
+	return e.client.BlockNumber(e.ctx)
+}
+
 func (e *EthereumListener) GetChainID() (*big.Int, error) {
 	if e.chainId != nil {
 		return e.chainId, nil

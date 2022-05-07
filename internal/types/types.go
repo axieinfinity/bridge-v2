@@ -50,6 +50,7 @@ type IListener interface {
 	GetSafeBlockRange() uint64
 	GetCurrentBlock() IBlock
 	GetLatestBlock() (IBlock, error)
+	GetLatestBlockHeight() (uint64, error)
 	GetBlock(height uint64) (IBlock, error)
 	GetChainID() (*big.Int, error)
 	GetReceipt(common.Hash) (*types.Receipt, error)
