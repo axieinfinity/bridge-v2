@@ -41,7 +41,7 @@ type IUtils interface {
 	Title(text string) string
 	NewEthClient(url string) (EthClient, error)
 	SendContractTransaction(key *ecdsa.PrivateKey, chainId *big.Int, fn func(opts *bind.TransactOpts) (*types.Transaction, error)) (*types.Transaction, error)
-	SubscribeTransactionReceipt(client *ethclient.Client, tx *types.Transaction, ticker *time.Ticker, maxTry int) error
+	SubscribeTransactionReceipt(client *ethclient.Client, tx *types.Transaction, ticker time.Duration, maxTry int) error
 	SignTypedData(typedData apitypes.TypedData, privateKey *ecdsa.PrivateKey) (hexutil.Bytes, error)
 }
 
@@ -145,20 +145,20 @@ func (u *Utils) SendContractTransaction(key *ecdsa.PrivateKey, chainId *big.Int,
 	return fn(opts)
 }
 
-func (u *Utils) SubscribeTransactionReceipt(client *ethclient.Client, tx *types.Transaction, ticker *time.Ticker, maxTry int) error {
+func (u *Utils) SubscribeTransactionReceipt(client *ethclient.Client, tx *types.Transaction, duration time.Duration, maxTry int) error {
 	var (
 		receipt *types.Receipt
 		err     error
 		count   int
 	)
 	for count < maxTry {
-		<-ticker.C
+		time.Sleep(duration)
 		receipt, err = client.TransactionReceipt(context.Background(), tx.Hash()) // counter..
 		if receipt != nil {
 			// start confirmation step
 			// start 3 times confirmation
 			for i := 0; i < 3; i++ {
-				<-ticker.C
+				time.Sleep(duration)
 				confirmedReceipt, _ := client.TransactionReceipt(context.Background(), tx.Hash())
 				if confirmedReceipt == nil { // receipt is not found, then reorg may happen then break and retry again
 					goto RETRY

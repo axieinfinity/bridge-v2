@@ -86,16 +86,20 @@ func NewRoninTask(listener types.IListener, util utils.IUtils) (*RoninTask, erro
 }
 
 func (r *RoninTask) Start() {
-	for {
-		if err := r.process(); err != nil {
-			log.Error("[RoninTask] error while process tasks", "err", err)
-		}
+	go func() {
 		select {
 		case <-r.ctx.Done():
 			r.client.Close()
 			r.Close()
 			return
 		}
+	}()
+	for {
+		if err := r.process(); err != nil {
+			log.Error("[RoninTask] error while process tasks", "err", err)
+		}
+		// wait a specific time
+		time.Sleep(r.taskInterval)
 	}
 }
 
@@ -132,21 +136,18 @@ func (r *RoninTask) process() error {
 	}
 	// wait for bulk deposit finish
 	if err = bulkDepositTask.send(); err != nil {
-		// TODO: log here...
+		log.Error("[RoninTask][bulkDepositTask] error while sending bulkDepositTask", "err", err)
 	}
 
 	// wait for bulk submit signatures finish
 	if err = bulkSubmitWithdrawalSignaturesTask.send(); err != nil {
-		// TODO: log here...
+		log.Error("[RoninTask][bulkSubmitWithdrawalSignaturesTask] error while sending bulkSubmitWithdrawalSignaturesTask", "err", err)
 	}
 
 	// wait for all ack tasks be finished
 	if err = ackWithdrewTasks.send(); err != nil {
-		// TODO: log here...
+		log.Error("[RoninTask][ackWithdrewTasks] error while sending ackWithdrewTasks", "err", err)
 	}
-
-	// wait a specific time
-	<-time.NewTimer(r.taskInterval).C
 	return nil
 }
 
@@ -158,7 +159,7 @@ type BulkTask struct {
 	client          *ethclient.Client
 	contractAddress common.Address
 	chainId         *big.Int
-	ticker          *time.Ticker
+	ticker          time.Duration
 	maxTry          int
 	taskType        string
 }
@@ -172,7 +173,7 @@ func NewBulkTask(client *ethclient.Client, store types.IMainStore, chainId *big.
 		client:          client,
 		contractAddress: contractAddress,
 		chainId:         chainId,
-		ticker:          time.NewTicker(ticker),
+		ticker:          ticker,
 		maxTry:          maxTry,
 		taskType:        taskType,
 	}

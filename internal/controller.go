@@ -142,6 +142,7 @@ func (c *Controller) LoadABIsFromConfig(lsConfig *types.LsConfig) (err error) {
 	return
 }
 
+// prepareJob saves new job to database
 func (c *Controller) prepareJob(job types.IJob) error {
 	if job.GetID() == 0 {
 		return job.Save()
@@ -149,6 +150,7 @@ func (c *Controller) prepareJob(job types.IJob) error {
 	return nil
 }
 
+// processSuccessJob updates job's status to `done` to database
 func (c *Controller) processSuccessJob(job types.IJob) {
 	if job == nil {
 		return
@@ -161,6 +163,7 @@ func (c *Controller) processSuccessJob(job types.IJob) {
 	}
 }
 
+// processFailedJob updates job's status to `failed` to database
 func (c *Controller) processFailedJob(job types.IJob) {
 	if job == nil {
 		return
@@ -188,7 +191,6 @@ func (c *Controller) Start() error {
 				if job == nil {
 					continue
 				}
-				log.Info("receive new job", "isnil", job == nil)
 				// add new job to database before processing
 				if err := c.prepareJob(job); err != nil {
 					log.Error("[Controller] failed on preparing job", "err", err, "jobType", job.GetType(), "tx", job.GetTransaction().GetHash().Hex())
