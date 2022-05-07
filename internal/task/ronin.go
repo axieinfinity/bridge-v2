@@ -39,7 +39,7 @@ type RoninTask struct {
 
 	taskInterval    time.Duration
 	txCheckInterval time.Duration
-	secret          types.Secret
+	secret          *types.Secret
 
 	client    *ethclient.Client
 	contracts map[string]string
@@ -120,6 +120,9 @@ func (r *RoninTask) process() error {
 	if err != nil {
 		return err
 	}
+	if len(tasks) == 0 {
+		return nil
+	}
 
 	bulkDepositTask := NewBulkTask(r.client, r.store, r.chainId, r.validator, common.HexToAddress(r.contracts[types.GATEWAY_CONTRACT]), r.txCheckInterval, defaultMaxTry, types.DEPOSIT_TASK, r.util)
 	bulkSubmitWithdrawalSignaturesTask := NewBulkTask(r.client, r.store, r.chainId, r.validator, common.HexToAddress(r.contracts[types.GATEWAY_CONTRACT]), r.txCheckInterval, defaultMaxTry, types.WITHDRAWAL_TASK, r.util)
@@ -186,6 +189,7 @@ func (r *BulkTask) collectTask(t *models.Task) {
 }
 
 func (r *BulkTask) send() error {
+	log.Info("[BulkTask] sending bulk", "type", r.taskType, "tasks", len(r.tasks))
 	if len(r.tasks) == 0 {
 		return nil
 	}

@@ -6,7 +6,7 @@ import (
 	"github.com/axieinfinity/bridge-v2/internal/types"
 )
 
-func (c *Controller) InitEthereumListener(ctx context.Context, lsConfig *types.LsConfig, store types.IMainStore) *listener.EthereumListener {
+func (c *Controller) InitEthereum(ctx context.Context, lsConfig *types.LsConfig, store types.IMainStore) *listener.EthereumListener {
 	ethListener, err := listener.NewEthereumListener(ctx, lsConfig, c.utilWrapper, store)
 	if err != nil {
 		return nil
@@ -14,7 +14,7 @@ func (c *Controller) InitEthereumListener(ctx context.Context, lsConfig *types.L
 	return ethListener
 }
 
-func (c *Controller) InitRoninListener(ctx context.Context, lsConfig *types.LsConfig, store types.IMainStore) *listener.RoninListener {
+func (c *Controller) InitRonin(ctx context.Context, lsConfig *types.LsConfig, store types.IMainStore) *listener.RoninListener {
 	roninListener, err := listener.NewRoninListener(ctx, lsConfig, c.utilWrapper, store)
 	if err != nil {
 		return nil

@@ -19,8 +19,8 @@ services:
 
   bridge:
     build:
-      context: ../../
-      dockerfile: docker/chainnode/Dockerfile
+      context: ..
+      dockerfile: docker/Dockerfile
     restart: always
     environment:
       - RONIN_RPC=${RONIN_RPC}
@@ -29,12 +29,42 @@ services:
       - ETHEREUM_RPC=${ETHEREUM_RPC}
       - ETHEREUM_VALIDATOR_KEY=${ETHEREUM_VALIDATOR_KEY}
       - ETHEREUM_RELAYER_KEY=${ETHEREUM_RELAYER_KEY}
+      - DB_HOST=${DB_HOST}
       - DB_NAME=${DB_NAME}
       - DB_PORT=${DB_PORT}
-      - DB_NAME=${DB_NAME}
       - DB_USERNAME=${DB_USERNAME}
       - DB_PASSWORD=${DB_PASSWORD}
       - VERBOSITY=${VERBOSITY}
       - CONFIG_PATH=${CONFIG_PATH}
     depends_on:
       - db
+      - node
+
+  node:
+    image: kiendn60302/node
+    restart: always
+    hostname: node
+    container_name: node
+    ports:
+      - "8545:8545"
+      - "8546:8546"
+      - "30303:30303"
+      - "30303:30303/udp"
+    volumes:
+      - ~/.skymavis/ronin:/opt/ronin
+    environment:
+      - SYNC_MODE=${SYNC_MODE}
+      - BOOTNODES=${BOOTNODES}
+      - NETWORK_ID=${NETWORK_ID}
+      - GENESIS_PATH=${GENESIS_PATH}
+      - RPC_NODE=${RPC_NODE}
+      - DATA_DIR=${DATA_DIR}
+      - SUBSCRIBER=${SUBSCRIBER}
+      - KAFKA_URL=${KAFKA_URL}
+      - KAFKA_USERNAME=${KAFKA_USERNAME}
+      - KAFKA_PASSWORD=${KAFKA_PASSWORD}
+      - KAFKA_AUTHENTICATION_TYPE=${KAFKA_AUTHENTICATION_TYPE}
+      - VERBOSITY=${VERBOSITY}
+      - CONFIRM_BLOCK_AT=${CONFIRM_BLOCK_AT}
+      - RONIN_PARAMS=${RONIN_PARAMS}
+      - MINE=${MINE}

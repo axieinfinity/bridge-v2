@@ -177,7 +177,7 @@ type IMainStore interface {
 type Config struct {
 	Listeners       map[string]*LsConfig `json:"listeners"`
 	NumberOfWorkers int                  `json:"numberOfWorkers"`
-	DB              Database             `json:"database"`
+	DB              *Database            `json:"database"`
 }
 
 type Database struct {
@@ -202,7 +202,7 @@ type LsConfig struct {
 	TaskInterval   time.Duration `json:"taskInterval"`
 
 	// TODO: apply more ways to get privatekey. such as: PLAINTEXT, KMS, etc.
-	Secret                 Secret                `json:"secret"`
+	Secret                 *Secret               `json:"secret"`
 	Subscriptions          map[string]*Subscribe `json:"subscriptions"`
 	TransactionCheckPeriod time.Duration         `json:"transactionCheckPeriod"`
 	Contracts              map[string]string     `json:"contracts"`

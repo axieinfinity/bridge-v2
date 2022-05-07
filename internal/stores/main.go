@@ -94,3 +94,27 @@ func MustConnectDatabase(cfg *types.Config) (*gorm.DB, error) {
 	}
 	return db, err
 }
+
+func MustConnectDatabaseWithName(cfg *types.Config, dbName string) (*gorm.DB, error) {
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%d sslmode=disable", cfg.DB.Host, cfg.DB.User, cfg.DB.Password, dbName, cfg.DB.Port)
+	dialect := postgres.Open(dsn)
+	db, err := gorm.Open(dialect, &gorm.Config{})
+	if err != nil {
+		panic(err)
+	}
+	pgDB, err := db.DB()
+	if err != nil {
+		panic(err)
+	}
+
+	pgDB.SetConnMaxLifetime(time.Duration(cfg.DB.ConnMaxLifetime) * time.Hour)
+	pgDB.SetMaxIdleConns(cfg.DB.MaxIdleConns)
+	pgDB.SetMaxOpenConns(cfg.DB.MaxOpenConns)
+
+	err = db.Raw("SELECT 1").Error
+	if err != nil {
+		log.Error("error querying SELECT 1", "err", err)
+		panic(err)
+	}
+	return db, err
+}

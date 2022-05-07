@@ -5,6 +5,7 @@
       "rpcUrl": "http://localhost:8545",
       "blockTime": 3,
       "safeBlockRange": 3,
+      "transactionCheckPeriod": 5,
       "secret": {
         "validator": "",
         "relayer": ""
@@ -45,44 +46,6 @@
           },
           "callbacks": {
             "Ronin": "ProvideReceiptSignatureCallback"
-          }
-        }
-      }
-    },
-    "Ethereum": {
-      "chainId": "0x3",
-      "rpcUrl": "https://ropsten.infura.io/v3/b262e519c1c94ac996100e3235375ce8",
-      "blockTime": 15,
-      "safeBlockRange": 8,
-      "secret": {
-        "validator": "",
-        "relayer": ""
-      },
-      "fromHeight": 12234008,
-      "contracts": {
-        "Gateway": "0x03d1F13c7391F6B5A651143a31034cf728A93694"
-      },
-      "subscriptions": {
-        "DepositRequestedSubscription": {
-          "to": "0x3b6371EB912bFd5C0E249A16000ffbC6B881555A",
-          "type": 1,
-          "handler": {
-            "abi": "contracts/ethereum/MainchainGatewayV2.abi",
-            "name": "DepositRequested"
-          },
-          "callbacks": {
-            "Ronin": "DepositRequestedCallback"
-          }
-        },
-        "WithdrewSubscription": {
-          "to": "0x3b6371EB912bFd5C0E249A16000ffbC6B881555A",
-          "type": 1,
-          "handler": {
-            "abi": "contracts/ethereum/MainchainGatewayV2.abi",
-            "name": "Withdrew"
-          },
-          "callbacks": {
-            "Ronin": "WithdrewCallback"
           }
         }
       }
