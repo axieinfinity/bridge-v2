@@ -320,19 +320,58 @@ func (r *BulkTask) sendWithdrawalSignaturesTransaction() (successTasks []*models
 
 		typedData := apitypes.TypedData{
 			Types: apitypes.Types{
-				"EIP712Domain": []apitypes.Type{{Name: "verifyingContract", Type: "address"}},
-				"SubmitWithdrawalSignatures": []apitypes.Type{
-					{Name: "withdrawals", Type: "uint256"},
+				"EIP712Domain": []apitypes.Type{
+					{Name: "name", Type: "string"},
+					{Name: "version", Type: "string"},
+					{Name: "chainId", Type: "uint256"},
+					{Name: "verifyingContract", Type: "address"},
+				},
+				"Receipt": []apitypes.Type{
+					{Name: "id", Type: "uint256"},
+					{Name: "kind", Type: "uint8"},
+					{Name: "mainchain", Type: "TokenOwner"},
+					{Name: "ronin", Type: "TokenOwner"},
+					{Name: "info", Type: "TokenInfo"},
+				},
+				"TokenOwner": []apitypes.Type{
+					{Name: "addr", Type: "string"},
+					{Name: "tokenAddr", Type: "string"},
+					{Name: "chainId", Type: "uint256"},
+				},
+				"TokenInfo": []apitypes.Type{
+					{Name: "erc", Type: "uint8"},
+					{Name: "id", Type: "uint256"},
+					{Name: "quantity", Type: "uint256"},
 				},
 			},
 			Domain: apitypes.TypedDataDomain{
-				VerifyingContract: r.contractAddress.Hex(),
+				Name:              "MainchainGatewayV2",
+				Version:           "2",
+				ChainId:           math.NewHexOrDecimal256(receipt.Mainchain.ChainId.Int64()),
+				VerifyingContract: receipt.Mainchain.Addr.Hex(),
 			},
-			PrimaryType: "SubmitWithdrawalSignatures",
+			PrimaryType: "Receipt",
 			Message: apitypes.TypedDataMessage{
-				"withdrawals": math.NewHexOrDecimal256(receipt.Id.Int64()),
+				"id":   math.NewHexOrDecimal256(receipt.Id.Int64()),
+				"kind": hexutil.EncodeBig(big.NewInt(int64(receipt.Kind))),
+				"mainchain": apitypes.TypedDataMessage{
+					"addr":      receipt.Mainchain.Addr.Hex(),
+					"tokenAddr": receipt.Mainchain.TokenAddr.Hex(),
+					"chainId":   math.NewHexOrDecimal256(receipt.Mainchain.ChainId.Int64()),
+				},
+				"ronin": apitypes.TypedDataMessage{
+					"addr":      receipt.Ronin.Addr.Hex(),
+					"tokenAddr": receipt.Ronin.TokenAddr.Hex(),
+					"chainId":   math.NewHexOrDecimal256(receipt.Ronin.ChainId.Int64()),
+				},
+				"info": apitypes.TypedDataMessage{
+					"erc":      hexutil.EncodeBig(big.NewInt(int64(receipt.Info.Erc))),
+					"id":       math.NewHexOrDecimal256(receipt.Info.Id.Int64()),
+					"quantity": math.NewHexOrDecimal256(receipt.Info.Quantity.Int64()),
+				},
 			},
 		}
+
 		sigs, err := r.util.SignTypedData(typedData, r.validator)
 		if err != nil {
 			t.LastError = err.Error()

@@ -51,7 +51,7 @@
     },
     "Ethereum": {
       "chainId": "0x3",
-      "rpcUrl": "https://ropsten.infura.io/v3/b262e519c1c94ac996100e3235375ce8",
+      "rpcUrl": "",
       "blockTime": 15,
       "safeBlockRange": 8,
       "secret": {
