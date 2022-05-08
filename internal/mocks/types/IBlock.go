@@ -46,16 +46,16 @@ func (_m *IBlock) GetHeight() uint64 {
 	return r0
 }
 
-// GetReceipts provides a mock function with given fields:
-func (_m *IBlock) GetReceipts() []types.IReceipt {
+// GetLogs provides a mock function with given fields:
+func (_m *IBlock) GetLogs() []types.ILog {
 	ret := _m.Called()
 
-	var r0 []types.IReceipt
-	if rf, ok := ret.Get(0).(func() []types.IReceipt); ok {
+	var r0 []types.ILog
+	if rf, ok := ret.Get(0).(func() []types.ILog); ok {
 		r0 = rf()
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]types.IReceipt)
+			r0 = ret.Get(0).([]types.ILog)
 		}
 	}
 

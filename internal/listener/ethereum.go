@@ -3,6 +3,7 @@ package listener
 import (
 	"context"
 	"crypto/ecdsa"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/axieinfinity/bridge-v2/internal/models"
@@ -40,21 +41,24 @@ type EthereumListener struct {
 	validatorKey   *ecdsa.PrivateKey
 	relayerKey     *ecdsa.PrivateKey
 	store          types.IMainStore
+
+	prepareJobChan chan types.IJob
 }
 
-func NewEthereumListener(ctx context.Context, cfg *types.LsConfig, helpers utils.IUtils, store types.IMainStore) (*EthereumListener, error) {
+func NewEthereumListener(ctx context.Context, cfg *types.LsConfig, helpers utils.IUtils, store types.IMainStore, prepareJobChan chan types.IJob) (*EthereumListener, error) {
 	newCtx, cancelFunc := context.WithCancel(ctx)
 	ethListener := &EthereumListener{
-		name:         cfg.Name,
-		period:       cfg.LoadInterval,
-		currentBlock: atomic.Value{},
-		ctx:          newCtx,
-		cancelCtx:    cancelFunc,
-		fromHeight:   cfg.FromHeight,
-		utilsWrapper: &utils.Utils{},
-		store:        store,
-		config:       cfg,
-		chainId:      hexutil.MustDecodeBig(cfg.ChainId),
+		name:           cfg.Name,
+		period:         cfg.LoadInterval,
+		currentBlock:   atomic.Value{},
+		ctx:            newCtx,
+		cancelCtx:      cancelFunc,
+		fromHeight:     cfg.FromHeight,
+		utilsWrapper:   &utils.Utils{},
+		store:          store,
+		config:         cfg,
+		chainId:        hexutil.MustDecodeBig(cfg.ChainId),
+		prepareJobChan: prepareJobChan,
 	}
 	if helpers != nil {
 		ethListener.utilsWrapper = helpers
@@ -103,6 +107,10 @@ func (e *EthereumListener) Period() time.Duration {
 
 func (e *EthereumListener) GetSafeBlockRange() uint64 {
 	return e.safeBlockRange
+}
+
+func (e *EthereumListener) IsDisabled() bool {
+	return e.config.Disabled
 }
 
 func (e *EthereumListener) GetCurrentBlock() types.IBlock {
@@ -238,7 +246,7 @@ func (e *EthereumListener) GetListenHandleJob(subscriptionName string, tx types.
 	return NewEthListenJob(types.ListenHandler, e, subscriptionName, tx, data)
 }
 
-func (e *EthereumListener) SendCallbackJobs(listeners map[string]types.IListener, subscriptionName string, tx types.ITransaction, inputData []byte, jobChan chan<- types.IJob) {
+func (e *EthereumListener) SendCallbackJobs(listeners map[string]types.IListener, subscriptionName string, tx types.ITransaction, inputData []byte) {
 	log.Info("[EthereumListener][SendCallbackJobs] Start", "subscriptionName", subscriptionName, "listeners", len(listeners))
 	chainId, err := e.GetChainID()
 	if err != nil {
@@ -255,9 +263,15 @@ func (e *EthereumListener) SendCallbackJobs(listeners map[string]types.IListener
 		l := listeners[listenerName]
 		job := NewEthCallbackJob(l, methodName, tx, inputData, chainId, e.utilsWrapper)
 		if job != nil {
-			jobChan <- job
+			e.prepareJobChan <- job
 		}
 	}
+}
+
+func (e *EthereumListener) SendTransactionCheckerJob(chainId *big.Int, ids []int, tx *ethtypes.Transaction) {
+	log.Info("[EthereumListener][SendTransactionCheckerJob] Start", "tx", tx.Hash().Hex())
+	job := NewEthCheckTransactionStatusJob(e, ids, tx, chainId, e.utilsWrapper)
+	e.prepareJobChan <- job
 }
 
 func (e *EthereumListener) GetBlock(height uint64) (types.IBlock, error) {
@@ -294,7 +308,7 @@ func (e *EthereumListener) NewJobFromDB(job *models.Job) (types.IJob, error) {
 				jobType:          types.ListenHandler,
 				retryCount:       job.RetryCount,
 				maxTry:           20,
-				nextTry:          time.Now().Unix(),
+				nextTry:          time.Now().Unix() + int64(job.RetryCount*5),
 				backOff:          5,
 				data:             common.Hex2Bytes(job.Data),
 				tx:               transaction,
@@ -315,7 +329,7 @@ func (e *EthereumListener) NewJobFromDB(job *models.Job) (types.IJob, error) {
 				jobType:      types.CallbackHandler,
 				retryCount:   job.RetryCount,
 				maxTry:       20,
-				nextTry:      time.Now().Unix(),
+				nextTry:      time.Now().Unix() + int64(job.RetryCount*5),
 				backOff:      5,
 				data:         common.Hex2Bytes(job.Data),
 				tx:           transaction,
@@ -324,6 +338,27 @@ func (e *EthereumListener) NewJobFromDB(job *models.Job) (types.IJob, error) {
 				id:           int32(job.ID),
 			},
 			method: job.Method,
+		}, nil
+	case types.TransactionChecker:
+		var ids []int
+		if err := json.Unmarshal(common.Hex2Bytes(job.Data), &ids); err != nil {
+			return nil, err
+		}
+		return &EthCheckTransactionStatusJob{
+			BaseJob: &BaseJob{
+				utilsWrapper: e.utilsWrapper,
+				id:           int32(job.ID),
+				jobType:      types.TransactionChecker,
+				retryCount:   job.RetryCount,
+				maxTry:       20,
+				nextTry:      time.Now().Unix() + int64(job.RetryCount*5),
+				backOff:      5,
+				data:         common.Hex2Bytes(job.Data),
+				tx:           transaction,
+				listener:     e,
+				fromChainID:  chainId,
+			},
+			ids: ids,
 		}, nil
 	}
 	return nil, errors.New("jobType does not match")

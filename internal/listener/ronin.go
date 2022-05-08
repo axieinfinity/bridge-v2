@@ -18,8 +18,8 @@ type RoninListener struct {
 	task types.ITask
 }
 
-func NewRoninListener(ctx context.Context, cfg *types.LsConfig, helpers utils.IUtils, store types.IMainStore) (*RoninListener, error) {
-	listener, err := NewEthereumListener(ctx, cfg, helpers, store)
+func NewRoninListener(ctx context.Context, cfg *types.LsConfig, helpers utils.IUtils, store types.IMainStore, prepareJobChan chan types.IJob) (*RoninListener, error) {
+	listener, err := NewEthereumListener(ctx, cfg, helpers, store, prepareJobChan)
 	if err != nil {
 		panic(err)
 	}

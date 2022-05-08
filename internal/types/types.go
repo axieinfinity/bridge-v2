@@ -20,6 +20,7 @@ const (
 const (
 	ListenHandler = iota
 	CallbackHandler
+	TransactionChecker
 )
 
 const (
@@ -33,9 +34,10 @@ const (
 	DEPOSIT_TASK      = "deposit"
 	WITHDRAWAL_TASK   = "withdrawal"
 
-	STATUS_PENDING = "pending"
-	STATUS_FAILED  = "failed"
-	STATUS_DONE    = "done"
+	STATUS_PENDING    = "pending"
+	STATUS_FAILED     = "failed"
+	STATUS_PROCESSING = "processing"
+	STATUS_DONE       = "done"
 
 	GATEWAY_CONTRACT     = "Gateway"
 	BRIDGEADMIN_CONTRACT = "BridgeAdmin"
@@ -64,12 +66,15 @@ type IListener interface {
 	SaveTransactionsToDB(txs []ITransaction) error
 
 	GetListenHandleJob(subscriptionName string, tx ITransaction, eventId string, data []byte) IJob
-	SendCallbackJobs(listeners map[string]IListener, subscriptionName string, tx ITransaction, inputData []byte, jobChan chan<- IJob)
+	SendCallbackJobs(listeners map[string]IListener, subscriptionName string, tx ITransaction, inputData []byte)
+	SendTransactionCheckerJob(chainId *big.Int, ids []int, tx *types.Transaction)
 
 	NewJobFromDB(job *models.Job) (IJob, error)
 
 	Start()
 	Close()
+
+	IsDisabled() bool
 }
 
 type IEthListener interface {
@@ -154,6 +159,7 @@ type ITaskStore interface {
 	Save(task *models.Task) error
 	Update(task *models.Task) error
 	GetPendingTasks(chain string, limit int) ([]*models.Task, error)
+	UpdateTaskWithIds(ids []int, status string) error
 }
 
 type IDepositStore interface {
@@ -166,6 +172,10 @@ type IWithdrawalStore interface {
 	GetWithdrawalById(withdrawalId int64) (*models.Withdrawal, error)
 }
 
+type IEventStore interface {
+	Save(event *models.Event) error
+}
+
 type IMainStore interface {
 	GetDB() *gorm.DB
 	GetDepositStore() IDepositStore
@@ -173,6 +183,7 @@ type IMainStore interface {
 	GetTaskStore() ITaskStore
 	GetJobStore() IJobStore
 	GetProcessedBlockStore() IProcessedBlockStore
+	GetEventStore() IEventStore
 }
 
 type Config struct {
@@ -201,6 +212,7 @@ type LsConfig struct {
 	SafeBlockRange uint64        `json:"safeBlockRange"`
 	FromHeight     uint64        `json:"fromHeight"`
 	TaskInterval   time.Duration `json:"taskInterval"`
+	Disabled       bool          `json:"disabled"`
 
 	// TODO: apply more ways to get privatekey. such as: PLAINTEXT, KMS, etc.
 	Secret                 *Secret               `json:"secret"`

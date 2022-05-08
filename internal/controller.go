@@ -304,6 +304,9 @@ func (c *Controller) Start() error {
 	// run all events listeners
 	for _, listener := range c.listeners {
 		go listener.Start()
+		if listener.IsDisabled() {
+			continue
+		}
 		go c.startListener(listener, 0)
 	}
 	return nil

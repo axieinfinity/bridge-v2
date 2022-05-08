@@ -91,6 +91,27 @@ func (_m *EthClient) BlockByNumber(ctx context.Context, number *big.Int) (*types
 	return r0, r1
 }
 
+// BlockNumber provides a mock function with given fields: ctx
+func (_m *EthClient) BlockNumber(ctx context.Context) (uint64, error) {
+	ret := _m.Called(ctx)
+
+	var r0 uint64
+	if rf, ok := ret.Get(0).(func(context.Context) uint64); ok {
+		r0 = rf(ctx)
+	} else {
+		r0 = ret.Get(0).(uint64)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = rf(ctx)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // CallContract provides a mock function with given fields: ctx, call, blockNumber
 func (_m *EthClient) CallContract(ctx context.Context, call ethereum.CallMsg, blockNumber *big.Int) ([]byte, error) {
 	ret := _m.Called(ctx, call, blockNumber)
@@ -158,6 +179,29 @@ func (_m *EthClient) CodeAt(ctx context.Context, account common.Address, blockNu
 	var r1 error
 	if rf, ok := ret.Get(1).(func(context.Context, common.Address, *big.Int) error); ok {
 		r1 = rf(ctx, account, blockNumber)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// FilterLogs provides a mock function with given fields: ctx, q
+func (_m *EthClient) FilterLogs(ctx context.Context, q ethereum.FilterQuery) ([]types.Log, error) {
+	ret := _m.Called(ctx, q)
+
+	var r0 []types.Log
+	if rf, ok := ret.Get(0).(func(context.Context, ethereum.FilterQuery) []types.Log); ok {
+		r0 = rf(ctx, q)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]types.Log)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, ethereum.FilterQuery) error); ok {
+		r1 = rf(ctx, q)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -248,6 +292,29 @@ func (_m *EthClient) StorageAt(ctx context.Context, account common.Address, key 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(context.Context, common.Address, common.Hash, *big.Int) error); ok {
 		r1 = rf(ctx, account, key, blockNumber)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// SubscribeFilterLogs provides a mock function with given fields: ctx, q, ch
+func (_m *EthClient) SubscribeFilterLogs(ctx context.Context, q ethereum.FilterQuery, ch chan<- types.Log) (ethereum.Subscription, error) {
+	ret := _m.Called(ctx, q, ch)
+
+	var r0 ethereum.Subscription
+	if rf, ok := ret.Get(0).(func(context.Context, ethereum.FilterQuery, chan<- types.Log) ethereum.Subscription); ok {
+		r0 = rf(ctx, q, ch)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(ethereum.Subscription)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, ethereum.FilterQuery, chan<- types.Log) error); ok {
+		r1 = rf(ctx, q, ch)
 	} else {
 		r1 = ret.Error(1)
 	}

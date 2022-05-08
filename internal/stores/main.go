@@ -18,6 +18,7 @@ type MainStore struct {
 	JobStore            types.IJobStore
 	TaskStore           types.ITaskStore
 	ProcessedBlockStore types.IProcessedBlockStore
+	EventStore          types.IEventStore
 }
 
 func NewMainStore(db *gorm.DB) *MainStore {
@@ -29,6 +30,7 @@ func NewMainStore(db *gorm.DB) *MainStore {
 		ProcessedBlockStore: NewProcessedBlockStore(db),
 		DepositStore:        NewDepositStore(db),
 		WithdrawalStore:     NewWithdrawalStore(db),
+		EventStore:          NewEventStore(db),
 	}
 	m := []interface{}{
 		&models.Deposit{},
@@ -36,6 +38,7 @@ func NewMainStore(db *gorm.DB) *MainStore {
 		&models.ProcessedBlock{},
 		&models.Task{},
 		&models.Withdrawal{},
+		&models.Event{},
 	}
 	if err := cl.AutoMigrate(m...); err != nil {
 		panic(err)
@@ -69,6 +72,10 @@ func (m *MainStore) GetJobStore() types.IJobStore {
 
 func (m *MainStore) GetProcessedBlockStore() types.IProcessedBlockStore {
 	return m.ProcessedBlockStore
+}
+
+func (m *MainStore) GetEventStore() types.IEventStore {
+	return m.EventStore
 }
 
 func MustConnectDatabase(cfg *types.Config) (*gorm.DB, error) {

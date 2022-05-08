@@ -6,6 +6,10 @@ import (
 	context "context"
 	big "math/big"
 
+	common "github.com/ethereum/go-ethereum/common"
+
+	coretypes "github.com/ethereum/go-ethereum/core/types"
+
 	mock "github.com/stretchr/testify/mock"
 
 	models "github.com/axieinfinity/bridge-v2/internal/models"
@@ -144,13 +148,34 @@ func (_m *IListener) GetLatestBlock() (types.IBlock, error) {
 	return r0, r1
 }
 
-// GetListenHandleJob provides a mock function with given fields: subscriptionName, tx, data
-func (_m *IListener) GetListenHandleJob(subscriptionName string, tx types.ITransaction, data []byte) types.IJob {
-	ret := _m.Called(subscriptionName, tx, data)
+// GetLatestBlockHeight provides a mock function with given fields:
+func (_m *IListener) GetLatestBlockHeight() (uint64, error) {
+	ret := _m.Called()
+
+	var r0 uint64
+	if rf, ok := ret.Get(0).(func() uint64); ok {
+		r0 = rf()
+	} else {
+		r0 = ret.Get(0).(uint64)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func() error); ok {
+		r1 = rf()
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetListenHandleJob provides a mock function with given fields: subscriptionName, tx, eventId, data
+func (_m *IListener) GetListenHandleJob(subscriptionName string, tx types.ITransaction, eventId string, data []byte) types.IJob {
+	ret := _m.Called(subscriptionName, tx, eventId, data)
 
 	var r0 types.IJob
-	if rf, ok := ret.Get(0).(func(string, types.ITransaction, []byte) types.IJob); ok {
-		r0 = rf(subscriptionName, tx, data)
+	if rf, ok := ret.Get(0).(func(string, types.ITransaction, string, []byte) types.IJob); ok {
+		r0 = rf(subscriptionName, tx, eventId, data)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(types.IJob)
@@ -172,6 +197,29 @@ func (_m *IListener) GetName() string {
 	}
 
 	return r0
+}
+
+// GetReceipt provides a mock function with given fields: _a0
+func (_m *IListener) GetReceipt(_a0 common.Hash) (*coretypes.Receipt, error) {
+	ret := _m.Called(_a0)
+
+	var r0 *coretypes.Receipt
+	if rf, ok := ret.Get(0).(func(common.Hash) *coretypes.Receipt); ok {
+		r0 = rf(_a0)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*coretypes.Receipt)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(common.Hash) error); ok {
+		r1 = rf(_a0)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
 // GetSafeBlockRange provides a mock function with given fields:
@@ -285,9 +333,14 @@ func (_m *IListener) SaveTransactionsToDB(txs []types.ITransaction) error {
 	return r0
 }
 
-// SendCallbackJobs provides a mock function with given fields: listeners, subscriptionName, tx, inputData, jobChan
-func (_m *IListener) SendCallbackJobs(listeners map[string]types.IListener, subscriptionName string, tx types.ITransaction, inputData []byte, jobChan chan<- types.IJob) {
-	_m.Called(listeners, subscriptionName, tx, inputData, jobChan)
+// SendCallbackJobs provides a mock function with given fields: listeners, subscriptionName, tx, inputData
+func (_m *IListener) SendCallbackJobs(listeners map[string]types.IListener, subscriptionName string, tx types.ITransaction, inputData []byte) {
+	_m.Called(listeners, subscriptionName, tx, inputData)
+}
+
+// SendTransactionCheckerJob provides a mock function with given fields: chainId, ids, tx
+func (_m *IListener) SendTransactionCheckerJob(chainId *big.Int, ids []int, tx *coretypes.Transaction) {
+	_m.Called(chainId, ids, tx)
 }
 
 // Start provides a mock function with given fields:

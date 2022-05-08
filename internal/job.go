@@ -96,7 +96,7 @@ func (w *Worker) processJob(job types.IJob) {
 		goto ERROR
 	}
 	if job.GetType() == types.ListenHandler {
-		job.GetListener().SendCallbackJobs(w.listeners, job.GetSubscriptionName(), job.GetTransaction(), val, w.mainChan)
+		job.GetListener().SendCallbackJobs(w.listeners, job.GetSubscriptionName(), job.GetTransaction(), val)
 	}
 	w.successChan <- job
 	return

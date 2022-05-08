@@ -73,6 +73,20 @@ func (_m *ILog) GetTopics() []string {
 	return r0
 }
 
+// GetTxIndex provides a mock function with given fields:
+func (_m *ILog) GetTxIndex() uint {
+	ret := _m.Called()
+
+	var r0 uint
+	if rf, ok := ret.Get(0).(func() uint); ok {
+		r0 = rf()
+	} else {
+		r0 = ret.Get(0).(uint)
+	}
+
+	return r0
+}
+
 // NewILog creates a new instance of ILog. It also registers the testing.TB interface on the mock and a cleanup function to assert the mocks expectations.
 func NewILog(t testing.TB) *ILog {
 	mock := &ILog{}

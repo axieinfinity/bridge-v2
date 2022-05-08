@@ -26,7 +26,7 @@ const (
 	defaultMaxTry       = 5
 )
 
-var defaultTaskInterval = time.Minute
+var defaultTaskInterval = 3 * time.Second
 
 type RoninTask struct {
 	ctx        context.Context
@@ -112,6 +112,10 @@ func (r *RoninTask) GetListener() types.IListener {
 }
 
 func (r *RoninTask) process() error {
+	var (
+		ids []int
+		tx  *ethtypes.Transaction
+	)
 	chainId, err := r.GetListener().GetChainID()
 	if err != nil {
 		return err
@@ -138,18 +142,33 @@ func (r *RoninTask) process() error {
 		ackWithdrewTasks.collectTask(task)
 	}
 	// wait for bulk deposit finish
-	if err = bulkDepositTask.send(); err != nil {
+	if ids, tx, err = bulkDepositTask.send(); err != nil {
 		log.Error("[RoninTask][bulkDepositTask] error while sending bulkDepositTask", "err", err)
 	}
 
+	// create job to check tx receipts of these ids
+	if tx != nil {
+		r.listener.SendTransactionCheckerJob(r.chainId, ids, tx)
+	}
+
 	// wait for bulk submit signatures finish
-	if err = bulkSubmitWithdrawalSignaturesTask.send(); err != nil {
+	if ids, tx, err = bulkSubmitWithdrawalSignaturesTask.send(); err != nil {
 		log.Error("[RoninTask][bulkSubmitWithdrawalSignaturesTask] error while sending bulkSubmitWithdrawalSignaturesTask", "err", err)
 	}
 
+	// create job to check tx receipts of these ids
+	if tx != nil {
+		r.listener.SendTransactionCheckerJob(r.chainId, ids, tx)
+	}
+
 	// wait for all ack tasks be finished
-	if err = ackWithdrewTasks.send(); err != nil {
+	if ids, tx, err = ackWithdrewTasks.send(); err != nil {
 		log.Error("[RoninTask][ackWithdrewTasks] error while sending ackWithdrewTasks", "err", err)
+	}
+
+	// create job to check tx receipts of these ids
+	if tx != nil {
+		r.listener.SendTransactionCheckerJob(r.chainId, ids, tx)
 	}
 	return nil
 }
@@ -188,36 +207,41 @@ func (r *BulkTask) collectTask(t *models.Task) {
 	}
 }
 
-func (r *BulkTask) send() error {
+func (r *BulkTask) send() ([]int, *ethtypes.Transaction, error) {
 	log.Info("[BulkTask] sending bulk", "type", r.taskType, "tasks", len(r.tasks))
 	if len(r.tasks) == 0 {
-		return nil
+		return nil, nil, nil
 	}
 	var (
 		successTasks, failedTasks []*models.Task
+		transaction               *ethtypes.Transaction
+		txHash                    string
+		ids                       []int
 		err                       error
 	)
 	switch r.taskType {
 	case types.DEPOSIT_TASK:
-		successTasks, failedTasks = r.sendDepositTransaction()
+		successTasks, failedTasks, transaction = r.sendDepositTransaction()
 	case types.WITHDRAWAL_TASK:
-		successTasks, failedTasks = r.sendWithdrawalSignaturesTransaction()
+		successTasks, failedTasks, transaction = r.sendWithdrawalSignaturesTransaction()
 	case types.ACK_WITHDREW_TASK:
-		successTasks, failedTasks = r.SendAckTransactions()
+		successTasks, failedTasks, transaction = r.SendAckTransactions()
 	}
-	if err = updateTasks(r.store, successTasks, types.STATUS_DONE); err != nil {
+	if transaction != nil {
+		txHash = transaction.Hash().Hex()
+	}
+	if ids, err = updateTasks(r.store, successTasks, types.STATUS_PROCESSING, txHash); err != nil {
 		log.Error("[BulkTask][updateTasks] error while update success tasks", "err", err)
 	}
-	if err = updateTasks(r.store, failedTasks, types.STATUS_FAILED); err != nil {
+	if _, err = updateTasks(r.store, failedTasks, types.STATUS_FAILED, txHash); err != nil {
 		log.Error("[BulkTask][updateTasks] error while update failed tasks", "err", err)
 	}
-	return err
+	return ids, transaction, err
 }
 
-func (r *BulkTask) sendDepositTransaction() ([]*models.Task, []*models.Task) {
+func (r *BulkTask) sendDepositTransaction() (successTasks []*models.Task, failedTasks []*models.Task, tx *ethtypes.Transaction) {
 	var (
-		successTasks, failedTasks []*models.Task
-		receipts                  []gateway2.TransferReceipt
+		receipts []gateway2.TransferReceipt
 	)
 
 	for _, t := range r.tasks {
@@ -267,9 +291,9 @@ func (r *BulkTask) sendDepositTransaction() ([]*models.Task, []*models.Task) {
 			t.LastError = err.Error()
 			failedTasks = append(failedTasks, t)
 		}
-		return nil, failedTasks
+		return nil, failedTasks, nil
 	}
-	tx, err := r.util.SendContractTransaction(r.validator, r.chainId, func(opts *bind.TransactOpts) (*ethtypes.Transaction, error) {
+	tx, err = r.util.SendContractTransaction(r.validator, r.chainId, func(opts *bind.TransactOpts) (*ethtypes.Transaction, error) {
 		return c.BulkDepositFor(opts, receipts)
 	})
 	if err != nil {
@@ -277,19 +301,12 @@ func (r *BulkTask) sendDepositTransaction() ([]*models.Task, []*models.Task) {
 			t.LastError = err.Error()
 			failedTasks = append(failedTasks, t)
 		}
-		return nil, failedTasks
+		return nil, failedTasks, nil
 	}
-	if err = r.util.SubscribeTransactionReceipt(r.client, tx, r.ticker, r.maxTry); err != nil {
-		for _, t := range successTasks {
-			t.LastError = err.Error()
-			failedTasks = append(failedTasks, t)
-		}
-		return nil, failedTasks
-	}
-	return successTasks, failedTasks
+	return
 }
 
-func (r *BulkTask) sendWithdrawalSignaturesTransaction() (successTasks []*models.Task, failedTasks []*models.Task) {
+func (r *BulkTask) sendWithdrawalSignaturesTransaction() (successTasks []*models.Task, failedTasks []*models.Task, tx *ethtypes.Transaction) {
 
 	var (
 		ids        []*big.Int
@@ -389,10 +406,10 @@ func (r *BulkTask) sendWithdrawalSignaturesTransaction() (successTasks []*models
 			t.LastError = err.Error()
 			failedTasks = append(failedTasks, t)
 		}
-		return nil, failedTasks
+		return nil, failedTasks, nil
 	}
 	if len(ids) > 0 {
-		tx, err := r.util.SendContractTransaction(r.validator, r.chainId, func(opts *bind.TransactOpts) (*ethtypes.Transaction, error) {
+		tx, err = r.util.SendContractTransaction(r.validator, r.chainId, func(opts *bind.TransactOpts) (*ethtypes.Transaction, error) {
 			return c.BulkSubmitWithdrawalSignatures(opts, ids, signatures)
 		})
 		if err != nil {
@@ -401,28 +418,20 @@ func (r *BulkTask) sendWithdrawalSignaturesTransaction() (successTasks []*models
 				t.LastError = err.Error()
 				failedTasks = append(failedTasks, t)
 			}
-			return nil, failedTasks
-		}
-		if err = r.util.SubscribeTransactionReceipt(r.client, tx, r.ticker, r.maxTry); err != nil {
-			// append all success tasks into failed tasks
-			for _, t := range successTasks {
-				t.LastError = err.Error()
-				failedTasks = append(failedTasks, t)
-			}
-			return nil, failedTasks
+			return nil, failedTasks, nil
 		}
 	}
 	return
 }
 
-func (r *BulkTask) SendAckTransactions() (successTasks []*models.Task, failedTasks []*models.Task) {
+func (r *BulkTask) SendAckTransactions() (successTasks []*models.Task, failedTasks []*models.Task, tx *ethtypes.Transaction) {
 	var ids []*big.Int
 	c, err := gateway2.NewGatewayTransactor(r.contractAddress, r.client)
 	if err != nil {
 		for _, t := range r.tasks {
 			t.LastError = err.Error()
 		}
-		return nil, r.tasks
+		return nil, r.tasks, nil
 	}
 	for _, t := range r.tasks {
 		// Unpack event data
@@ -442,7 +451,7 @@ func (r *BulkTask) SendAckTransactions() (successTasks []*models.Task, failedTas
 		ids = append(ids, ethEvent.Receipt.Id)
 		successTasks = append(successTasks, t)
 	}
-	tx, err := r.util.SendContractTransaction(r.validator, r.chainId, func(opts *bind.TransactOpts) (*ethtypes.Transaction, error) {
+	tx, err = r.util.SendContractTransaction(r.validator, r.chainId, func(opts *bind.TransactOpts) (*ethtypes.Transaction, error) {
 		if ids != nil {
 			return c.BulkAcknowledgeMainchainWithdrew(nil, ids)
 		}
@@ -454,20 +463,12 @@ func (r *BulkTask) SendAckTransactions() (successTasks []*models.Task, failedTas
 			t.LastError = err.Error()
 			failedTasks = append(failedTasks, t)
 		}
-		return nil, failedTasks
-	}
-	if err = r.util.SubscribeTransactionReceipt(r.client, tx, r.ticker, r.maxTry); err != nil {
-		// append all success tasks into failed tasks
-		for _, t := range successTasks {
-			t.LastError = err.Error()
-			failedTasks = append(failedTasks, t)
-		}
-		return nil, failedTasks
+		return nil, failedTasks, nil
 	}
 	return
 }
 
-func updateTasks(store types.IMainStore, tasks []*models.Task, status string) error {
+func updateTasks(store types.IMainStore, tasks []*models.Task, status, txHash string) (ids []int, err error) {
 	// update tasks with given status
 	// note: if task.retries < 10 then retries++ and status still be processing
 	for _, t := range tasks {
@@ -479,10 +480,12 @@ func updateTasks(store types.IMainStore, tasks []*models.Task, status string) er
 			}
 		} else {
 			t.Status = status
+			t.TransactionHash = txHash
 		}
-		if err := store.GetTaskStore().Update(t); err != nil {
+		if err = store.GetTaskStore().Update(t); err != nil {
 			log.Error("error while update task", "id", t.ID)
 		}
+		ids = append(ids, t.ID)
 	}
-	return nil
+	return
 }

@@ -32,3 +32,7 @@ func (t *TaskStore) GetPendingTasks(chain string, limit int) ([]*models.Task, er
 		Limit(limit).Find(&tasks).Error
 	return tasks, err
 }
+
+func (t *TaskStore) UpdateTaskWithIds(ids []int, status string) error {
+	return t.Model(&models.Task{}).Where("id in ?", ids).Update("status", status).Error
+}

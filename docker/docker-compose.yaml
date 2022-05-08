@@ -19,8 +19,10 @@ services:
 
   bridge:
     build:
-      context: ..
+      context: ../
       dockerfile: docker/Dockerfile
+    image: kiendn60302/bridge
+    container_name: bridge_test
     restart: always
     environment:
       - RONIN_RPC=${RONIN_RPC}
@@ -44,14 +46,14 @@ services:
     image: kiendn60302/node
     restart: always
     hostname: node
-    container_name: node
+    container_name: node_test
     ports:
       - "8545:8545"
       - "8546:8546"
       - "30303:30303"
       - "30303:30303/udp"
     volumes:
-      - ~/.skymavis/ronin:/opt/ronin
+      - /Users/mac/coding/ronin/testnet1/ronin:/opt/ronin
     environment:
       - SYNC_MODE=${SYNC_MODE}
       - BOOTNODES=${BOOTNODES}

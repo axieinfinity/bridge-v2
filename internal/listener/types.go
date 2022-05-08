@@ -2,6 +2,8 @@ package listener
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/axieinfinity/bridge-v2/internal/models"
 	"github.com/axieinfinity/bridge-v2/internal/types"
@@ -67,6 +69,18 @@ type EthTransaction struct {
 	chainId *big.Int
 	sender  common.Address
 	tx      *ethtypes.Transaction
+}
+
+func NewEthTransactionWithoutError(chainId *big.Int, tx *ethtypes.Transaction) *EthTransaction {
+	ethTx := &EthTransaction{
+		chainId: chainId,
+		tx:      tx,
+	}
+	sender, err := ethtypes.LatestSignerForChainID(chainId).Sender(tx)
+	if err == nil {
+		ethTx.sender = sender
+	}
+	return ethTx
 }
 
 func NewEthTransaction(chainId *big.Int, tx *ethtypes.Transaction) (*EthTransaction, error) {
@@ -184,7 +198,7 @@ func (e *BaseJob) GetBackOff() int {
 	return e.backOff
 }
 
-func (e *BaseJob) Process() (map[string]interface{}, error) {
+func (e *BaseJob) Process() ([]byte, error) {
 	return nil, nil
 }
 
@@ -277,6 +291,17 @@ func NewEthListenJob(jobType int, listener types.IListener, subscriptionName str
 
 func (e *EthListenJob) Process() ([]byte, error) {
 	// TODO: implement handleMethod, if it is defined then process it and return its result.
+	// save event data to database
+	subscription, ok := e.listener.GetSubscriptions()[e.subscriptionName]
+	if ok {
+		if err := e.listener.GetStore().GetEventStore().Save(&models.Event{
+			EventName:       subscription.Handler.Name,
+			TransactionHash: e.tx.GetHash().Hex(),
+			FromChainId:     hexutil.EncodeBig(e.FromChainID()),
+		}); err != nil {
+			log.Error("[EthListenJob][Process] error while storing event to database", "err", err)
+		}
+	}
 	// omit first 4 bytes which is method
 	return e.data, nil
 }
@@ -336,6 +361,68 @@ func (e *EthCallbackJob) Update(status string) error {
 		Method:           e.method,
 	}
 	if err := e.listener.GetStore().GetJobStore().Update(job); err != nil {
+		return err
+	}
+	return nil
+}
+
+type EthCheckTransactionStatusJob struct {
+	*BaseJob
+	ids []int
+}
+
+func NewEthCheckTransactionStatusJob(listener types.IListener, ids []int, tx *ethtypes.Transaction, fromChainID *big.Int, helpers utils.IUtils) *EthCheckTransactionStatusJob {
+	if helpers == nil {
+		helpers = &utils.Utils{}
+	}
+	data, _ := json.Marshal(ids)
+	ethTx := NewEthTransactionWithoutError(fromChainID, tx)
+	return &EthCheckTransactionStatusJob{
+		BaseJob: &BaseJob{
+			utilsWrapper: helpers,
+			jobType:      types.TransactionChecker,
+			retryCount:   0,
+			maxTry:       20,
+			nextTry:      0,
+			backOff:      5,
+			data:         data,
+			tx:           ethTx,
+			listener:     listener,
+			fromChainID:  fromChainID,
+		},
+		ids: ids,
+	}
+}
+
+func (e *EthCheckTransactionStatusJob) Process() ([]byte, error) {
+	log.Info("[EthCheckTransactionStatusJob] Start Process", "tx", e.tx.GetHash())
+	receipt, err := e.listener.GetReceipt(e.tx.GetHash())
+	if err != nil {
+		return nil, err
+	}
+	if receipt != nil {
+		// start confirmation step
+		// start 3 times confirmation
+		for i := 0; i < 3; i++ {
+			time.Sleep(e.listener.Config().TransactionCheckPeriod * time.Second)
+			confirmedReceipt, _ := e.listener.GetReceipt(e.tx.GetHash())
+			if confirmedReceipt == nil { // receipt is not found, then reorg may happen then break and retry again
+				return nil, errors.New("failed when confirm receipt")
+			}
+		}
+		// check receipt status
+		if receipt.Status == 0 {
+			return nil, errors.New("transaction failed")
+		}
+	}
+	return nil, nil
+}
+
+func (e *EthCheckTransactionStatusJob) Update(status string) error {
+	if err := e.BaseJob.Update(status); err != nil {
+		return err
+	}
+	if err := e.listener.GetStore().GetTaskStore().UpdateTaskWithIds(e.ids, status); err != nil {
 		return err
 	}
 	return nil

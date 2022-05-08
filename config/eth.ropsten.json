@@ -1,10 +1,12 @@
 {
   "listeners": {
     "Ronin": {
+      "disabled": true,
       "chainId": "0x7e5",
       "rpcUrl": "http://localhost:8545",
       "blockTime": 3,
-      "safeBlockRange": 5,
+      "safeBlockRange": 3,
+      "transactionCheckPeriod": 5,
       "secret": {
         "validator": "",
         "relayer": ""
@@ -12,41 +14,6 @@
       "fromHeight": 6567000,
       "contracts": {
         "Gateway": "0x03d1F13c7391F6B5A651143a31034cf728A93694"
-      },
-      "subscriptions": {
-        "MainchainWithdrewSubscription": {
-          "to": "0x03d1F13c7391F6B5A651143a31034cf728A93694",
-          "type": 1,
-          "handler": {
-            "abi": "contracts/ronin/RoninGatewayV2.abi",
-            "name": "MainchainWithdrew"
-          },
-          "callbacks": {
-            "Ronin": "StoreMainchainWithdrawCallback"
-          }
-        },
-        "WithdrawalRequestedSubscription": {
-          "to": "0x03d1F13c7391F6B5A651143a31034cf728A93694",
-          "type": 1,
-          "handler": {
-            "abi": "contracts/ronin/RoninGatewayV2.abi",
-            "name": "WithdrawalRequested"
-          },
-          "callbacks": {
-            "Ronin": "ProvideReceiptSignatureCallback"
-          }
-        },
-        "WithdrawalSignaturesRequestedSubscription": {
-          "to": "0x03d1F13c7391F6B5A651143a31034cf728A93694",
-          "type": 1,
-          "handler": {
-            "abi": "contracts/ronin/RoninGatewayV2.abi",
-            "name": "WithdrawalSignaturesRequested"
-          },
-          "callbacks": {
-            "Ronin": "ProvideReceiptSignatureCallback"
-          }
-        }
       }
     },
     "Ethereum": {
@@ -54,6 +21,7 @@
       "rpcUrl": "",
       "blockTime": 15,
       "safeBlockRange": 8,
+      "transactionCheckPeriod": 5,
       "secret": {
         "validator": "",
         "relayer": ""
