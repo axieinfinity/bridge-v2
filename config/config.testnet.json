@@ -9,7 +9,7 @@
         "validator": "",
         "relayer": ""
       },
-      "fromHeight": 6567000,
+      "fromHeight": 6508284,
       "contracts": {
         "Gateway": "0x03d1F13c7391F6B5A651143a31034cf728A93694"
       },
@@ -58,7 +58,7 @@
         "validator": "",
         "relayer": ""
       },
-      "fromHeight": 12241350,
+      "fromHeight": 12234008,
       "contracts": {
         "Gateway": "0x03d1F13c7391F6B5A651143a31034cf728A93694"
       },
@@ -88,7 +88,6 @@
       }
     }
   },
-  "numberOfWorkers": 1024,
   "database": {
     "host": "localhost",
     "user": "postgres",

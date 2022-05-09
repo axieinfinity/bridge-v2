@@ -32,6 +32,8 @@ const (
 	dbUsername = "DB_USERNAME"
 	dbPassword = "DB_PASSWORD"
 
+	numberOfWorkers = "NUMBER_OF_WORKERS"
+
 	separator = "__"
 )
 
@@ -119,6 +121,10 @@ func checkEnv(cfg *types.Config) {
 
 	if os.Getenv(dbPassword) != "" {
 		cfg.DB.Password = os.Getenv(dbPassword)
+	}
+
+	if os.Getenv(numberOfWorkers) != "" {
+		cfg.NumberOfWorkers, _ = strconv.Atoi(os.Getenv(numberOfWorkers))
 	}
 
 	// clean key

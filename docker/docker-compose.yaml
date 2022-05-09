@@ -11,18 +11,12 @@ services:
     environment:
       POSTGRES_PASSWORD: example
 
-  adminer:
-    image: adminer
-    restart: always
-    ports:
-      - 8080:8080
-
   bridge:
     build:
       context: ../
       dockerfile: docker/Dockerfile
     image: kiendn60302/bridge
-    container_name: bridge_test
+    container_name: bridge
     restart: always
     environment:
       - RONIN_RPC=${RONIN_RPC}
@@ -46,7 +40,7 @@ services:
     image: kiendn60302/node
     restart: always
     hostname: node
-    container_name: node_test
+    container_name: node
     ports:
       - "8545:8545"
       - "8546:8546"

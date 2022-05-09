@@ -452,7 +452,7 @@ func (c *Controller) processLogs(listener types.IListener, block types.IBlock) {
 			}
 			hasSubscriptionType = true
 			tx := block.GetTransactions()[logData.GetTxIndex()]
-			if !c.compareAddress(subscription.To, tx.GetToAddress()) {
+			if !c.compareAddress(subscription.To, logData.GetContractAddress()) {
 				continue
 			}
 			eventId := logData.GetTopics()[0]
