@@ -8,6 +8,7 @@ import (
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
@@ -44,6 +45,7 @@ type IUtils interface {
 	SendContractTransaction(key *ecdsa.PrivateKey, chainId *big.Int, fn func(opts *bind.TransactOpts) (*types.Transaction, error)) (*types.Transaction, error)
 	SubscribeTransactionReceipt(client *ethclient.Client, tx *types.Transaction, ticker time.Duration, maxTry int) error
 	SignTypedData(typedData apitypes.TypedData, privateKey *ecdsa.PrivateKey) (hexutil.Bytes, error)
+	FilterLogs(client EthClient, opts *bind.FilterOpts, contractAddresses []common.Address, filteredMethods map[*abi.ABI]map[string]struct{}) ([]types.Log, error)
 }
 
 type Utils struct{}
@@ -203,4 +205,34 @@ func (u *Utils) signTypedData(typedData apitypes.TypedData, privateKey *ecdsa.Pr
 	}
 	signature[64] += 27 // Transform V from 0/1 to 27/28 according to the yellow paper
 	return signature, nil
+}
+
+func (u *Utils) FilterLogs(client EthClient, opts *bind.FilterOpts, contractAddresses []common.Address, filteredMethods map[*abi.ABI]map[string]struct{}) ([]types.Log, error) {
+	// Don't crash on a lazy user
+	if opts == nil {
+		opts = new(bind.FilterOpts)
+	}
+	var query [][]interface{}
+	for contractAbi, methods := range filteredMethods {
+		var events []interface{}
+		for method, _ := range methods {
+			if _, ok := contractAbi.Events[method]; ok {
+				events = append(events, contractAbi.Events[method].ID)
+			}
+		}
+		query = append(query, events)
+	}
+	topics, err := abi.MakeTopics(query...)
+	if err != nil {
+		return nil, err
+	}
+	config := ethereum.FilterQuery{
+		Addresses: contractAddresses,
+		Topics:    topics,
+		FromBlock: new(big.Int).SetUint64(opts.Start),
+	}
+	if opts.End != nil {
+		config.ToBlock = new(big.Int).SetUint64(*opts.End)
+	}
+	return client.FilterLogs(opts.Context, config)
 }

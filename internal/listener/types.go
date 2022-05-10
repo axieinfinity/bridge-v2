@@ -14,6 +14,7 @@ import (
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/log"
 	"math/big"
+	"strings"
 	"time"
 )
 
@@ -23,18 +24,10 @@ type EthBlock struct {
 	logs  []types.ILog
 }
 
-func NewEthBlock(client utils.EthClient, chainId *big.Int, block *ethtypes.Block) (*EthBlock, error) {
+func NewEthBlock(client utils.EthClient, chainId *big.Int, block *ethtypes.Block, getLogs bool) (*EthBlock, error) {
 	ethBlock := &EthBlock{
 		block: block,
 	}
-	log.Info("Getting logs from block hash", "block", block.NumberU64(), "hash", block.Hash().Hex())
-	blockHash := block.Hash()
-	logs, err := client.FilterLogs(context.Background(), ethereum.FilterQuery{BlockHash: &blockHash})
-	if err != nil {
-		log.Error("[NewEthBlock] error while getting logs", "err", err, "block", block.NumberU64(), "hash", block.Hash().Hex())
-		return nil, err
-	}
-
 	// convert txs into ILog
 	for _, tx := range block.Transactions() {
 		transaction, err := NewEthTransaction(chainId, tx)
@@ -44,11 +37,19 @@ func NewEthBlock(client utils.EthClient, chainId *big.Int, block *ethtypes.Block
 		}
 		ethBlock.txs = append(ethBlock.txs, transaction)
 	}
-
-	// convert logs to ILog
-	for _, l := range logs {
-		ethLog := EthLog(l)
-		ethBlock.logs = append(ethBlock.logs, &ethLog)
+	if getLogs {
+		log.Info("Getting logs from block hash", "block", block.NumberU64(), "hash", block.Hash().Hex())
+		blockHash := block.Hash()
+		logs, err := client.FilterLogs(context.Background(), ethereum.FilterQuery{BlockHash: &blockHash})
+		if err != nil {
+			log.Error("[NewEthBlock] error while getting logs", "err", err, "block", block.NumberU64(), "hash", block.Hash().Hex())
+			return nil, err
+		}
+		// convert logs to ILog
+		for _, l := range logs {
+			ethLog := EthLog(l)
+			ethBlock.logs = append(ethBlock.logs, &ethLog)
+		}
 	}
 	log.Info("[NewEthBlock] Finish getting eth block", "block", ethBlock.block.NumberU64(), "txs", len(ethBlock.txs), "logs", len(ethBlock.logs))
 	return ethBlock, nil
@@ -117,6 +118,48 @@ func (b *EthTransaction) GetValue() *big.Int {
 	return b.tx.Value()
 }
 
+type EmptyTransaction struct {
+	chainId  *big.Int
+	hash     common.Hash
+	from, to *common.Address
+	data     []byte
+}
+
+func NewEmptyTransaction(chainId *big.Int, tx common.Hash, data []byte, from, to *common.Address) *EmptyTransaction {
+	return &EmptyTransaction{
+		chainId: chainId,
+		hash:    tx,
+		from:    from,
+		to:      to,
+		data:    data,
+	}
+}
+
+func (b *EmptyTransaction) GetHash() common.Hash {
+	return b.hash
+}
+
+func (b *EmptyTransaction) GetFromAddress() string {
+	if b.from != nil {
+		return b.from.Hex()
+	}
+	return ""
+}
+func (b *EmptyTransaction) GetToAddress() string {
+	if b.to != nil {
+		return b.to.Hex()
+	}
+	return ""
+}
+
+func (b *EmptyTransaction) GetData() []byte {
+	return b.data
+}
+
+func (b *EmptyTransaction) GetValue() *big.Int {
+	return nil
+}
+
 type EthLog ethtypes.Log
 
 func (e *EthLog) GetContractAddress() string {
@@ -140,6 +183,10 @@ func (e *EthLog) GetIndex() uint {
 
 func (e *EthLog) GetTxIndex() uint {
 	return e.TxIndex
+}
+
+func (e *EthLog) GetTransactionHash() string {
+	return e.TxHash.Hex()
 }
 
 type BaseJob struct {
@@ -335,7 +382,7 @@ func NewEthCallbackJob(listener types.IListener, method string, tx types.ITransa
 
 func (e *EthCallbackJob) Process() ([]byte, error) {
 	log.Info("[EthCallbackJob] Start Process", "method", e.method, "jobId", e.id)
-	val, err := e.utilsWrapper.Invoke(e.listener, e.method, e.tx, e.data)
+	val, err := e.utilsWrapper.Invoke(e.listener, e.method, e.fromChainID, e.tx, e.data)
 	if err != nil {
 		return nil, err
 	}
@@ -395,9 +442,15 @@ func NewEthCheckTransactionStatusJob(listener types.IListener, ids []int, tx *et
 }
 
 func (e *EthCheckTransactionStatusJob) Process() ([]byte, error) {
-	log.Info("[EthCheckTransactionStatusJob] Start Process", "tx", e.tx.GetHash())
+	log.Info("[EthCheckTransactionStatusJob] Start checking transaction status", "tx", e.tx.GetHash())
 	receipt, err := e.listener.GetReceipt(e.tx.GetHash())
 	if err != nil {
+		if strings.Contains(err.Error(), "execution reverted") {
+			if err = e.listener.GetStore().GetTaskStore().UpdateTaskWithIds(e.ids, 0, types.STATUS_DONE); err != nil {
+				return nil, err
+			}
+			return nil, nil
+		}
 		return nil, err
 	}
 	if receipt != nil {
@@ -410,20 +463,9 @@ func (e *EthCheckTransactionStatusJob) Process() ([]byte, error) {
 				return nil, errors.New("failed when confirm receipt")
 			}
 		}
-		// check receipt status
-		if receipt.Status == 0 {
-			return nil, errors.New("transaction failed")
+		if err = e.listener.GetStore().GetTaskStore().UpdateTaskWithIds(e.ids, int(receipt.Status), types.STATUS_DONE); err != nil {
+			return nil, err
 		}
 	}
 	return nil, nil
-}
-
-func (e *EthCheckTransactionStatusJob) Update(status string) error {
-	if err := e.BaseJob.Update(status); err != nil {
-		return err
-	}
-	if err := e.listener.GetStore().GetTaskStore().UpdateTaskWithIds(e.ids, status); err != nil {
-		return err
-	}
-	return nil
 }

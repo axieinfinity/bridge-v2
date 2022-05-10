@@ -113,6 +113,14 @@ func (e *EthereumListener) IsDisabled() bool {
 	return e.config.Disabled
 }
 
+func (e *EthereumListener) SetInitHeight(height uint64) {
+	e.fromHeight = height
+}
+
+func (e *EthereumListener) GetInitHeight() uint64 {
+	return e.fromHeight
+}
+
 func (e *EthereumListener) GetCurrentBlock() types.IBlock {
 	if _, ok := e.currentBlock.Load().(types.IBlock); !ok {
 		var (
@@ -159,7 +167,7 @@ func (e *EthereumListener) GetProcessedBlock() (types.IBlock, error) {
 	if err != nil {
 		return nil, err
 	}
-	return NewEthBlock(e.client, chainId, block)
+	return NewEthBlock(e.client, chainId, block, false)
 }
 
 func (e *EthereumListener) GetLatestBlock() (types.IBlock, error) {
@@ -167,7 +175,7 @@ func (e *EthereumListener) GetLatestBlock() (types.IBlock, error) {
 	if err != nil {
 		return nil, err
 	}
-	return NewEthBlock(e.client, e.chainId, block)
+	return NewEthBlock(e.client, e.chainId, block, false)
 }
 
 func (e *EthereumListener) GetLatestBlockHeight() (uint64, error) {
@@ -215,6 +223,10 @@ func (e *EthereumListener) SaveCurrentBlockToDB() error {
 
 func (e *EthereumListener) SaveTransactionsToDB(txs []types.ITransaction) error {
 	return nil
+}
+
+func (e *EthereumListener) GetEthClient() utils.EthClient {
+	return e.client
 }
 
 func (e *EthereumListener) GetListenHandleJob(subscriptionName string, tx types.ITransaction, eventId string, data []byte) types.IJob {
@@ -279,7 +291,15 @@ func (e *EthereumListener) GetBlock(height uint64) (types.IBlock, error) {
 	if err != nil {
 		return nil, err
 	}
-	return NewEthBlock(e.client, e.chainId, block)
+	return NewEthBlock(e.client, e.chainId, block, false)
+}
+
+func (e *EthereumListener) GetBlockWithLogs(height uint64) (types.IBlock, error) {
+	block, err := e.client.BlockByNumber(e.ctx, big.NewInt(int64(height)))
+	if err != nil {
+		return nil, err
+	}
+	return NewEthBlock(e.client, e.chainId, block, true)
 }
 
 func (e *EthereumListener) GetReceipt(txHash common.Hash) (*ethtypes.Receipt, error) {

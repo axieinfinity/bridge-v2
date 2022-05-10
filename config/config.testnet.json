@@ -10,6 +10,7 @@
         "relayer": ""
       },
       "fromHeight": 6508284,
+      "processWithinBlocks": 864000,
       "contracts": {
         "Gateway": "0x03d1F13c7391F6B5A651143a31034cf728A93694"
       },
@@ -50,6 +51,7 @@
       }
     },
     "Ethereum": {
+      "disabled": false,
       "chainId": "0x3",
       "rpcUrl": "",
       "blockTime": 15,
@@ -59,6 +61,7 @@
         "relayer": ""
       },
       "fromHeight": 12234008,
+      "processWithinBlocks": 198720,
       "contracts": {
         "Gateway": "0x03d1F13c7391F6B5A651143a31034cf728A93694"
       },

@@ -244,6 +244,12 @@ func (r *BulkTask) sendDepositTransaction() (successTasks []*models.Task, failed
 		receipts []gateway2.TransferReceipt
 	)
 
+	// create caller
+	caller, err := gateway2.NewGatewayCaller(r.contractAddress, r.client)
+	if err != nil {
+		return
+	}
+
 	for _, t := range r.tasks {
 		ethEvent := new(gateway.GatewayDepositRequested)
 		ethGatewayAbi, err := gateway.GatewayMetaData.GetAbi()
@@ -261,6 +267,15 @@ func (r *BulkTask) sendDepositTransaction() (successTasks []*models.Task, failed
 		}
 		// append task into success tasks
 		successTasks = append(successTasks, t)
+
+		// check deposit vote
+		result, err := caller.DepositVote(nil, r.chainId, ethEvent.Receipt.Id)
+		if err != nil {
+			continue
+		}
+		if result.Status == types.VoteStatusExecuted {
+			continue
+		}
 
 		// append new receipt into receipts slice
 		receipts = append(receipts, gateway2.TransferReceipt{
@@ -335,68 +350,85 @@ func (r *BulkTask) sendWithdrawalSignaturesTransaction() (successTasks []*models
 			continue
 		}
 
-		typedData := apitypes.TypedData{
-			Types: apitypes.Types{
-				"EIP712Domain": []apitypes.Type{
-					{Name: "name", Type: "string"},
-					{Name: "version", Type: "string"},
-					{Name: "chainId", Type: "uint256"},
-					{Name: "verifyingContract", Type: "address"},
-				},
-				"Receipt": []apitypes.Type{
-					{Name: "id", Type: "uint256"},
-					{Name: "kind", Type: "uint8"},
-					{Name: "mainchain", Type: "TokenOwner"},
-					{Name: "ronin", Type: "TokenOwner"},
-					{Name: "info", Type: "TokenInfo"},
-				},
-				"TokenOwner": []apitypes.Type{
-					{Name: "addr", Type: "string"},
-					{Name: "tokenAddr", Type: "string"},
-					{Name: "chainId", Type: "uint256"},
-				},
-				"TokenInfo": []apitypes.Type{
-					{Name: "erc", Type: "uint8"},
-					{Name: "id", Type: "uint256"},
-					{Name: "quantity", Type: "uint256"},
-				},
-			},
-			Domain: apitypes.TypedDataDomain{
-				Name:              "MainchainGatewayV2",
-				Version:           "2",
-				ChainId:           math.NewHexOrDecimal256(receipt.Mainchain.ChainId.Int64()),
-				VerifyingContract: receipt.Mainchain.Addr.Hex(),
-			},
-			PrimaryType: "Receipt",
-			Message: apitypes.TypedDataMessage{
-				"id":   math.NewHexOrDecimal256(receipt.Id.Int64()),
-				"kind": hexutil.EncodeBig(big.NewInt(int64(receipt.Kind))),
-				"mainchain": apitypes.TypedDataMessage{
-					"addr":      receipt.Mainchain.Addr.Hex(),
-					"tokenAddr": receipt.Mainchain.TokenAddr.Hex(),
-					"chainId":   math.NewHexOrDecimal256(receipt.Mainchain.ChainId.Int64()),
-				},
-				"ronin": apitypes.TypedDataMessage{
-					"addr":      receipt.Ronin.Addr.Hex(),
-					"tokenAddr": receipt.Ronin.TokenAddr.Hex(),
-					"chainId":   math.NewHexOrDecimal256(receipt.Ronin.ChainId.Int64()),
-				},
-				"info": apitypes.TypedDataMessage{
-					"erc":      hexutil.EncodeBig(big.NewInt(int64(receipt.Info.Erc))),
-					"id":       math.NewHexOrDecimal256(receipt.Info.Id.Int64()),
-					"quantity": math.NewHexOrDecimal256(receipt.Info.Quantity.Int64()),
-				},
-			},
-		}
-
-		sigs, err := r.util.SignTypedData(typedData, r.validator)
+		// try checking on smart contract
+		// create caller
+		caller, err := gateway2.NewGatewayCaller(r.contractAddress, r.client)
 		if err != nil {
 			t.LastError = err.Error()
 			failedTasks = append(failedTasks, t)
 			continue
 		}
-		signatures = append(signatures, sigs)
-		ids = append(ids, receipt.Id)
+		result, err := caller.MainchainWithdrew(nil, receipt.Id)
+		if err != nil {
+			t.LastError = err.Error()
+			failedTasks = append(failedTasks, t)
+			continue
+		}
+
+		if !result {
+			typedData := apitypes.TypedData{
+				Types: apitypes.Types{
+					"EIP712Domain": []apitypes.Type{
+						{Name: "name", Type: "string"},
+						{Name: "version", Type: "string"},
+						{Name: "chainId", Type: "uint256"},
+						{Name: "verifyingContract", Type: "address"},
+					},
+					"Receipt": []apitypes.Type{
+						{Name: "id", Type: "uint256"},
+						{Name: "kind", Type: "uint8"},
+						{Name: "mainchain", Type: "TokenOwner"},
+						{Name: "ronin", Type: "TokenOwner"},
+						{Name: "info", Type: "TokenInfo"},
+					},
+					"TokenOwner": []apitypes.Type{
+						{Name: "addr", Type: "string"},
+						{Name: "tokenAddr", Type: "string"},
+						{Name: "chainId", Type: "uint256"},
+					},
+					"TokenInfo": []apitypes.Type{
+						{Name: "erc", Type: "uint8"},
+						{Name: "id", Type: "uint256"},
+						{Name: "quantity", Type: "uint256"},
+					},
+				},
+				Domain: apitypes.TypedDataDomain{
+					Name:              "MainchainGatewayV2",
+					Version:           "2",
+					ChainId:           math.NewHexOrDecimal256(receipt.Mainchain.ChainId.Int64()),
+					VerifyingContract: receipt.Mainchain.Addr.Hex(),
+				},
+				PrimaryType: "Receipt",
+				Message: apitypes.TypedDataMessage{
+					"id":   math.NewHexOrDecimal256(receipt.Id.Int64()),
+					"kind": hexutil.EncodeBig(big.NewInt(int64(receipt.Kind))),
+					"mainchain": apitypes.TypedDataMessage{
+						"addr":      receipt.Mainchain.Addr.Hex(),
+						"tokenAddr": receipt.Mainchain.TokenAddr.Hex(),
+						"chainId":   math.NewHexOrDecimal256(receipt.Mainchain.ChainId.Int64()),
+					},
+					"ronin": apitypes.TypedDataMessage{
+						"addr":      receipt.Ronin.Addr.Hex(),
+						"tokenAddr": receipt.Ronin.TokenAddr.Hex(),
+						"chainId":   math.NewHexOrDecimal256(receipt.Ronin.ChainId.Int64()),
+					},
+					"info": apitypes.TypedDataMessage{
+						"erc":      hexutil.EncodeBig(big.NewInt(int64(receipt.Info.Erc))),
+						"id":       math.NewHexOrDecimal256(receipt.Info.Id.Int64()),
+						"quantity": math.NewHexOrDecimal256(receipt.Info.Quantity.Int64()),
+					},
+				},
+			}
+
+			sigs, err := r.util.SignTypedData(typedData, r.validator)
+			if err != nil {
+				t.LastError = err.Error()
+				failedTasks = append(failedTasks, t)
+				continue
+			}
+			signatures = append(signatures, sigs)
+			ids = append(ids, receipt.Id)
+		}
 		successTasks = append(successTasks, t)
 	}
 	c, err := gateway2.NewGatewayTransactor(r.contractAddress, r.client)
@@ -448,7 +480,25 @@ func (r *BulkTask) SendAckTransactions() (successTasks []*models.Task, failedTas
 			failedTasks = append(failedTasks, t)
 			continue
 		}
-		ids = append(ids, ethEvent.Receipt.Id)
+
+		// try checking on smart contract
+		// create caller
+		caller, err := gateway2.NewGatewayCaller(r.contractAddress, r.client)
+		if err != nil {
+			t.LastError = err.Error()
+			failedTasks = append(failedTasks, t)
+			continue
+		}
+		result, err := caller.MainchainWithdrew(nil, ethEvent.Receipt.Id)
+		if err != nil {
+			t.LastError = err.Error()
+			failedTasks = append(failedTasks, t)
+			continue
+		}
+
+		if !result {
+			ids = append(ids, ethEvent.Receipt.Id)
+		}
 		successTasks = append(successTasks, t)
 	}
 	tx, err = r.util.SendContractTransaction(r.validator, r.chainId, func(opts *bind.TransactOpts) (*ethtypes.Transaction, error) {

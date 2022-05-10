@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/ecdsa"
 	"github.com/axieinfinity/bridge-v2/internal/models"
+	"github.com/axieinfinity/bridge-v2/internal/utils"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
@@ -54,6 +55,7 @@ type IListener interface {
 	GetLatestBlock() (IBlock, error)
 	GetLatestBlockHeight() (uint64, error)
 	GetBlock(height uint64) (IBlock, error)
+	GetBlockWithLogs(height uint64) (IBlock, error)
 	GetChainID() (*big.Int, error)
 	GetReceipt(common.Hash) (*types.Receipt, error)
 	Context() context.Context
@@ -75,6 +77,10 @@ type IListener interface {
 	Close()
 
 	IsDisabled() bool
+	SetInitHeight(uint64)
+	GetInitHeight() uint64
+
+	GetEthClient() utils.EthClient
 }
 
 type IEthListener interface {
@@ -97,6 +103,7 @@ type ILog interface {
 	GetData() []byte
 	GetIndex() uint
 	GetTxIndex() uint
+	GetTransactionHash() string
 }
 
 type IReceipt interface {
@@ -159,7 +166,7 @@ type ITaskStore interface {
 	Save(task *models.Task) error
 	Update(task *models.Task) error
 	GetPendingTasks(chain string, limit int) ([]*models.Task, error)
-	UpdateTaskWithIds(ids []int, status string) error
+	UpdateTaskWithIds(ids []int, transactionStatus int, status string) error
 }
 
 type IDepositStore interface {
@@ -219,6 +226,7 @@ type LsConfig struct {
 	Subscriptions          map[string]*Subscribe `json:"subscriptions"`
 	TransactionCheckPeriod time.Duration         `json:"transactionCheckPeriod"`
 	Contracts              map[string]string     `json:"contracts"`
+	ProcessWithinBlocks    uint64                `json:"processWithinBlocks"`
 }
 
 type Secret struct {

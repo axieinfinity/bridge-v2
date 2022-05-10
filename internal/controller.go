@@ -4,10 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	listener2 "github.com/axieinfinity/bridge-v2/internal/listener"
 	"github.com/axieinfinity/bridge-v2/internal/stores"
 	"github.com/axieinfinity/bridge-v2/internal/types"
 	"github.com/axieinfinity/bridge-v2/internal/utils"
 	"github.com/ethereum/go-ethereum/accounts/abi"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/log"
 	"gorm.io/gorm"
@@ -18,6 +20,7 @@ import (
 )
 
 const (
+	defaultBatchSize        = 500
 	defaultWorkers          = 2048
 	defaultMaxQueueSize     = 4096
 	defaultCoolDownDuration = 1
@@ -59,7 +62,7 @@ type Controller struct {
 	store               types.IMainStore
 	stop                chan struct{}
 	isClosed            atomic.Value
-	hasSubscriptionType sync.Map
+	hasSubscriptionType map[string]map[int]bool
 }
 
 func New(cfg *types.Config, db *gorm.DB, helpers utils.IUtils) (*Controller, error) {
@@ -82,7 +85,7 @@ func New(cfg *types.Config, db *gorm.DB, helpers utils.IUtils) (*Controller, err
 		store:               stores.NewMainStore(db),
 		stop:                make(chan struct{}),
 		isClosed:            atomic.Value{},
-		hasSubscriptionType: sync.Map{},
+		hasSubscriptionType: make(map[string]map[int]bool),
 	}
 	c.isClosed.Store(false)
 	if helpers != nil {
@@ -119,6 +122,15 @@ func New(cfg *types.Config, db *gorm.DB, helpers utils.IUtils) (*Controller, err
 			return nil, errors.New("listener is nil")
 		}
 		c.listeners[name] = l
+		c.hasSubscriptionType[name] = make(map[int]bool)
+
+		// filtering subscription, get all subscriptionType available for each listener
+		for _, subscription := range l.GetSubscriptions() {
+			if c.hasSubscriptionType[name][subscription.Type] {
+				continue
+			}
+			c.hasSubscriptionType[name][subscription.Type] = true
+		}
 	}
 
 	// init workers
@@ -334,20 +346,18 @@ func (c *Controller) startListener(listener types.IListener, tryCount int) {
 		go c.startListener(listener, tryCount+1)
 		return
 	}
+	// reset fromHeight if it is out of allowed blocks range
+	if listener.Config().ProcessWithinBlocks > 0 && latestBlockHeight-listener.GetInitHeight() > listener.Config().ProcessWithinBlocks {
+		listener.SetInitHeight(latestBlockHeight - listener.Config().ProcessWithinBlocks)
+	}
 	log.Info("[Controller] Latest Block", "height", latestBlockHeight, "listener", listener.GetName())
 	// start processing past blocks
 	currentBlock := listener.GetCurrentBlock()
 	if currentBlock != nil {
-		for currentBlock.GetHeight() < latestBlockHeight {
-			block, err := listener.GetBlock(currentBlock.GetHeight() + 1)
-			if err != nil {
-				log.Error("[Controller][startListener] error while get latest block", "err", err, "listener", listener.GetName())
-				time.Sleep(time.Duration(tryCount+1) * time.Second)
-				go c.startListener(listener, tryCount+1)
-				return
-			}
-			c.Process(listener, block)
-			currentBlock = listener.GetCurrentBlock()
+		if err := c.processBehindBlock(listener, currentBlock.GetHeight(), latestBlockHeight); err != nil {
+			log.Error("[Controller][startListener] error while processing behind block", "err", err, "height", currentBlock.GetHeight(), "latestBlockHeight", latestBlockHeight)
+			time.Sleep(time.Duration(tryCount+1) * time.Second)
+			go c.startListener(listener, tryCount+1)
 		}
 	}
 	// start listening to block's events
@@ -359,7 +369,7 @@ func (c *Controller) startListener(listener types.IListener, tryCount int) {
 		case <-tick.C:
 			latest, err := listener.GetLatestBlockHeight()
 			if err != nil {
-				log.Error("[Controller][Process] error while get latest block height")
+				log.Error("[Controller][Watcher] error while get latest block height")
 			}
 			currentBlock = listener.GetCurrentBlock()
 			// do nothing if currentBlock is within safe block range
@@ -367,51 +377,131 @@ func (c *Controller) startListener(listener types.IListener, tryCount int) {
 				continue
 			}
 			// if current block is behind safeBlockRange then process without waiting
-			if latest-listener.GetSafeBlockRange() > currentBlock.GetHeight()+1 {
-				currentHeight := currentBlock.GetHeight() + 1
-				for i := currentHeight; i < latest-listener.GetSafeBlockRange(); i++ {
-					c.processBlock(listener, i)
-				}
+			if err := c.processBehindBlock(listener, currentBlock.GetHeight(), latest); err != nil {
+				log.Error("[Controller][Watcher]  error while processing behind block", err, "height", currentBlock.GetHeight(), "latestBlockHeight", latestBlockHeight)
 				continue
+			} else {
+				currentBlock = listener.GetCurrentBlock()
 			}
+			log.Info("[Controller][Watcher] start processing block", "height", currentBlock.GetHeight()+1, "listener", listener.GetName(), "latest", latest)
 			c.processBlock(listener, currentBlock.GetHeight()+1)
 		}
 	}
 }
 
-func (c *Controller) processBlock(listener types.IListener, height uint64) {
-	block, err := listener.GetBlock(height)
-	if err != nil {
-		log.Error("[Controller][processBlock] error while get block", "err", err, "listener", listener.GetName(), "height", height)
-		return
+func (c *Controller) processBehindBlock(listener types.IListener, height, latestBlockHeight uint64) error {
+	if latestBlockHeight-listener.GetSafeBlockRange() > height+2 {
+		var (
+			safeBlock, block types.IBlock
+			tryCount         int
+			err              error
+		)
+		safeBlock, err = listener.GetBlock(latestBlockHeight - listener.GetSafeBlockRange())
+		if err != nil {
+			log.Error("[Controller][Process] error while getting safeBlock", "err", err, "latest", latestBlockHeight)
+			return err
+		}
+		// process logs
+		if c.hasSubscriptionType[listener.GetName()][types.LogEvent] {
+			c.processBatchLogs(listener, height, latestBlockHeight-listener.GetSafeBlockRange())
+			goto updateCurrent
+		}
+		// process transactions
+		if c.hasSubscriptionType[listener.GetName()][types.TxEvent] {
+			for height <= latestBlockHeight-listener.GetSafeBlockRange() {
+				block, err = listener.GetBlock(height)
+				if err != nil {
+					log.Error("[Controller][processBlock] error while get block", "err", err, "listener", listener.GetName(), "height", height)
+					tryCount++
+					time.Sleep(time.Duration(tryCount) * time.Second)
+					continue
+				}
+				height++
+				c.processTxs(listener, block.GetTransactions())
+			}
+		}
+	updateCurrent:
+		listener.UpdateCurrentBlock(safeBlock)
 	}
-	c.Process(listener, block)
+	return nil
 }
 
-func (c *Controller) Process(listener types.IListener, latestBlock types.IBlock) {
-	log.Info("[Controller][Process] start processing block", "height", latestBlock.GetHeight())
-	// if latest block has been processed then do nothing
-	if listener.GetCurrentBlock() != nil && latestBlock.GetHeight() == listener.GetCurrentBlock().GetHeight() {
-		return
+func (c *Controller) processBlock(listener types.IListener, height uint64) {
+	if c.hasSubscriptionType[listener.GetName()][types.LogEvent] {
+		c.processBatchLogs(listener, height, height)
 	}
-	if err := listener.UpdateCurrentBlock(latestBlock); err != nil {
-		log.Error("[Controller][Process] error while updating current block", "err", err, "listener", listener.GetName())
-		return
+	if c.hasSubscriptionType[listener.GetName()][types.TxEvent] {
+		block, err := listener.GetBlock(height)
+		if err != nil {
+			log.Error("[Controller][processBlock] error while get block", "err", err, "listener", listener.GetName(), "height", height)
+			return
+		}
+		c.processTxs(listener, block.GetTransactions())
 	}
-	if len(latestBlock.GetTransactions()) > 0 {
-		go c.processTxs(listener, latestBlock.GetTransactions())
-	}
+}
 
-	if len(latestBlock.GetLogs()) > 0 {
-		go c.processLogs(listener, latestBlock)
+func (c *Controller) processBatchLogs(listener types.IListener, fromHeight, toHeight uint64) {
+	var (
+		contractAddresses []common.Address
+	)
+	chainId, _ := listener.GetChainID()
+	addedContract := make(map[common.Address]struct{})
+	filteredMethods := make(map[*abi.ABI]map[string]struct{})
+	eventIds := make(map[common.Hash]string)
+	for subscriptionName, subscription := range listener.GetSubscriptions() {
+		name := subscription.Handler.Name
+		if filteredMethods[subscription.Handler.ABI] == nil {
+			filteredMethods[subscription.Handler.ABI] = make(map[string]struct{})
+		}
+		filteredMethods[subscription.Handler.ABI][name] = struct{}{}
+		eventIds[subscription.Handler.ABI.Events[name].ID] = subscriptionName
+		contractAddress := common.HexToAddress(subscription.To)
+
+		if _, ok := addedContract[contractAddress]; !ok {
+			contractAddresses = append(contractAddresses, contractAddress)
+			addedContract[contractAddress] = struct{}{}
+		}
+	}
+	retry := 0
+	for fromHeight <= toHeight {
+		if retry == 10 {
+			break
+		}
+		opts := &bind.FilterOpts{
+			Start:   fromHeight,
+			Context: c.ctx,
+		}
+		if fromHeight+500 < toHeight {
+			to := fromHeight + 500
+			opts.End = &to
+		} else {
+			opts.End = &toHeight
+		}
+		logs, err := c.utilWrapper.FilterLogs(listener.GetEthClient(), opts, contractAddresses, filteredMethods)
+		if err != nil {
+			log.Error("[Controller][processBatchLogs] error while process batch logs", "err", err, "from", fromHeight, "to", opts.End)
+			retry++
+			continue
+		}
+		log.Info("[Controller][processBatchLogs] finish getting logs", "from", opts.Start, "to", *opts.End, "logs", len(logs), "listener", listener.GetName())
+		fromHeight = *opts.End + 1
+		for _, eventLog := range logs {
+			eventId := eventLog.Topics[0]
+			log.Info("[Controller][processBatchLogs] processing log", "topic", eventLog.Topics[0].Hex(), "address", eventLog.Address.Hex(), "transaction", eventLog.TxHash.Hex(), "listener", listener.GetName())
+			if _, ok := eventIds[eventId]; !ok {
+				continue
+			}
+			data := eventLog.Data
+			name := eventIds[eventId]
+			tx := listener2.NewEmptyTransaction(chainId, eventLog.TxHash, eventLog.Data, nil, &eventLog.Address)
+			if job := listener.GetListenHandleJob(name, tx, eventId.Hex(), data); job != nil {
+				c.PrepareJobChan <- job
+			}
+		}
 	}
 }
 
 func (c *Controller) processTxs(listener types.IListener, txs []types.ITransaction) {
-	val, ok := c.hasSubscriptionType.Load(types.TxEvent)
-	if ok && !val.(bool) {
-		return
-	}
 	for _, tx := range txs {
 		if len(tx.GetData()) < 4 {
 			continue
@@ -421,49 +511,16 @@ func (c *Controller) processTxs(listener types.IListener, txs []types.ITransacti
 		if err != nil || receipt.Status != 1 {
 			continue
 		}
-		hasSubscriptionType := false
 		for name, subscription := range listener.GetSubscriptions() {
 			if subscription.Handler == nil || subscription.Type != types.TxEvent {
 				continue
 			}
-			hasSubscriptionType = true
 			eventId := tx.GetData()[0:4]
 			data := tx.GetData()[4:]
 			if job := listener.GetListenHandleJob(name, tx, common.Bytes2Hex(eventId), data); job != nil {
 				c.PrepareJobChan <- job
 			}
 		}
-		if val == nil {
-			c.hasSubscriptionType.Store(types.TxEvent, hasSubscriptionType)
-		}
-	}
-}
-
-func (c *Controller) processLogs(listener types.IListener, block types.IBlock) {
-	val, ok := c.hasSubscriptionType.Load(types.LogEvent)
-	if ok && !val.(bool) {
-		return
-	}
-	hasSubscriptionType := false
-	for _, logData := range block.GetLogs() {
-		for name, subscription := range listener.GetSubscriptions() {
-			if subscription.Handler == nil || subscription.Type != types.LogEvent {
-				continue
-			}
-			hasSubscriptionType = true
-			tx := block.GetTransactions()[logData.GetTxIndex()]
-			if !c.compareAddress(subscription.To, logData.GetContractAddress()) {
-				continue
-			}
-			eventId := logData.GetTopics()[0]
-			data := logData.GetData()
-			if job := listener.GetListenHandleJob(name, tx, eventId, data); job != nil {
-				c.PrepareJobChan <- job
-			}
-		}
-	}
-	if val == nil {
-		c.hasSubscriptionType.Store(types.LogEvent, hasSubscriptionType)
 	}
 }
 

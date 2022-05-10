@@ -33,6 +33,6 @@ func (t *TaskStore) GetPendingTasks(chain string, limit int) ([]*models.Task, er
 	return tasks, err
 }
 
-func (t *TaskStore) UpdateTaskWithIds(ids []int, status string) error {
-	return t.Model(&models.Task{}).Where("id in ?", ids).Update("status", status).Error
+func (t *TaskStore) UpdateTaskWithIds(ids []int, transactionStatus int, status string) error {
+	return t.Model(&models.Task{}).Where("id in ?", ids).Updates(map[string]interface{}{"status": status, "transaction_status": transactionStatus}).Error
 }
