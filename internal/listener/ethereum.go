@@ -59,6 +59,7 @@ func NewEthereumListener(ctx context.Context, cfg *types.LsConfig, helpers utils
 		config:         cfg,
 		chainId:        hexutil.MustDecodeBig(cfg.ChainId),
 		prepareJobChan: prepareJobChan,
+		safeBlockRange: cfg.SafeBlockRange,
 	}
 	if helpers != nil {
 		ethListener.utilsWrapper = helpers

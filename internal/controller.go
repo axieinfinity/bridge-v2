@@ -392,9 +392,10 @@ func (c *Controller) startListener(listener types.IListener, tryCount int) {
 func (c *Controller) processBehindBlock(listener types.IListener, height, latestBlockHeight uint64) error {
 	if latestBlockHeight-listener.GetSafeBlockRange() > height+2 {
 		var (
-			safeBlock, block types.IBlock
-			tryCount         int
-			err              error
+			safeBlock, block  types.IBlock
+			tryCount          int
+			err               error
+			processedToHeight uint64
 		)
 		safeBlock, err = listener.GetBlock(latestBlockHeight - listener.GetSafeBlockRange())
 		if err != nil {
@@ -403,12 +404,11 @@ func (c *Controller) processBehindBlock(listener types.IListener, height, latest
 		}
 		// process logs
 		if c.hasSubscriptionType[listener.GetName()][types.LogEvent] {
-			c.processBatchLogs(listener, height, latestBlockHeight-listener.GetSafeBlockRange())
-			goto updateCurrent
+			processedToHeight = c.processBatchLogs(listener, height, safeBlock.GetHeight())
 		}
 		// process transactions
 		if c.hasSubscriptionType[listener.GetName()][types.TxEvent] {
-			for height <= latestBlockHeight-listener.GetSafeBlockRange() {
+			for height <= processedToHeight {
 				block, err = listener.GetBlock(height)
 				if err != nil {
 					log.Error("[Controller][processBlock] error while get block", "err", err, "listener", listener.GetName(), "height", height)
@@ -420,7 +420,11 @@ func (c *Controller) processBehindBlock(listener types.IListener, height, latest
 				c.processTxs(listener, block.GetTransactions())
 			}
 		}
-	updateCurrent:
+		if processedToHeight < safeBlock.GetHeight() {
+			block, _ := listener.GetBlock(processedToHeight)
+			listener.UpdateCurrentBlock(block)
+			return errors.New(fmt.Sprintf("error occurred while processing behind block, expect %d but processed to %d", safeBlock.GetHeight(), processedToHeight))
+		}
 		listener.UpdateCurrentBlock(safeBlock)
 	}
 	return nil
@@ -440,7 +444,7 @@ func (c *Controller) processBlock(listener types.IListener, height uint64) {
 	}
 }
 
-func (c *Controller) processBatchLogs(listener types.IListener, fromHeight, toHeight uint64) {
+func (c *Controller) processBatchLogs(listener types.IListener, fromHeight, toHeight uint64) uint64 {
 	var (
 		contractAddresses []common.Address
 	)
@@ -485,20 +489,23 @@ func (c *Controller) processBatchLogs(listener types.IListener, fromHeight, toHe
 		}
 		log.Info("[Controller][processBatchLogs] finish getting logs", "from", opts.Start, "to", *opts.End, "logs", len(logs), "listener", listener.GetName())
 		fromHeight = *opts.End + 1
-		for _, eventLog := range logs {
-			eventId := eventLog.Topics[0]
-			log.Info("[Controller][processBatchLogs] processing log", "topic", eventLog.Topics[0].Hex(), "address", eventLog.Address.Hex(), "transaction", eventLog.TxHash.Hex(), "listener", listener.GetName())
-			if _, ok := eventIds[eventId]; !ok {
-				continue
+		go func() {
+			for _, eventLog := range logs {
+				eventId := eventLog.Topics[0]
+				log.Info("[Controller][processBatchLogs] processing log", "topic", eventLog.Topics[0].Hex(), "address", eventLog.Address.Hex(), "transaction", eventLog.TxHash.Hex(), "listener", listener.GetName())
+				if _, ok := eventIds[eventId]; !ok {
+					continue
+				}
+				data := eventLog.Data
+				name := eventIds[eventId]
+				tx := listener2.NewEmptyTransaction(chainId, eventLog.TxHash, eventLog.Data, nil, &eventLog.Address)
+				if job := listener.GetListenHandleJob(name, tx, eventId.Hex(), data); job != nil {
+					c.PrepareJobChan <- job
+				}
 			}
-			data := eventLog.Data
-			name := eventIds[eventId]
-			tx := listener2.NewEmptyTransaction(chainId, eventLog.TxHash, eventLog.Data, nil, &eventLog.Address)
-			if job := listener.GetListenHandleJob(name, tx, eventId.Hex(), data); job != nil {
-				c.PrepareJobChan <- job
-			}
-		}
+		}()
 	}
+	return fromHeight
 }
 
 func (c *Controller) processTxs(listener types.IListener, txs []types.ITransaction) {
