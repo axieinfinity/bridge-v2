@@ -269,7 +269,7 @@ func (r *BulkTask) sendDepositTransaction() (successTasks []*models.Task, failed
 		successTasks = append(successTasks, t)
 
 		// check deposit vote
-		result, err := caller.DepositVote(nil, r.chainId, ethEvent.Receipt.Id)
+		result, err := caller.DepositVote(nil, ethEvent.Receipt.Mainchain.ChainId, ethEvent.Receipt.Id)
 		if err != nil {
 			continue
 		}

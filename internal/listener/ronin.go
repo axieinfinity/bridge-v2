@@ -140,7 +140,7 @@ func (l *RoninListener) DepositRequestedCallback(fromChainId *big.Int, tx types.
 	if err != nil {
 		return err
 	}
-	result, err := caller.DepositVote(nil, chainId, ethEvent.Receipt.Id)
+	result, err := caller.DepositVote(nil, ethEvent.Receipt.Mainchain.ChainId, ethEvent.Receipt.Id)
 	if err != nil {
 		return err
 	}
