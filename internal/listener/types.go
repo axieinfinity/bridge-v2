@@ -2,8 +2,6 @@ package listener
 
 import (
 	"context"
-	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/axieinfinity/bridge-v2/internal/models"
 	"github.com/axieinfinity/bridge-v2/internal/types"
@@ -14,7 +12,6 @@ import (
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/log"
 	"math/big"
-	"strings"
 	"time"
 )
 
@@ -411,61 +408,4 @@ func (e *EthCallbackJob) Update(status string) error {
 		return err
 	}
 	return nil
-}
-
-type EthCheckTransactionStatusJob struct {
-	*BaseJob
-	ids []int
-}
-
-func NewEthCheckTransactionStatusJob(listener types.IListener, ids []int, tx *ethtypes.Transaction, fromChainID *big.Int, helpers utils.IUtils) *EthCheckTransactionStatusJob {
-	if helpers == nil {
-		helpers = &utils.Utils{}
-	}
-	data, _ := json.Marshal(ids)
-	ethTx := NewEthTransactionWithoutError(fromChainID, tx)
-	return &EthCheckTransactionStatusJob{
-		BaseJob: &BaseJob{
-			utilsWrapper: helpers,
-			jobType:      types.TransactionChecker,
-			retryCount:   0,
-			maxTry:       20,
-			nextTry:      0,
-			backOff:      5,
-			data:         data,
-			tx:           ethTx,
-			listener:     listener,
-			fromChainID:  fromChainID,
-		},
-		ids: ids,
-	}
-}
-
-func (e *EthCheckTransactionStatusJob) Process() ([]byte, error) {
-	log.Info("[EthCheckTransactionStatusJob] Start checking transaction status", "tx", e.tx.GetHash())
-	receipt, err := e.listener.GetReceipt(e.tx.GetHash())
-	if err != nil {
-		if strings.Contains(err.Error(), "execution reverted") {
-			if err = e.listener.GetStore().GetTaskStore().UpdateTaskWithIds(e.ids, 0, types.STATUS_DONE); err != nil {
-				return nil, err
-			}
-			return nil, nil
-		}
-		return nil, err
-	}
-	if receipt != nil {
-		// start confirmation step
-		// start 3 times confirmation
-		for i := 0; i < 3; i++ {
-			time.Sleep(e.listener.Config().TransactionCheckPeriod * time.Second)
-			confirmedReceipt, _ := e.listener.GetReceipt(e.tx.GetHash())
-			if confirmedReceipt == nil { // receipt is not found, then reorg may happen then break and retry again
-				return nil, errors.New("failed when confirm receipt")
-			}
-		}
-		if err = e.listener.GetStore().GetTaskStore().UpdateTaskWithIds(e.ids, int(receipt.Status), types.STATUS_DONE); err != nil {
-			return nil, err
-		}
-	}
-	return nil, nil
 }

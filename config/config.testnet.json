@@ -5,6 +5,9 @@
       "rpcUrl": "http://localhost:8545",
       "blockTime": 3,
       "safeBlockRange": 5,
+      "maxTasksQuery": 1000,
+      "minTasksQuery": 50,
+      "transactionCheckPeriod": 5,
       "secret": {
         "validator": "",
         "relayer": ""
@@ -12,7 +15,8 @@
       "fromHeight": 6508284,
       "processWithinBlocks": 864000,
       "contracts": {
-        "Gateway": "0x03d1F13c7391F6B5A651143a31034cf728A93694"
+        "Gateway": "0x03d1F13c7391F6B5A651143a31034cf728A93694",
+        "EthGateway": "0x3b6371EB912bFd5C0E249A16000ffbC6B881555A"
       },
       "subscriptions": {
         "MainchainWithdrewSubscription": {
@@ -56,6 +60,7 @@
       "rpcUrl": "",
       "blockTime": 15,
       "safeBlockRange": 8,
+      "transactionCheckPeriod": 15,
       "secret": {
         "validator": "",
         "relayer": ""

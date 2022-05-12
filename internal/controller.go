@@ -21,9 +21,10 @@ import (
 
 const (
 	defaultBatchSize        = 500
-	defaultWorkers          = 2048
+	defaultWorkers          = 8182
 	defaultMaxQueueSize     = 4096
 	defaultCoolDownDuration = 1
+	defaultMaxRetry         = 10
 )
 
 type Controller struct {
@@ -304,7 +305,7 @@ func (c *Controller) Start() error {
 		}
 		j, err := listener.NewJobFromDB(job)
 		if err != nil {
-			log.Error("[Controller] error while init job from db", "err", err, "jobId", job.ID)
+			log.Error("[Controller] error while init job from db", "err", err, "jobId", job.ID, "type", job.Type)
 			continue
 		}
 		// add job to jobChan
@@ -331,7 +332,7 @@ func (c *Controller) Wait() {
 // startListener starts listening events for a listener, it comes with a tryCount which close this listener if tryCount reaches 10 times
 func (c *Controller) startListener(listener types.IListener, tryCount int) {
 	// panic when tryCount reaches 10 times panic
-	if tryCount >= 10 {
+	if tryCount >= defaultMaxRetry {
 		log.Error("[Controller][startListener] maximum try has been reached, close listener", "listener", listener.GetName())
 		listener.Close()
 		return
@@ -475,8 +476,8 @@ func (c *Controller) processBatchLogs(listener types.IListener, fromHeight, toHe
 			Start:   fromHeight,
 			Context: c.ctx,
 		}
-		if fromHeight+500 < toHeight {
-			to := fromHeight + 500
+		if fromHeight+defaultBatchSize < toHeight {
+			to := fromHeight + defaultBatchSize
 			opts.End = &to
 		} else {
 			opts.End = &toHeight

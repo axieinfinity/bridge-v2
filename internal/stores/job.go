@@ -1,6 +1,7 @@
 package stores
 
 import (
+	"fmt"
 	"github.com/axieinfinity/bridge-v2/internal/models"
 	"github.com/axieinfinity/bridge-v2/internal/types"
 	"gorm.io/gorm"
@@ -25,6 +26,7 @@ func (j *JobStore) Update(job *models.Job) error {
 func (j *JobStore) GetPendingJobs() ([]*models.Job, error) {
 	// query all pending jobs
 	var jobs []*models.Job
-	err := j.Model(&models.Job{}).Where("status = ?", types.STATUS_PENDING).Find(&jobs).Error
+	err := j.Model(&models.Job{}).Where("status = ?", types.STATUS_PENDING).
+		Order(fmt.Sprintf("created_at + POWER(2, retry_count) * 10 ASC")).Find(&jobs).Error
 	return jobs, err
 }

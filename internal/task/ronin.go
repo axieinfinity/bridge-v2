@@ -14,19 +14,22 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/common/math"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/signer/core/apitypes"
 	"math/big"
+	"sync"
 	"time"
 )
 
 const (
 	defaultLimitRecords = 50
 	defaultMaxTry       = 5
+	defaultReceiptCheck = 30
 )
 
-var defaultTaskInterval = 3 * time.Second
+var defaultTaskInterval = 1 * time.Second
 
 type RoninTask struct {
 	ctx        context.Context
@@ -47,7 +50,8 @@ type RoninTask struct {
 	validator *ecdsa.PrivateKey
 	relayer   *ecdsa.PrivateKey
 
-	chainId *big.Int
+	limitQuery int
+	chainId    *big.Int
 }
 
 func NewRoninTask(listener types.IListener, util utils.IUtils) (*RoninTask, error) {
@@ -75,6 +79,7 @@ func NewRoninTask(listener types.IListener, util utils.IUtils) (*RoninTask, erro
 		util:            util,
 		validator:       listener.(types.IEthListener).GetValidatorKey(),
 		relayer:         listener.(types.IEthListener).GetRelayerKey(),
+		limitQuery:      defaultLimitRecords,
 	}
 	if config.TaskInterval > 0 {
 		task.taskInterval = config.TaskInterval * time.Second
@@ -82,25 +87,35 @@ func NewRoninTask(listener types.IListener, util utils.IUtils) (*RoninTask, erro
 	if config.TransactionCheckPeriod > 0 {
 		task.txCheckInterval = config.TransactionCheckPeriod * time.Second
 	}
+	if config.MaxTasksQuery > 0 {
+		task.limitQuery = config.MaxTasksQuery
+	}
 	return task, nil
 }
 
 func (r *RoninTask) Start() {
-	go func() {
+	taskTicker := time.NewTicker(r.taskInterval)
+	processingTicker := time.NewTicker(time.Duration(defaultReceiptCheck) * time.Second)
+	for {
 		select {
+		case <-taskTicker.C:
+			if err := r.processPending(); err != nil {
+				log.Error("[RoninTask] error while process tasks", "err", err)
+			}
+		case <-processingTicker.C:
+			if err := r.checkProcessingTasks(); err != nil {
+				log.Error("[RoninTask] error while checking processing tasks", "err", err)
+			}
 		case <-r.ctx.Done():
 			r.client.Close()
 			r.Close()
 			return
 		}
-	}()
-	for {
-		if err := r.process(); err != nil {
-			log.Error("[RoninTask] error while process tasks", "err", err)
-		}
-		// wait a specific time
-		time.Sleep(r.taskInterval)
 	}
+}
+
+func (r *RoninTask) SetLimitQuery(limit int) {
+	r.limitQuery = limit
 }
 
 func (r *RoninTask) Close() {
@@ -111,16 +126,8 @@ func (r *RoninTask) GetListener() types.IListener {
 	return r.listener
 }
 
-func (r *RoninTask) process() error {
-	var (
-		ids []int
-		tx  *ethtypes.Transaction
-	)
-	chainId, err := r.GetListener().GetChainID()
-	if err != nil {
-		return err
-	}
-	tasks, err := r.store.GetTaskStore().GetPendingTasks(hexutil.EncodeBig(chainId), defaultLimitRecords)
+func (r *RoninTask) processPending() error {
+	tasks, err := r.store.GetTaskStore().GetTasks(hexutil.EncodeBig(r.chainId), types.STATUS_PENDING, r.limitQuery, 10)
 	if err != nil {
 		return err
 	}
@@ -128,9 +135,9 @@ func (r *RoninTask) process() error {
 		return nil
 	}
 
-	bulkDepositTask := NewBulkTask(r.client, r.store, r.chainId, r.validator, common.HexToAddress(r.contracts[types.GATEWAY_CONTRACT]), r.txCheckInterval, defaultMaxTry, types.DEPOSIT_TASK, r.util)
-	bulkSubmitWithdrawalSignaturesTask := NewBulkTask(r.client, r.store, r.chainId, r.validator, common.HexToAddress(r.contracts[types.GATEWAY_CONTRACT]), r.txCheckInterval, defaultMaxTry, types.WITHDRAWAL_TASK, r.util)
-	ackWithdrewTasks := NewBulkTask(r.client, r.store, r.chainId, r.validator, common.HexToAddress(r.contracts[types.GATEWAY_CONTRACT]), r.txCheckInterval, defaultMaxTry, types.ACK_WITHDREW_TASK, r.util)
+	bulkDepositTask := NewBulkTask(r.listener, r.client, r.store, r.chainId, r.validator, r.contracts, r.txCheckInterval, defaultMaxTry, types.DEPOSIT_TASK, r.util)
+	bulkSubmitWithdrawalSignaturesTask := NewBulkTask(r.listener, r.client, r.store, r.chainId, r.validator, r.contracts, r.txCheckInterval, defaultMaxTry, types.WITHDRAWAL_TASK, r.util)
+	ackWithdrewTasks := NewBulkTask(r.listener, r.client, r.store, r.chainId, r.validator, r.contracts, r.txCheckInterval, defaultMaxTry, types.ACK_WITHDREW_TASK, r.util)
 	for _, task := range tasks {
 		// collect tasks for bulk deposits
 		bulkDepositTask.collectTask(task)
@@ -138,66 +145,156 @@ func (r *RoninTask) process() error {
 		// collect tasks for bulk withdrawal signature
 		bulkSubmitWithdrawalSignaturesTask.collectTask(task)
 
-		// collect tasks for ...
+		// collect tasks for acknowledge withdrawal
 		ackWithdrewTasks.collectTask(task)
 	}
-	// wait for bulk deposit finish
-	if ids, tx, err = bulkDepositTask.send(); err != nil {
-		log.Error("[RoninTask][bulkDepositTask] error while sending bulkDepositTask", "err", err)
+	bulkDepositTask.send()
+	bulkSubmitWithdrawalSignaturesTask.send()
+	ackWithdrewTasks.send()
+	return nil
+}
+
+func (r *RoninTask) checkProcessingTasks() error {
+	tasks, err := r.store.GetTaskStore().GetTasks(hexutil.EncodeBig(r.chainId), types.STATUS_PROCESSING, r.limitQuery, 2)
+	if err != nil {
+		return err
+	}
+	if len(tasks) == 0 {
+		return nil
 	}
 
-	// create job to check tx receipts of these ids
-	if tx != nil {
-		r.listener.SendTransactionCheckerJob(r.chainId, ids, tx)
+	failedTasksMap := sync.Map{}
+	successTasks := sync.Map{}
+	processedTx := make(map[string][]*models.Task)
+
+	var wg sync.WaitGroup
+	wg.Add(len(tasks))
+
+	for _, t := range tasks {
+		if _, ok := processedTx[t.TransactionHash]; ok {
+			wg.Done()
+			processedTx[t.TransactionHash] = append(processedTx[t.TransactionHash], t)
+			continue
+		}
+		processedTx[t.TransactionHash] = append(processedTx[t.TransactionHash], t)
+		go func(task *models.Task) {
+			defer wg.Done()
+			// check transaction receipt status
+			log.Info("[RoninTask][checkProcessingTasks] Start checking transaction status", "tx", task.TransactionHash)
+			receipt, err := r.listener.GetReceipt(common.HexToHash(task.TransactionHash))
+			if err != nil {
+				failedTasksMap.Store(task.TransactionHash, struct{}{})
+				return
+			}
+			if receipt != nil {
+				// start confirmation step
+				// start 3 times confirmation
+				for i := 0; i < int(r.listener.Config().SafeBlockRange); i++ {
+					time.Sleep(r.listener.Config().TransactionCheckPeriod * time.Second)
+					confirmedReceipt, _ := r.listener.GetReceipt(common.HexToHash(task.TransactionHash))
+					if confirmedReceipt == nil { // receipt is not found, then reorg may happen then break and retry again
+						failedTasksMap.Store(task.TransactionHash, struct{}{})
+						return
+					}
+				}
+				successTasks.Store(task.TransactionHash, receipt.Status)
+				return
+			}
+			failedTasksMap.Store(task.TransactionHash, struct{}{})
+		}(t)
+	}
+	wg.Wait()
+
+	// collect successTasks
+	var (
+		successTxs []string
+		failedTxs  []string
+	)
+
+	successTasks.Range(func(key any, value any) bool {
+		if value.(uint64) == 1 {
+			successTxs = append(successTxs, key.(string))
+		} else {
+			failedTxs = append(failedTxs, key.(string))
+		}
+		return true
+	})
+
+	// collect droppedTasks, retryTasks
+	var (
+		droppedTaskIds []int
+		retryTaskIds   []int
+	)
+	failedTasksMap.Range(func(key any, value any) bool {
+		failedTasks := processedTx[key.(string)]
+		for _, task := range failedTasks {
+			if task.Retries+1 >= 10 {
+				droppedTaskIds = append(droppedTaskIds, task.ID)
+			} else {
+				retryTaskIds = append(retryTaskIds, task.ID)
+			}
+		}
+		return true
+	})
+
+	// update success tasks with transaction's status = 1 (success)
+	if len(successTxs) > 0 {
+		if err = r.store.GetTaskStore().UpdateTasksWithTransactionHash(successTxs, 1, types.STATUS_DONE); err != nil {
+			log.Error("[RoninTask][checkProcessingTasks] error while update tasks with success transactions", "err", err)
+		}
 	}
 
-	// wait for bulk submit signatures finish
-	if ids, tx, err = bulkSubmitWithdrawalSignaturesTask.send(); err != nil {
-		log.Error("[RoninTask][bulkSubmitWithdrawalSignaturesTask] error while sending bulkSubmitWithdrawalSignaturesTask", "err", err)
+	// update success tasks with transaction's status = 0 (failed)
+	if len(failedTxs) > 0 {
+		if err = r.store.GetTaskStore().UpdateTasksWithTransactionHash(failedTxs, 0, types.STATUS_DONE); err != nil {
+			log.Error("[RoninTask][checkProcessingTasks] error while update tasks with failed transactions", "err", err)
+		}
 	}
 
-	// create job to check tx receipts of these ids
-	if tx != nil {
-		r.listener.SendTransactionCheckerJob(r.chainId, ids, tx)
+	// update failed tasks
+	if len(droppedTaskIds) > 0 {
+		if err = r.store.GetTaskStore().UpdateTaskWithIds(droppedTaskIds, 0, types.STATUS_FAILED); err != nil {
+			log.Error("[RoninTask][checkProcessingTasks] error while update tasks with success transactions", "err", err)
+		}
 	}
 
-	// wait for all ack tasks be finished
-	if ids, tx, err = ackWithdrewTasks.send(); err != nil {
-		log.Error("[RoninTask][ackWithdrewTasks] error while sending ackWithdrewTasks", "err", err)
+	// update retries tasks
+	if len(retryTaskIds) > 0 {
+		if err = r.store.GetTaskStore().IncrementRetries(retryTaskIds); err != nil {
+			log.Error("[RoninTask][checkProcessingTasks] error while increment retries", "err", err)
+		}
 	}
 
-	// create job to check tx receipts of these ids
-	if tx != nil {
-		r.listener.SendTransactionCheckerJob(r.chainId, ids, tx)
-	}
 	return nil
 }
 
 type BulkTask struct {
-	util            utils.IUtils
-	tasks           []*models.Task
-	store           types.IMainStore
-	validator       *ecdsa.PrivateKey
-	client          *ethclient.Client
-	contractAddress common.Address
-	chainId         *big.Int
-	ticker          time.Duration
-	maxTry          int
-	taskType        string
+	util      utils.IUtils
+	tasks     []*models.Task
+	store     types.IMainStore
+	validator *ecdsa.PrivateKey
+	client    *ethclient.Client
+	contracts map[string]string
+	chainId   *big.Int
+	ticker    time.Duration
+	maxTry    int
+	taskType  string
+	listener  types.IListener
 }
 
-func NewBulkTask(client *ethclient.Client, store types.IMainStore, chainId *big.Int, validator *ecdsa.PrivateKey, contractAddress common.Address, ticker time.Duration, maxTry int, taskType string, util utils.IUtils) *BulkTask {
+func NewBulkTask(listener types.IListener, client *ethclient.Client, store types.IMainStore, chainId *big.Int, validator *ecdsa.PrivateKey, contracts map[string]string, ticker time.Duration, maxTry int, taskType string, util utils.IUtils) *BulkTask {
 	return &BulkTask{
-		util:            util,
-		tasks:           make([]*models.Task, 0),
-		store:           store,
-		validator:       validator,
-		client:          client,
-		contractAddress: contractAddress,
-		chainId:         chainId,
-		ticker:          ticker,
-		maxTry:          maxTry,
-		taskType:        taskType,
+		util:      util,
+		tasks:     make([]*models.Task, 0),
+		store:     store,
+		validator: validator,
+		client:    client,
+		contracts: contracts,
+		chainId:   chainId,
+		ticker:    ticker,
+		maxTry:    maxTry,
+		taskType:  taskType,
+		listener:  listener,
 	}
 }
 
@@ -207,50 +304,58 @@ func (r *BulkTask) collectTask(t *models.Task) {
 	}
 }
 
-func (r *BulkTask) send() ([]int, *ethtypes.Transaction, error) {
+func (r *BulkTask) send() {
 	log.Info("[BulkTask] sending bulk", "type", r.taskType, "tasks", len(r.tasks))
 	if len(r.tasks) == 0 {
-		return nil, nil, nil
+		return
 	}
-	var (
-		successTasks, failedTasks []*models.Task
-		transaction               *ethtypes.Transaction
-		txHash                    string
-		ids                       []int
-		err                       error
-	)
 	switch r.taskType {
 	case types.DEPOSIT_TASK:
-		successTasks, failedTasks, transaction = r.sendDepositTransaction()
+		r.sendBulkTransactions(r.sendDepositTransaction)
 	case types.WITHDRAWAL_TASK:
-		successTasks, failedTasks, transaction = r.sendWithdrawalSignaturesTransaction()
+		r.sendBulkTransactions(r.sendWithdrawalSignaturesTransaction)
 	case types.ACK_WITHDREW_TASK:
-		successTasks, failedTasks, transaction = r.SendAckTransactions()
+		r.sendBulkTransactions(r.SendAckTransactions)
 	}
-	if transaction != nil {
-		txHash = transaction.Hash().Hex()
-	}
-	if ids, err = updateTasks(r.store, successTasks, types.STATUS_PROCESSING, txHash); err != nil {
-		log.Error("[BulkTask][updateTasks] error while update success tasks", "err", err)
-	}
-	if _, err = updateTasks(r.store, failedTasks, types.STATUS_FAILED, txHash); err != nil {
-		log.Error("[BulkTask][updateTasks] error while update failed tasks", "err", err)
-	}
-	return ids, transaction, err
 }
 
-func (r *BulkTask) sendDepositTransaction() (successTasks []*models.Task, failedTasks []*models.Task, tx *ethtypes.Transaction) {
+func (r *BulkTask) sendBulkTransactions(sendTxs func(tasks []*models.Task) (successTasks []*models.Task, failedTasks []*models.Task, tx *ethtypes.Transaction)) {
+	start, end := 0, len(r.tasks)
+	for start < end {
+		var (
+			txHash string
+			next   int
+		)
+		if start+defaultLimitRecords < end {
+			next = start + defaultLimitRecords
+		} else {
+			next = end
+		}
+		log.Info("[BulkTask][sendBulkTransactions] start sending txs", "start", start, "end", end, "type", r.taskType)
+		successTasks, failedTasks, transaction := sendTxs(r.tasks[start:next])
+
+		if transaction != nil {
+			txHash = transaction.Hash().Hex()
+			go updateTasks(r.store, successTasks, types.STATUS_PROCESSING, txHash)
+		}
+		go updateTasks(r.store, failedTasks, types.STATUS_FAILED, txHash)
+		start = next
+	}
+
+}
+
+func (r *BulkTask) sendDepositTransaction(tasks []*models.Task) (successTasks []*models.Task, failedTasks []*models.Task, tx *ethtypes.Transaction) {
 	var (
 		receipts []gateway2.TransferReceipt
 	)
 
 	// create caller
-	caller, err := gateway2.NewGatewayCaller(r.contractAddress, r.client)
+	caller, err := gateway2.NewGatewayCaller(common.HexToAddress(r.contracts[types.GATEWAY_CONTRACT]), r.client)
 	if err != nil {
 		return
 	}
 
-	for _, t := range r.tasks {
+	for _, t := range tasks {
 		ethEvent := new(gateway.GatewayDepositRequested)
 		ethGatewayAbi, err := gateway.GatewayMetaData.GetAbi()
 		if err != nil {
@@ -271,9 +376,22 @@ func (r *BulkTask) sendDepositTransaction() (successTasks []*models.Task, failed
 		// check deposit vote
 		result, err := caller.DepositVote(nil, ethEvent.Receipt.Mainchain.ChainId, ethEvent.Receipt.Id)
 		if err != nil {
+			t.LastError = err.Error()
+			failedTasks = append(failedTasks, t)
 			continue
 		}
 		if result.Status == types.VoteStatusExecuted {
+			continue
+		}
+
+		// check if current validator has been voted for this deposit or not
+		voted, err := caller.DepositVoted(nil, ethEvent.Receipt.Mainchain.ChainId, ethEvent.Receipt.Id, crypto.PubkeyToAddress(r.validator.PublicKey))
+		if err != nil {
+			t.LastError = err.Error()
+			failedTasks = append(failedTasks, t)
+			continue
+		}
+		if voted {
 			continue
 		}
 
@@ -299,7 +417,7 @@ func (r *BulkTask) sendDepositTransaction() (successTasks []*models.Task, failed
 		})
 	}
 	// send tx with above receipts
-	c, err := gateway2.NewGatewayTransactor(r.contractAddress, r.client)
+	c, err := gateway2.NewGatewayTransactor(common.HexToAddress(r.contracts[types.GATEWAY_CONTRACT]), r.client)
 	if err != nil {
 		// append all success tasks into failed tasks
 		for _, t := range successTasks {
@@ -321,14 +439,14 @@ func (r *BulkTask) sendDepositTransaction() (successTasks []*models.Task, failed
 	return
 }
 
-func (r *BulkTask) sendWithdrawalSignaturesTransaction() (successTasks []*models.Task, failedTasks []*models.Task, tx *ethtypes.Transaction) {
+func (r *BulkTask) sendWithdrawalSignaturesTransaction(tasks []*models.Task) (successTasks []*models.Task, failedTasks []*models.Task, tx *ethtypes.Transaction) {
 
 	var (
 		ids        []*big.Int
 		signatures [][]byte
 	)
 
-	for _, t := range r.tasks {
+	for _, t := range tasks {
 		// Unpack event from data
 		ronEvent := new(gateway2.GatewayMainchainWithdrew)
 		ronGatewayAbi, err := gateway2.GatewayMetaData.GetAbi()
@@ -352,7 +470,7 @@ func (r *BulkTask) sendWithdrawalSignaturesTransaction() (successTasks []*models
 
 		// try checking on smart contract
 		// create caller
-		caller, err := gateway2.NewGatewayCaller(r.contractAddress, r.client)
+		caller, err := gateway2.NewGatewayCaller(common.HexToAddress(r.contracts[types.GATEWAY_CONTRACT]), r.client)
 		if err != nil {
 			t.LastError = err.Error()
 			failedTasks = append(failedTasks, t)
@@ -382,8 +500,8 @@ func (r *BulkTask) sendWithdrawalSignaturesTransaction() (successTasks []*models
 						{Name: "info", Type: "TokenInfo"},
 					},
 					"TokenOwner": []apitypes.Type{
-						{Name: "addr", Type: "string"},
-						{Name: "tokenAddr", Type: "string"},
+						{Name: "addr", Type: "address"},
+						{Name: "tokenAddr", Type: "address"},
 						{Name: "chainId", Type: "uint256"},
 					},
 					"TokenInfo": []apitypes.Type{
@@ -396,7 +514,7 @@ func (r *BulkTask) sendWithdrawalSignaturesTransaction() (successTasks []*models
 					Name:              "MainchainGatewayV2",
 					Version:           "2",
 					ChainId:           math.NewHexOrDecimal256(receipt.Mainchain.ChainId.Int64()),
-					VerifyingContract: receipt.Mainchain.Addr.Hex(),
+					VerifyingContract: r.contracts[types.ETH_GATEWAY_CONTRACT],
 				},
 				PrimaryType: "Receipt",
 				Message: apitypes.TypedDataMessage{
@@ -431,7 +549,7 @@ func (r *BulkTask) sendWithdrawalSignaturesTransaction() (successTasks []*models
 		}
 		successTasks = append(successTasks, t)
 	}
-	c, err := gateway2.NewGatewayTransactor(r.contractAddress, r.client)
+	c, err := gateway2.NewGatewayTransactor(common.HexToAddress(r.contracts[types.GATEWAY_CONTRACT]), r.client)
 	if err != nil {
 		// append all success tasks into failed tasks
 		for _, t := range successTasks {
@@ -456,16 +574,16 @@ func (r *BulkTask) sendWithdrawalSignaturesTransaction() (successTasks []*models
 	return
 }
 
-func (r *BulkTask) SendAckTransactions() (successTasks []*models.Task, failedTasks []*models.Task, tx *ethtypes.Transaction) {
+func (r *BulkTask) SendAckTransactions(tasks []*models.Task) (successTasks []*models.Task, failedTasks []*models.Task, tx *ethtypes.Transaction) {
 	var ids []*big.Int
-	c, err := gateway2.NewGatewayTransactor(r.contractAddress, r.client)
+	c, err := gateway2.NewGatewayTransactor(common.HexToAddress(r.contracts[types.GATEWAY_CONTRACT]), r.client)
 	if err != nil {
-		for _, t := range r.tasks {
+		for _, t := range tasks {
 			t.LastError = err.Error()
 		}
-		return nil, r.tasks, nil
+		return nil, tasks, nil
 	}
-	for _, t := range r.tasks {
+	for _, t := range tasks {
 		// Unpack event data
 		ethEvent := new(gateway.GatewayWithdrew)
 		ethGatewayAbi, err := gateway.GatewayMetaData.GetAbi()
@@ -483,7 +601,7 @@ func (r *BulkTask) SendAckTransactions() (successTasks []*models.Task, failedTas
 
 		// try checking on smart contract
 		// create caller
-		caller, err := gateway2.NewGatewayCaller(r.contractAddress, r.client)
+		caller, err := gateway2.NewGatewayCaller(common.HexToAddress(r.contracts[types.GATEWAY_CONTRACT]), r.client)
 		if err != nil {
 			t.LastError = err.Error()
 			failedTasks = append(failedTasks, t)
@@ -518,7 +636,7 @@ func (r *BulkTask) SendAckTransactions() (successTasks []*models.Task, failedTas
 	return
 }
 
-func updateTasks(store types.IMainStore, tasks []*models.Task, status, txHash string) (ids []int, err error) {
+func updateTasks(store types.IMainStore, tasks []*models.Task, status, txHash string) {
 	// update tasks with given status
 	// note: if task.retries < 10 then retries++ and status still be processing
 	for _, t := range tasks {
@@ -532,10 +650,8 @@ func updateTasks(store types.IMainStore, tasks []*models.Task, status, txHash st
 			t.Status = status
 			t.TransactionHash = txHash
 		}
-		if err = store.GetTaskStore().Update(t); err != nil {
-			log.Error("error while update task", "id", t.ID)
+		if err := store.GetTaskStore().Update(t); err != nil {
+			log.Error("error while update task", "id", t.ID, "err", err)
 		}
-		ids = append(ids, t.ID)
 	}
-	return
 }

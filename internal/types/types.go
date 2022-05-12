@@ -21,7 +21,6 @@ const (
 const (
 	ListenHandler = iota
 	CallbackHandler
-	TransactionChecker
 )
 
 const (
@@ -41,6 +40,7 @@ const (
 	STATUS_DONE       = "done"
 
 	GATEWAY_CONTRACT     = "Gateway"
+	ETH_GATEWAY_CONTRACT = "EthGateway"
 	BRIDGEADMIN_CONTRACT = "BridgeAdmin"
 )
 
@@ -69,7 +69,6 @@ type IListener interface {
 
 	GetListenHandleJob(subscriptionName string, tx ITransaction, eventId string, data []byte) IJob
 	SendCallbackJobs(listeners map[string]IListener, subscriptionName string, tx ITransaction, inputData []byte)
-	SendTransactionCheckerJob(chainId *big.Int, ids []int, tx *types.Transaction)
 
 	NewJobFromDB(job *models.Job) (IJob, error)
 
@@ -81,6 +80,7 @@ type IListener interface {
 	GetInitHeight() uint64
 
 	GetEthClient() utils.EthClient
+	GetTask() ITask
 }
 
 type IEthListener interface {
@@ -149,6 +149,7 @@ type ITask interface {
 	Start()
 	Close()
 	GetListener() IListener
+	SetLimitQuery(limit int)
 }
 
 type IJobStore interface {
@@ -165,8 +166,10 @@ type IProcessedBlockStore interface {
 type ITaskStore interface {
 	Save(task *models.Task) error
 	Update(task *models.Task) error
-	GetPendingTasks(chain string, limit int) ([]*models.Task, error)
+	GetTasks(chain, status string, limit, retrySeconds int) ([]*models.Task, error)
 	UpdateTaskWithIds(ids []int, transactionStatus int, status string) error
+	UpdateTasksWithTransactionHash(txs []string, transactionStatus int, status string) error
+	IncrementRetries(ids []int) error
 }
 
 type IDepositStore interface {
@@ -227,6 +230,9 @@ type LsConfig struct {
 	TransactionCheckPeriod time.Duration         `json:"transactionCheckPeriod"`
 	Contracts              map[string]string     `json:"contracts"`
 	ProcessWithinBlocks    uint64                `json:"processWithinBlocks"`
+
+	MaxTasksQuery int `json:"maxTasksQuery"`
+	MinTasksQuery int `json:"minTasksQuery"`
 }
 
 type Secret struct {

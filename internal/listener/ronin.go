@@ -10,6 +10,7 @@ import (
 	"github.com/axieinfinity/bridge-v2/internal/utils"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/log"
 	"math/big"
 	"time"
@@ -37,6 +38,10 @@ func (l *RoninListener) Start() {
 	go l.task.Start()
 }
 
+func (l *RoninListener) GetTask() types.ITask {
+	return l.task
+}
+
 // StoreMainchainWithdrawCallback stores the receipt to own database for future check from ProvideReceiptSignatureCallback
 func (l *RoninListener) StoreMainchainWithdrawCallback(fromChainId *big.Int, tx types.ITransaction, data []byte) error {
 	log.Info("[RoninListener] StoreMainchainWithdrawCallback", "tx", tx.GetHash().Hex())
@@ -54,6 +59,7 @@ func (l *RoninListener) StoreMainchainWithdrawCallback(fromChainId *big.Int, tx 
 		WithdrawalId:         receipt.Id.Int64(),
 		ExternalAddress:      receipt.Mainchain.Addr.Hex(),
 		ExternalTokenAddress: receipt.Mainchain.TokenAddr.Hex(),
+		ExternalChainId:      receipt.Mainchain.ChainId.Int64(),
 		RoninAddress:         receipt.Ronin.Addr.Hex(),
 		RoninTokenAddress:    receipt.Ronin.TokenAddr.Hex(),
 		TokenErc:             receipt.Info.Erc,
@@ -140,6 +146,8 @@ func (l *RoninListener) DepositRequestedCallback(fromChainId *big.Int, tx types.
 	if err != nil {
 		return err
 	}
+
+	// check if deposit has been executed or not
 	result, err := caller.DepositVote(nil, ethEvent.Receipt.Mainchain.ChainId, ethEvent.Receipt.Id)
 	if err != nil {
 		return err
@@ -148,6 +156,17 @@ func (l *RoninListener) DepositRequestedCallback(fromChainId *big.Int, tx types.
 	if result.Status == types.VoteStatusExecuted {
 		return nil
 	}
+
+	// check if current validator has been voted for this deposit or not
+	voted, err := caller.DepositVoted(nil, ethEvent.Receipt.Mainchain.ChainId, ethEvent.Receipt.Id, crypto.PubkeyToAddress(l.validatorKey.PublicKey))
+	if err != nil {
+		return err
+	}
+	log.Info("[RoninListener][DepositRequestedCallback] result of calling DepositVoted function", "voted", voted, "receiptId", ethEvent.Receipt.Id, "tx", tx.GetHash().Hex())
+	if voted {
+		return nil
+	}
+
 	// create task and store to database
 	depositTask := &models.Task{
 		ChainId:         hexutil.EncodeBig(chainId),

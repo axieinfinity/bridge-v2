@@ -3,7 +3,6 @@ package listener
 import (
 	"context"
 	"crypto/ecdsa"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/axieinfinity/bridge-v2/internal/models"
@@ -120,6 +119,10 @@ func (e *EthereumListener) SetInitHeight(height uint64) {
 
 func (e *EthereumListener) GetInitHeight() uint64 {
 	return e.fromHeight
+}
+
+func (e *EthereumListener) GetTask() types.ITask {
+	return nil
 }
 
 func (e *EthereumListener) GetCurrentBlock() types.IBlock {
@@ -260,14 +263,14 @@ func (e *EthereumListener) GetListenHandleJob(subscriptionName string, tx types.
 }
 
 func (e *EthereumListener) SendCallbackJobs(listeners map[string]types.IListener, subscriptionName string, tx types.ITransaction, inputData []byte) {
-	log.Info("[EthereumListener][SendCallbackJobs] Start", "subscriptionName", subscriptionName, "listeners", len(listeners))
+	log.Info("[EthereumListener][SendCallbackJobs] Start", "subscriptionName", subscriptionName, "listeners", len(listeners), "fromTx", tx.GetHash().Hex())
 	chainId, err := e.GetChainID()
 	if err != nil {
 		return
 	}
 	subscription, ok := e.GetSubscriptions()[subscriptionName]
 	if !ok {
-		log.Info("[EthereumListener][SendCallbackJobs] cannot find subscription", "subscriptionName", subscriptionName)
+		log.Warn("[EthereumListener][SendCallbackJobs] cannot find subscription", "subscriptionName", subscriptionName)
 		return
 	}
 	log.Info("[EthereumListener][SendCallbackJobs] subscription found", "subscriptionName", subscriptionName, "numberOfCallbacks", len(subscription.CallBacks))
@@ -279,12 +282,6 @@ func (e *EthereumListener) SendCallbackJobs(listeners map[string]types.IListener
 			e.prepareJobChan <- job
 		}
 	}
-}
-
-func (e *EthereumListener) SendTransactionCheckerJob(chainId *big.Int, ids []int, tx *ethtypes.Transaction) {
-	log.Info("[EthereumListener][SendTransactionCheckerJob] Start", "tx", tx.Hash().Hex())
-	job := NewEthCheckTransactionStatusJob(e, ids, tx, chainId, e.utilsWrapper)
-	e.prepareJobChan <- job
 }
 
 func (e *EthereumListener) GetBlock(height uint64) (types.IBlock, error) {
@@ -359,27 +356,6 @@ func (e *EthereumListener) NewJobFromDB(job *models.Job) (types.IJob, error) {
 				id:           int32(job.ID),
 			},
 			method: job.Method,
-		}, nil
-	case types.TransactionChecker:
-		var ids []int
-		if err := json.Unmarshal(common.Hex2Bytes(job.Data), &ids); err != nil {
-			return nil, err
-		}
-		return &EthCheckTransactionStatusJob{
-			BaseJob: &BaseJob{
-				utilsWrapper: e.utilsWrapper,
-				id:           int32(job.ID),
-				jobType:      types.TransactionChecker,
-				retryCount:   job.RetryCount,
-				maxTry:       20,
-				nextTry:      time.Now().Unix() + int64(job.RetryCount*5),
-				backOff:      5,
-				data:         common.Hex2Bytes(job.Data),
-				tx:           transaction,
-				listener:     e,
-				fromChainID:  chainId,
-			},
-			ids: ids,
 		}, nil
 	}
 	return nil, errors.New("jobType does not match")
