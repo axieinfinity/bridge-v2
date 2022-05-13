@@ -13,7 +13,6 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/signer/core/apitypes"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
@@ -51,7 +50,6 @@ type IUtils interface {
 type Utils struct{}
 
 func (u *Utils) Invoke(any interface{}, name string, args ...interface{}) (reflect.Value, error) {
-	log.Info("[utils][Invoke] Start", "caller", any, "method", name, "args", args)
 	method := reflect.ValueOf(any).MethodByName(name)
 	methodType := method.Type()
 	numIn := methodType.NumIn()

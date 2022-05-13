@@ -331,6 +331,11 @@ func (c *Controller) Wait() {
 
 // startListener starts listening events for a listener, it comes with a tryCount which close this listener if tryCount reaches 10 times
 func (c *Controller) startListener(listener types.IListener, tryCount int) {
+	defer func() {
+		if r := recover(); r != nil {
+			log.Error("[Controller][startListener] recover from panic", "message", r)
+		}
+	}()
 	// panic when tryCount reaches 10 times panic
 	if tryCount >= defaultMaxRetry {
 		log.Error("[Controller][startListener] maximum try has been reached, close listener", "listener", listener.GetName())

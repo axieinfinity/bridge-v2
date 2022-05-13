@@ -155,7 +155,7 @@ func bridge(ctx *cli.Context) {
 	if ctx.GlobalIsSet(LogLvlFlag.Name) {
 		logLvl = log.Lvl(ctx.GlobalInt(LogLvlFlag.Name))
 	}
-	log.Root().SetHandler(log.LvlFilterHandler(logLvl, log.StreamHandler(os.Stdout, log.TerminalFormat(true))))
+	log.Root().SetHandler(log.LvlFilterHandler(logLvl, log.StreamHandler(os.Stderr, log.TerminalFormat(true))))
 
 	if os.Getenv(configPath) != "" {
 		if err := ctx.GlobalSet(ConfigFlag.Name, os.Getenv(configPath)); err != nil {

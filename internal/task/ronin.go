@@ -127,6 +127,11 @@ func (r *RoninTask) GetListener() types.IListener {
 }
 
 func (r *RoninTask) processPending() error {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Error("[RoninTask][processPending]recover from panic", "err", err)
+		}
+	}()
 	tasks, err := r.store.GetTaskStore().GetTasks(hexutil.EncodeBig(r.chainId), types.STATUS_PENDING, r.limitQuery, 10)
 	if err != nil {
 		return err
@@ -155,6 +160,11 @@ func (r *RoninTask) processPending() error {
 }
 
 func (r *RoninTask) checkProcessingTasks() error {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Error("[RoninTask][checkProcessingTasks] recover from panic", "err", err)
+		}
+	}()
 	tasks, err := r.store.GetTaskStore().GetTasks(hexutil.EncodeBig(r.chainId), types.STATUS_PROCESSING, r.limitQuery, 2)
 	if err != nil {
 		return err
@@ -621,7 +631,7 @@ func (r *BulkTask) SendAckTransactions(tasks []*models.Task) (successTasks []*mo
 	}
 	tx, err = r.util.SendContractTransaction(r.validator, r.chainId, func(opts *bind.TransactOpts) (*ethtypes.Transaction, error) {
 		if ids != nil {
-			return c.BulkAcknowledgeMainchainWithdrew(nil, ids)
+			return c.BulkAcknowledgeMainchainWithdrew(opts, ids)
 		}
 		return nil, errors.New("empty withdraw ids list")
 	})

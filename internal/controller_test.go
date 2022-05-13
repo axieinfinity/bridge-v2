@@ -63,7 +63,7 @@ func LoadControllerConfig() *types.Config {
 				RpcUrl:         "",
 				LoadInterval:   3,
 				SafeBlockRange: uint64(0),
-				Secret: types.Secret{
+				Secret: &types.Secret{
 					Validator: "8843ebcb1021b00ae9a644db6617f9c6d870e5fd53624cefe374c1d2d710fd06",
 					Relayer:   "8843ebcb1021b00ae9a644db6617f9c6d870e5fd53624cefe374c1d2d710fd06",
 				},
@@ -93,7 +93,7 @@ type TestListener struct {
 }
 
 func (c *Controller) InitTestListener(ctx context.Context, lsConfig *types.LsConfig, store types.IMainStore) *TestListener {
-	l, err := listener.NewEthereumListener(ctx, lsConfig, c.utilWrapper, store)
+	l, err := listener.NewEthereumListener(ctx, lsConfig, c.utilWrapper, store, c.PrepareJobChan)
 	if err != nil {
 		panic(err)
 	}
