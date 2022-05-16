@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/ecdsa"
 	"errors"
+	"fmt"
 	"github.com/axieinfinity/bridge-v2/generated_contracts/ethereum/gateway"
 	gateway2 "github.com/axieinfinity/bridge-v2/generated_contracts/ronin/gateway"
 	"github.com/axieinfinity/bridge-v2/internal/models"
@@ -439,7 +440,7 @@ func (r *BulkTask) sendDepositTransaction(tasks []*models.Task) (successTasks []
 		return nil, failedTasks, nil
 	}
 	tx, err = r.util.SendContractTransaction(r.validator, r.chainId, func(opts *bind.TransactOpts) (*ethtypes.Transaction, error) {
-		return c.BulkDepositFor(opts, receipts)
+		return c.TryBulkDepositFor(opts, receipts)
 	})
 	if err != nil {
 		for _, t := range successTasks {
@@ -526,26 +527,26 @@ func (r *BulkTask) sendWithdrawalSignaturesTransaction(tasks []*models.Task) (su
 					Name:              "MainchainGatewayV2",
 					Version:           "2",
 					ChainId:           math.NewHexOrDecimal256(receipt.Mainchain.ChainId.Int64()),
-					VerifyingContract: r.contracts[types.ETH_GATEWAY_CONTRACT],
+					VerifyingContract: "0x3b6371EB912bFd5C0E249A16000ffbC6B881555A",
 				},
 				PrimaryType: "Receipt",
 				Message: apitypes.TypedDataMessage{
-					"id":   math.NewHexOrDecimal256(receipt.Id.Int64()),
-					"kind": hexutil.EncodeBig(big.NewInt(int64(receipt.Kind))),
+					"id":   receipt.Id.String(),
+					"kind": fmt.Sprintf("%d", receipt.Kind),
 					"mainchain": apitypes.TypedDataMessage{
 						"addr":      receipt.Mainchain.Addr.Hex(),
 						"tokenAddr": receipt.Mainchain.TokenAddr.Hex(),
-						"chainId":   math.NewHexOrDecimal256(receipt.Mainchain.ChainId.Int64()),
+						"chainId":   receipt.Mainchain.ChainId.String(),
 					},
 					"ronin": apitypes.TypedDataMessage{
 						"addr":      receipt.Ronin.Addr.Hex(),
 						"tokenAddr": receipt.Ronin.TokenAddr.Hex(),
-						"chainId":   math.NewHexOrDecimal256(receipt.Ronin.ChainId.Int64()),
+						"chainId":   receipt.Ronin.ChainId.String(),
 					},
 					"info": apitypes.TypedDataMessage{
-						"erc":      hexutil.EncodeBig(big.NewInt(int64(receipt.Info.Erc))),
-						"id":       math.NewHexOrDecimal256(receipt.Info.Id.Int64()),
-						"quantity": math.NewHexOrDecimal256(receipt.Info.Quantity.Int64()),
+						"erc":      fmt.Sprintf("%d", receipt.Info.Erc),
+						"id":       receipt.Info.Id.String(),
+						"quantity": receipt.Info.Quantity.String(),
 					},
 				},
 			}
@@ -633,7 +634,7 @@ func (r *BulkTask) SendAckTransactions(tasks []*models.Task) (successTasks []*mo
 	}
 	tx, err = r.util.SendContractTransaction(r.validator, r.chainId, func(opts *bind.TransactOpts) (*ethtypes.Transaction, error) {
 		if ids != nil {
-			return c.BulkAcknowledgeMainchainWithdrew(opts, ids)
+			return c.TryBulkAcknowledgeMainchainWithdrew(opts, ids)
 		}
 		return nil, errors.New("empty withdraw ids list")
 	})
