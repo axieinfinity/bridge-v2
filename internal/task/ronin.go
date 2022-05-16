@@ -207,8 +207,11 @@ func (r *RoninTask) checkProcessingTasks() error {
 						return
 					}
 				}
-				successTasks.Store(task.TransactionHash, receipt.Status)
-				return
+				// if receipt status is failed then add tx to failed tasks map
+				if receipt.Status == 1 {
+					successTasks.Store(task.TransactionHash, receipt.Status)
+					return
+				}
 			}
 			failedTasksMap.Store(task.TransactionHash, struct{}{})
 		}(t)
@@ -358,7 +361,6 @@ func (r *BulkTask) sendDepositTransaction(tasks []*models.Task) (successTasks []
 	var (
 		receipts []gateway2.TransferReceipt
 	)
-
 	// create caller
 	caller, err := gateway2.NewGatewayCaller(common.HexToAddress(r.contracts[types.GATEWAY_CONTRACT]), r.client)
 	if err != nil {
