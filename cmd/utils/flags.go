@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with go-ethereum. If not, see <http://www.gnu.org/licenses/>.
 
-package main
+package utils
 
 import (
 	"github.com/ethereum/go-ethereum/params"
@@ -148,4 +148,28 @@ func NewApp(gitCommit, gitDate, usage string) *cli.App {
 	app.Version = params.VersionWithCommit(gitCommit, gitDate)
 	app.Usage = usage
 	return app
+}
+
+// MigrateFlags sets the global flag from a local flag when it's set.
+// This is a temporary function used for migrating old command/flags to the
+// new format.
+//
+// e.g. geth account new --keystore /tmp/mykeystore --lightkdf
+//
+// is equivalent after calling this method with:
+//
+// geth --keystore /tmp/mykeystore --lightkdf account new
+//
+// This allows the use of the existing configuration functionality.
+// When all flags are migrated this function can be removed and the existing
+// configuration functionality must be changed that is uses local flags
+func MigrateFlags(action func(ctx *cli.Context) error) func(*cli.Context) error {
+	return func(ctx *cli.Context) error {
+		for _, name := range ctx.FlagNames() {
+			if ctx.IsSet(name) {
+				ctx.GlobalSet(name, ctx.String(name))
+			}
+		}
+		return action(ctx)
+	}
 }

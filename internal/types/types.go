@@ -156,6 +156,8 @@ type IJobStore interface {
 	Save(job *models.Job) error
 	Update(job *models.Job) error
 	GetPendingJobs() ([]*models.Job, error)
+	DeleteJobs([]string, uint64) error
+	Count() int64
 }
 
 type IProcessedBlockStore interface {
@@ -170,6 +172,8 @@ type ITaskStore interface {
 	UpdateTaskWithIds(ids []int, transactionStatus int, status string) error
 	UpdateTasksWithTransactionHash(txs []string, transactionStatus int, status string) error
 	IncrementRetries(ids []int) error
+	DeleteTasks([]string, uint64) error
+	Count() int64
 }
 
 type IDepositStore interface {
@@ -184,6 +188,8 @@ type IWithdrawalStore interface {
 
 type IEventStore interface {
 	Save(event *models.Event) error
+	DeleteEvents(uint64) error
+	Count() int64
 }
 
 type IMainStore interface {
@@ -200,6 +206,10 @@ type Config struct {
 	Listeners       map[string]*LsConfig `json:"listeners"`
 	NumberOfWorkers int                  `json:"numberOfWorkers"`
 	DB              *Database            `json:"database"`
+	Cleaner         Cleaner              `json:"cleaner"`
+
+	// this field is used for testing purpose
+	Testing bool
 }
 
 type Database struct {
@@ -212,6 +222,15 @@ type Database struct {
 	ConnMaxLifetime int `json:"connMaxLifeTime"`
 	MaxIdleConns    int `json:"maxIdleConns"`
 	MaxOpenConns    int `json:"maxOpenConns"`
+}
+
+type Cleaner map[string]*CleanerConfig
+
+type CleanerConfig struct {
+	Cron           string `json:"cron"`
+	RemoveAfter    uint64 `json:"removeAfter"`
+	SkipIfLessThan uint64 `json:"SkipIfLessThan"`
+	Description    string `json:"description"`
 }
 
 type LsConfig struct {

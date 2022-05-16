@@ -102,5 +102,37 @@
     "password": "example",
     "dbName": "bridge",
     "port": 5432
+  },
+  "cleaner": {
+    "ClearSuccessTasks": {
+      "cron": "0 0 1 * *",
+      "removeAfter": 7776000,
+      "skipIfLessThan": 1000,
+      "description": "triggered at 00:00 on day-of-month 1"
+    },
+    "ClearFailedTasks": {
+      "cron": "0 1 1 * *",
+      "removeAfter": 31104000,
+      "skipIfLessThan": 1000,
+      "description": "triggered at 01:00 on day-of-month 1"
+    },
+    "ClearEvents": {
+      "cron": "0 0 * * 0",
+      "removeAfter": 604800,
+      "skipIfLessThan": 1000,
+      "description": "triggered at 00:00 on Sunday"
+    },
+    "ClearSuccessJobs": {
+      "cron": "0 0 * * 0",
+      "removeAfter": 604800,
+      "skipIfLessThan": 1000,
+      "description": "triggered at 00:00 on Sunday"
+    },
+    "ClearFailedJobs": {
+      "cron": "0 0 * * 0",
+      "removeAfter": 604800,
+      "skipIfLessThan": 1000,
+      "description": "triggered at 00:00 on Sunday"
+    }
   }
 }

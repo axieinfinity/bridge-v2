@@ -36,6 +36,23 @@ services:
       - db
       - node
 
+  cleaner:
+    image: kiendn60302/bridge
+    container_name: cleaner
+    restart: always
+    environment:
+      - DB_HOST=${DB_HOST}
+      - DB_NAME=${DB_NAME}
+      - DB_PORT=${DB_PORT}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - VERBOSITY=${VERBOSITY}
+      - CONFIG_PATH=${CONFIG_PATH}
+      - CLEANER=cleaner
+    depends_on:
+      - db
+      - bridge
+
   node:
     image: kiendn60302/node
     restart: always

@@ -30,3 +30,13 @@ func (j *JobStore) GetPendingJobs() ([]*models.Job, error) {
 		Order(fmt.Sprintf("created_at + POWER(2, retry_count) * 10 ASC")).Find(&jobs).Error
 	return jobs, err
 }
+
+func (j *JobStore) DeleteJobs(status []string, createdAt uint64) error {
+	return j.Where("status in ? AND created_at <= ?", status, createdAt).Delete(&models.Job{}).Error
+}
+
+func (j *JobStore) Count() int64 {
+	var count int64
+	j.Model(&models.Job{}).Select("id").Count(&count)
+	return count
+}

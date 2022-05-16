@@ -527,7 +527,7 @@ func (r *BulkTask) sendWithdrawalSignaturesTransaction(tasks []*models.Task) (su
 					Name:              "MainchainGatewayV2",
 					Version:           "2",
 					ChainId:           math.NewHexOrDecimal256(receipt.Mainchain.ChainId.Int64()),
-					VerifyingContract: "0x3b6371EB912bFd5C0E249A16000ffbC6B881555A",
+					VerifyingContract: r.contracts[types.ETH_GATEWAY_CONTRACT],
 				},
 				PrimaryType: "Receipt",
 				Message: apitypes.TypedDataMessage{

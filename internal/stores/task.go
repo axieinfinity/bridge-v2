@@ -47,3 +47,13 @@ func (t *TaskStore) UpdateTasksWithTransactionHash(txs []string, transactionStat
 func (t *TaskStore) IncrementRetries(ids []int) error {
 	return t.Model(&models.Task{}).Where("id in ?", ids).Update("retries", gorm.Expr("retries + 1")).Error
 }
+
+func (t *TaskStore) DeleteTasks(status []string, fromTime uint64) error {
+	return t.Where("status in ? AND created_at <= ?", status, fromTime).Delete(&models.Task{}).Error
+}
+
+func (t *TaskStore) Count() int64 {
+	var count int64
+	t.Model(&models.Task{}).Select("id").Count(&count)
+	return count
+}

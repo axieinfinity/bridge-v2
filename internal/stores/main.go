@@ -6,6 +6,7 @@ import (
 	"github.com/axieinfinity/bridge-v2/internal/types"
 	"github.com/ethereum/go-ethereum/log"
 	"gorm.io/driver/postgres"
+	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"time"
 )
@@ -79,6 +80,11 @@ func (m *MainStore) GetEventStore() types.IEventStore {
 }
 
 func MustConnectDatabase(cfg *types.Config) (*gorm.DB, error) {
+	// load sqlite db for testing purpose
+	if cfg.Testing {
+		return gorm.Open(sqlite.Open("gorm.db"), &gorm.Config{})
+	}
+
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%d sslmode=disable", cfg.DB.Host, cfg.DB.User, cfg.DB.Password, cfg.DB.DBName, cfg.DB.Port)
 	dialect := postgres.Open(dsn)
 	db, err := gorm.Open(dialect, &gorm.Config{})
@@ -103,20 +109,32 @@ func MustConnectDatabase(cfg *types.Config) (*gorm.DB, error) {
 }
 
 func MustConnectDatabaseWithName(cfg *types.Config, dbName string) (*gorm.DB, error) {
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%d sslmode=disable", cfg.DB.Host, cfg.DB.User, cfg.DB.Password, dbName, cfg.DB.Port)
-	dialect := postgres.Open(dsn)
-	db, err := gorm.Open(dialect, &gorm.Config{})
-	if err != nil {
-		panic(err)
-	}
-	pgDB, err := db.DB()
-	if err != nil {
-		panic(err)
-	}
+	var (
+		err error
+		db  *gorm.DB
+	)
+	// load sqlite db for testing purpose
+	if cfg.Testing {
+		db, err = gorm.Open(sqlite.Open("gorm.db"), &gorm.Config{})
+		if err != nil {
+			panic(err)
+		}
+	} else {
+		dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%d sslmode=disable", cfg.DB.Host, cfg.DB.User, cfg.DB.Password, dbName, cfg.DB.Port)
+		dialect := postgres.Open(dsn)
+		db, err = gorm.Open(dialect, &gorm.Config{})
+		if err != nil {
+			panic(err)
+		}
+		pgDB, err := db.DB()
+		if err != nil {
+			panic(err)
+		}
 
-	pgDB.SetConnMaxLifetime(time.Duration(cfg.DB.ConnMaxLifetime) * time.Hour)
-	pgDB.SetMaxIdleConns(cfg.DB.MaxIdleConns)
-	pgDB.SetMaxOpenConns(cfg.DB.MaxOpenConns)
+		pgDB.SetConnMaxLifetime(time.Duration(cfg.DB.ConnMaxLifetime) * time.Hour)
+		pgDB.SetMaxIdleConns(cfg.DB.MaxIdleConns)
+		pgDB.SetMaxOpenConns(cfg.DB.MaxOpenConns)
+	}
 
 	err = db.Raw("SELECT 1").Error
 	if err != nil {

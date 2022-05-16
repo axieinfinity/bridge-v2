@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/axieinfinity/bridge-v2/cmd/utils"
 	"github.com/axieinfinity/bridge-v2/internal"
 	"github.com/axieinfinity/bridge-v2/internal/stores"
 	"github.com/axieinfinity/bridge-v2/internal/types"
@@ -38,7 +39,7 @@ const (
 )
 
 var (
-	app        = NewApp("", "", "the bridge-v2 command interface")
+	app        = utils.NewApp("", "", "the bridge-v2 command interface")
 	ConfigFlag = cli.StringFlag{
 		Name:  "config",
 		Usage: "path to config file",
@@ -54,6 +55,9 @@ func init() {
 	app.HideVersion = true // we have a command to print the version
 	app.Copyright = "Copyright 2022 The Sky Mavis Authors"
 	app.Flags = append(app.Flags, ConfigFlag, LogLvlFlag)
+	app.Commands = []cli.Command{
+		cleanerCommand,
+	}
 }
 
 func setRpcUrlFromEnv(cfg *types.Config, rpc string) {
@@ -90,6 +94,47 @@ func setKeyFromEnv(cfg *types.Config, isValidator bool, key string) {
 	}
 }
 
+func prepare(ctx *cli.Context) *types.Config {
+	// load log level
+	logLvl := log.LvlInfo
+	if os.Getenv(verbosity) != "" {
+		if err := ctx.GlobalSet(LogLvlFlag.Name, os.Getenv("VERBOSITY")); err != nil {
+			fmt.Println("cannot set verbosity from environment")
+		}
+	}
+	if ctx.GlobalIsSet(LogLvlFlag.Name) {
+		logLvl = log.Lvl(ctx.GlobalInt(LogLvlFlag.Name))
+	}
+	log.Root().SetHandler(log.LvlFilterHandler(logLvl, log.StreamHandler(os.Stderr, log.TerminalFormat(true))))
+
+	cfg := &types.Config{}
+
+	if os.Getenv(configPath) != "" {
+		if err := ctx.GlobalSet(ConfigFlag.Name, os.Getenv(configPath)); err != nil {
+			panic(err)
+		}
+	}
+
+	// load config file
+	if ctx.GlobalIsSet(ConfigFlag.Name) {
+		log.Info("loading config from file", "path", ctx.GlobalString(ConfigFlag.Name))
+		plan, err := ioutil.ReadFile(ctx.GlobalString(ConfigFlag.Name))
+		if err != nil {
+			panic(err)
+		}
+		if err := json.Unmarshal(plan, &cfg); err != nil {
+			panic(err)
+		}
+	}
+
+	checkEnv(cfg)
+
+	// try creating db if it does not exist
+	createPgDb(cfg)
+
+	return cfg
+}
+
 func checkEnv(cfg *types.Config) {
 	setRpcUrlFromEnv(cfg, os.Getenv(roninRpc))
 	setKeyFromEnv(cfg, true, os.Getenv(roninValidatorKey))
@@ -97,6 +142,10 @@ func checkEnv(cfg *types.Config) {
 	setRpcUrlFromEnv(cfg, os.Getenv(ethereumRpc))
 	setKeyFromEnv(cfg, true, os.Getenv(ethereumValidatorKey))
 	setKeyFromEnv(cfg, false, os.Getenv(ethereumRelayerKey))
+
+	if cfg.DB == nil {
+		cfg.DB = &types.Database{}
+	}
 
 	if os.Getenv(dbHost) != "" {
 		log.Info("load db hostname from env", "path", os.Getenv(dbHost))
@@ -145,42 +194,7 @@ func createPgDb(cfg *types.Config) {
 }
 
 func bridge(ctx *cli.Context) {
-	// load log level
-	logLvl := log.LvlInfo
-	if os.Getenv(verbosity) != "" {
-		if err := ctx.GlobalSet(LogLvlFlag.Name, os.Getenv("VERBOSITY")); err != nil {
-			fmt.Println("cannot set verbosity from environment")
-		}
-	}
-	if ctx.GlobalIsSet(LogLvlFlag.Name) {
-		logLvl = log.Lvl(ctx.GlobalInt(LogLvlFlag.Name))
-	}
-	log.Root().SetHandler(log.LvlFilterHandler(logLvl, log.StreamHandler(os.Stderr, log.TerminalFormat(true))))
-
-	if os.Getenv(configPath) != "" {
-		if err := ctx.GlobalSet(ConfigFlag.Name, os.Getenv(configPath)); err != nil {
-			panic(err)
-		}
-	}
-
-	// load config file
-	if !ctx.GlobalIsSet(ConfigFlag.Name) {
-		panic("config path must be defined")
-	}
-	log.Info("loading config from file", "path", ctx.GlobalString(ConfigFlag.Name))
-	plan, err := ioutil.ReadFile(ctx.GlobalString(ConfigFlag.Name))
-	if err != nil {
-		panic(err)
-	}
-	var cfg *types.Config
-	if err := json.Unmarshal(plan, &cfg); err != nil {
-		panic(err)
-	}
-
-	checkEnv(cfg)
-
-	// try creating db if it does not exist
-	createPgDb(cfg)
+	cfg := prepare(ctx)
 
 	// init db
 	db, err := stores.MustConnectDatabase(cfg)
