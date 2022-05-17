@@ -4,7 +4,7 @@
       "chainId": "0x7e5",
       "rpcUrl": "http://localhost:8545",
       "blockTime": 3,
-      "safeBlockRange": 5,
+      "safeBlockRange": 10,
       "maxTasksQuery": 1000,
       "minTasksQuery": 50,
       "transactionCheckPeriod": 5,
