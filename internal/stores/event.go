@@ -3,6 +3,7 @@ package stores
 import (
 	"github.com/axieinfinity/bridge-v2/internal/models"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type EventStore struct {
@@ -14,7 +15,7 @@ func NewEventStore(db *gorm.DB) *EventStore {
 }
 
 func (e *EventStore) Save(event *models.Event) error {
-	return e.Create(event).Error
+	return e.Clauses(clause.OnConflict{DoNothing: true}).Create(event).Error
 }
 
 func (e *EventStore) DeleteEvents(createdAt uint64) error {

@@ -334,7 +334,6 @@ func NewEthListenJob(jobType int, listener types.IListener, subscriptionName str
 }
 
 func (e *EthListenJob) Process() ([]byte, error) {
-	// TODO: implement handleMethod, if it is defined then process it and return its result.
 	// save event data to database
 	subscription, ok := e.listener.GetSubscriptions()[e.subscriptionName]
 	if ok {
@@ -342,11 +341,11 @@ func (e *EthListenJob) Process() ([]byte, error) {
 			EventName:       subscription.Handler.Name,
 			TransactionHash: e.tx.GetHash().Hex(),
 			FromChainId:     hexutil.EncodeBig(e.FromChainID()),
+			CreatedAt:       time.Now().Unix(),
 		}); err != nil {
 			log.Error("[EthListenJob][Process] error while storing event to database", "err", err)
 		}
 	}
-	// omit first 4 bytes which is method
 	return e.data, nil
 }
 
