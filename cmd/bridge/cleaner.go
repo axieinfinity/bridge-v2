@@ -20,7 +20,7 @@ var (
 		Name:      "cleaner",
 		ShortName: "cl",
 		Aliases:   nil,
-		Usage:     "",
+		Usage:     "activate cleaner",
 		Action:    utils.MigrateFlags(startCleaner),
 		Flags: []cli.Flag{
 			ConfigFlag,
