@@ -14,8 +14,8 @@ type Withdrawal struct {
 	RoninTokenAddress    string `json:"roninTokenAddress" gorm:"column:ronin_token_address;index:idx_withdrawal_ronin_token_address;not null"`
 	TokenErc             uint8  `json:"tokenERC" gorm:"column:token_erc;not null"`
 	TokenId              int64  `json:"tokenId" gorm:"column:token_id;not null"`
-	TokenQuantity        int64  `json:"tokenQuantity" gorm:"column:token_quantity;not null"`
-	BlockNumber          int64  `json:"blockNumber" gorm:"column:block_number;index:idx_withdrawal_block_number;not null"`
+	TokenQuantity        string `json:"tokenQuantity" gorm:"column:token_quantity;not null"`
+	Transaction          string `json:"transaction" gorm:"column:transaction;index:idx_withdrawal_transaction;not null"`
 }
 
 func (m Withdrawal) BeforeCreate(tx *gorm.DB) (err error) {

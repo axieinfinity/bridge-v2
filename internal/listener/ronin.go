@@ -64,9 +64,8 @@ func (l *RoninListener) StoreMainchainWithdrawCallback(fromChainId *big.Int, tx 
 		RoninTokenAddress:    receipt.Ronin.TokenAddr.Hex(),
 		TokenErc:             receipt.Info.Erc,
 		TokenId:              receipt.Info.Id.Int64(),
-		// TODO: should we hex this value, since int64 might not cover big number more than 10^18
-		TokenQuantity: receipt.Info.Quantity.Int64(),
-		BlockNumber:   int64(ronEvent.Raw.BlockNumber),
+		TokenQuantity:        receipt.Info.Quantity.String(),
+		Transaction:          tx.GetHash().Hex(),
 	})
 }
 
