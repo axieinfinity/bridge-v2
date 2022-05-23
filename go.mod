@@ -4,6 +4,8 @@ go 1.18
 
 require (
 	github.com/ethereum/go-ethereum v1.10.17
+	github.com/go-co-op/gocron v1.13.0
+	github.com/go-gormigrate/gormigrate/v2 v2.0.1
 	github.com/stretchr/testify v1.7.1
 	golang.org/x/crypto v0.0.0-20220427172511-eb4f295cb31f
 	golang.org/x/text v0.3.7
@@ -19,7 +21,6 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/deckarep/golang-set v1.8.0 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.0.1 // indirect
-	github.com/go-co-op/gocron v1.13.0 // indirect
 	github.com/go-ole/go-ole v1.2.1 // indirect
 	github.com/go-stack/stack v1.8.0 // indirect
 	github.com/google/uuid v1.2.0 // indirect

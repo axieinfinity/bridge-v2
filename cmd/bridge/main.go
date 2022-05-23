@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/axieinfinity/bridge-v2/cmd/utils"
 	"github.com/axieinfinity/bridge-v2/internal"
+	"github.com/axieinfinity/bridge-v2/internal/migration"
 	"github.com/axieinfinity/bridge-v2/internal/stores"
 	"github.com/axieinfinity/bridge-v2/internal/types"
 	"github.com/ethereum/go-ethereum/log"
@@ -201,6 +202,11 @@ func bridge(ctx *cli.Context) {
 	if err != nil {
 		panic(err)
 	}
+	// start migration
+	if err = migration.Migrate(db, cfg); err != nil {
+		panic(err)
+	}
+	//init controller
 	controller, err := internal.New(cfg, db, nil)
 	if err != nil {
 		panic(err)
