@@ -101,7 +101,8 @@
     "user": "postgres",
     "password": "example",
     "dbName": "bridge",
-    "port": 5432
+    "port": 5432,
+    "maxOpenConns": 500
   },
   "cleaner": {
     "ClearSuccessTasks": {

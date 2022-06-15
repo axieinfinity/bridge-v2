@@ -28,11 +28,14 @@ const (
 	ethereumRelayerKey   = "ETHEREUM_RELAYER_KEY"
 	verbosity            = "VERBOSITY"
 
-	dbHost     = "DB_HOST"
-	dbPort     = "DB_PORT"
-	dbName     = "DB_NAME"
-	dbUsername = "DB_USERNAME"
-	dbPassword = "DB_PASSWORD"
+	dbHost            = "DB_HOST"
+	dbPort            = "DB_PORT"
+	dbName            = "DB_NAME"
+	dbUsername        = "DB_USERNAME"
+	dbPassword        = "DB_PASSWORD"
+	dbConnMaxLifeTime = "DB_CONN_MAX_LIFE_TIME"
+	dbMaxIdleConns    = "DB_MAX_IDLE_CONNS"
+	dbMaxOpenConns    = "DB_MAX_OPEN_CONNS"
 
 	numberOfWorkers = "NUMBER_OF_WORKERS"
 
@@ -171,6 +174,18 @@ func checkEnv(cfg *types.Config) {
 
 	if os.Getenv(dbPassword) != "" {
 		cfg.DB.Password = os.Getenv(dbPassword)
+	}
+
+	if os.Getenv(dbConnMaxLifeTime) != "" {
+		cfg.DB.ConnMaxLifetime, _ = strconv.Atoi(os.Getenv(dbConnMaxLifeTime))
+	}
+
+	if os.Getenv(dbMaxIdleConns) != "" {
+		cfg.DB.MaxIdleConns, _ = strconv.Atoi(os.Getenv(dbMaxIdleConns))
+	}
+
+	if os.Getenv(dbMaxOpenConns) != "" {
+		cfg.DB.MaxOpenConns, _ = strconv.Atoi(os.Getenv(dbMaxOpenConns))
 	}
 
 	if os.Getenv(numberOfWorkers) != "" {

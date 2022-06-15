@@ -100,13 +100,17 @@ func (r *RoninTask) Start() {
 	for {
 		select {
 		case <-taskTicker.C:
-			if err := r.processPending(); err != nil {
-				log.Error("[RoninTask] error while process tasks", "err", err)
-			}
+			go func() {
+				if err := r.processPending(); err != nil {
+					log.Error("[RoninTask] error while process tasks", "err", err)
+				}
+			}()
 		case <-processingTicker.C:
-			if err := r.checkProcessingTasks(); err != nil {
-				log.Error("[RoninTask] error while checking processing tasks", "err", err)
-			}
+			go func() {
+				if err := r.checkProcessingTasks(); err != nil {
+					log.Error("[RoninTask] error while checking processing tasks", "err", err)
+				}
+			}()
 		case <-r.ctx.Done():
 			r.client.Close()
 			r.Close()
@@ -188,6 +192,7 @@ func (r *RoninTask) checkProcessingTasks() error {
 			continue
 		}
 		processedTx[t.TransactionHash] = append(processedTx[t.TransactionHash], t)
+
 		go func(task *models.Task) {
 			defer wg.Done()
 			// check transaction receipt status
