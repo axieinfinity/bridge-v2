@@ -230,7 +230,7 @@ func (r *RoninTask) checkProcessingTasks() error {
 		failedTxs  []string
 	)
 
-	successTasks.Range(func(key any, value any) bool {
+	successTasks.Range(func(key interface{}, value interface{}) bool {
 		if value.(uint64) == 1 {
 			successTxs = append(successTxs, key.(string))
 		} else {
@@ -244,7 +244,7 @@ func (r *RoninTask) checkProcessingTasks() error {
 		droppedTaskIds []int
 		retryTaskIds   []int
 	)
-	failedTasksMap.Range(func(key any, value any) bool {
+	failedTasksMap.Range(func(key interface{}, value interface{}) bool {
 		failedTasks := processedTx[key.(string)]
 		for _, task := range failedTasks {
 			if task.Retries+1 >= 10 {
