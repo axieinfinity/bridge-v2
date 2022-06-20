@@ -2,14 +2,14 @@
 FROM golang:1.17.0-alpine3.13 as builder
 
 RUN apk add --no-cache make gcc musl-dev linux-headers git
-WORKDIR /app
-COPY . /app
-RUN make bridge
+
+COPY . /opt
+RUN cd /opt && make bridge
 
 FROM alpine:3.15
 
 RUN apk add --no-cache ca-certificates
-WORKDIR /app
+WORKDIR /opt
 
 ENV CONFIG_PATH ''
 ENV RONIN_RPC ''
@@ -33,8 +33,8 @@ ENV DB_MAX_OPEN_CONNS ''
 ENV CLEANER ''
 
 COPY --from=builder /go/bin/bridge /usr/local/bin/bridge
-COPY --from=builder /app/config/ ./
-COPY --from=builder /app/contracts ./contracts
-COPY --from=builder /app/docker/entrypoint.sh ./
+COPY --from=builder /opt/config/ ./
+COPY --from=builder /opt/contracts ./contracts
+COPY --from=builder /opt/docker/entrypoint.sh ./
 
 ENTRYPOINT ["./entrypoint.sh"]
