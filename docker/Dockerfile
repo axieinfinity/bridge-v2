@@ -1,14 +1,14 @@
 # Build Geth in a stock Go builder container
 FROM golang:1.18  as builder
 
-RUN apk add --no-cache make gcc musl-dev linux-headers git
+RUN apt install  --no-cache make gcc musl-dev linux-headers git
 
 COPY . /opt
 RUN cd /opt && make bridge
 
 FROM alpine:3.15
 
-RUN apk add --no-cache ca-certificates
+RUN apt install  --no-cache ca-certificates
 WORKDIR /opt
 
 ENV CONFIG_PATH ''
