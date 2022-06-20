@@ -4,7 +4,7 @@ FROM golang:1.18.2-alpine3.15 as builder
 RUN apk add --no-cache make gcc musl-dev linux-headers git
 WORKDIR /app
 COPY . /app
-RUN cd /app && make bridge
+RUN make bridge
 
 FROM alpine:3.15
 
