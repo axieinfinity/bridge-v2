@@ -39,6 +39,9 @@ const (
 
 	numberOfWorkers = "NUMBER_OF_WORKERS"
 
+	// separator is used mainly for RPC or Key configuration
+	// the main purpose of adding prefix before separator is to dynamically add new listener configuration
+	// without hard coding new key and rebuilding the code.
 	separator = "__"
 )
 
