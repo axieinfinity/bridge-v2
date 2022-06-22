@@ -37,7 +37,7 @@ type IWeightedValidatorWeightedValidator struct {
 
 // ValidatorMetaData contains all meta data concerning the Validator contract.
 var ValidatorMetaData = &bind.MetaData{
-	ABI: "[{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"nonce\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"numerator\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"denominator\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"previousNumerator\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"previousDenominator\",\"type\":\"uint256\"}],\"name\":\"ThresholdUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"nonce\",\"type\":\"uint256\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"validator\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"governor\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"weight\",\"type\":\"uint256\"}],\"indexed\":false,\"internalType\":\"structIWeightedValidator.WeightedValidator[]\",\"name\":\"validators\",\"type\":\"tuple[]\"}],\"name\":\"ValidatorsAdded\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"nonce\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"address[]\",\"name\":\"validators\",\"type\":\"address[]\"}],\"name\":\"ValidatorsRemoved\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"nonce\",\"type\":\"uint256\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"validator\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"governor\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"weight\",\"type\":\"uint256\"}],\"indexed\":false,\"internalType\":\"structIWeightedValidator.WeightedValidator[]\",\"name\":\"validators\",\"type\":\"tuple[]\"}],\"name\":\"ValidatorsUpdated\",\"type\":\"event\"},{\"inputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"validator\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"governor\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"weight\",\"type\":\"uint256\"}],\"internalType\":\"structIWeightedValidator.WeightedValidator[]\",\"name\":\"_validatorList\",\"type\":\"tuple[]\"}],\"name\":\"addValidators\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_voteWeight\",\"type\":\"uint256\"}],\"name\":\"checkThreshold\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_validator\",\"type\":\"address\"}],\"name\":\"getGovernorWeight\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address[]\",\"name\":\"_addrList\",\"type\":\"address[]\"}],\"name\":\"getGovernorWeights\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"_weight\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getGovernors\",\"outputs\":[{\"internalType\":\"address[]\",\"name\":\"\",\"type\":\"address[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getThreshold\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getValidatorInfo\",\"outputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"validator\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"governor\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"weight\",\"type\":\"uint256\"}],\"internalType\":\"structIWeightedValidator.WeightedValidator[]\",\"name\":\"_list\",\"type\":\"tuple[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_validator\",\"type\":\"address\"}],\"name\":\"getValidatorWeight\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address[]\",\"name\":\"_addrList\",\"type\":\"address[]\"}],\"name\":\"getValidatorWeights\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"_weight\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getValidators\",\"outputs\":[{\"internalType\":\"address[]\",\"name\":\"\",\"type\":\"address[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"validator\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"governor\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"weight\",\"type\":\"uint256\"}],\"internalType\":\"structIWeightedValidator.WeightedValidator[]\",\"name\":\"_initValidators\",\"type\":\"tuple[]\"},{\"internalType\":\"uint256\",\"name\":\"_numerator\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_denominator\",\"type\":\"uint256\"}],\"name\":\"initialize\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"minimumVoteWeight\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"nonce\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address[]\",\"name\":\"_validatorList\",\"type\":\"address[]\"}],\"name\":\"removeValidators\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_numerator\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_denominator\",\"type\":\"uint256\"}],\"name\":\"setThreshold\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"_previousNum\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_previousDenom\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"totalValidators\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"totalWeights\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"validator\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"governor\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"weight\",\"type\":\"uint256\"}],\"internalType\":\"structIWeightedValidator.WeightedValidator[]\",\"name\":\"_validatorList\",\"type\":\"tuple[]\"}],\"name\":\"updateValidators\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_index\",\"type\":\"uint256\"}],\"name\":\"validators\",\"outputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"validator\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"governor\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"weight\",\"type\":\"uint256\"}],\"internalType\":\"structIWeightedValidator.WeightedValidator\",\"name\":\"\",\"type\":\"tuple\"}],\"stateMutability\":\"view\",\"type\":\"function\"}]",
+	ABI: "[{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"nonce\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"numerator\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"denominator\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"previousNumerator\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"previousDenominator\",\"type\":\"uint256\"}],\"name\":\"ThresholdUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"nonce\",\"type\":\"uint256\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"validator\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"governor\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"weight\",\"type\":\"uint256\"}],\"indexed\":false,\"internalType\":\"structIWeightedValidator.WeightedValidator[]\",\"name\":\"validators\",\"type\":\"tuple[]\"}],\"name\":\"ValidatorsAdded\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"nonce\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"address[]\",\"name\":\"validators\",\"type\":\"address[]\"}],\"name\":\"ValidatorsRemoved\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"nonce\",\"type\":\"uint256\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"validator\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"governor\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"weight\",\"type\":\"uint256\"}],\"indexed\":false,\"internalType\":\"structIWeightedValidator.WeightedValidator[]\",\"name\":\"validators\",\"type\":\"tuple[]\"}],\"name\":\"ValidatorsUpdated\",\"type\":\"event\"},{\"inputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"validator\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"governor\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"weight\",\"type\":\"uint256\"}],\"internalType\":\"structIWeightedValidator.WeightedValidator[]\",\"name\":\"_validatorList\",\"type\":\"tuple[]\"}],\"name\":\"addValidators\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_voteWeight\",\"type\":\"uint256\"}],\"name\":\"checkThreshold\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_governor\",\"type\":\"address\"}],\"name\":\"getGovernorWeight\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getGovernors\",\"outputs\":[{\"internalType\":\"address[]\",\"name\":\"\",\"type\":\"address[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getThreshold\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getValidatorInfo\",\"outputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"validator\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"governor\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"weight\",\"type\":\"uint256\"}],\"internalType\":\"structIWeightedValidator.WeightedValidator[]\",\"name\":\"_list\",\"type\":\"tuple[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_validator\",\"type\":\"address\"}],\"name\":\"getValidatorWeight\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getValidators\",\"outputs\":[{\"internalType\":\"address[]\",\"name\":\"\",\"type\":\"address[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"validator\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"governor\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"weight\",\"type\":\"uint256\"}],\"internalType\":\"structIWeightedValidator.WeightedValidator[]\",\"name\":\"_initValidators\",\"type\":\"tuple[]\"},{\"internalType\":\"uint256\",\"name\":\"_numerator\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_denominator\",\"type\":\"uint256\"}],\"name\":\"initialize\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"minimumVoteWeight\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"nonce\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address[]\",\"name\":\"_validatorList\",\"type\":\"address[]\"}],\"name\":\"removeValidators\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_numerator\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_denominator\",\"type\":\"uint256\"}],\"name\":\"setThreshold\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"_previousNum\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_previousDenom\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address[]\",\"name\":\"_addrList\",\"type\":\"address[]\"}],\"name\":\"sumGovernorWeights\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"_weight\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address[]\",\"name\":\"_addrList\",\"type\":\"address[]\"}],\"name\":\"sumValidatorWeights\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"_weight\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"totalValidators\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"totalWeights\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"validator\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"governor\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"weight\",\"type\":\"uint256\"}],\"internalType\":\"structIWeightedValidator.WeightedValidator[]\",\"name\":\"_validatorList\",\"type\":\"tuple[]\"}],\"name\":\"updateValidators\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_index\",\"type\":\"uint256\"}],\"name\":\"validators\",\"outputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"validator\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"governor\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"weight\",\"type\":\"uint256\"}],\"internalType\":\"structIWeightedValidator.WeightedValidator\",\"name\":\"\",\"type\":\"tuple\"}],\"stateMutability\":\"view\",\"type\":\"function\"}]",
 }
 
 // ValidatorABI is the input ABI used to generate the binding from.
@@ -219,10 +219,10 @@ func (_Validator *ValidatorCallerSession) CheckThreshold(_voteWeight *big.Int) (
 
 // GetGovernorWeight is a free data retrieval call binding the contract method 0xd78392f8.
 //
-// Solidity: function getGovernorWeight(address _validator) view returns(uint256)
-func (_Validator *ValidatorCaller) GetGovernorWeight(opts *bind.CallOpts, _validator common.Address) (*big.Int, error) {
+// Solidity: function getGovernorWeight(address _governor) view returns(uint256)
+func (_Validator *ValidatorCaller) GetGovernorWeight(opts *bind.CallOpts, _governor common.Address) (*big.Int, error) {
 	var out []interface{}
-	err := _Validator.contract.Call(opts, &out, "getGovernorWeight", _validator)
+	err := _Validator.contract.Call(opts, &out, "getGovernorWeight", _governor)
 
 	if err != nil {
 		return *new(*big.Int), err
@@ -236,47 +236,16 @@ func (_Validator *ValidatorCaller) GetGovernorWeight(opts *bind.CallOpts, _valid
 
 // GetGovernorWeight is a free data retrieval call binding the contract method 0xd78392f8.
 //
-// Solidity: function getGovernorWeight(address _validator) view returns(uint256)
-func (_Validator *ValidatorSession) GetGovernorWeight(_validator common.Address) (*big.Int, error) {
-	return _Validator.Contract.GetGovernorWeight(&_Validator.CallOpts, _validator)
+// Solidity: function getGovernorWeight(address _governor) view returns(uint256)
+func (_Validator *ValidatorSession) GetGovernorWeight(_governor common.Address) (*big.Int, error) {
+	return _Validator.Contract.GetGovernorWeight(&_Validator.CallOpts, _governor)
 }
 
 // GetGovernorWeight is a free data retrieval call binding the contract method 0xd78392f8.
 //
-// Solidity: function getGovernorWeight(address _validator) view returns(uint256)
-func (_Validator *ValidatorCallerSession) GetGovernorWeight(_validator common.Address) (*big.Int, error) {
-	return _Validator.Contract.GetGovernorWeight(&_Validator.CallOpts, _validator)
-}
-
-// GetGovernorWeights is a free data retrieval call binding the contract method 0xcc7e6b3b.
-//
-// Solidity: function getGovernorWeights(address[] _addrList) view returns(uint256 _weight)
-func (_Validator *ValidatorCaller) GetGovernorWeights(opts *bind.CallOpts, _addrList []common.Address) (*big.Int, error) {
-	var out []interface{}
-	err := _Validator.contract.Call(opts, &out, "getGovernorWeights", _addrList)
-
-	if err != nil {
-		return *new(*big.Int), err
-	}
-
-	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
-
-	return out0, err
-
-}
-
-// GetGovernorWeights is a free data retrieval call binding the contract method 0xcc7e6b3b.
-//
-// Solidity: function getGovernorWeights(address[] _addrList) view returns(uint256 _weight)
-func (_Validator *ValidatorSession) GetGovernorWeights(_addrList []common.Address) (*big.Int, error) {
-	return _Validator.Contract.GetGovernorWeights(&_Validator.CallOpts, _addrList)
-}
-
-// GetGovernorWeights is a free data retrieval call binding the contract method 0xcc7e6b3b.
-//
-// Solidity: function getGovernorWeights(address[] _addrList) view returns(uint256 _weight)
-func (_Validator *ValidatorCallerSession) GetGovernorWeights(_addrList []common.Address) (*big.Int, error) {
-	return _Validator.Contract.GetGovernorWeights(&_Validator.CallOpts, _addrList)
+// Solidity: function getGovernorWeight(address _governor) view returns(uint256)
+func (_Validator *ValidatorCallerSession) GetGovernorWeight(_governor common.Address) (*big.Int, error) {
+	return _Validator.Contract.GetGovernorWeight(&_Validator.CallOpts, _governor)
 }
 
 // GetGovernors is a free data retrieval call binding the contract method 0xf80b5352.
@@ -404,37 +373,6 @@ func (_Validator *ValidatorCallerSession) GetValidatorWeight(_validator common.A
 	return _Validator.Contract.GetValidatorWeight(&_Validator.CallOpts, _validator)
 }
 
-// GetValidatorWeights is a free data retrieval call binding the contract method 0x19906ee4.
-//
-// Solidity: function getValidatorWeights(address[] _addrList) view returns(uint256 _weight)
-func (_Validator *ValidatorCaller) GetValidatorWeights(opts *bind.CallOpts, _addrList []common.Address) (*big.Int, error) {
-	var out []interface{}
-	err := _Validator.contract.Call(opts, &out, "getValidatorWeights", _addrList)
-
-	if err != nil {
-		return *new(*big.Int), err
-	}
-
-	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
-
-	return out0, err
-
-}
-
-// GetValidatorWeights is a free data retrieval call binding the contract method 0x19906ee4.
-//
-// Solidity: function getValidatorWeights(address[] _addrList) view returns(uint256 _weight)
-func (_Validator *ValidatorSession) GetValidatorWeights(_addrList []common.Address) (*big.Int, error) {
-	return _Validator.Contract.GetValidatorWeights(&_Validator.CallOpts, _addrList)
-}
-
-// GetValidatorWeights is a free data retrieval call binding the contract method 0x19906ee4.
-//
-// Solidity: function getValidatorWeights(address[] _addrList) view returns(uint256 _weight)
-func (_Validator *ValidatorCallerSession) GetValidatorWeights(_addrList []common.Address) (*big.Int, error) {
-	return _Validator.Contract.GetValidatorWeights(&_Validator.CallOpts, _addrList)
-}
-
 // GetValidators is a free data retrieval call binding the contract method 0xb7ab4db5.
 //
 // Solidity: function getValidators() view returns(address[])
@@ -526,6 +464,68 @@ func (_Validator *ValidatorSession) Nonce() (*big.Int, error) {
 // Solidity: function nonce() view returns(uint256)
 func (_Validator *ValidatorCallerSession) Nonce() (*big.Int, error) {
 	return _Validator.Contract.Nonce(&_Validator.CallOpts)
+}
+
+// SumGovernorWeights is a free data retrieval call binding the contract method 0x5f14a1c3.
+//
+// Solidity: function sumGovernorWeights(address[] _addrList) view returns(uint256 _weight)
+func (_Validator *ValidatorCaller) SumGovernorWeights(opts *bind.CallOpts, _addrList []common.Address) (*big.Int, error) {
+	var out []interface{}
+	err := _Validator.contract.Call(opts, &out, "sumGovernorWeights", _addrList)
+
+	if err != nil {
+		return *new(*big.Int), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
+
+	return out0, err
+
+}
+
+// SumGovernorWeights is a free data retrieval call binding the contract method 0x5f14a1c3.
+//
+// Solidity: function sumGovernorWeights(address[] _addrList) view returns(uint256 _weight)
+func (_Validator *ValidatorSession) SumGovernorWeights(_addrList []common.Address) (*big.Int, error) {
+	return _Validator.Contract.SumGovernorWeights(&_Validator.CallOpts, _addrList)
+}
+
+// SumGovernorWeights is a free data retrieval call binding the contract method 0x5f14a1c3.
+//
+// Solidity: function sumGovernorWeights(address[] _addrList) view returns(uint256 _weight)
+func (_Validator *ValidatorCallerSession) SumGovernorWeights(_addrList []common.Address) (*big.Int, error) {
+	return _Validator.Contract.SumGovernorWeights(&_Validator.CallOpts, _addrList)
+}
+
+// SumValidatorWeights is a free data retrieval call binding the contract method 0xcb16477a.
+//
+// Solidity: function sumValidatorWeights(address[] _addrList) view returns(uint256 _weight)
+func (_Validator *ValidatorCaller) SumValidatorWeights(opts *bind.CallOpts, _addrList []common.Address) (*big.Int, error) {
+	var out []interface{}
+	err := _Validator.contract.Call(opts, &out, "sumValidatorWeights", _addrList)
+
+	if err != nil {
+		return *new(*big.Int), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
+
+	return out0, err
+
+}
+
+// SumValidatorWeights is a free data retrieval call binding the contract method 0xcb16477a.
+//
+// Solidity: function sumValidatorWeights(address[] _addrList) view returns(uint256 _weight)
+func (_Validator *ValidatorSession) SumValidatorWeights(_addrList []common.Address) (*big.Int, error) {
+	return _Validator.Contract.SumValidatorWeights(&_Validator.CallOpts, _addrList)
+}
+
+// SumValidatorWeights is a free data retrieval call binding the contract method 0xcb16477a.
+//
+// Solidity: function sumValidatorWeights(address[] _addrList) view returns(uint256 _weight)
+func (_Validator *ValidatorCallerSession) SumValidatorWeights(_addrList []common.Address) (*big.Int, error) {
+	return _Validator.Contract.SumValidatorWeights(&_Validator.CallOpts, _addrList)
 }
 
 // TotalValidators is a free data retrieval call binding the contract method 0xc81b356b.
