@@ -39,10 +39,8 @@ const (
 
 	numberOfWorkers = "NUMBER_OF_WORKERS"
 
-	// separator is used mainly for RPC or Key configuration
-	// the main purpose of adding prefix before separator is to dynamically add new listener configuration
-	// without hard coding new key and rebuilding the code.
-	separator = "__"
+	EthereumNetwork = "Ethereum"
+	RoninNetwork    = "Ronin"
 )
 
 var (
@@ -67,36 +65,26 @@ func init() {
 	}
 }
 
-func setRpcUrlFromEnv(cfg *types.Config, rpc string) {
+func setRpcUrlFromEnv(cfg *types.Config, rpc, network string) {
 	if rpc == "" {
 		return
 	}
-	str := strings.Split(rpc, separator)
-	if len(str) == 2 {
-		listener := str[0]
-		url := str[1]
-		if _, ok := cfg.Listeners[listener]; ok {
-			cfg.Listeners[listener].RpcUrl = url
-		}
+	if _, ok := cfg.Listeners[network]; ok {
+		cfg.Listeners[network].RpcUrl = rpc
 	}
 }
 
-func setKeyFromEnv(cfg *types.Config, isValidator bool, key string) {
+func setKeyFromEnv(cfg *types.Config, isValidator bool, key, network string) {
 	if key == "" {
 		return
 	}
-	str := strings.Split(key, separator)
-	if len(str) == 2 {
-		listener := str[0]
-		key := str[1]
-		if _, ok := cfg.Listeners[listener]; ok {
-			// delete prefix 0x or ronin: and lower key
-			key = strings.ToLower(strings.Replace(strings.Replace(key, "0x", "", 1), "ronin:", "", 1))
-			if isValidator {
-				cfg.Listeners[listener].Secret.Validator = key
-			} else {
-				cfg.Listeners[listener].Secret.Relayer = key
-			}
+	if _, ok := cfg.Listeners[network]; ok {
+		// delete prefix 0x or ronin: and lower key
+		key = strings.ToLower(strings.Replace(strings.Replace(key, "0x", "", 1), "ronin:", "", 1))
+		if isValidator {
+			cfg.Listeners[network].Secret.Validator = key
+		} else {
+			cfg.Listeners[network].Secret.Relayer = key
 		}
 	}
 }
@@ -143,12 +131,12 @@ func prepare(ctx *cli.Context) *types.Config {
 }
 
 func checkEnv(cfg *types.Config) {
-	setRpcUrlFromEnv(cfg, os.Getenv(roninRpc))
-	setKeyFromEnv(cfg, true, os.Getenv(roninValidatorKey))
-	setKeyFromEnv(cfg, false, os.Getenv(roninRelayKey))
-	setRpcUrlFromEnv(cfg, os.Getenv(ethereumRpc))
-	setKeyFromEnv(cfg, true, os.Getenv(ethereumValidatorKey))
-	setKeyFromEnv(cfg, false, os.Getenv(ethereumRelayerKey))
+	setRpcUrlFromEnv(cfg, os.Getenv(roninRpc), RoninNetwork)
+	setKeyFromEnv(cfg, true, os.Getenv(roninValidatorKey), RoninNetwork)
+	setKeyFromEnv(cfg, false, os.Getenv(roninRelayKey), RoninNetwork)
+	setRpcUrlFromEnv(cfg, os.Getenv(ethereumRpc), EthereumNetwork)
+	setKeyFromEnv(cfg, true, os.Getenv(ethereumValidatorKey), EthereumNetwork)
+	setKeyFromEnv(cfg, false, os.Getenv(ethereumRelayerKey), EthereumNetwork)
 
 	if cfg.DB == nil {
 		cfg.DB = &types.Database{}
