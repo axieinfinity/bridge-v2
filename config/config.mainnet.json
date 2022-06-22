@@ -1,0 +1,139 @@
+{
+  "listeners": {
+    "Ronin": {
+      "chainId": "0x7e4",
+      "rpcUrl": "http://localhost:8545",
+      "blockTime": 3,
+      "safeBlockRange": 10,
+      "maxTasksQuery": 1000,
+      "minTasksQuery": 50,
+      "transactionCheckPeriod": 5,
+      "secret": {
+        "validator": "",
+        "relayer": ""
+      },
+      "fromHeight": 14763470,
+      "processWithinBlocks": 864000,
+      "contracts": {
+        "Gateway": "0x0CF8fF40a508bdBc39fBe1Bb679dCBa64E65C7Df",
+        "EthGateway": "0x64192819Ac13Ef72bF6b5AE239AC672B43a9AF08"
+      },
+      "subscriptions": {
+        "MainchainWithdrewSubscription": {
+          "to": "0x0CF8fF40a508bdBc39fBe1Bb679dCBa64E65C7Df",
+          "type": 1,
+          "handler": {
+            "abi": "contracts/ronin/RoninGatewayV2.abi",
+            "name": "MainchainWithdrew"
+          },
+          "callbacks": {
+            "Ronin": "StoreMainchainWithdrawCallback"
+          }
+        },
+        "WithdrawalRequestedSubscription": {
+          "to": "0x0CF8fF40a508bdBc39fBe1Bb679dCBa64E65C7Df",
+          "type": 1,
+          "handler": {
+            "abi": "contracts/ronin/RoninGatewayV2.abi",
+            "name": "WithdrawalRequested"
+          },
+          "callbacks": {
+            "Ronin": "ProvideReceiptSignatureCallback"
+          }
+        },
+        "WithdrawalSignaturesRequestedSubscription": {
+          "to": "0x0CF8fF40a508bdBc39fBe1Bb679dCBa64E65C7Df",
+          "type": 1,
+          "handler": {
+            "abi": "contracts/ronin/RoninGatewayV2.abi",
+            "name": "WithdrawalSignaturesRequested"
+          },
+          "callbacks": {
+            "Ronin": "ProvideReceiptSignatureCallback"
+          }
+        }
+      }
+    },
+    "Ethereum": {
+      "disabled": false,
+      "chainId": "0x1",
+      "rpcUrl": "",
+      "blockTime": 15,
+      "safeBlockRange": 8,
+      "transactionCheckPeriod": 15,
+      "secret": {
+        "validator": "",
+        "relayer": ""
+      },
+      "fromHeight": 15006540,
+      "processWithinBlocks": 198720,
+      "contracts": {
+        "Gateway": "0x0CF8fF40a508bdBc39fBe1Bb679dCBa64E65C7Df"
+      },
+      "subscriptions": {
+        "DepositRequestedSubscription": {
+          "to": "0x64192819Ac13Ef72bF6b5AE239AC672B43a9AF08",
+          "type": 1,
+          "handler": {
+            "abi": "contracts/ethereum/MainchainGatewayV2.abi",
+            "name": "DepositRequested"
+          },
+          "callbacks": {
+            "Ronin": "DepositRequestedCallback"
+          }
+        },
+        "WithdrewSubscription": {
+          "to": "0x64192819Ac13Ef72bF6b5AE239AC672B43a9AF08",
+          "type": 1,
+          "handler": {
+            "abi": "contracts/ethereum/MainchainGatewayV2.abi",
+            "name": "Withdrew"
+          },
+          "callbacks": {
+            "Ronin": "WithdrewCallback"
+          }
+        }
+      }
+    }
+  },
+  "database": {
+    "host": "localhost",
+    "user": "postgres",
+    "password": "example",
+    "dbName": "bridge",
+    "port": 5432,
+    "maxOpenConns": 500
+  },
+  "cleaner": {
+    "ClearSuccessTasks": {
+      "cron": "0 0 1 * *",
+      "removeAfter": 7776000,
+      "skipIfLessThan": 1000,
+      "description": "triggered at 00:00 on day-of-month 1"
+    },
+    "ClearFailedTasks": {
+      "cron": "0 1 1 * *",
+      "removeAfter": 31104000,
+      "skipIfLessThan": 1000,
+      "description": "triggered at 01:00 on day-of-month 1"
+    },
+    "ClearEvents": {
+      "cron": "0 0 * * 0",
+      "removeAfter": 604800,
+      "skipIfLessThan": 1000,
+      "description": "triggered at 00:00 on Sunday"
+    },
+    "ClearSuccessJobs": {
+      "cron": "0 0 * * 0",
+      "removeAfter": 604800,
+      "skipIfLessThan": 1000,
+      "description": "triggered at 00:00 on Sunday"
+    },
+    "ClearFailedJobs": {
+      "cron": "0 0 * * 0",
+      "removeAfter": 604800,
+      "skipIfLessThan": 1000,
+      "description": "triggered at 00:00 on Sunday"
+    }
+  }
+}

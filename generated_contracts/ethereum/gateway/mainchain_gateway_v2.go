@@ -28,6 +28,12 @@ var (
 	_ = event.NewSubscription
 )
 
+// MappedTokenConsumerMappedToken is an auto generated low-level Go binding around an user-defined struct.
+type MappedTokenConsumerMappedToken struct {
+	Erc       uint8
+	TokenAddr common.Address
+}
+
 // SignatureConsumerSignature is an auto generated low-level Go binding around an user-defined struct.
 type SignatureConsumerSignature struct {
 	V uint8
@@ -67,7 +73,7 @@ type TransferRequest struct {
 
 // GatewayMetaData contains all meta data concerning the Gateway contract.
 var GatewayMetaData = &bind.MetaData{
-	ABI: "[{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address[]\",\"name\":\"tokens\",\"type\":\"address[]\"},{\"indexed\":false,\"internalType\":\"uint256[]\",\"name\":\"limits\",\"type\":\"uint256[]\"}],\"name\":\"DailyWithdrawalLimitsUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"receiptHash\",\"type\":\"bytes32\"},{\"components\":[{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"enumTransfer.Kind\",\"name\":\"kind\",\"type\":\"uint8\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"tokenAddr\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"chainId\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Owner\",\"name\":\"mainchain\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"tokenAddr\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"chainId\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Owner\",\"name\":\"ronin\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"enumToken.Standard\",\"name\":\"erc\",\"type\":\"uint8\"},{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"quantity\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Info\",\"name\":\"info\",\"type\":\"tuple\"}],\"indexed\":false,\"internalType\":\"structTransfer.Receipt\",\"name\":\"receipt\",\"type\":\"tuple\"}],\"name\":\"DepositRequested\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address[]\",\"name\":\"tokens\",\"type\":\"address[]\"},{\"indexed\":false,\"internalType\":\"uint256[]\",\"name\":\"thresholds\",\"type\":\"uint256[]\"}],\"name\":\"FullSigsThresholdsUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address[]\",\"name\":\"tokens\",\"type\":\"address[]\"},{\"indexed\":false,\"internalType\":\"uint256[]\",\"name\":\"thresholds\",\"type\":\"uint256[]\"}],\"name\":\"LockedThresholdsUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"Paused\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"previousAdminRole\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"newAdminRole\",\"type\":\"bytes32\"}],\"name\":\"RoleAdminChanged\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"}],\"name\":\"RoleGranted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"}],\"name\":\"RoleRevoked\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"nonce\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"numerator\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"denominator\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"previousNumerator\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"previousDenominator\",\"type\":\"uint256\"}],\"name\":\"ThresholdUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address[]\",\"name\":\"mainchainTokens\",\"type\":\"address[]\"},{\"indexed\":false,\"internalType\":\"address[]\",\"name\":\"roninTokens\",\"type\":\"address[]\"}],\"name\":\"TokenMapped\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address[]\",\"name\":\"tokens\",\"type\":\"address[]\"},{\"indexed\":false,\"internalType\":\"uint256[]\",\"name\":\"percentages\",\"type\":\"uint256[]\"}],\"name\":\"UnlockFeePercentagesUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"Unpaused\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"contractIWeightedValidator\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"ValidatorContractUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"receiptHash\",\"type\":\"bytes32\"},{\"components\":[{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"enumTransfer.Kind\",\"name\":\"kind\",\"type\":\"uint8\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"tokenAddr\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"chainId\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Owner\",\"name\":\"mainchain\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"tokenAddr\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"chainId\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Owner\",\"name\":\"ronin\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"enumToken.Standard\",\"name\":\"erc\",\"type\":\"uint8\"},{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"quantity\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Info\",\"name\":\"info\",\"type\":\"tuple\"}],\"indexed\":false,\"internalType\":\"structTransfer.Receipt\",\"name\":\"receipt\",\"type\":\"tuple\"}],\"name\":\"WithdrawalLocked\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"receiptHash\",\"type\":\"bytes32\"},{\"components\":[{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"enumTransfer.Kind\",\"name\":\"kind\",\"type\":\"uint8\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"tokenAddr\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"chainId\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Owner\",\"name\":\"mainchain\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"tokenAddr\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"chainId\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Owner\",\"name\":\"ronin\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"enumToken.Standard\",\"name\":\"erc\",\"type\":\"uint8\"},{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"quantity\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Info\",\"name\":\"info\",\"type\":\"tuple\"}],\"indexed\":false,\"internalType\":\"structTransfer.Receipt\",\"name\":\"receipt\",\"type\":\"tuple\"}],\"name\":\"WithdrawalUnlocked\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"receiptHash\",\"type\":\"bytes32\"},{\"components\":[{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"enumTransfer.Kind\",\"name\":\"kind\",\"type\":\"uint8\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"tokenAddr\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"chainId\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Owner\",\"name\":\"mainchain\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"tokenAddr\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"chainId\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Owner\",\"name\":\"ronin\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"enumToken.Standard\",\"name\":\"erc\",\"type\":\"uint8\"},{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"quantity\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Info\",\"name\":\"info\",\"type\":\"tuple\"}],\"indexed\":false,\"internalType\":\"structTransfer.Receipt\",\"name\":\"receipt\",\"type\":\"tuple\"}],\"name\":\"Withdrew\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"contractIWETH\",\"name\":\"weth\",\"type\":\"address\"}],\"name\":\"WrappedNativeTokenContractUpdated\",\"type\":\"event\"},{\"stateMutability\":\"payable\",\"type\":\"fallback\"},{\"inputs\":[],\"name\":\"DEFAULT_ADMIN_ROLE\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"DOMAIN_SEPARATOR\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"WITHDRAWAL_UNLOCKER_ROLE\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"_MAX_PERCENTAGE\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"recipientAddr\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"tokenAddr\",\"type\":\"address\"},{\"components\":[{\"internalType\":\"enumToken.Standard\",\"name\":\"erc\",\"type\":\"uint8\"},{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"quantity\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Info\",\"name\":\"info\",\"type\":\"tuple\"}],\"internalType\":\"structTransfer.Request[]\",\"name\":\"_requests\",\"type\":\"tuple[]\"}],\"name\":\"bulkRequestDepositFor\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_voteWeight\",\"type\":\"uint256\"}],\"name\":\"checkThreshold\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"dailyWithdrawalLimit\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"depositCount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"fullSigThreshold\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"}],\"name\":\"getRoleAdmin\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"index\",\"type\":\"uint256\"}],\"name\":\"getRoleMember\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"}],\"name\":\"getRoleMemberCount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_mainchainToken\",\"type\":\"address\"}],\"name\":\"getRoninToken\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"_addr\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getThreshold\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"grantRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"hasRole\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_roleSetter\",\"type\":\"address\"},{\"internalType\":\"contractIWETH\",\"name\":\"_wrappedToken\",\"type\":\"address\"},{\"internalType\":\"contractIWeightedValidator\",\"name\":\"_validatorContract\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_roninChainId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_numerator\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_denominator\",\"type\":\"uint256\"},{\"internalType\":\"address[][3]\",\"name\":\"_addresses\",\"type\":\"address[][3]\"},{\"internalType\":\"uint256[][4]\",\"name\":\"_thresholds\",\"type\":\"uint256[][4]\"}],\"name\":\"initialize\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"lastDateSynced\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"lastSyncedWithdrawal\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"lockedThreshold\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address[]\",\"name\":\"_mainchainTokens\",\"type\":\"address[]\"},{\"internalType\":\"address[]\",\"name\":\"_roninTokens\",\"type\":\"address[]\"}],\"name\":\"mapTokens\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address[]\",\"name\":\"_mainchainTokens\",\"type\":\"address[]\"},{\"internalType\":\"address[]\",\"name\":\"_roninTokens\",\"type\":\"address[]\"},{\"internalType\":\"uint256[]\",\"name\":\"_fullSigThreshold\",\"type\":\"uint256[]\"},{\"internalType\":\"uint256[]\",\"name\":\"_lockedThreshold\",\"type\":\"uint256[]\"},{\"internalType\":\"uint256[]\",\"name\":\"_dailyWithdrawalLimit\",\"type\":\"uint256[]\"}],\"name\":\"mapTokensAndThresholds\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"minimumVoteWeight\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"nonce\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"pause\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"paused\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_token\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_quantity\",\"type\":\"uint256\"}],\"name\":\"reachedWithdrawalLimit\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"receiveEther\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"renounceRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"recipientAddr\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"tokenAddr\",\"type\":\"address\"},{\"components\":[{\"internalType\":\"enumToken.Standard\",\"name\":\"erc\",\"type\":\"uint8\"},{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"quantity\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Info\",\"name\":\"info\",\"type\":\"tuple\"}],\"internalType\":\"structTransfer.Request\",\"name\":\"_request\",\"type\":\"tuple\"}],\"name\":\"requestDepositFor\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"revokeRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"roninChainId\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address[]\",\"name\":\"_tokens\",\"type\":\"address[]\"},{\"internalType\":\"uint256[]\",\"name\":\"_limits\",\"type\":\"uint256[]\"}],\"name\":\"setDailyWithdrawalLimits\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address[]\",\"name\":\"_tokens\",\"type\":\"address[]\"},{\"internalType\":\"uint256[]\",\"name\":\"_thresholds\",\"type\":\"uint256[]\"}],\"name\":\"setFullSigsThresholds\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address[]\",\"name\":\"_tokens\",\"type\":\"address[]\"},{\"internalType\":\"uint256[]\",\"name\":\"_thresholds\",\"type\":\"uint256[]\"}],\"name\":\"setLockedThresholds\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_numerator\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_denominator\",\"type\":\"uint256\"}],\"name\":\"setThreshold\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address[]\",\"name\":\"_tokens\",\"type\":\"address[]\"},{\"internalType\":\"uint256[]\",\"name\":\"_percentages\",\"type\":\"uint256[]\"}],\"name\":\"setUnlockFeePercentages\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"contractIWeightedValidator\",\"name\":\"_validatorContract\",\"type\":\"address\"}],\"name\":\"setValidatorContract\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"contractIWETH\",\"name\":\"_wrappedToken\",\"type\":\"address\"}],\"name\":\"setWrappedNativeTokenContract\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"enumTransfer.Kind\",\"name\":\"kind\",\"type\":\"uint8\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"tokenAddr\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"chainId\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Owner\",\"name\":\"mainchain\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"tokenAddr\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"chainId\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Owner\",\"name\":\"ronin\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"enumToken.Standard\",\"name\":\"erc\",\"type\":\"uint8\"},{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"quantity\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Info\",\"name\":\"info\",\"type\":\"tuple\"}],\"internalType\":\"structTransfer.Receipt\",\"name\":\"_receipt\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"uint8\",\"name\":\"v\",\"type\":\"uint8\"},{\"internalType\":\"bytes32\",\"name\":\"r\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"s\",\"type\":\"bytes32\"}],\"internalType\":\"structSignatureConsumer.Signature[]\",\"name\":\"_signatures\",\"type\":\"tuple[]\"}],\"name\":\"submitWithdrawal\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"_locked\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"interfaceId\",\"type\":\"bytes4\"}],\"name\":\"supportsInterface\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"unlockFeePercentages\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"enumTransfer.Kind\",\"name\":\"kind\",\"type\":\"uint8\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"tokenAddr\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"chainId\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Owner\",\"name\":\"mainchain\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"tokenAddr\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"chainId\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Owner\",\"name\":\"ronin\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"enumToken.Standard\",\"name\":\"erc\",\"type\":\"uint8\"},{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"quantity\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Info\",\"name\":\"info\",\"type\":\"tuple\"}],\"internalType\":\"structTransfer.Receipt\",\"name\":\"_receipt\",\"type\":\"tuple\"}],\"name\":\"unlockWithdrawal\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"unpause\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"validatorContract\",\"outputs\":[{\"internalType\":\"contractIWeightedValidator\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"withdrawalHash\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"withdrawalLocked\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"wrappedNativeToken\",\"outputs\":[{\"internalType\":\"contractIWETH\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"stateMutability\":\"payable\",\"type\":\"receive\"}]",
+	ABI: "[{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address[]\",\"name\":\"tokens\",\"type\":\"address[]\"},{\"indexed\":false,\"internalType\":\"uint256[]\",\"name\":\"limits\",\"type\":\"uint256[]\"}],\"name\":\"DailyWithdrawalLimitsUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"receiptHash\",\"type\":\"bytes32\"},{\"components\":[{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"enumTransfer.Kind\",\"name\":\"kind\",\"type\":\"uint8\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"tokenAddr\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"chainId\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Owner\",\"name\":\"mainchain\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"tokenAddr\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"chainId\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Owner\",\"name\":\"ronin\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"enumToken.Standard\",\"name\":\"erc\",\"type\":\"uint8\"},{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"quantity\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Info\",\"name\":\"info\",\"type\":\"tuple\"}],\"indexed\":false,\"internalType\":\"structTransfer.Receipt\",\"name\":\"receipt\",\"type\":\"tuple\"}],\"name\":\"DepositRequested\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address[]\",\"name\":\"tokens\",\"type\":\"address[]\"},{\"indexed\":false,\"internalType\":\"uint256[]\",\"name\":\"thresholds\",\"type\":\"uint256[]\"}],\"name\":\"HighTierThresholdsUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"nonce\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"numerator\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"denominator\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"previousNumerator\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"previousDenominator\",\"type\":\"uint256\"}],\"name\":\"HighTierVoteWeightThresholdUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address[]\",\"name\":\"tokens\",\"type\":\"address[]\"},{\"indexed\":false,\"internalType\":\"uint256[]\",\"name\":\"thresholds\",\"type\":\"uint256[]\"}],\"name\":\"LockedThresholdsUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"Paused\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"previousAdminRole\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"newAdminRole\",\"type\":\"bytes32\"}],\"name\":\"RoleAdminChanged\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"}],\"name\":\"RoleGranted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"}],\"name\":\"RoleRevoked\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"nonce\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"numerator\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"denominator\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"previousNumerator\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"previousDenominator\",\"type\":\"uint256\"}],\"name\":\"ThresholdUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address[]\",\"name\":\"mainchainTokens\",\"type\":\"address[]\"},{\"indexed\":false,\"internalType\":\"address[]\",\"name\":\"roninTokens\",\"type\":\"address[]\"},{\"indexed\":false,\"internalType\":\"enumToken.Standard[]\",\"name\":\"standards\",\"type\":\"uint8[]\"}],\"name\":\"TokenMapped\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address[]\",\"name\":\"tokens\",\"type\":\"address[]\"},{\"indexed\":false,\"internalType\":\"uint256[]\",\"name\":\"percentages\",\"type\":\"uint256[]\"}],\"name\":\"UnlockFeePercentagesUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"Unpaused\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"contractIWeightedValidator\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"ValidatorContractUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"receiptHash\",\"type\":\"bytes32\"},{\"components\":[{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"enumTransfer.Kind\",\"name\":\"kind\",\"type\":\"uint8\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"tokenAddr\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"chainId\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Owner\",\"name\":\"mainchain\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"tokenAddr\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"chainId\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Owner\",\"name\":\"ronin\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"enumToken.Standard\",\"name\":\"erc\",\"type\":\"uint8\"},{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"quantity\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Info\",\"name\":\"info\",\"type\":\"tuple\"}],\"indexed\":false,\"internalType\":\"structTransfer.Receipt\",\"name\":\"receipt\",\"type\":\"tuple\"}],\"name\":\"WithdrawalLocked\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"receiptHash\",\"type\":\"bytes32\"},{\"components\":[{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"enumTransfer.Kind\",\"name\":\"kind\",\"type\":\"uint8\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"tokenAddr\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"chainId\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Owner\",\"name\":\"mainchain\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"tokenAddr\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"chainId\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Owner\",\"name\":\"ronin\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"enumToken.Standard\",\"name\":\"erc\",\"type\":\"uint8\"},{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"quantity\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Info\",\"name\":\"info\",\"type\":\"tuple\"}],\"indexed\":false,\"internalType\":\"structTransfer.Receipt\",\"name\":\"receipt\",\"type\":\"tuple\"}],\"name\":\"WithdrawalUnlocked\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"receiptHash\",\"type\":\"bytes32\"},{\"components\":[{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"enumTransfer.Kind\",\"name\":\"kind\",\"type\":\"uint8\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"tokenAddr\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"chainId\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Owner\",\"name\":\"mainchain\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"tokenAddr\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"chainId\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Owner\",\"name\":\"ronin\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"enumToken.Standard\",\"name\":\"erc\",\"type\":\"uint8\"},{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"quantity\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Info\",\"name\":\"info\",\"type\":\"tuple\"}],\"indexed\":false,\"internalType\":\"structTransfer.Receipt\",\"name\":\"receipt\",\"type\":\"tuple\"}],\"name\":\"Withdrew\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"contractIWETH\",\"name\":\"weth\",\"type\":\"address\"}],\"name\":\"WrappedNativeTokenContractUpdated\",\"type\":\"event\"},{\"stateMutability\":\"payable\",\"type\":\"fallback\"},{\"inputs\":[],\"name\":\"DEFAULT_ADMIN_ROLE\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"DOMAIN_SEPARATOR\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"WITHDRAWAL_UNLOCKER_ROLE\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"_MAX_PERCENTAGE\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_voteWeight\",\"type\":\"uint256\"}],\"name\":\"checkHighTierVoteWeightThreshold\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_voteWeight\",\"type\":\"uint256\"}],\"name\":\"checkThreshold\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"dailyWithdrawalLimit\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"depositCount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getHighTierVoteWeightThreshold\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"}],\"name\":\"getRoleAdmin\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"index\",\"type\":\"uint256\"}],\"name\":\"getRoleMember\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"}],\"name\":\"getRoleMemberCount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_mainchainToken\",\"type\":\"address\"}],\"name\":\"getRoninToken\",\"outputs\":[{\"components\":[{\"internalType\":\"enumToken.Standard\",\"name\":\"erc\",\"type\":\"uint8\"},{\"internalType\":\"address\",\"name\":\"tokenAddr\",\"type\":\"address\"}],\"internalType\":\"structMappedTokenConsumer.MappedToken\",\"name\":\"_token\",\"type\":\"tuple\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getThreshold\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"grantRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"hasRole\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"highTierThreshold\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_roleSetter\",\"type\":\"address\"},{\"internalType\":\"contractIWETH\",\"name\":\"_wrappedToken\",\"type\":\"address\"},{\"internalType\":\"contractIWeightedValidator\",\"name\":\"_validatorContract\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_roninChainId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_numerator\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_highTierVWNumerator\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_denominator\",\"type\":\"uint256\"},{\"internalType\":\"address[][3]\",\"name\":\"_addresses\",\"type\":\"address[][3]\"},{\"internalType\":\"uint256[][4]\",\"name\":\"_thresholds\",\"type\":\"uint256[][4]\"},{\"internalType\":\"enumToken.Standard[]\",\"name\":\"_standards\",\"type\":\"uint8[]\"}],\"name\":\"initialize\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"lastDateSynced\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"lastSyncedWithdrawal\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"lockedThreshold\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address[]\",\"name\":\"_mainchainTokens\",\"type\":\"address[]\"},{\"internalType\":\"address[]\",\"name\":\"_roninTokens\",\"type\":\"address[]\"},{\"internalType\":\"enumToken.Standard[]\",\"name\":\"_standards\",\"type\":\"uint8[]\"}],\"name\":\"mapTokens\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address[]\",\"name\":\"_mainchainTokens\",\"type\":\"address[]\"},{\"internalType\":\"address[]\",\"name\":\"_roninTokens\",\"type\":\"address[]\"},{\"internalType\":\"enumToken.Standard[]\",\"name\":\"_standards\",\"type\":\"uint8[]\"},{\"internalType\":\"uint256[][4]\",\"name\":\"_thresholds\",\"type\":\"uint256[][4]\"}],\"name\":\"mapTokensAndThresholds\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"minimumVoteWeight\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"nonce\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"pause\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"paused\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_token\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_quantity\",\"type\":\"uint256\"}],\"name\":\"reachedWithdrawalLimit\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"receiveEther\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"renounceRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"recipientAddr\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"tokenAddr\",\"type\":\"address\"},{\"components\":[{\"internalType\":\"enumToken.Standard\",\"name\":\"erc\",\"type\":\"uint8\"},{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"quantity\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Info\",\"name\":\"info\",\"type\":\"tuple\"}],\"internalType\":\"structTransfer.Request\",\"name\":\"_request\",\"type\":\"tuple\"}],\"name\":\"requestDepositFor\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"revokeRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"roninChainId\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address[]\",\"name\":\"_tokens\",\"type\":\"address[]\"},{\"internalType\":\"uint256[]\",\"name\":\"_limits\",\"type\":\"uint256[]\"}],\"name\":\"setDailyWithdrawalLimits\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address[]\",\"name\":\"_tokens\",\"type\":\"address[]\"},{\"internalType\":\"uint256[]\",\"name\":\"_thresholds\",\"type\":\"uint256[]\"}],\"name\":\"setHighTierThresholds\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_numerator\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_denominator\",\"type\":\"uint256\"}],\"name\":\"setHighTierVoteWeightThreshold\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"_previousNum\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_previousDenom\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address[]\",\"name\":\"_tokens\",\"type\":\"address[]\"},{\"internalType\":\"uint256[]\",\"name\":\"_thresholds\",\"type\":\"uint256[]\"}],\"name\":\"setLockedThresholds\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_numerator\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_denominator\",\"type\":\"uint256\"}],\"name\":\"setThreshold\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"_previousNum\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_previousDenom\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address[]\",\"name\":\"_tokens\",\"type\":\"address[]\"},{\"internalType\":\"uint256[]\",\"name\":\"_percentages\",\"type\":\"uint256[]\"}],\"name\":\"setUnlockFeePercentages\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"contractIWeightedValidator\",\"name\":\"_validatorContract\",\"type\":\"address\"}],\"name\":\"setValidatorContract\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"contractIWETH\",\"name\":\"_wrappedToken\",\"type\":\"address\"}],\"name\":\"setWrappedNativeTokenContract\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"enumTransfer.Kind\",\"name\":\"kind\",\"type\":\"uint8\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"tokenAddr\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"chainId\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Owner\",\"name\":\"mainchain\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"tokenAddr\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"chainId\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Owner\",\"name\":\"ronin\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"enumToken.Standard\",\"name\":\"erc\",\"type\":\"uint8\"},{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"quantity\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Info\",\"name\":\"info\",\"type\":\"tuple\"}],\"internalType\":\"structTransfer.Receipt\",\"name\":\"_receipt\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"uint8\",\"name\":\"v\",\"type\":\"uint8\"},{\"internalType\":\"bytes32\",\"name\":\"r\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"s\",\"type\":\"bytes32\"}],\"internalType\":\"structSignatureConsumer.Signature[]\",\"name\":\"_signatures\",\"type\":\"tuple[]\"}],\"name\":\"submitWithdrawal\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"_locked\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"interfaceId\",\"type\":\"bytes4\"}],\"name\":\"supportsInterface\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"unlockFeePercentages\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"enumTransfer.Kind\",\"name\":\"kind\",\"type\":\"uint8\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"tokenAddr\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"chainId\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Owner\",\"name\":\"mainchain\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"tokenAddr\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"chainId\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Owner\",\"name\":\"ronin\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"enumToken.Standard\",\"name\":\"erc\",\"type\":\"uint8\"},{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"quantity\",\"type\":\"uint256\"}],\"internalType\":\"structToken.Info\",\"name\":\"info\",\"type\":\"tuple\"}],\"internalType\":\"structTransfer.Receipt\",\"name\":\"_receipt\",\"type\":\"tuple\"}],\"name\":\"unlockWithdrawal\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"unpause\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"validatorContract\",\"outputs\":[{\"internalType\":\"contractIWeightedValidator\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"withdrawalHash\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"withdrawalLocked\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"wrappedNativeToken\",\"outputs\":[{\"internalType\":\"contractIWETH\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"stateMutability\":\"payable\",\"type\":\"receive\"}]",
 }
 
 // GatewayABI is the input ABI used to generate the binding from.
@@ -340,6 +346,37 @@ func (_Gateway *GatewayCallerSession) MAXPERCENTAGE() (*big.Int, error) {
 	return _Gateway.Contract.MAXPERCENTAGE(&_Gateway.CallOpts)
 }
 
+// CheckHighTierVoteWeightThreshold is a free data retrieval call binding the contract method 0xac78dfe8.
+//
+// Solidity: function checkHighTierVoteWeightThreshold(uint256 _voteWeight) view returns(bool)
+func (_Gateway *GatewayCaller) CheckHighTierVoteWeightThreshold(opts *bind.CallOpts, _voteWeight *big.Int) (bool, error) {
+	var out []interface{}
+	err := _Gateway.contract.Call(opts, &out, "checkHighTierVoteWeightThreshold", _voteWeight)
+
+	if err != nil {
+		return *new(bool), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(bool)).(*bool)
+
+	return out0, err
+
+}
+
+// CheckHighTierVoteWeightThreshold is a free data retrieval call binding the contract method 0xac78dfe8.
+//
+// Solidity: function checkHighTierVoteWeightThreshold(uint256 _voteWeight) view returns(bool)
+func (_Gateway *GatewaySession) CheckHighTierVoteWeightThreshold(_voteWeight *big.Int) (bool, error) {
+	return _Gateway.Contract.CheckHighTierVoteWeightThreshold(&_Gateway.CallOpts, _voteWeight)
+}
+
+// CheckHighTierVoteWeightThreshold is a free data retrieval call binding the contract method 0xac78dfe8.
+//
+// Solidity: function checkHighTierVoteWeightThreshold(uint256 _voteWeight) view returns(bool)
+func (_Gateway *GatewayCallerSession) CheckHighTierVoteWeightThreshold(_voteWeight *big.Int) (bool, error) {
+	return _Gateway.Contract.CheckHighTierVoteWeightThreshold(&_Gateway.CallOpts, _voteWeight)
+}
+
 // CheckThreshold is a free data retrieval call binding the contract method 0xdafae408.
 //
 // Solidity: function checkThreshold(uint256 _voteWeight) view returns(bool)
@@ -433,35 +470,36 @@ func (_Gateway *GatewayCallerSession) DepositCount() (*big.Int, error) {
 	return _Gateway.Contract.DepositCount(&_Gateway.CallOpts)
 }
 
-// FullSigThreshold is a free data retrieval call binding the contract method 0xdf5baf45.
+// GetHighTierVoteWeightThreshold is a free data retrieval call binding the contract method 0xcdb67444.
 //
-// Solidity: function fullSigThreshold(address ) view returns(uint256)
-func (_Gateway *GatewayCaller) FullSigThreshold(opts *bind.CallOpts, arg0 common.Address) (*big.Int, error) {
+// Solidity: function getHighTierVoteWeightThreshold() view returns(uint256, uint256)
+func (_Gateway *GatewayCaller) GetHighTierVoteWeightThreshold(opts *bind.CallOpts) (*big.Int, *big.Int, error) {
 	var out []interface{}
-	err := _Gateway.contract.Call(opts, &out, "fullSigThreshold", arg0)
+	err := _Gateway.contract.Call(opts, &out, "getHighTierVoteWeightThreshold")
 
 	if err != nil {
-		return *new(*big.Int), err
+		return *new(*big.Int), *new(*big.Int), err
 	}
 
 	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
+	out1 := *abi.ConvertType(out[1], new(*big.Int)).(**big.Int)
 
-	return out0, err
+	return out0, out1, err
 
 }
 
-// FullSigThreshold is a free data retrieval call binding the contract method 0xdf5baf45.
+// GetHighTierVoteWeightThreshold is a free data retrieval call binding the contract method 0xcdb67444.
 //
-// Solidity: function fullSigThreshold(address ) view returns(uint256)
-func (_Gateway *GatewaySession) FullSigThreshold(arg0 common.Address) (*big.Int, error) {
-	return _Gateway.Contract.FullSigThreshold(&_Gateway.CallOpts, arg0)
+// Solidity: function getHighTierVoteWeightThreshold() view returns(uint256, uint256)
+func (_Gateway *GatewaySession) GetHighTierVoteWeightThreshold() (*big.Int, *big.Int, error) {
+	return _Gateway.Contract.GetHighTierVoteWeightThreshold(&_Gateway.CallOpts)
 }
 
-// FullSigThreshold is a free data retrieval call binding the contract method 0xdf5baf45.
+// GetHighTierVoteWeightThreshold is a free data retrieval call binding the contract method 0xcdb67444.
 //
-// Solidity: function fullSigThreshold(address ) view returns(uint256)
-func (_Gateway *GatewayCallerSession) FullSigThreshold(arg0 common.Address) (*big.Int, error) {
-	return _Gateway.Contract.FullSigThreshold(&_Gateway.CallOpts, arg0)
+// Solidity: function getHighTierVoteWeightThreshold() view returns(uint256, uint256)
+func (_Gateway *GatewayCallerSession) GetHighTierVoteWeightThreshold() (*big.Int, *big.Int, error) {
+	return _Gateway.Contract.GetHighTierVoteWeightThreshold(&_Gateway.CallOpts)
 }
 
 // GetRoleAdmin is a free data retrieval call binding the contract method 0x248a9ca3.
@@ -559,16 +597,16 @@ func (_Gateway *GatewayCallerSession) GetRoleMemberCount(role [32]byte) (*big.In
 
 // GetRoninToken is a free data retrieval call binding the contract method 0xb2975794.
 //
-// Solidity: function getRoninToken(address _mainchainToken) view returns(address _addr)
-func (_Gateway *GatewayCaller) GetRoninToken(opts *bind.CallOpts, _mainchainToken common.Address) (common.Address, error) {
+// Solidity: function getRoninToken(address _mainchainToken) view returns((uint8,address) _token)
+func (_Gateway *GatewayCaller) GetRoninToken(opts *bind.CallOpts, _mainchainToken common.Address) (MappedTokenConsumerMappedToken, error) {
 	var out []interface{}
 	err := _Gateway.contract.Call(opts, &out, "getRoninToken", _mainchainToken)
 
 	if err != nil {
-		return *new(common.Address), err
+		return *new(MappedTokenConsumerMappedToken), err
 	}
 
-	out0 := *abi.ConvertType(out[0], new(common.Address)).(*common.Address)
+	out0 := *abi.ConvertType(out[0], new(MappedTokenConsumerMappedToken)).(*MappedTokenConsumerMappedToken)
 
 	return out0, err
 
@@ -576,15 +614,15 @@ func (_Gateway *GatewayCaller) GetRoninToken(opts *bind.CallOpts, _mainchainToke
 
 // GetRoninToken is a free data retrieval call binding the contract method 0xb2975794.
 //
-// Solidity: function getRoninToken(address _mainchainToken) view returns(address _addr)
-func (_Gateway *GatewaySession) GetRoninToken(_mainchainToken common.Address) (common.Address, error) {
+// Solidity: function getRoninToken(address _mainchainToken) view returns((uint8,address) _token)
+func (_Gateway *GatewaySession) GetRoninToken(_mainchainToken common.Address) (MappedTokenConsumerMappedToken, error) {
 	return _Gateway.Contract.GetRoninToken(&_Gateway.CallOpts, _mainchainToken)
 }
 
 // GetRoninToken is a free data retrieval call binding the contract method 0xb2975794.
 //
-// Solidity: function getRoninToken(address _mainchainToken) view returns(address _addr)
-func (_Gateway *GatewayCallerSession) GetRoninToken(_mainchainToken common.Address) (common.Address, error) {
+// Solidity: function getRoninToken(address _mainchainToken) view returns((uint8,address) _token)
+func (_Gateway *GatewayCallerSession) GetRoninToken(_mainchainToken common.Address) (MappedTokenConsumerMappedToken, error) {
 	return _Gateway.Contract.GetRoninToken(&_Gateway.CallOpts, _mainchainToken)
 }
 
@@ -651,12 +689,12 @@ func (_Gateway *GatewayCallerSession) HasRole(role [32]byte, account common.Addr
 	return _Gateway.Contract.HasRole(&_Gateway.CallOpts, role, account)
 }
 
-// LastDateSynced is a free data retrieval call binding the contract method 0xcbc829c6.
+// HighTierThreshold is a free data retrieval call binding the contract method 0xb1d08a03.
 //
-// Solidity: function lastDateSynced() view returns(uint256)
-func (_Gateway *GatewayCaller) LastDateSynced(opts *bind.CallOpts) (*big.Int, error) {
+// Solidity: function highTierThreshold(address ) view returns(uint256)
+func (_Gateway *GatewayCaller) HighTierThreshold(opts *bind.CallOpts, arg0 common.Address) (*big.Int, error) {
 	var out []interface{}
-	err := _Gateway.contract.Call(opts, &out, "lastDateSynced")
+	err := _Gateway.contract.Call(opts, &out, "highTierThreshold", arg0)
 
 	if err != nil {
 		return *new(*big.Int), err
@@ -668,18 +706,49 @@ func (_Gateway *GatewayCaller) LastDateSynced(opts *bind.CallOpts) (*big.Int, er
 
 }
 
-// LastDateSynced is a free data retrieval call binding the contract method 0xcbc829c6.
+// HighTierThreshold is a free data retrieval call binding the contract method 0xb1d08a03.
 //
-// Solidity: function lastDateSynced() view returns(uint256)
-func (_Gateway *GatewaySession) LastDateSynced() (*big.Int, error) {
-	return _Gateway.Contract.LastDateSynced(&_Gateway.CallOpts)
+// Solidity: function highTierThreshold(address ) view returns(uint256)
+func (_Gateway *GatewaySession) HighTierThreshold(arg0 common.Address) (*big.Int, error) {
+	return _Gateway.Contract.HighTierThreshold(&_Gateway.CallOpts, arg0)
 }
 
-// LastDateSynced is a free data retrieval call binding the contract method 0xcbc829c6.
+// HighTierThreshold is a free data retrieval call binding the contract method 0xb1d08a03.
 //
-// Solidity: function lastDateSynced() view returns(uint256)
-func (_Gateway *GatewayCallerSession) LastDateSynced() (*big.Int, error) {
-	return _Gateway.Contract.LastDateSynced(&_Gateway.CallOpts)
+// Solidity: function highTierThreshold(address ) view returns(uint256)
+func (_Gateway *GatewayCallerSession) HighTierThreshold(arg0 common.Address) (*big.Int, error) {
+	return _Gateway.Contract.HighTierThreshold(&_Gateway.CallOpts, arg0)
+}
+
+// LastDateSynced is a free data retrieval call binding the contract method 0x1d4a7210.
+//
+// Solidity: function lastDateSynced(address ) view returns(uint256)
+func (_Gateway *GatewayCaller) LastDateSynced(opts *bind.CallOpts, arg0 common.Address) (*big.Int, error) {
+	var out []interface{}
+	err := _Gateway.contract.Call(opts, &out, "lastDateSynced", arg0)
+
+	if err != nil {
+		return *new(*big.Int), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
+
+	return out0, err
+
+}
+
+// LastDateSynced is a free data retrieval call binding the contract method 0x1d4a7210.
+//
+// Solidity: function lastDateSynced(address ) view returns(uint256)
+func (_Gateway *GatewaySession) LastDateSynced(arg0 common.Address) (*big.Int, error) {
+	return _Gateway.Contract.LastDateSynced(&_Gateway.CallOpts, arg0)
+}
+
+// LastDateSynced is a free data retrieval call binding the contract method 0x1d4a7210.
+//
+// Solidity: function lastDateSynced(address ) view returns(uint256)
+func (_Gateway *GatewayCallerSession) LastDateSynced(arg0 common.Address) (*big.Int, error) {
+	return _Gateway.Contract.LastDateSynced(&_Gateway.CallOpts, arg0)
 }
 
 // LastSyncedWithdrawal is a free data retrieval call binding the contract method 0xd55ed103.
@@ -1085,27 +1154,6 @@ func (_Gateway *GatewayCallerSession) WrappedNativeToken() (common.Address, erro
 	return _Gateway.Contract.WrappedNativeToken(&_Gateway.CallOpts)
 }
 
-// BulkRequestDepositFor is a paid mutator transaction binding the contract method 0xd2d9114f.
-//
-// Solidity: function bulkRequestDepositFor((address,address,(uint8,uint256,uint256))[] _requests) payable returns()
-func (_Gateway *GatewayTransactor) BulkRequestDepositFor(opts *bind.TransactOpts, _requests []TransferRequest) (*types.Transaction, error) {
-	return _Gateway.contract.Transact(opts, "bulkRequestDepositFor", _requests)
-}
-
-// BulkRequestDepositFor is a paid mutator transaction binding the contract method 0xd2d9114f.
-//
-// Solidity: function bulkRequestDepositFor((address,address,(uint8,uint256,uint256))[] _requests) payable returns()
-func (_Gateway *GatewaySession) BulkRequestDepositFor(_requests []TransferRequest) (*types.Transaction, error) {
-	return _Gateway.Contract.BulkRequestDepositFor(&_Gateway.TransactOpts, _requests)
-}
-
-// BulkRequestDepositFor is a paid mutator transaction binding the contract method 0xd2d9114f.
-//
-// Solidity: function bulkRequestDepositFor((address,address,(uint8,uint256,uint256))[] _requests) payable returns()
-func (_Gateway *GatewayTransactorSession) BulkRequestDepositFor(_requests []TransferRequest) (*types.Transaction, error) {
-	return _Gateway.Contract.BulkRequestDepositFor(&_Gateway.TransactOpts, _requests)
-}
-
 // GrantRole is a paid mutator transaction binding the contract method 0x2f2ff15d.
 //
 // Solidity: function grantRole(bytes32 role, address account) returns()
@@ -1127,67 +1175,67 @@ func (_Gateway *GatewayTransactorSession) GrantRole(role [32]byte, account commo
 	return _Gateway.Contract.GrantRole(&_Gateway.TransactOpts, role, account)
 }
 
-// Initialize is a paid mutator transaction binding the contract method 0x163d245b.
+// Initialize is a paid mutator transaction binding the contract method 0x180ff1e9.
 //
-// Solidity: function initialize(address _roleSetter, address _wrappedToken, address _validatorContract, uint256 _roninChainId, uint256 _numerator, uint256 _denominator, address[][3] _addresses, uint256[][4] _thresholds) payable returns()
-func (_Gateway *GatewayTransactor) Initialize(opts *bind.TransactOpts, _roleSetter common.Address, _wrappedToken common.Address, _validatorContract common.Address, _roninChainId *big.Int, _numerator *big.Int, _denominator *big.Int, _addresses [3][]common.Address, _thresholds [4][]*big.Int) (*types.Transaction, error) {
-	return _Gateway.contract.Transact(opts, "initialize", _roleSetter, _wrappedToken, _validatorContract, _roninChainId, _numerator, _denominator, _addresses, _thresholds)
+// Solidity: function initialize(address _roleSetter, address _wrappedToken, address _validatorContract, uint256 _roninChainId, uint256 _numerator, uint256 _highTierVWNumerator, uint256 _denominator, address[][3] _addresses, uint256[][4] _thresholds, uint8[] _standards) payable returns()
+func (_Gateway *GatewayTransactor) Initialize(opts *bind.TransactOpts, _roleSetter common.Address, _wrappedToken common.Address, _validatorContract common.Address, _roninChainId *big.Int, _numerator *big.Int, _highTierVWNumerator *big.Int, _denominator *big.Int, _addresses [3][]common.Address, _thresholds [4][]*big.Int, _standards []uint8) (*types.Transaction, error) {
+	return _Gateway.contract.Transact(opts, "initialize", _roleSetter, _wrappedToken, _validatorContract, _roninChainId, _numerator, _highTierVWNumerator, _denominator, _addresses, _thresholds, _standards)
 }
 
-// Initialize is a paid mutator transaction binding the contract method 0x163d245b.
+// Initialize is a paid mutator transaction binding the contract method 0x180ff1e9.
 //
-// Solidity: function initialize(address _roleSetter, address _wrappedToken, address _validatorContract, uint256 _roninChainId, uint256 _numerator, uint256 _denominator, address[][3] _addresses, uint256[][4] _thresholds) payable returns()
-func (_Gateway *GatewaySession) Initialize(_roleSetter common.Address, _wrappedToken common.Address, _validatorContract common.Address, _roninChainId *big.Int, _numerator *big.Int, _denominator *big.Int, _addresses [3][]common.Address, _thresholds [4][]*big.Int) (*types.Transaction, error) {
-	return _Gateway.Contract.Initialize(&_Gateway.TransactOpts, _roleSetter, _wrappedToken, _validatorContract, _roninChainId, _numerator, _denominator, _addresses, _thresholds)
+// Solidity: function initialize(address _roleSetter, address _wrappedToken, address _validatorContract, uint256 _roninChainId, uint256 _numerator, uint256 _highTierVWNumerator, uint256 _denominator, address[][3] _addresses, uint256[][4] _thresholds, uint8[] _standards) payable returns()
+func (_Gateway *GatewaySession) Initialize(_roleSetter common.Address, _wrappedToken common.Address, _validatorContract common.Address, _roninChainId *big.Int, _numerator *big.Int, _highTierVWNumerator *big.Int, _denominator *big.Int, _addresses [3][]common.Address, _thresholds [4][]*big.Int, _standards []uint8) (*types.Transaction, error) {
+	return _Gateway.Contract.Initialize(&_Gateway.TransactOpts, _roleSetter, _wrappedToken, _validatorContract, _roninChainId, _numerator, _highTierVWNumerator, _denominator, _addresses, _thresholds, _standards)
 }
 
-// Initialize is a paid mutator transaction binding the contract method 0x163d245b.
+// Initialize is a paid mutator transaction binding the contract method 0x180ff1e9.
 //
-// Solidity: function initialize(address _roleSetter, address _wrappedToken, address _validatorContract, uint256 _roninChainId, uint256 _numerator, uint256 _denominator, address[][3] _addresses, uint256[][4] _thresholds) payable returns()
-func (_Gateway *GatewayTransactorSession) Initialize(_roleSetter common.Address, _wrappedToken common.Address, _validatorContract common.Address, _roninChainId *big.Int, _numerator *big.Int, _denominator *big.Int, _addresses [3][]common.Address, _thresholds [4][]*big.Int) (*types.Transaction, error) {
-	return _Gateway.Contract.Initialize(&_Gateway.TransactOpts, _roleSetter, _wrappedToken, _validatorContract, _roninChainId, _numerator, _denominator, _addresses, _thresholds)
+// Solidity: function initialize(address _roleSetter, address _wrappedToken, address _validatorContract, uint256 _roninChainId, uint256 _numerator, uint256 _highTierVWNumerator, uint256 _denominator, address[][3] _addresses, uint256[][4] _thresholds, uint8[] _standards) payable returns()
+func (_Gateway *GatewayTransactorSession) Initialize(_roleSetter common.Address, _wrappedToken common.Address, _validatorContract common.Address, _roninChainId *big.Int, _numerator *big.Int, _highTierVWNumerator *big.Int, _denominator *big.Int, _addresses [3][]common.Address, _thresholds [4][]*big.Int, _standards []uint8) (*types.Transaction, error) {
+	return _Gateway.Contract.Initialize(&_Gateway.TransactOpts, _roleSetter, _wrappedToken, _validatorContract, _roninChainId, _numerator, _highTierVWNumerator, _denominator, _addresses, _thresholds, _standards)
 }
 
-// MapTokens is a paid mutator transaction binding the contract method 0xfc73b5d0.
+// MapTokens is a paid mutator transaction binding the contract method 0x1b6e7594.
 //
-// Solidity: function mapTokens(address[] _mainchainTokens, address[] _roninTokens) returns()
-func (_Gateway *GatewayTransactor) MapTokens(opts *bind.TransactOpts, _mainchainTokens []common.Address, _roninTokens []common.Address) (*types.Transaction, error) {
-	return _Gateway.contract.Transact(opts, "mapTokens", _mainchainTokens, _roninTokens)
+// Solidity: function mapTokens(address[] _mainchainTokens, address[] _roninTokens, uint8[] _standards) returns()
+func (_Gateway *GatewayTransactor) MapTokens(opts *bind.TransactOpts, _mainchainTokens []common.Address, _roninTokens []common.Address, _standards []uint8) (*types.Transaction, error) {
+	return _Gateway.contract.Transact(opts, "mapTokens", _mainchainTokens, _roninTokens, _standards)
 }
 
-// MapTokens is a paid mutator transaction binding the contract method 0xfc73b5d0.
+// MapTokens is a paid mutator transaction binding the contract method 0x1b6e7594.
 //
-// Solidity: function mapTokens(address[] _mainchainTokens, address[] _roninTokens) returns()
-func (_Gateway *GatewaySession) MapTokens(_mainchainTokens []common.Address, _roninTokens []common.Address) (*types.Transaction, error) {
-	return _Gateway.Contract.MapTokens(&_Gateway.TransactOpts, _mainchainTokens, _roninTokens)
+// Solidity: function mapTokens(address[] _mainchainTokens, address[] _roninTokens, uint8[] _standards) returns()
+func (_Gateway *GatewaySession) MapTokens(_mainchainTokens []common.Address, _roninTokens []common.Address, _standards []uint8) (*types.Transaction, error) {
+	return _Gateway.Contract.MapTokens(&_Gateway.TransactOpts, _mainchainTokens, _roninTokens, _standards)
 }
 
-// MapTokens is a paid mutator transaction binding the contract method 0xfc73b5d0.
+// MapTokens is a paid mutator transaction binding the contract method 0x1b6e7594.
 //
-// Solidity: function mapTokens(address[] _mainchainTokens, address[] _roninTokens) returns()
-func (_Gateway *GatewayTransactorSession) MapTokens(_mainchainTokens []common.Address, _roninTokens []common.Address) (*types.Transaction, error) {
-	return _Gateway.Contract.MapTokens(&_Gateway.TransactOpts, _mainchainTokens, _roninTokens)
+// Solidity: function mapTokens(address[] _mainchainTokens, address[] _roninTokens, uint8[] _standards) returns()
+func (_Gateway *GatewayTransactorSession) MapTokens(_mainchainTokens []common.Address, _roninTokens []common.Address, _standards []uint8) (*types.Transaction, error) {
+	return _Gateway.Contract.MapTokens(&_Gateway.TransactOpts, _mainchainTokens, _roninTokens, _standards)
 }
 
-// MapTokensAndThresholds is a paid mutator transaction binding the contract method 0x056f7781.
+// MapTokensAndThresholds is a paid mutator transaction binding the contract method 0xdff525e1.
 //
-// Solidity: function mapTokensAndThresholds(address[] _mainchainTokens, address[] _roninTokens, uint256[] _fullSigThreshold, uint256[] _lockedThreshold, uint256[] _dailyWithdrawalLimit) returns()
-func (_Gateway *GatewayTransactor) MapTokensAndThresholds(opts *bind.TransactOpts, _mainchainTokens []common.Address, _roninTokens []common.Address, _fullSigThreshold []*big.Int, _lockedThreshold []*big.Int, _dailyWithdrawalLimit []*big.Int) (*types.Transaction, error) {
-	return _Gateway.contract.Transact(opts, "mapTokensAndThresholds", _mainchainTokens, _roninTokens, _fullSigThreshold, _lockedThreshold, _dailyWithdrawalLimit)
+// Solidity: function mapTokensAndThresholds(address[] _mainchainTokens, address[] _roninTokens, uint8[] _standards, uint256[][4] _thresholds) returns()
+func (_Gateway *GatewayTransactor) MapTokensAndThresholds(opts *bind.TransactOpts, _mainchainTokens []common.Address, _roninTokens []common.Address, _standards []uint8, _thresholds [4][]*big.Int) (*types.Transaction, error) {
+	return _Gateway.contract.Transact(opts, "mapTokensAndThresholds", _mainchainTokens, _roninTokens, _standards, _thresholds)
 }
 
-// MapTokensAndThresholds is a paid mutator transaction binding the contract method 0x056f7781.
+// MapTokensAndThresholds is a paid mutator transaction binding the contract method 0xdff525e1.
 //
-// Solidity: function mapTokensAndThresholds(address[] _mainchainTokens, address[] _roninTokens, uint256[] _fullSigThreshold, uint256[] _lockedThreshold, uint256[] _dailyWithdrawalLimit) returns()
-func (_Gateway *GatewaySession) MapTokensAndThresholds(_mainchainTokens []common.Address, _roninTokens []common.Address, _fullSigThreshold []*big.Int, _lockedThreshold []*big.Int, _dailyWithdrawalLimit []*big.Int) (*types.Transaction, error) {
-	return _Gateway.Contract.MapTokensAndThresholds(&_Gateway.TransactOpts, _mainchainTokens, _roninTokens, _fullSigThreshold, _lockedThreshold, _dailyWithdrawalLimit)
+// Solidity: function mapTokensAndThresholds(address[] _mainchainTokens, address[] _roninTokens, uint8[] _standards, uint256[][4] _thresholds) returns()
+func (_Gateway *GatewaySession) MapTokensAndThresholds(_mainchainTokens []common.Address, _roninTokens []common.Address, _standards []uint8, _thresholds [4][]*big.Int) (*types.Transaction, error) {
+	return _Gateway.Contract.MapTokensAndThresholds(&_Gateway.TransactOpts, _mainchainTokens, _roninTokens, _standards, _thresholds)
 }
 
-// MapTokensAndThresholds is a paid mutator transaction binding the contract method 0x056f7781.
+// MapTokensAndThresholds is a paid mutator transaction binding the contract method 0xdff525e1.
 //
-// Solidity: function mapTokensAndThresholds(address[] _mainchainTokens, address[] _roninTokens, uint256[] _fullSigThreshold, uint256[] _lockedThreshold, uint256[] _dailyWithdrawalLimit) returns()
-func (_Gateway *GatewayTransactorSession) MapTokensAndThresholds(_mainchainTokens []common.Address, _roninTokens []common.Address, _fullSigThreshold []*big.Int, _lockedThreshold []*big.Int, _dailyWithdrawalLimit []*big.Int) (*types.Transaction, error) {
-	return _Gateway.Contract.MapTokensAndThresholds(&_Gateway.TransactOpts, _mainchainTokens, _roninTokens, _fullSigThreshold, _lockedThreshold, _dailyWithdrawalLimit)
+// Solidity: function mapTokensAndThresholds(address[] _mainchainTokens, address[] _roninTokens, uint8[] _standards, uint256[][4] _thresholds) returns()
+func (_Gateway *GatewayTransactorSession) MapTokensAndThresholds(_mainchainTokens []common.Address, _roninTokens []common.Address, _standards []uint8, _thresholds [4][]*big.Int) (*types.Transaction, error) {
+	return _Gateway.Contract.MapTokensAndThresholds(&_Gateway.TransactOpts, _mainchainTokens, _roninTokens, _standards, _thresholds)
 }
 
 // Pause is a paid mutator transaction binding the contract method 0x8456cb59.
@@ -1316,25 +1364,46 @@ func (_Gateway *GatewayTransactorSession) SetDailyWithdrawalLimits(_tokens []com
 	return _Gateway.Contract.SetDailyWithdrawalLimits(&_Gateway.TransactOpts, _tokens, _limits)
 }
 
-// SetFullSigsThresholds is a paid mutator transaction binding the contract method 0xd8356de7.
+// SetHighTierThresholds is a paid mutator transaction binding the contract method 0x93c5678f.
 //
-// Solidity: function setFullSigsThresholds(address[] _tokens, uint256[] _thresholds) returns()
-func (_Gateway *GatewayTransactor) SetFullSigsThresholds(opts *bind.TransactOpts, _tokens []common.Address, _thresholds []*big.Int) (*types.Transaction, error) {
-	return _Gateway.contract.Transact(opts, "setFullSigsThresholds", _tokens, _thresholds)
+// Solidity: function setHighTierThresholds(address[] _tokens, uint256[] _thresholds) returns()
+func (_Gateway *GatewayTransactor) SetHighTierThresholds(opts *bind.TransactOpts, _tokens []common.Address, _thresholds []*big.Int) (*types.Transaction, error) {
+	return _Gateway.contract.Transact(opts, "setHighTierThresholds", _tokens, _thresholds)
 }
 
-// SetFullSigsThresholds is a paid mutator transaction binding the contract method 0xd8356de7.
+// SetHighTierThresholds is a paid mutator transaction binding the contract method 0x93c5678f.
 //
-// Solidity: function setFullSigsThresholds(address[] _tokens, uint256[] _thresholds) returns()
-func (_Gateway *GatewaySession) SetFullSigsThresholds(_tokens []common.Address, _thresholds []*big.Int) (*types.Transaction, error) {
-	return _Gateway.Contract.SetFullSigsThresholds(&_Gateway.TransactOpts, _tokens, _thresholds)
+// Solidity: function setHighTierThresholds(address[] _tokens, uint256[] _thresholds) returns()
+func (_Gateway *GatewaySession) SetHighTierThresholds(_tokens []common.Address, _thresholds []*big.Int) (*types.Transaction, error) {
+	return _Gateway.Contract.SetHighTierThresholds(&_Gateway.TransactOpts, _tokens, _thresholds)
 }
 
-// SetFullSigsThresholds is a paid mutator transaction binding the contract method 0xd8356de7.
+// SetHighTierThresholds is a paid mutator transaction binding the contract method 0x93c5678f.
 //
-// Solidity: function setFullSigsThresholds(address[] _tokens, uint256[] _thresholds) returns()
-func (_Gateway *GatewayTransactorSession) SetFullSigsThresholds(_tokens []common.Address, _thresholds []*big.Int) (*types.Transaction, error) {
-	return _Gateway.Contract.SetFullSigsThresholds(&_Gateway.TransactOpts, _tokens, _thresholds)
+// Solidity: function setHighTierThresholds(address[] _tokens, uint256[] _thresholds) returns()
+func (_Gateway *GatewayTransactorSession) SetHighTierThresholds(_tokens []common.Address, _thresholds []*big.Int) (*types.Transaction, error) {
+	return _Gateway.Contract.SetHighTierThresholds(&_Gateway.TransactOpts, _tokens, _thresholds)
+}
+
+// SetHighTierVoteWeightThreshold is a paid mutator transaction binding the contract method 0x9dcc4da3.
+//
+// Solidity: function setHighTierVoteWeightThreshold(uint256 _numerator, uint256 _denominator) returns(uint256 _previousNum, uint256 _previousDenom)
+func (_Gateway *GatewayTransactor) SetHighTierVoteWeightThreshold(opts *bind.TransactOpts, _numerator *big.Int, _denominator *big.Int) (*types.Transaction, error) {
+	return _Gateway.contract.Transact(opts, "setHighTierVoteWeightThreshold", _numerator, _denominator)
+}
+
+// SetHighTierVoteWeightThreshold is a paid mutator transaction binding the contract method 0x9dcc4da3.
+//
+// Solidity: function setHighTierVoteWeightThreshold(uint256 _numerator, uint256 _denominator) returns(uint256 _previousNum, uint256 _previousDenom)
+func (_Gateway *GatewaySession) SetHighTierVoteWeightThreshold(_numerator *big.Int, _denominator *big.Int) (*types.Transaction, error) {
+	return _Gateway.Contract.SetHighTierVoteWeightThreshold(&_Gateway.TransactOpts, _numerator, _denominator)
+}
+
+// SetHighTierVoteWeightThreshold is a paid mutator transaction binding the contract method 0x9dcc4da3.
+//
+// Solidity: function setHighTierVoteWeightThreshold(uint256 _numerator, uint256 _denominator) returns(uint256 _previousNum, uint256 _previousDenom)
+func (_Gateway *GatewayTransactorSession) SetHighTierVoteWeightThreshold(_numerator *big.Int, _denominator *big.Int) (*types.Transaction, error) {
+	return _Gateway.Contract.SetHighTierVoteWeightThreshold(&_Gateway.TransactOpts, _numerator, _denominator)
 }
 
 // SetLockedThresholds is a paid mutator transaction binding the contract method 0x1a8e55b0.
@@ -1360,21 +1429,21 @@ func (_Gateway *GatewayTransactorSession) SetLockedThresholds(_tokens []common.A
 
 // SetThreshold is a paid mutator transaction binding the contract method 0xb9c36209.
 //
-// Solidity: function setThreshold(uint256 _numerator, uint256 _denominator) returns(uint256, uint256)
+// Solidity: function setThreshold(uint256 _numerator, uint256 _denominator) returns(uint256 _previousNum, uint256 _previousDenom)
 func (_Gateway *GatewayTransactor) SetThreshold(opts *bind.TransactOpts, _numerator *big.Int, _denominator *big.Int) (*types.Transaction, error) {
 	return _Gateway.contract.Transact(opts, "setThreshold", _numerator, _denominator)
 }
 
 // SetThreshold is a paid mutator transaction binding the contract method 0xb9c36209.
 //
-// Solidity: function setThreshold(uint256 _numerator, uint256 _denominator) returns(uint256, uint256)
+// Solidity: function setThreshold(uint256 _numerator, uint256 _denominator) returns(uint256 _previousNum, uint256 _previousDenom)
 func (_Gateway *GatewaySession) SetThreshold(_numerator *big.Int, _denominator *big.Int) (*types.Transaction, error) {
 	return _Gateway.Contract.SetThreshold(&_Gateway.TransactOpts, _numerator, _denominator)
 }
 
 // SetThreshold is a paid mutator transaction binding the contract method 0xb9c36209.
 //
-// Solidity: function setThreshold(uint256 _numerator, uint256 _denominator) returns(uint256, uint256)
+// Solidity: function setThreshold(uint256 _numerator, uint256 _denominator) returns(uint256 _previousNum, uint256 _previousDenom)
 func (_Gateway *GatewayTransactorSession) SetThreshold(_numerator *big.Int, _denominator *big.Int) (*types.Transaction, error) {
 	return _Gateway.Contract.SetThreshold(&_Gateway.TransactOpts, _numerator, _denominator)
 }
@@ -1817,9 +1886,9 @@ func (_Gateway *GatewayFilterer) ParseDepositRequested(log types.Log) (*GatewayD
 	return event, nil
 }
 
-// GatewayFullSigsThresholdsUpdatedIterator is returned from FilterFullSigsThresholdsUpdated and is used to iterate over the raw logs and unpacked data for FullSigsThresholdsUpdated events raised by the Gateway contract.
-type GatewayFullSigsThresholdsUpdatedIterator struct {
-	Event *GatewayFullSigsThresholdsUpdated // Event containing the contract specifics and raw log
+// GatewayHighTierThresholdsUpdatedIterator is returned from FilterHighTierThresholdsUpdated and is used to iterate over the raw logs and unpacked data for HighTierThresholdsUpdated events raised by the Gateway contract.
+type GatewayHighTierThresholdsUpdatedIterator struct {
+	Event *GatewayHighTierThresholdsUpdated // Event containing the contract specifics and raw log
 
 	contract *bind.BoundContract // Generic contract to use for unpacking event data
 	event    string              // Event name to use for unpacking event data
@@ -1833,7 +1902,7 @@ type GatewayFullSigsThresholdsUpdatedIterator struct {
 // Next advances the iterator to the subsequent event, returning whether there
 // are any more events found. In case of a retrieval or parsing error, false is
 // returned and Error() can be queried for the exact failure.
-func (it *GatewayFullSigsThresholdsUpdatedIterator) Next() bool {
+func (it *GatewayHighTierThresholdsUpdatedIterator) Next() bool {
 	// If the iterator failed, stop iterating
 	if it.fail != nil {
 		return false
@@ -1842,7 +1911,7 @@ func (it *GatewayFullSigsThresholdsUpdatedIterator) Next() bool {
 	if it.done {
 		select {
 		case log := <-it.logs:
-			it.Event = new(GatewayFullSigsThresholdsUpdated)
+			it.Event = new(GatewayHighTierThresholdsUpdated)
 			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 				it.fail = err
 				return false
@@ -1857,7 +1926,7 @@ func (it *GatewayFullSigsThresholdsUpdatedIterator) Next() bool {
 	// Iterator still in progress, wait for either a data or an error event
 	select {
 	case log := <-it.logs:
-		it.Event = new(GatewayFullSigsThresholdsUpdated)
+		it.Event = new(GatewayHighTierThresholdsUpdated)
 		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 			it.fail = err
 			return false
@@ -1873,42 +1942,42 @@ func (it *GatewayFullSigsThresholdsUpdatedIterator) Next() bool {
 }
 
 // Error returns any retrieval or parsing error occurred during filtering.
-func (it *GatewayFullSigsThresholdsUpdatedIterator) Error() error {
+func (it *GatewayHighTierThresholdsUpdatedIterator) Error() error {
 	return it.fail
 }
 
 // Close terminates the iteration process, releasing any pending underlying
 // resources.
-func (it *GatewayFullSigsThresholdsUpdatedIterator) Close() error {
+func (it *GatewayHighTierThresholdsUpdatedIterator) Close() error {
 	it.sub.Unsubscribe()
 	return nil
 }
 
-// GatewayFullSigsThresholdsUpdated represents a FullSigsThresholdsUpdated event raised by the Gateway contract.
-type GatewayFullSigsThresholdsUpdated struct {
+// GatewayHighTierThresholdsUpdated represents a HighTierThresholdsUpdated event raised by the Gateway contract.
+type GatewayHighTierThresholdsUpdated struct {
 	Tokens     []common.Address
 	Thresholds []*big.Int
 	Raw        types.Log // Blockchain specific contextual infos
 }
 
-// FilterFullSigsThresholdsUpdated is a free log retrieval operation binding the contract event 0x30f30fe53f33a6b009d6d0446c37f11eff8aa1033a9a92df9e8fda478cb768f7.
+// FilterHighTierThresholdsUpdated is a free log retrieval operation binding the contract event 0x80bc635c452ae67f12f9b6f12ad4daa6dbbc04eeb9ebb87d354ce10c0e210dc0.
 //
-// Solidity: event FullSigsThresholdsUpdated(address[] tokens, uint256[] thresholds)
-func (_Gateway *GatewayFilterer) FilterFullSigsThresholdsUpdated(opts *bind.FilterOpts) (*GatewayFullSigsThresholdsUpdatedIterator, error) {
+// Solidity: event HighTierThresholdsUpdated(address[] tokens, uint256[] thresholds)
+func (_Gateway *GatewayFilterer) FilterHighTierThresholdsUpdated(opts *bind.FilterOpts) (*GatewayHighTierThresholdsUpdatedIterator, error) {
 
-	logs, sub, err := _Gateway.contract.FilterLogs(opts, "FullSigsThresholdsUpdated")
+	logs, sub, err := _Gateway.contract.FilterLogs(opts, "HighTierThresholdsUpdated")
 	if err != nil {
 		return nil, err
 	}
-	return &GatewayFullSigsThresholdsUpdatedIterator{contract: _Gateway.contract, event: "FullSigsThresholdsUpdated", logs: logs, sub: sub}, nil
+	return &GatewayHighTierThresholdsUpdatedIterator{contract: _Gateway.contract, event: "HighTierThresholdsUpdated", logs: logs, sub: sub}, nil
 }
 
-// WatchFullSigsThresholdsUpdated is a free log subscription operation binding the contract event 0x30f30fe53f33a6b009d6d0446c37f11eff8aa1033a9a92df9e8fda478cb768f7.
+// WatchHighTierThresholdsUpdated is a free log subscription operation binding the contract event 0x80bc635c452ae67f12f9b6f12ad4daa6dbbc04eeb9ebb87d354ce10c0e210dc0.
 //
-// Solidity: event FullSigsThresholdsUpdated(address[] tokens, uint256[] thresholds)
-func (_Gateway *GatewayFilterer) WatchFullSigsThresholdsUpdated(opts *bind.WatchOpts, sink chan<- *GatewayFullSigsThresholdsUpdated) (event.Subscription, error) {
+// Solidity: event HighTierThresholdsUpdated(address[] tokens, uint256[] thresholds)
+func (_Gateway *GatewayFilterer) WatchHighTierThresholdsUpdated(opts *bind.WatchOpts, sink chan<- *GatewayHighTierThresholdsUpdated) (event.Subscription, error) {
 
-	logs, sub, err := _Gateway.contract.WatchLogs(opts, "FullSigsThresholdsUpdated")
+	logs, sub, err := _Gateway.contract.WatchLogs(opts, "HighTierThresholdsUpdated")
 	if err != nil {
 		return nil, err
 	}
@@ -1918,8 +1987,8 @@ func (_Gateway *GatewayFilterer) WatchFullSigsThresholdsUpdated(opts *bind.Watch
 			select {
 			case log := <-logs:
 				// New log arrived, parse the event and forward to the user
-				event := new(GatewayFullSigsThresholdsUpdated)
-				if err := _Gateway.contract.UnpackLog(event, "FullSigsThresholdsUpdated", log); err != nil {
+				event := new(GatewayHighTierThresholdsUpdated)
+				if err := _Gateway.contract.UnpackLog(event, "HighTierThresholdsUpdated", log); err != nil {
 					return err
 				}
 				event.Raw = log
@@ -1940,12 +2009,176 @@ func (_Gateway *GatewayFilterer) WatchFullSigsThresholdsUpdated(opts *bind.Watch
 	}), nil
 }
 
-// ParseFullSigsThresholdsUpdated is a log parse operation binding the contract event 0x30f30fe53f33a6b009d6d0446c37f11eff8aa1033a9a92df9e8fda478cb768f7.
+// ParseHighTierThresholdsUpdated is a log parse operation binding the contract event 0x80bc635c452ae67f12f9b6f12ad4daa6dbbc04eeb9ebb87d354ce10c0e210dc0.
 //
-// Solidity: event FullSigsThresholdsUpdated(address[] tokens, uint256[] thresholds)
-func (_Gateway *GatewayFilterer) ParseFullSigsThresholdsUpdated(log types.Log) (*GatewayFullSigsThresholdsUpdated, error) {
-	event := new(GatewayFullSigsThresholdsUpdated)
-	if err := _Gateway.contract.UnpackLog(event, "FullSigsThresholdsUpdated", log); err != nil {
+// Solidity: event HighTierThresholdsUpdated(address[] tokens, uint256[] thresholds)
+func (_Gateway *GatewayFilterer) ParseHighTierThresholdsUpdated(log types.Log) (*GatewayHighTierThresholdsUpdated, error) {
+	event := new(GatewayHighTierThresholdsUpdated)
+	if err := _Gateway.contract.UnpackLog(event, "HighTierThresholdsUpdated", log); err != nil {
+		return nil, err
+	}
+	event.Raw = log
+	return event, nil
+}
+
+// GatewayHighTierVoteWeightThresholdUpdatedIterator is returned from FilterHighTierVoteWeightThresholdUpdated and is used to iterate over the raw logs and unpacked data for HighTierVoteWeightThresholdUpdated events raised by the Gateway contract.
+type GatewayHighTierVoteWeightThresholdUpdatedIterator struct {
+	Event *GatewayHighTierVoteWeightThresholdUpdated // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *GatewayHighTierVoteWeightThresholdUpdatedIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(GatewayHighTierVoteWeightThresholdUpdated)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(GatewayHighTierVoteWeightThresholdUpdated)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *GatewayHighTierVoteWeightThresholdUpdatedIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *GatewayHighTierVoteWeightThresholdUpdatedIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// GatewayHighTierVoteWeightThresholdUpdated represents a HighTierVoteWeightThresholdUpdated event raised by the Gateway contract.
+type GatewayHighTierVoteWeightThresholdUpdated struct {
+	Nonce               *big.Int
+	Numerator           *big.Int
+	Denominator         *big.Int
+	PreviousNumerator   *big.Int
+	PreviousDenominator *big.Int
+	Raw                 types.Log // Blockchain specific contextual infos
+}
+
+// FilterHighTierVoteWeightThresholdUpdated is a free log retrieval operation binding the contract event 0x31312c97b89cc751b832d98fd459b967a2c3eef3b49757d1cf5ebaa12bb6eee1.
+//
+// Solidity: event HighTierVoteWeightThresholdUpdated(uint256 indexed nonce, uint256 indexed numerator, uint256 indexed denominator, uint256 previousNumerator, uint256 previousDenominator)
+func (_Gateway *GatewayFilterer) FilterHighTierVoteWeightThresholdUpdated(opts *bind.FilterOpts, nonce []*big.Int, numerator []*big.Int, denominator []*big.Int) (*GatewayHighTierVoteWeightThresholdUpdatedIterator, error) {
+
+	var nonceRule []interface{}
+	for _, nonceItem := range nonce {
+		nonceRule = append(nonceRule, nonceItem)
+	}
+	var numeratorRule []interface{}
+	for _, numeratorItem := range numerator {
+		numeratorRule = append(numeratorRule, numeratorItem)
+	}
+	var denominatorRule []interface{}
+	for _, denominatorItem := range denominator {
+		denominatorRule = append(denominatorRule, denominatorItem)
+	}
+
+	logs, sub, err := _Gateway.contract.FilterLogs(opts, "HighTierVoteWeightThresholdUpdated", nonceRule, numeratorRule, denominatorRule)
+	if err != nil {
+		return nil, err
+	}
+	return &GatewayHighTierVoteWeightThresholdUpdatedIterator{contract: _Gateway.contract, event: "HighTierVoteWeightThresholdUpdated", logs: logs, sub: sub}, nil
+}
+
+// WatchHighTierVoteWeightThresholdUpdated is a free log subscription operation binding the contract event 0x31312c97b89cc751b832d98fd459b967a2c3eef3b49757d1cf5ebaa12bb6eee1.
+//
+// Solidity: event HighTierVoteWeightThresholdUpdated(uint256 indexed nonce, uint256 indexed numerator, uint256 indexed denominator, uint256 previousNumerator, uint256 previousDenominator)
+func (_Gateway *GatewayFilterer) WatchHighTierVoteWeightThresholdUpdated(opts *bind.WatchOpts, sink chan<- *GatewayHighTierVoteWeightThresholdUpdated, nonce []*big.Int, numerator []*big.Int, denominator []*big.Int) (event.Subscription, error) {
+
+	var nonceRule []interface{}
+	for _, nonceItem := range nonce {
+		nonceRule = append(nonceRule, nonceItem)
+	}
+	var numeratorRule []interface{}
+	for _, numeratorItem := range numerator {
+		numeratorRule = append(numeratorRule, numeratorItem)
+	}
+	var denominatorRule []interface{}
+	for _, denominatorItem := range denominator {
+		denominatorRule = append(denominatorRule, denominatorItem)
+	}
+
+	logs, sub, err := _Gateway.contract.WatchLogs(opts, "HighTierVoteWeightThresholdUpdated", nonceRule, numeratorRule, denominatorRule)
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(GatewayHighTierVoteWeightThresholdUpdated)
+				if err := _Gateway.contract.UnpackLog(event, "HighTierVoteWeightThresholdUpdated", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// ParseHighTierVoteWeightThresholdUpdated is a log parse operation binding the contract event 0x31312c97b89cc751b832d98fd459b967a2c3eef3b49757d1cf5ebaa12bb6eee1.
+//
+// Solidity: event HighTierVoteWeightThresholdUpdated(uint256 indexed nonce, uint256 indexed numerator, uint256 indexed denominator, uint256 previousNumerator, uint256 previousDenominator)
+func (_Gateway *GatewayFilterer) ParseHighTierVoteWeightThresholdUpdated(log types.Log) (*GatewayHighTierVoteWeightThresholdUpdated, error) {
+	event := new(GatewayHighTierVoteWeightThresholdUpdated)
+	if err := _Gateway.contract.UnpackLog(event, "HighTierVoteWeightThresholdUpdated", log); err != nil {
 		return nil, err
 	}
 	event.Raw = log
@@ -2942,12 +3175,13 @@ func (it *GatewayTokenMappedIterator) Close() error {
 type GatewayTokenMapped struct {
 	MainchainTokens []common.Address
 	RoninTokens     []common.Address
+	Standards       []uint8
 	Raw             types.Log // Blockchain specific contextual infos
 }
 
-// FilterTokenMapped is a free log retrieval operation binding the contract event 0x1b7fd57807f95645ee3e0d5a22377a7779e93655cd5f6871151ae7129df015b3.
+// FilterTokenMapped is a free log retrieval operation binding the contract event 0xa4f03cc9c0e0aeb5b71b4ec800702753f65748c2cf3064695ba8e8b46be70444.
 //
-// Solidity: event TokenMapped(address[] mainchainTokens, address[] roninTokens)
+// Solidity: event TokenMapped(address[] mainchainTokens, address[] roninTokens, uint8[] standards)
 func (_Gateway *GatewayFilterer) FilterTokenMapped(opts *bind.FilterOpts) (*GatewayTokenMappedIterator, error) {
 
 	logs, sub, err := _Gateway.contract.FilterLogs(opts, "TokenMapped")
@@ -2957,9 +3191,9 @@ func (_Gateway *GatewayFilterer) FilterTokenMapped(opts *bind.FilterOpts) (*Gate
 	return &GatewayTokenMappedIterator{contract: _Gateway.contract, event: "TokenMapped", logs: logs, sub: sub}, nil
 }
 
-// WatchTokenMapped is a free log subscription operation binding the contract event 0x1b7fd57807f95645ee3e0d5a22377a7779e93655cd5f6871151ae7129df015b3.
+// WatchTokenMapped is a free log subscription operation binding the contract event 0xa4f03cc9c0e0aeb5b71b4ec800702753f65748c2cf3064695ba8e8b46be70444.
 //
-// Solidity: event TokenMapped(address[] mainchainTokens, address[] roninTokens)
+// Solidity: event TokenMapped(address[] mainchainTokens, address[] roninTokens, uint8[] standards)
 func (_Gateway *GatewayFilterer) WatchTokenMapped(opts *bind.WatchOpts, sink chan<- *GatewayTokenMapped) (event.Subscription, error) {
 
 	logs, sub, err := _Gateway.contract.WatchLogs(opts, "TokenMapped")
@@ -2994,9 +3228,9 @@ func (_Gateway *GatewayFilterer) WatchTokenMapped(opts *bind.WatchOpts, sink cha
 	}), nil
 }
 
-// ParseTokenMapped is a log parse operation binding the contract event 0x1b7fd57807f95645ee3e0d5a22377a7779e93655cd5f6871151ae7129df015b3.
+// ParseTokenMapped is a log parse operation binding the contract event 0xa4f03cc9c0e0aeb5b71b4ec800702753f65748c2cf3064695ba8e8b46be70444.
 //
-// Solidity: event TokenMapped(address[] mainchainTokens, address[] roninTokens)
+// Solidity: event TokenMapped(address[] mainchainTokens, address[] roninTokens, uint8[] standards)
 func (_Gateway *GatewayFilterer) ParseTokenMapped(log types.Log) (*GatewayTokenMapped, error) {
 	event := new(GatewayTokenMapped)
 	if err := _Gateway.contract.UnpackLog(event, "TokenMapped", log); err != nil {
