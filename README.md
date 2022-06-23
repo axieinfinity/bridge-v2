@@ -66,10 +66,10 @@ maximum number of pending/processing tasks queried from database
 #### 6. transactionCheckPeriod
 period of checking whether a transaction is mined or not by querying its transaction's receipt. If receipt is found, it will try 3 more times to make sure the transaction is not replaced because of reorg.
 
-#### 7.secret
+#### 7. secret
 stores private key of validator and relayer. These fields can be empty and passed via environment variables through 2 variables: `RONIN_VALIDATOR_KEY`, `RONIN_RELAYER_KEY` and Ethereum are: `ETHEREUM_VALIDATOR_KEY`, `ETHEREUM_RELAYER_KEY`
-##### syntax: `<listenerName>__<key>`
-##### example: `Ronin__xxxx4563e6591c1eba4b932a3513006cb5bcd1a6f69c32295dxxxx`
+##### syntax: `<key>`
+##### example: `xxxx4563e6591c1eba4b932a3513006cb5bcd1a6f69c32295dxxxx`
 
 #### 8. fromHeight
 Initially, bridge uses this property to load data from this block. After that, bridge will store latest processed block into `processed_block` table and use value from this table to continue.
