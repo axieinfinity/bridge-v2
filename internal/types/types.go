@@ -81,6 +81,8 @@ type IListener interface {
 
 	GetEthClient() utils.EthClient
 	GetTask() ITask
+
+	IsUpTodate() bool
 }
 
 type IEthListener interface {
@@ -117,6 +119,7 @@ type IBlock interface {
 	GetHeight() uint64
 	GetTransactions() []ITransaction
 	GetLogs() []ILog
+	GetTimestamp() uint64
 }
 
 type IJob interface {

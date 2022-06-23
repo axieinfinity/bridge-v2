@@ -320,6 +320,15 @@ func (c *Controller) Start() error {
 		if listener.IsDisabled() {
 			continue
 		}
+		// check whether node is up-to-date or not
+		// it guarantees that blocks data are consistent to other nodes
+		for {
+			if listener.IsUpTodate() {
+				break
+			}
+			// sleep for 10s
+			time.Sleep(10 * time.Second)
+		}
 		go c.startListener(listener, 0)
 	}
 	return nil
