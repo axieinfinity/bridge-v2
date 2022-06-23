@@ -155,6 +155,10 @@ func (e *EthereumListener) GetCurrentBlock() types.IBlock {
 	return e.currentBlock.Load().(types.IBlock)
 }
 
+func (e *EthereumListener) IsUpTodate() bool {
+	return true
+}
+
 func (e *EthereumListener) GetProcessedBlock() (types.IBlock, error) {
 	chainId, err := e.GetChainID()
 	if err != nil {

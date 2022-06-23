@@ -63,6 +63,10 @@ func (b *EthBlock) GetLogs() []types.ILog {
 	return b.logs
 }
 
+func (b *EthBlock) GetTimestamp() uint64 {
+	return b.block.Time()
+}
+
 type EthTransaction struct {
 	chainId *big.Int
 	sender  common.Address

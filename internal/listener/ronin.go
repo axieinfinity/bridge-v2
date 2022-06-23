@@ -69,6 +69,16 @@ func (l *RoninListener) StoreMainchainWithdrawCallback(fromChainId *big.Int, tx 
 	})
 }
 
+func (l *RoninListener) IsUpTodate() bool {
+	latestBlock, err := l.GetLatestBlock()
+	if err != nil {
+		log.Error("[RoninListener][IsUpTodate] error while get latest block", "err", err, "listener", l.GetName())
+		return false
+	}
+	// true if timestamp is within 1 hour
+	return uint64(time.Now().Unix())-latestBlock.GetTimestamp() <= uint64(time.Hour)
+}
+
 func (l *RoninListener) ProvideReceiptSignatureCallback(fromChainId *big.Int, tx types.ITransaction, data []byte) error {
 	// check database if receipt exist then do nothing
 	// Unpack event from data
