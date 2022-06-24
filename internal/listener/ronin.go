@@ -16,6 +16,8 @@ import (
 	"time"
 )
 
+const oneHour = 3600
+
 type RoninListener struct {
 	*EthereumListener
 	task types.ITask
@@ -76,7 +78,12 @@ func (l *RoninListener) IsUpTodate() bool {
 		return false
 	}
 	// true if timestamp is within 1 hour
-	return uint64(time.Now().Unix())-latestBlock.GetTimestamp() <= uint64(time.Hour)
+	distance := uint64(time.Now().Unix()) - latestBlock.GetTimestamp()
+	if distance > uint64(oneHour) {
+		log.Info("Node is not up-to-date, keep waiting...", "distance", distance, "listener", l.GetName())
+		return false
+	}
+	return true
 }
 
 func (l *RoninListener) ProvideReceiptSignatureCallback(fromChainId *big.Int, tx types.ITransaction, data []byte) error {
