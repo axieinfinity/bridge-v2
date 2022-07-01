@@ -177,6 +177,7 @@ type ITaskStore interface {
 	IncrementRetries(ids []int) error
 	DeleteTasks([]string, uint64) error
 	Count() int64
+	ResetTo(ids []string, status string) error
 }
 
 type IDepositStore interface {

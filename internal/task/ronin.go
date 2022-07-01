@@ -3,10 +3,9 @@ package task
 import (
 	"context"
 	"crypto/ecdsa"
-	"errors"
 	"fmt"
 	"github.com/axieinfinity/bridge-v2/generated_contracts/ethereum/gateway"
-	gateway2 "github.com/axieinfinity/bridge-v2/generated_contracts/ronin/gateway"
+	roninGateway "github.com/axieinfinity/bridge-v2/generated_contracts/ronin/gateway"
 	"github.com/axieinfinity/bridge-v2/internal/models"
 	"github.com/axieinfinity/bridge-v2/internal/types"
 	"github.com/axieinfinity/bridge-v2/internal/utils"
@@ -198,43 +197,45 @@ func (r *RoninTask) checkProcessingTasks() error {
 			// check transaction receipt status
 			log.Info("[RoninTask][checkProcessingTasks] Start checking transaction status", "tx", task.TransactionHash)
 			receipt, err := r.listener.GetReceipt(common.HexToHash(task.TransactionHash))
-			if err != nil {
+			if err != nil || receipt == nil {
 				failedTasksMap.Store(task.TransactionHash, struct{}{})
 				return
 			}
-			if receipt != nil {
-				// start confirmation step
-				// start 3 times confirmation
-				for i := 0; i < int(r.listener.Config().SafeBlockRange); i++ {
-					time.Sleep(r.listener.Config().TransactionCheckPeriod * time.Second)
-					confirmedReceipt, _ := r.listener.GetReceipt(common.HexToHash(task.TransactionHash))
-					if confirmedReceipt == nil { // receipt is not found, then reorg may happen then break and retry again
-						failedTasksMap.Store(task.TransactionHash, struct{}{})
-						return
-					}
-				}
-				// if receipt status is failed then add tx to failed tasks map
-				if receipt.Status == 1 {
-					successTasks.Store(task.TransactionHash, receipt.Status)
+			// start confirmation step
+			// start 3 times confirmation
+			for i := 0; i < int(r.listener.Config().SafeBlockRange); i++ {
+				time.Sleep(r.listener.Config().TransactionCheckPeriod * time.Second)
+				confirmedReceipt, _ := r.listener.GetReceipt(common.HexToHash(task.TransactionHash))
+				if confirmedReceipt == nil { // receipt is not found, then reorg may happen then break and retry again
+					failedTasksMap.Store(task.TransactionHash, struct{}{})
 					return
 				}
 			}
-			failedTasksMap.Store(task.TransactionHash, struct{}{})
+			// add task and transaction's status into successTasks
+			successTasks.Store(task, receipt.Status)
 		}(t)
 	}
 	wg.Wait()
 
 	// collect successTasks
 	var (
-		successTxs []string
-		failedTxs  []string
+		successTxs     []string
+		failedTxs      []string
+		resetToPending []string
 	)
 
 	successTasks.Range(func(key interface{}, value interface{}) bool {
+		task := key.(*models.Task)
 		if value.(uint64) == 1 {
-			successTxs = append(successTxs, key.(string))
+			successTxs = append(successTxs, task.TransactionHash)
 		} else {
-			failedTxs = append(failedTxs, key.(string))
+			if task.Retries+1 >= 10 {
+				// append to failedTxs and update all tasks with this transactionHash to done
+				failedTxs = append(failedTxs, task.TransactionHash)
+			} else {
+				// append to resetToPending and update all tasks with this transactionHash to pending
+				resetToPending = append(resetToPending, task.TransactionHash)
+			}
 		}
 		return true
 	})
@@ -281,6 +282,13 @@ func (r *RoninTask) checkProcessingTasks() error {
 	if len(retryTaskIds) > 0 {
 		if err = r.store.GetTaskStore().IncrementRetries(retryTaskIds); err != nil {
 			log.Error("[RoninTask][checkProcessingTasks] error while increment retries", "err", err)
+		}
+	}
+
+	// update all tasks contain failed txs to pending
+	if len(resetToPending) > 0 {
+		if err = r.store.GetTaskStore().ResetTo(resetToPending, types.STATUS_PENDING); err != nil {
+			log.Error("[RoninTask][checkProcessingTasks] error while reset tasks to pending", "err", err)
 		}
 	}
 
@@ -365,198 +373,114 @@ func (r *BulkTask) sendBulkTransactions(sendTxs func(tasks []*models.Task) (succ
 
 func (r *BulkTask) sendDepositTransaction(tasks []*models.Task) (successTasks []*models.Task, failedTasks []*models.Task, tx *ethtypes.Transaction) {
 	var (
-		receipts []gateway2.TransferReceipt
+		receipts []roninGateway.TransferReceipt
 	)
 	// create caller
-	caller, err := gateway2.NewGatewayCaller(common.HexToAddress(r.contracts[types.GATEWAY_CONTRACT]), r.client)
+	caller, err := roninGateway.NewGatewayCaller(common.HexToAddress(r.contracts[types.GATEWAY_CONTRACT]), r.client)
 	if err != nil {
-		return
+		for _, t := range tasks {
+			t.LastError = err.Error()
+			failedTasks = append(failedTasks, t)
+		}
+		return nil, failedTasks, nil
+	}
+
+	// create transactor
+	transactor, err := roninGateway.NewGatewayTransactor(common.HexToAddress(r.contracts[types.GATEWAY_CONTRACT]), r.client)
+	if err != nil {
+		for _, t := range tasks {
+			t.LastError = err.Error()
+			failedTasks = append(failedTasks, t)
+		}
+		return nil, failedTasks, nil
 	}
 
 	for _, t := range tasks {
-		ethEvent := new(gateway.GatewayDepositRequested)
-		ethGatewayAbi, err := gateway.GatewayMetaData.GetAbi()
+		ok, receipt, err := r.ValidateDepositTask(caller, t)
 		if err != nil {
 			t.LastError = err.Error()
 			failedTasks = append(failedTasks, t)
 			continue
 		}
 
-		data := common.Hex2Bytes(t.Data)
-		if err = ethGatewayAbi.UnpackIntoInterface(ethEvent, "DepositRequested", data); err != nil {
-			t.LastError = err.Error()
-			failedTasks = append(failedTasks, t)
-			continue
-		}
 		// append task into success tasks
 		successTasks = append(successTasks, t)
 
-		// check deposit vote
-		result, err := caller.DepositVote(nil, ethEvent.Receipt.Mainchain.ChainId, ethEvent.Receipt.Id)
-		if err != nil {
-			t.LastError = err.Error()
-			failedTasks = append(failedTasks, t)
-			continue
-		}
-		if result.Status == types.VoteStatusExecuted {
-			continue
-		}
-
-		// check if current validator has been voted for this deposit or not
-		voted, err := caller.DepositVoted(nil, ethEvent.Receipt.Mainchain.ChainId, ethEvent.Receipt.Id, crypto.PubkeyToAddress(r.validator.PublicKey))
-		if err != nil {
-			t.LastError = err.Error()
-			failedTasks = append(failedTasks, t)
-			continue
-		}
-		if voted {
+		// if deposit request is executed or voted (ok) then do nothing
+		if ok {
 			continue
 		}
 
 		// append new receipt into receipts slice
-		receipts = append(receipts, gateway2.TransferReceipt{
-			Id:   ethEvent.Receipt.Id,
-			Kind: ethEvent.Receipt.Kind,
-			Mainchain: gateway2.TokenOwner{
-				Addr:      ethEvent.Receipt.Mainchain.Addr,
-				TokenAddr: ethEvent.Receipt.Mainchain.TokenAddr,
-				ChainId:   ethEvent.Receipt.Mainchain.ChainId,
+		receipts = append(receipts, roninGateway.TransferReceipt{
+			Id:   receipt.Id,
+			Kind: receipt.Kind,
+			Mainchain: roninGateway.TokenOwner{
+				Addr:      receipt.Mainchain.Addr,
+				TokenAddr: receipt.Mainchain.TokenAddr,
+				ChainId:   receipt.Mainchain.ChainId,
 			},
-			Ronin: gateway2.TokenOwner{
-				Addr:      ethEvent.Receipt.Ronin.Addr,
-				TokenAddr: ethEvent.Receipt.Ronin.TokenAddr,
-				ChainId:   ethEvent.Receipt.Ronin.ChainId,
+			Ronin: roninGateway.TokenOwner{
+				Addr:      receipt.Ronin.Addr,
+				TokenAddr: receipt.Ronin.TokenAddr,
+				ChainId:   receipt.Ronin.ChainId,
 			},
-			Info: gateway2.TokenInfo{
-				Erc:      ethEvent.Receipt.Info.Erc,
-				Id:       ethEvent.Receipt.Info.Id,
-				Quantity: ethEvent.Receipt.Info.Quantity,
+			Info: roninGateway.TokenInfo{
+				Erc:      receipt.Info.Erc,
+				Id:       receipt.Info.Id,
+				Quantity: receipt.Info.Quantity,
 			},
 		})
 	}
-	// send tx with above receipts
-	c, err := gateway2.NewGatewayTransactor(common.HexToAddress(r.contracts[types.GATEWAY_CONTRACT]), r.client)
-	if err != nil {
-		// append all success tasks into failed tasks
-		for _, t := range successTasks {
-			t.LastError = err.Error()
-			failedTasks = append(failedTasks, t)
+	if len(receipts) > 0 {
+		tx, err = r.util.SendContractTransaction(r.validator, r.chainId, func(opts *bind.TransactOpts) (*ethtypes.Transaction, error) {
+			return transactor.TryBulkDepositFor(opts, receipts)
+		})
+		if err != nil {
+			for _, t := range successTasks {
+				t.LastError = err.Error()
+				failedTasks = append(failedTasks, t)
+			}
+			return nil, failedTasks, nil
 		}
-		return nil, failedTasks, nil
-	}
-	tx, err = r.util.SendContractTransaction(r.validator, r.chainId, func(opts *bind.TransactOpts) (*ethtypes.Transaction, error) {
-		return c.TryBulkDepositFor(opts, receipts)
-	})
-	if err != nil {
-		for _, t := range successTasks {
-			t.LastError = err.Error()
-			failedTasks = append(failedTasks, t)
-		}
-		return nil, failedTasks, nil
 	}
 	return
 }
 
 func (r *BulkTask) sendWithdrawalSignaturesTransaction(tasks []*models.Task) (successTasks []*models.Task, failedTasks []*models.Task, tx *ethtypes.Transaction) {
-
 	var (
 		ids        []*big.Int
 		signatures [][]byte
 	)
-
+	//create transactor
+	transactor, err := roninGateway.NewGatewayTransactor(common.HexToAddress(r.contracts[types.GATEWAY_CONTRACT]), r.client)
+	if err != nil {
+		// append all success tasks into failed tasks
+		for _, t := range tasks {
+			t.LastError = err.Error()
+			failedTasks = append(failedTasks, t)
+		}
+		return nil, failedTasks, nil
+	}
+	// create caller
+	caller, err := roninGateway.NewGatewayCaller(common.HexToAddress(r.contracts[types.GATEWAY_CONTRACT]), r.client)
+	if err != nil {
+		// append all success tasks into failed tasks
+		for _, t := range tasks {
+			t.LastError = err.Error()
+			failedTasks = append(failedTasks, t)
+		}
+		return nil, failedTasks, nil
+	}
 	for _, t := range tasks {
-		// Unpack event from data
-		ronEvent := new(gateway2.GatewayMainchainWithdrew)
-		ronGatewayAbi, err := gateway2.GatewayMetaData.GetAbi()
+		result, receipt, err := r.ValidateWithdrawalTask(caller, t)
 		if err != nil {
 			t.LastError = err.Error()
 			failedTasks = append(failedTasks, t)
 			continue
 		}
-		if err = ronGatewayAbi.UnpackIntoInterface(ronEvent, "MainchainWithdrew", common.Hex2Bytes(t.Data)); err != nil {
-			t.LastError = err.Error()
-			failedTasks = append(failedTasks, t)
-			continue
-		}
-		receipt := ronEvent.Receipt
-
-		// try getting withdrawal data from database by receipt.id, do nothing if withdrawal is found
-		withdrawal, _ := r.store.GetWithdrawalStore().GetWithdrawalById(receipt.Id.Int64())
-		if withdrawal != nil && withdrawal.ID > 0 {
-			continue
-		}
-
-		// try checking on smart contract
-		// create caller
-		caller, err := gateway2.NewGatewayCaller(common.HexToAddress(r.contracts[types.GATEWAY_CONTRACT]), r.client)
-		if err != nil {
-			t.LastError = err.Error()
-			failedTasks = append(failedTasks, t)
-			continue
-		}
-		result, err := caller.MainchainWithdrew(nil, receipt.Id)
-		if err != nil {
-			t.LastError = err.Error()
-			failedTasks = append(failedTasks, t)
-			continue
-		}
-
 		if !result {
-			typedData := apitypes.TypedData{
-				Types: apitypes.Types{
-					"EIP712Domain": []apitypes.Type{
-						{Name: "name", Type: "string"},
-						{Name: "version", Type: "string"},
-						{Name: "chainId", Type: "uint256"},
-						{Name: "verifyingContract", Type: "address"},
-					},
-					"Receipt": []apitypes.Type{
-						{Name: "id", Type: "uint256"},
-						{Name: "kind", Type: "uint8"},
-						{Name: "mainchain", Type: "TokenOwner"},
-						{Name: "ronin", Type: "TokenOwner"},
-						{Name: "info", Type: "TokenInfo"},
-					},
-					"TokenOwner": []apitypes.Type{
-						{Name: "addr", Type: "address"},
-						{Name: "tokenAddr", Type: "address"},
-						{Name: "chainId", Type: "uint256"},
-					},
-					"TokenInfo": []apitypes.Type{
-						{Name: "erc", Type: "uint8"},
-						{Name: "id", Type: "uint256"},
-						{Name: "quantity", Type: "uint256"},
-					},
-				},
-				Domain: apitypes.TypedDataDomain{
-					Name:              "MainchainGatewayV2",
-					Version:           "2",
-					ChainId:           math.NewHexOrDecimal256(receipt.Mainchain.ChainId.Int64()),
-					VerifyingContract: r.contracts[types.ETH_GATEWAY_CONTRACT],
-				},
-				PrimaryType: "Receipt",
-				Message: apitypes.TypedDataMessage{
-					"id":   receipt.Id.String(),
-					"kind": fmt.Sprintf("%d", receipt.Kind),
-					"mainchain": apitypes.TypedDataMessage{
-						"addr":      receipt.Mainchain.Addr.Hex(),
-						"tokenAddr": receipt.Mainchain.TokenAddr.Hex(),
-						"chainId":   receipt.Mainchain.ChainId.String(),
-					},
-					"ronin": apitypes.TypedDataMessage{
-						"addr":      receipt.Ronin.Addr.Hex(),
-						"tokenAddr": receipt.Ronin.TokenAddr.Hex(),
-						"chainId":   receipt.Ronin.ChainId.String(),
-					},
-					"info": apitypes.TypedDataMessage{
-						"erc":      fmt.Sprintf("%d", receipt.Info.Erc),
-						"id":       receipt.Info.Id.String(),
-						"quantity": receipt.Info.Quantity.String(),
-					},
-				},
-			}
-
-			sigs, err := r.util.SignTypedData(typedData, r.validator)
+			sigs, err := r.SignWithdrawalSignatures(receipt)
 			if err != nil {
 				t.LastError = err.Error()
 				failedTasks = append(failedTasks, t)
@@ -567,18 +491,10 @@ func (r *BulkTask) sendWithdrawalSignaturesTransaction(tasks []*models.Task) (su
 		}
 		successTasks = append(successTasks, t)
 	}
-	c, err := gateway2.NewGatewayTransactor(common.HexToAddress(r.contracts[types.GATEWAY_CONTRACT]), r.client)
-	if err != nil {
-		// append all success tasks into failed tasks
-		for _, t := range successTasks {
-			t.LastError = err.Error()
-			failedTasks = append(failedTasks, t)
-		}
-		return nil, failedTasks, nil
-	}
+
 	if len(ids) > 0 {
 		tx, err = r.util.SendContractTransaction(r.validator, r.chainId, func(opts *bind.TransactOpts) (*ethtypes.Transaction, error) {
-			return c.BulkSubmitWithdrawalSignatures(opts, ids, signatures)
+			return transactor.BulkSubmitWithdrawalSignatures(opts, ids, signatures)
 		})
 		if err != nil {
 			// append all success tasks into failed tasks
@@ -592,64 +508,110 @@ func (r *BulkTask) sendWithdrawalSignaturesTransaction(tasks []*models.Task) (su
 	return
 }
 
+func (r *BulkTask) SignWithdrawalSignatures(receipt roninGateway.TransferReceipt) (hexutil.Bytes, error) {
+	typedData := apitypes.TypedData{
+		Types: apitypes.Types{
+			"EIP712Domain": []apitypes.Type{
+				{Name: "name", Type: "string"},
+				{Name: "version", Type: "string"},
+				{Name: "chainId", Type: "uint256"},
+				{Name: "verifyingContract", Type: "address"},
+			},
+			"Receipt": []apitypes.Type{
+				{Name: "id", Type: "uint256"},
+				{Name: "kind", Type: "uint8"},
+				{Name: "mainchain", Type: "TokenOwner"},
+				{Name: "ronin", Type: "TokenOwner"},
+				{Name: "info", Type: "TokenInfo"},
+			},
+			"TokenOwner": []apitypes.Type{
+				{Name: "addr", Type: "address"},
+				{Name: "tokenAddr", Type: "address"},
+				{Name: "chainId", Type: "uint256"},
+			},
+			"TokenInfo": []apitypes.Type{
+				{Name: "erc", Type: "uint8"},
+				{Name: "id", Type: "uint256"},
+				{Name: "quantity", Type: "uint256"},
+			},
+		},
+		Domain: apitypes.TypedDataDomain{
+			Name:              "MainchainGatewayV2",
+			Version:           "2",
+			ChainId:           math.NewHexOrDecimal256(receipt.Mainchain.ChainId.Int64()),
+			VerifyingContract: r.contracts[types.ETH_GATEWAY_CONTRACT],
+		},
+		PrimaryType: "Receipt",
+		Message: apitypes.TypedDataMessage{
+			"id":   receipt.Id.String(),
+			"kind": fmt.Sprintf("%d", receipt.Kind),
+			"mainchain": apitypes.TypedDataMessage{
+				"addr":      receipt.Mainchain.Addr.Hex(),
+				"tokenAddr": receipt.Mainchain.TokenAddr.Hex(),
+				"chainId":   receipt.Mainchain.ChainId.String(),
+			},
+			"ronin": apitypes.TypedDataMessage{
+				"addr":      receipt.Ronin.Addr.Hex(),
+				"tokenAddr": receipt.Ronin.TokenAddr.Hex(),
+				"chainId":   receipt.Ronin.ChainId.String(),
+			},
+			"info": apitypes.TypedDataMessage{
+				"erc":      fmt.Sprintf("%d", receipt.Info.Erc),
+				"id":       receipt.Info.Id.String(),
+				"quantity": receipt.Info.Quantity.String(),
+			},
+		},
+	}
+	return r.util.SignTypedData(typedData, r.validator)
+}
+
 func (r *BulkTask) SendAckTransactions(tasks []*models.Task) (successTasks []*models.Task, failedTasks []*models.Task, tx *ethtypes.Transaction) {
-	var ids []*big.Int
-	c, err := gateway2.NewGatewayTransactor(common.HexToAddress(r.contracts[types.GATEWAY_CONTRACT]), r.client)
+	var (
+		ids []*big.Int
+	)
+	// create transactor
+	transactor, err := roninGateway.NewGatewayTransactor(common.HexToAddress(r.contracts[types.GATEWAY_CONTRACT]), r.client)
 	if err != nil {
 		for _, t := range tasks {
 			t.LastError = err.Error()
 		}
 		return nil, tasks, nil
 	}
+
+	// create caller
+	caller, err := roninGateway.NewGatewayCaller(common.HexToAddress(r.contracts[types.GATEWAY_CONTRACT]), r.client)
+	if err != nil {
+		for _, t := range tasks {
+			t.LastError = err.Error()
+		}
+		return nil, tasks, nil
+	}
+
+	// loop through tasks, check if they are qualified to send ack transaction or not
 	for _, t := range tasks {
-		// Unpack event data
-		ethEvent := new(gateway.GatewayWithdrew)
-		ethGatewayAbi, err := gateway.GatewayMetaData.GetAbi()
+		result, id, err := r.ValidateAckWithdrawalTask(caller, t)
 		if err != nil {
 			t.LastError = err.Error()
 			failedTasks = append(failedTasks, t)
 			continue
 		}
-
-		if err = ethGatewayAbi.UnpackIntoInterface(ethEvent, "Withdrew", common.Hex2Bytes(t.Data)); err != nil {
-			t.LastError = err.Error()
-			failedTasks = append(failedTasks, t)
-			continue
-		}
-
-		// try checking on smart contract
-		// create caller
-		caller, err := gateway2.NewGatewayCaller(common.HexToAddress(r.contracts[types.GATEWAY_CONTRACT]), r.client)
-		if err != nil {
-			t.LastError = err.Error()
-			failedTasks = append(failedTasks, t)
-			continue
-		}
-		result, err := caller.MainchainWithdrew(nil, ethEvent.Receipt.Id)
-		if err != nil {
-			t.LastError = err.Error()
-			failedTasks = append(failedTasks, t)
-			continue
-		}
-
 		if !result {
-			ids = append(ids, ethEvent.Receipt.Id)
+			ids = append(ids, id)
 		}
 		successTasks = append(successTasks, t)
 	}
-	tx, err = r.util.SendContractTransaction(r.validator, r.chainId, func(opts *bind.TransactOpts) (*ethtypes.Transaction, error) {
-		if ids != nil {
-			return c.TryBulkAcknowledgeMainchainWithdrew(opts, ids)
+	if len(ids) > 0 {
+		tx, err = r.util.SendContractTransaction(r.validator, r.chainId, func(opts *bind.TransactOpts) (*ethtypes.Transaction, error) {
+			return transactor.TryBulkAcknowledgeMainchainWithdrew(opts, ids)
+		})
+		if err != nil {
+			// append all success tasks into failed tasks
+			for _, t := range successTasks {
+				t.LastError = err.Error()
+				failedTasks = append(failedTasks, t)
+			}
+			return nil, failedTasks, nil
 		}
-		return nil, errors.New("empty withdraw ids list")
-	})
-	if err != nil {
-		// append all success tasks into failed tasks
-		for _, t := range successTasks {
-			t.LastError = err.Error()
-			failedTasks = append(failedTasks, t)
-		}
-		return nil, failedTasks, nil
 	}
 	return
 }
@@ -672,4 +634,104 @@ func updateTasks(store types.IMainStore, tasks []*models.Task, status, txHash st
 			log.Error("error while update task", "id", t.ID, "err", err)
 		}
 	}
+}
+
+// ValidateDepositTask validates if:
+// - current signer has been voted for a deposit request or not
+// - deposit request has been executed or not
+// also returns transfer receipt
+func (r *BulkTask) ValidateDepositTask(caller *roninGateway.GatewayCaller, task *models.Task) (bool, gateway.TransferReceipt, error) {
+	ethEvent := new(gateway.GatewayDepositRequested)
+	ethGatewayAbi, err := gateway.GatewayMetaData.GetAbi()
+	if err != nil {
+		return false, ethEvent.Receipt, err
+	}
+
+	data := common.Hex2Bytes(task.Data)
+	if err = ethGatewayAbi.UnpackIntoInterface(ethEvent, "DepositRequested", data); err != nil {
+		return false, ethEvent.Receipt, err
+	}
+
+	// check deposit vote
+	result, err := caller.DepositVote(nil, ethEvent.Receipt.Mainchain.ChainId, ethEvent.Receipt.Id)
+	if err != nil {
+		return false, ethEvent.Receipt, err
+	}
+	if result.Status == types.VoteStatusExecuted {
+		return true, ethEvent.Receipt, nil
+	}
+
+	// check if current validator has been voted for this deposit or not
+	voted, err := caller.DepositVoted(nil, ethEvent.Receipt.Mainchain.ChainId, ethEvent.Receipt.Id, crypto.PubkeyToAddress(r.validator.PublicKey))
+	if err != nil {
+		return false, ethEvent.Receipt, err
+	}
+	if voted {
+		return true, ethEvent.Receipt, nil
+	}
+	return false, ethEvent.Receipt, nil
+}
+
+// ValidateAckWithdrawalTask validates if:
+// - signer has been voted for a withdrawal or not
+// - withdrawal request is executed or not
+// returns true if withdraw is executed or voted
+// also returns receipt id
+func (r *BulkTask) ValidateAckWithdrawalTask(caller *roninGateway.GatewayCaller, task *models.Task) (bool, *big.Int, error) {
+	// Unpack event data
+	ethEvent := new(gateway.GatewayWithdrew)
+	ethGatewayAbi, err := gateway.GatewayMetaData.GetAbi()
+	if err != nil {
+		return false, nil, err
+	}
+
+	if err = ethGatewayAbi.UnpackIntoInterface(ethEvent, "Withdrew", common.Hex2Bytes(task.Data)); err != nil {
+		return false, nil, err
+	}
+
+	// check if withdraw has been executed or not
+	result, err := caller.MainchainWithdrew(nil, ethEvent.Receipt.Id)
+	if err != nil {
+		return false, nil, err
+	}
+	if result {
+		return true, ethEvent.Receipt.Id, nil
+	}
+
+	// check if withdrew has been voted or not
+	voted, err := caller.MainchainWithdrewVoted(nil, ethEvent.Receipt.Id, crypto.PubkeyToAddress(r.validator.PublicKey))
+	if err != nil {
+		return false, nil, err
+	}
+	return voted, ethEvent.Receipt.Id, nil
+}
+
+// ValidateWithdrawalTask validates if:
+// - Withdrawal request is executed or not
+// returns true if it is executed
+// also returns transfer receipt
+func (r *BulkTask) ValidateWithdrawalTask(caller *roninGateway.GatewayCaller, task *models.Task) (bool, roninGateway.TransferReceipt, error) {
+	// Unpack event from data
+	ronEvent := new(roninGateway.GatewayMainchainWithdrew)
+	ronGatewayAbi, err := roninGateway.GatewayMetaData.GetAbi()
+	if err != nil {
+		return false, ronEvent.Receipt, err
+	}
+	if err = ronGatewayAbi.UnpackIntoInterface(ronEvent, "MainchainWithdrew", common.Hex2Bytes(task.Data)); err != nil {
+		return false, ronEvent.Receipt, err
+	}
+	receipt := ronEvent.Receipt
+
+	// try getting withdrawal data from database by receipt.id, do nothing if withdrawal is found
+	withdrawal, _ := r.store.GetWithdrawalStore().GetWithdrawalById(receipt.Id.Int64())
+	if withdrawal != nil && withdrawal.ID > 0 {
+		return true, ronEvent.Receipt, nil
+	}
+
+	// check if withdraw has been executed or not
+	result, err := caller.MainchainWithdrew(nil, receipt.Id)
+	if err != nil {
+		return false, ronEvent.Receipt, err
+	}
+	return result, ronEvent.Receipt, nil
 }

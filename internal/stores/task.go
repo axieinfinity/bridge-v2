@@ -44,6 +44,14 @@ func (t *TaskStore) UpdateTasksWithTransactionHash(txs []string, transactionStat
 	}).Error
 }
 
+func (t *TaskStore) ResetTo(txs []string, status string) error {
+	columns := map[string]interface{}{
+		"status":  status,
+		"retries": gorm.Expr("retries + 1"),
+	}
+	return t.Model(&models.Task{}).Where("transaction_hash in ?", txs).Updates(columns).Error
+}
+
 func (t *TaskStore) IncrementRetries(ids []int) error {
 	return t.Model(&models.Task{}).Where("id in ?", ids).Update("retries", gorm.Expr("retries + 1")).Error
 }
