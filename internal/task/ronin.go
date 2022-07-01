@@ -363,8 +363,9 @@ func (r *BulkTask) sendBulkTransactions(sendTxs func(tasks []*models.Task) (succ
 		successTasks, failedTasks, transaction := sendTxs(r.tasks[start:next])
 
 		if transaction != nil {
-			txHash = transaction.Hash().Hex()
-			go updateTasks(r.store, successTasks, types.STATUS_PROCESSING, txHash)
+			go updateTasks(r.store, successTasks, types.STATUS_PROCESSING, transaction.Hash().Hex())
+		} else {
+			go updateTasks(r.store, successTasks, types.STATUS_DONE, "")
 		}
 		go updateTasks(r.store, failedTasks, types.STATUS_FAILED, txHash)
 		start = next
