@@ -287,6 +287,7 @@ func (r *RoninTask) checkProcessingTasks() error {
 
 	// update all tasks contain failed txs to pending
 	if len(resetToPending) > 0 {
+		log.Info("[RoninTask][checkProcessingTasks] reset tasks to pending", "transactionHash", resetToPending)
 		if err = r.store.GetTaskStore().ResetTo(resetToPending, types.STATUS_PENDING); err != nil {
 			log.Error("[RoninTask][checkProcessingTasks] error while reset tasks to pending", "err", err)
 		}
@@ -373,7 +374,8 @@ func (r *BulkTask) sendBulkTransactions(sendTxs func(tasks []*models.Task) (succ
 
 func (r *BulkTask) sendDepositTransaction(tasks []*models.Task) (successTasks []*models.Task, failedTasks []*models.Task, tx *ethtypes.Transaction) {
 	var (
-		receipts []roninGateway.TransferReceipt
+		receipts        []roninGateway.TransferReceipt
+		processingTasks []*models.Task
 	)
 	// create caller
 	caller, err := roninGateway.NewGatewayCaller(common.HexToAddress(r.contracts[types.GATEWAY_CONTRACT]), r.client)
@@ -403,13 +405,13 @@ func (r *BulkTask) sendDepositTransaction(tasks []*models.Task) (successTasks []
 			continue
 		}
 
-		// append task into success tasks
-		successTasks = append(successTasks, t)
-
-		// if deposit request is executed or voted (ok) then do nothing
+		// if deposit request is executed or voted (ok) then do nothing and append task into success tasks
 		if ok {
+			successTasks = append(successTasks, t)
 			continue
 		}
+		// otherwise add task to processingTasks to adjust after sending transaction
+		processingTasks = append(processingTasks, t)
 
 		// append new receipt into receipts slice
 		receipts = append(receipts, roninGateway.TransferReceipt{
@@ -437,20 +439,23 @@ func (r *BulkTask) sendDepositTransaction(tasks []*models.Task) (successTasks []
 			return transactor.TryBulkDepositFor(opts, receipts)
 		})
 		if err != nil {
-			for _, t := range successTasks {
+			for _, t := range processingTasks {
 				t.LastError = err.Error()
 				failedTasks = append(failedTasks, t)
 			}
-			return nil, failedTasks, nil
+			return successTasks, failedTasks, nil
 		}
 	}
+	// update successTasks from processingTasks
+	successTasks = append(successTasks, processingTasks...)
 	return
 }
 
 func (r *BulkTask) sendWithdrawalSignaturesTransaction(tasks []*models.Task) (successTasks []*models.Task, failedTasks []*models.Task, tx *ethtypes.Transaction) {
 	var (
-		ids        []*big.Int
-		signatures [][]byte
+		ids             []*big.Int
+		signatures      [][]byte
+		processingTasks []*models.Task
 	)
 	//create transactor
 	transactor, err := roninGateway.NewGatewayTransactor(common.HexToAddress(r.contracts[types.GATEWAY_CONTRACT]), r.client)
@@ -479,17 +484,21 @@ func (r *BulkTask) sendWithdrawalSignaturesTransaction(tasks []*models.Task) (su
 			failedTasks = append(failedTasks, t)
 			continue
 		}
-		if !result {
-			sigs, err := r.SignWithdrawalSignatures(receipt)
-			if err != nil {
-				t.LastError = err.Error()
-				failedTasks = append(failedTasks, t)
-				continue
-			}
-			signatures = append(signatures, sigs)
-			ids = append(ids, receipt.Id)
+		// if validated then do nothing and add to successTasks
+		if result {
+			successTasks = append(successTasks, t)
+			continue
 		}
-		successTasks = append(successTasks, t)
+		// otherwise add to processingTasks
+		sigs, err := r.SignWithdrawalSignatures(receipt)
+		if err != nil {
+			t.LastError = err.Error()
+			failedTasks = append(failedTasks, t)
+			continue
+		}
+		processingTasks = append(processingTasks, t)
+		signatures = append(signatures, sigs)
+		ids = append(ids, receipt.Id)
 	}
 
 	if len(ids) > 0 {
@@ -498,13 +507,15 @@ func (r *BulkTask) sendWithdrawalSignaturesTransaction(tasks []*models.Task) (su
 		})
 		if err != nil {
 			// append all success tasks into failed tasks
-			for _, t := range successTasks {
+			for _, t := range processingTasks {
 				t.LastError = err.Error()
 				failedTasks = append(failedTasks, t)
 			}
-			return nil, failedTasks, nil
+			return successTasks, failedTasks, nil
 		}
 	}
+	// update successTasks from processingTasks
+	successTasks = append(successTasks, processingTasks...)
 	return
 }
 
@@ -567,7 +578,8 @@ func (r *BulkTask) SignWithdrawalSignatures(receipt roninGateway.TransferReceipt
 
 func (r *BulkTask) SendAckTransactions(tasks []*models.Task) (successTasks []*models.Task, failedTasks []*models.Task, tx *ethtypes.Transaction) {
 	var (
-		ids []*big.Int
+		ids             []*big.Int
+		processingTasks []*models.Task
 	)
 	// create transactor
 	transactor, err := roninGateway.NewGatewayTransactor(common.HexToAddress(r.contracts[types.GATEWAY_CONTRACT]), r.client)
@@ -595,10 +607,14 @@ func (r *BulkTask) SendAckTransactions(tasks []*models.Task) (successTasks []*mo
 			failedTasks = append(failedTasks, t)
 			continue
 		}
-		if !result {
-			ids = append(ids, id)
+		// if validated then do nothing and add to successTasks
+		if result {
+			successTasks = append(successTasks, t)
+			continue
 		}
-		successTasks = append(successTasks, t)
+		// otherwise add id to ids and add task to processingTasks
+		ids = append(ids, id)
+		processingTasks = append(processingTasks, t)
 	}
 	if len(ids) > 0 {
 		tx, err = r.util.SendContractTransaction(r.validator, r.chainId, func(opts *bind.TransactOpts) (*ethtypes.Transaction, error) {
@@ -606,13 +622,15 @@ func (r *BulkTask) SendAckTransactions(tasks []*models.Task) (successTasks []*mo
 		})
 		if err != nil {
 			// append all success tasks into failed tasks
-			for _, t := range successTasks {
+			for _, t := range processingTasks {
 				t.LastError = err.Error()
 				failedTasks = append(failedTasks, t)
 			}
-			return nil, failedTasks, nil
+			return successTasks, failedTasks, nil
 		}
 	}
+	// update successTasks from processingTasks
+	successTasks = append(successTasks, processingTasks...)
 	return
 }
 
@@ -666,10 +684,7 @@ func (r *BulkTask) ValidateDepositTask(caller *roninGateway.GatewayCaller, task 
 	if err != nil {
 		return false, ethEvent.Receipt, err
 	}
-	if voted {
-		return true, ethEvent.Receipt, nil
-	}
-	return false, ethEvent.Receipt, nil
+	return voted, ethEvent.Receipt, nil
 }
 
 // ValidateAckWithdrawalTask validates if:
