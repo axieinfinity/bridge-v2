@@ -26,7 +26,7 @@ import (
 const (
 	defaultLimitRecords = 50
 	defaultMaxTry       = 5
-	defaultReceiptCheck = 30
+	defaultReceiptCheck = 50
 )
 
 var defaultTaskInterval = 1 * time.Second
@@ -194,6 +194,7 @@ func (r *RoninTask) checkProcessingTasks() error {
 
 		go func(task *models.Task) {
 			defer wg.Done()
+
 			// check transaction receipt status
 			log.Info("[RoninTask][checkProcessingTasks] Start checking transaction status", "tx", task.TransactionHash)
 			receipt, err := r.listener.GetReceipt(common.HexToHash(task.TransactionHash))
@@ -201,16 +202,16 @@ func (r *RoninTask) checkProcessingTasks() error {
 				failedTasksMap.Store(task.TransactionHash, struct{}{})
 				return
 			}
-			// start confirmation step
-			// start 3 times confirmation
-			for i := 0; i < int(r.listener.Config().SafeBlockRange); i++ {
-				time.Sleep(r.listener.Config().TransactionCheckPeriod * time.Second)
-				confirmedReceipt, _ := r.listener.GetReceipt(common.HexToHash(task.TransactionHash))
-				if confirmedReceipt == nil { // receipt is not found, then reorg may happen then break and retry again
-					failedTasksMap.Store(task.TransactionHash, struct{}{})
-					return
-				}
+
+			time.Sleep(time.Duration(r.listener.Config().SafeBlockRange) * r.listener.Config().LoadInterval * time.Second)
+			confirmedReceipt, _ := r.listener.GetReceipt(common.HexToHash(task.TransactionHash))
+			if confirmedReceipt == nil {
+				// receipt is not found, then reorg may happen then break and
+				// send task to successTasks with status 0, which will be added to `resetToPending` list
+				successTasks.Store(task, 0)
+				return
 			}
+
 			// add task and transaction's status into successTasks
 			successTasks.Store(task, receipt.Status)
 		}(t)
@@ -248,7 +249,7 @@ func (r *RoninTask) checkProcessingTasks() error {
 	failedTasksMap.Range(func(key interface{}, value interface{}) bool {
 		failedTasks := processedTx[key.(string)]
 		for _, task := range failedTasks {
-			if task.Retries+1 >= 10 {
+			if task.Retries+1 >= 10 { // transaction not found
 				droppedTaskIds = append(droppedTaskIds, task.ID)
 			} else {
 				retryTaskIds = append(retryTaskIds, task.ID)
