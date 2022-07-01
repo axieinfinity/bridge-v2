@@ -347,7 +347,7 @@ func (r *BulkTask) send() {
 	}
 }
 
-func (r *BulkTask) sendBulkTransactions(sendTxs func(tasks []*models.Task) (successTasks []*models.Task, failedTasks []*models.Task, tx *ethtypes.Transaction)) {
+func (r *BulkTask) sendBulkTransactions(sendTxs func(tasks []*models.Task) (doneTasks, processingTasks, failedTasks []*models.Task, tx *ethtypes.Transaction)) {
 	start, end := 0, len(r.tasks)
 	for start < end {
 		var (
@@ -360,23 +360,21 @@ func (r *BulkTask) sendBulkTransactions(sendTxs func(tasks []*models.Task) (succ
 			next = end
 		}
 		log.Info("[BulkTask][sendBulkTransactions] start sending txs", "start", start, "end", end, "type", r.taskType)
-		successTasks, failedTasks, transaction := sendTxs(r.tasks[start:next])
+		doneTasks, processingTasks, failedTasks, transaction := sendTxs(r.tasks[start:next])
 
 		if transaction != nil {
-			go updateTasks(r.store, successTasks, types.STATUS_PROCESSING, transaction.Hash().Hex())
-		} else {
-			go updateTasks(r.store, successTasks, types.STATUS_DONE, "")
+			go updateTasks(r.store, processingTasks, types.STATUS_PROCESSING, transaction.Hash().Hex())
 		}
+		go updateTasks(r.store, doneTasks, types.STATUS_DONE, txHash)
 		go updateTasks(r.store, failedTasks, types.STATUS_FAILED, txHash)
 		start = next
 	}
 
 }
 
-func (r *BulkTask) sendDepositTransaction(tasks []*models.Task) (successTasks []*models.Task, failedTasks []*models.Task, tx *ethtypes.Transaction) {
+func (r *BulkTask) sendDepositTransaction(tasks []*models.Task) (doneTasks, processingTasks, failedTasks []*models.Task, tx *ethtypes.Transaction) {
 	var (
-		receipts        []roninGateway.TransferReceipt
-		processingTasks []*models.Task
+		receipts []roninGateway.TransferReceipt
 	)
 	// create caller
 	caller, err := roninGateway.NewGatewayCaller(common.HexToAddress(r.contracts[types.GATEWAY_CONTRACT]), r.client)
@@ -385,7 +383,7 @@ func (r *BulkTask) sendDepositTransaction(tasks []*models.Task) (successTasks []
 			t.LastError = err.Error()
 			failedTasks = append(failedTasks, t)
 		}
-		return nil, failedTasks, nil
+		return nil, nil, failedTasks, nil
 	}
 
 	// create transactor
@@ -395,7 +393,7 @@ func (r *BulkTask) sendDepositTransaction(tasks []*models.Task) (successTasks []
 			t.LastError = err.Error()
 			failedTasks = append(failedTasks, t)
 		}
-		return nil, failedTasks, nil
+		return nil, nil, failedTasks, nil
 	}
 
 	for _, t := range tasks {
@@ -406,9 +404,9 @@ func (r *BulkTask) sendDepositTransaction(tasks []*models.Task) (successTasks []
 			continue
 		}
 
-		// if deposit request is executed or voted (ok) then do nothing and append task into success tasks
+		// if deposit request is executed or voted (ok) then do nothing and add to doneTasks
 		if ok {
-			successTasks = append(successTasks, t)
+			doneTasks = append(doneTasks, t)
 			continue
 		}
 		// otherwise add task to processingTasks to adjust after sending transaction
@@ -444,19 +442,16 @@ func (r *BulkTask) sendDepositTransaction(tasks []*models.Task) (successTasks []
 				t.LastError = err.Error()
 				failedTasks = append(failedTasks, t)
 			}
-			return successTasks, failedTasks, nil
+			return doneTasks, nil, failedTasks, nil
 		}
 	}
-	// update successTasks from processingTasks
-	successTasks = append(successTasks, processingTasks...)
 	return
 }
 
-func (r *BulkTask) sendWithdrawalSignaturesTransaction(tasks []*models.Task) (successTasks []*models.Task, failedTasks []*models.Task, tx *ethtypes.Transaction) {
+func (r *BulkTask) sendWithdrawalSignaturesTransaction(tasks []*models.Task) (doneTasks, processingTasks, failedTasks []*models.Task, tx *ethtypes.Transaction) {
 	var (
-		ids             []*big.Int
-		signatures      [][]byte
-		processingTasks []*models.Task
+		ids        []*big.Int
+		signatures [][]byte
 	)
 	//create transactor
 	transactor, err := roninGateway.NewGatewayTransactor(common.HexToAddress(r.contracts[types.GATEWAY_CONTRACT]), r.client)
@@ -466,7 +461,7 @@ func (r *BulkTask) sendWithdrawalSignaturesTransaction(tasks []*models.Task) (su
 			t.LastError = err.Error()
 			failedTasks = append(failedTasks, t)
 		}
-		return nil, failedTasks, nil
+		return nil, nil, failedTasks, nil
 	}
 	// create caller
 	caller, err := roninGateway.NewGatewayCaller(common.HexToAddress(r.contracts[types.GATEWAY_CONTRACT]), r.client)
@@ -476,7 +471,7 @@ func (r *BulkTask) sendWithdrawalSignaturesTransaction(tasks []*models.Task) (su
 			t.LastError = err.Error()
 			failedTasks = append(failedTasks, t)
 		}
-		return nil, failedTasks, nil
+		return nil, nil, failedTasks, nil
 	}
 	for _, t := range tasks {
 		result, receipt, err := r.ValidateWithdrawalTask(caller, t)
@@ -485,9 +480,9 @@ func (r *BulkTask) sendWithdrawalSignaturesTransaction(tasks []*models.Task) (su
 			failedTasks = append(failedTasks, t)
 			continue
 		}
-		// if validated then do nothing and add to successTasks
+		// if validated then do nothing and add to doneTasks
 		if result {
-			successTasks = append(successTasks, t)
+			doneTasks = append(doneTasks, t)
 			continue
 		}
 		// otherwise add to processingTasks
@@ -512,11 +507,9 @@ func (r *BulkTask) sendWithdrawalSignaturesTransaction(tasks []*models.Task) (su
 				t.LastError = err.Error()
 				failedTasks = append(failedTasks, t)
 			}
-			return successTasks, failedTasks, nil
+			return doneTasks, nil, failedTasks, nil
 		}
 	}
-	// update successTasks from processingTasks
-	successTasks = append(successTasks, processingTasks...)
 	return
 }
 
@@ -577,10 +570,9 @@ func (r *BulkTask) SignWithdrawalSignatures(receipt roninGateway.TransferReceipt
 	return r.util.SignTypedData(typedData, r.validator)
 }
 
-func (r *BulkTask) SendAckTransactions(tasks []*models.Task) (successTasks []*models.Task, failedTasks []*models.Task, tx *ethtypes.Transaction) {
+func (r *BulkTask) SendAckTransactions(tasks []*models.Task) (doneTasks, processingTasks, failedTasks []*models.Task, tx *ethtypes.Transaction) {
 	var (
-		ids             []*big.Int
-		processingTasks []*models.Task
+		ids []*big.Int
 	)
 	// create transactor
 	transactor, err := roninGateway.NewGatewayTransactor(common.HexToAddress(r.contracts[types.GATEWAY_CONTRACT]), r.client)
@@ -588,7 +580,7 @@ func (r *BulkTask) SendAckTransactions(tasks []*models.Task) (successTasks []*mo
 		for _, t := range tasks {
 			t.LastError = err.Error()
 		}
-		return nil, tasks, nil
+		return nil, nil, tasks, nil
 	}
 
 	// create caller
@@ -597,7 +589,7 @@ func (r *BulkTask) SendAckTransactions(tasks []*models.Task) (successTasks []*mo
 		for _, t := range tasks {
 			t.LastError = err.Error()
 		}
-		return nil, tasks, nil
+		return nil, nil, tasks, nil
 	}
 
 	// loop through tasks, check if they are qualified to send ack transaction or not
@@ -608,9 +600,9 @@ func (r *BulkTask) SendAckTransactions(tasks []*models.Task) (successTasks []*mo
 			failedTasks = append(failedTasks, t)
 			continue
 		}
-		// if validated then do nothing and add to successTasks
+		// if validated then do nothing and add to doneTasks
 		if result {
-			successTasks = append(successTasks, t)
+			doneTasks = append(doneTasks, t)
 			continue
 		}
 		// otherwise add id to ids and add task to processingTasks
@@ -627,11 +619,9 @@ func (r *BulkTask) SendAckTransactions(tasks []*models.Task) (successTasks []*mo
 				t.LastError = err.Error()
 				failedTasks = append(failedTasks, t)
 			}
-			return successTasks, failedTasks, nil
+			return doneTasks, nil, failedTasks, nil
 		}
 	}
-	// update successTasks from processingTasks
-	successTasks = append(successTasks, processingTasks...)
 	return
 }
 
