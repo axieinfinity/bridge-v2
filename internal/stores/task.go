@@ -35,10 +35,6 @@ func (t *TaskStore) GetTasks(chain, status string, limit, retrySeconds int, befo
 	return tasks, err
 }
 
-func (t *TaskStore) UpdateTaskWithIds(ids []int, transactionStatus int, status string) error {
-	return t.Model(&models.Task{}).Where("id in ?", ids).Updates(map[string]interface{}{"status": status, "transaction_status": transactionStatus}).Error
-}
-
 func (t *TaskStore) UpdateTasksWithTransactionHash(txs []string, transactionStatus int, status string) error {
 	return t.Model(&models.Task{}).Where("transaction_hash in ?", txs).Updates(map[string]interface{}{
 		"status":             status,
@@ -52,10 +48,6 @@ func (t *TaskStore) ResetTo(txs []string, status string) error {
 		"retries": gorm.Expr("retries + 1"),
 	}
 	return t.Model(&models.Task{}).Where("transaction_hash in ?", txs).Updates(columns).Error
-}
-
-func (t *TaskStore) IncrementRetries(ids []int) error {
-	return t.Model(&models.Task{}).Where("id in ?", ids).Update("retries", gorm.Expr("retries + 1")).Error
 }
 
 func (t *TaskStore) DeleteTasks(status []string, fromTime uint64) error {
