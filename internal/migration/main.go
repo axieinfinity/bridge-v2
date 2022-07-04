@@ -14,7 +14,7 @@ func Migrate(db *gorm.DB, cfg *types.Config) error {
 	migrations := []*gormigrate.Migration{
 		models20220515.Migrate(),
 		models20220701.Migrate(),
-		models20220703.Migrate(cfg),
+		models20220703.Migrate(),
 	}
 	migrate := gormigrate.New(db, gormigrate.DefaultOptions, migrations)
 	for _, version := range migrations {
