@@ -54,8 +54,9 @@ type Controller struct {
 	FailedJobChan  chan types.IJob
 	PrepareJobChan chan types.IJob
 
-	jobId         int32
-	processedJobs sync.Map
+	jobId                 int32
+	processedJobs         sync.Map
+	processedTransactions sync.Map
 
 	MaxQueueSize int
 	cfg          *types.Config
@@ -157,6 +158,13 @@ func (c *Controller) LoadABIsFromConfig(lsConfig *types.LsConfig) (err error) {
 
 // prepareJob saves new job to database
 func (c *Controller) prepareJob(job types.IJob) error {
+	if job == nil {
+		return nil
+	}
+	if _, ok := c.processedTransactions.Load(job.GetTransaction().GetHash().Hex()); ok {
+		return nil
+	}
+	c.processedTransactions.Store(job.GetTransaction().GetHash().Hex(), struct{}{})
 	if job.GetID() == 0 {
 		return job.Save()
 	}
@@ -168,12 +176,17 @@ func (c *Controller) processSuccessJob(job types.IJob) {
 	if job == nil {
 		return
 	}
+
 	log.Info("process job success", "id", job.GetID())
 	if err := job.Update(types.STATUS_DONE); err != nil {
 		log.Error("[Controller] failed on updating success job", "err", err, "jobType", job.GetType(), "tx", job.GetTransaction().GetHash().Hex())
 		// send back job to successJobChan
 		c.SuccessJobChan <- job
+		return
 	}
+
+	// remove job out of processedTransactions
+	c.processedTransactions.Delete(job.GetTransaction().GetHash().Hex())
 }
 
 // processFailedJob updates job's status to `failed` to database
@@ -181,12 +194,17 @@ func (c *Controller) processFailedJob(job types.IJob) {
 	if job == nil {
 		return
 	}
+
 	log.Info("process job failed", "id", job.GetID())
 	if err := job.Update(types.STATUS_FAILED); err != nil {
 		log.Error("[Controller] failed on updating failed job", "err", err, "jobType", job.GetType(), "tx", job.GetTransaction().GetHash().Hex())
 		// send back job to failedJobChan
 		c.FailedJobChan <- job
+		return
 	}
+
+	// remove job out of processedTransactions
+	c.processedTransactions.Delete(job.GetTransaction().GetHash().Hex())
 }
 
 func (c *Controller) Start() error {
@@ -201,9 +219,6 @@ func (c *Controller) Start() error {
 			case job := <-c.FailedJobChan:
 				c.processFailedJob(job)
 			case job := <-c.PrepareJobChan:
-				if job == nil {
-					continue
-				}
 				// add new job to database before processing
 				if err := c.prepareJob(job); err != nil {
 					log.Error("[Controller] failed on preparing job", "err", err, "jobType", job.GetType(), "tx", job.GetTransaction().GetHash().Hex())

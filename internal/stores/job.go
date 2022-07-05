@@ -1,6 +1,7 @@
 package stores
 
 import (
+	"errors"
 	"fmt"
 	"github.com/axieinfinity/bridge-v2/internal/models"
 	"github.com/axieinfinity/bridge-v2/internal/types"
@@ -15,7 +16,16 @@ func NewJobStore(db *gorm.DB) *JobStore {
 	return &JobStore{db}
 }
 
+func (j *JobStore) hasJob(hash string) bool {
+	var job = &models.Job{}
+	j.Model(&models.Job{}).Select("id").Where("transaction = ?", hash).First(job)
+	return job != nil
+}
+
 func (j *JobStore) Save(job *models.Job) error {
+	if j.hasJob(job.Transaction) {
+		return errors.New("job is already existed")
+	}
 	return j.Create(job).Error
 }
 
