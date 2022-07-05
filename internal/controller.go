@@ -25,7 +25,12 @@ const (
 	defaultMaxQueueSize     = 4096
 	defaultCoolDownDuration = 1
 	defaultMaxRetry         = 10
+	processedTxFmt          = "%d-%s"
 )
+
+func formatProcessedTx(jobType int, txHash string) string {
+	return fmt.Sprintf(processedTxFmt, jobType, txHash)
+}
 
 type Controller struct {
 	lock       sync.Mutex
@@ -161,10 +166,11 @@ func (c *Controller) prepareJob(job types.IJob) error {
 	if job == nil {
 		return nil
 	}
-	if _, ok := c.processedTransactions.Load(job.GetTransaction().GetHash().Hex()); ok {
+	formatedTx := formatProcessedTx(job.GetType(), job.GetTransaction().GetHash().Hex())
+	if _, ok := c.processedTransactions.Load(formatedTx); ok {
 		return nil
 	}
-	c.processedTransactions.Store(job.GetTransaction().GetHash().Hex(), struct{}{})
+	c.processedTransactions.Store(formatedTx, struct{}{})
 	if job.GetID() == 0 {
 		return job.Save()
 	}
@@ -186,7 +192,7 @@ func (c *Controller) processSuccessJob(job types.IJob) {
 	}
 
 	// remove job out of processedTransactions
-	c.processedTransactions.Delete(job.GetTransaction().GetHash().Hex())
+	c.processedTransactions.Delete(formatProcessedTx(job.GetType(), job.GetTransaction().GetHash().Hex()))
 }
 
 // processFailedJob updates job's status to `failed` to database
@@ -204,7 +210,7 @@ func (c *Controller) processFailedJob(job types.IJob) {
 	}
 
 	// remove job out of processedTransactions
-	c.processedTransactions.Delete(job.GetTransaction().GetHash().Hex())
+	c.processedTransactions.Delete(formatProcessedTx(job.GetType(), job.GetTransaction().GetHash().Hex()))
 }
 
 func (c *Controller) Start() error {
