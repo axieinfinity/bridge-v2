@@ -19,7 +19,20 @@ func (t *TaskStore) Save(task *models.Task) error {
 }
 
 func (t *TaskStore) Update(task *models.Task) error {
-	return t.Updates(task).Error
+	columns := map[string]interface{}{
+		"status":  task.Status,
+		"retries": task.Retries,
+	}
+	if task.TransactionHash != "" {
+		columns["transaction_hash"] = task.TransactionHash
+	}
+	if task.TxCreatedAt > 0 {
+		columns["tx_created_at"] = task.TxCreatedAt
+	}
+	if task.LastError != "" {
+		columns["last_error"] = task.LastError
+	}
+	return t.Model(&models.Task{}).Where("id = ?", task.ID).Updates(columns).Error
 }
 
 func (t *TaskStore) GetTasks(chain, status string, limit, retrySeconds int, before int64) ([]*models.Task, error) {
