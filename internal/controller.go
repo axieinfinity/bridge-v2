@@ -28,10 +28,6 @@ const (
 	processedTxFmt          = "%d-%s-%s"
 )
 
-func formatProcessedTx(jobType int, txHash string, data []byte) string {
-	return fmt.Sprintf(processedTxFmt, jobType, txHash, common.Bytes2Hex(data))
-}
-
 type Controller struct {
 	lock       sync.Mutex
 	ctx        context.Context
@@ -59,9 +55,8 @@ type Controller struct {
 	FailedJobChan  chan types.IJob
 	PrepareJobChan chan types.IJob
 
-	jobId                 int32
-	processedJobs         sync.Map
-	processedTransactions sync.Map
+	jobId         int32
+	processedJobs sync.Map
 
 	MaxQueueSize int
 	cfg          *types.Config
@@ -166,11 +161,6 @@ func (c *Controller) prepareJob(job types.IJob) error {
 	if job == nil {
 		return nil
 	}
-	formatedTx := formatProcessedTx(job.GetType(), job.GetTransaction().GetHash().Hex(), job.GetData())
-	if _, ok := c.processedTransactions.Load(formatedTx); ok {
-		return nil
-	}
-	c.processedTransactions.Store(formatedTx, struct{}{})
 	if job.GetID() == 0 {
 		return job.Save()
 	}
@@ -190,9 +180,6 @@ func (c *Controller) processSuccessJob(job types.IJob) {
 		c.SuccessJobChan <- job
 		return
 	}
-
-	// remove job out of processedTransactions
-	c.processedTransactions.Delete(formatProcessedTx(job.GetType(), job.GetTransaction().GetHash().Hex(), job.GetData()))
 }
 
 // processFailedJob updates job's status to `failed` to database
@@ -208,9 +195,6 @@ func (c *Controller) processFailedJob(job types.IJob) {
 		c.FailedJobChan <- job
 		return
 	}
-
-	// remove job out of processedTransactions
-	c.processedTransactions.Delete(formatProcessedTx(job.GetType(), job.GetTransaction().GetHash().Hex(), job.GetData()))
 }
 
 func (c *Controller) Start() error {
