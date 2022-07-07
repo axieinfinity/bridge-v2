@@ -259,6 +259,13 @@ type LsConfig struct {
 
 	MaxTasksQuery int `json:"maxTasksQuery"`
 	MinTasksQuery int `json:"minTasksQuery"`
+
+	// GetLogsBatchSize is used at batch size when calling processBatchLogs
+	GetLogsBatchSize int `json:"getLogsBatchSize"`
+
+	// MaxProcessingTasks is used to specify max processing tasks allowed while processing tasks
+	// if number of tasks reaches this number, it waits until this number decrease
+	MaxProcessingTasks int `json:"maxProcessingTasks"`
 }
 
 type Secret struct {

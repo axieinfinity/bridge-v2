@@ -20,12 +20,11 @@ import (
 )
 
 const (
-	defaultBatchSize        = 500
+	defaultBatchSize        = 100
 	defaultWorkers          = 8182
 	defaultMaxQueueSize     = 4096
 	defaultCoolDownDuration = 1
 	defaultMaxRetry         = 10
-	processedTxFmt          = "%d-%s-%s"
 )
 
 type Controller struct {
@@ -125,6 +124,10 @@ func New(cfg *types.Config, db *gorm.DB, helpers utils.IUtils) (*Controller, err
 		}
 		c.listeners[name] = l
 		c.hasSubscriptionType[name] = make(map[int]bool)
+
+		if lsConfig.GetLogsBatchSize == 0 {
+			lsConfig.GetLogsBatchSize = defaultBatchSize
+		}
 
 		// filtering subscription, get all subscriptionType available for each listener
 		for _, subscription := range l.GetSubscriptions() {
@@ -285,13 +288,21 @@ func (c *Controller) Start() error {
 				close(c.FailedJobChan)
 				close(c.Queue)
 
+				// close listeners
+				c.closeListeners()
+
 				// send signal to stop
 				c.stop <- struct{}{}
 				break
 			}
 		}
 	}()
+	c.processPendingJobs()
+	c.startListeners()
+	return nil
+}
 
+func (c *Controller) processPendingJobs() {
 	// load all pending jobs from database
 	jobs, err := c.store.GetJobStore().GetPendingJobs()
 	if err != nil {
@@ -321,7 +332,9 @@ func (c *Controller) Start() error {
 			c.JobChan <- j
 		}
 	}
+}
 
+func (c *Controller) startListeners() {
 	// run all events listeners
 	for _, listener := range c.listeners {
 		go listener.Start()
@@ -339,7 +352,12 @@ func (c *Controller) Start() error {
 		}
 		go c.startListener(listener, 0)
 	}
-	return nil
+}
+
+func (c *Controller) closeListeners() {
+	for _, listener := range c.listeners {
+		listener.Close()
+	}
 }
 
 func (c *Controller) Wait() {
@@ -396,7 +414,8 @@ func (c *Controller) startListener(listener types.IListener, tryCount int) {
 			}
 			latest, err := listener.GetLatestBlockHeight()
 			if err != nil {
-				log.Error("[Controller][Watcher] error while get latest block height")
+				log.Error("[Controller][Watcher] error while get latest block height", "err", err)
+				continue
 			}
 			currentBlock = listener.GetCurrentBlock()
 			// do nothing if currentBlock is within safe block range
@@ -405,7 +424,7 @@ func (c *Controller) startListener(listener types.IListener, tryCount int) {
 			}
 			// if current block is behind safeBlockRange then process without waiting
 			if err := c.processBehindBlock(listener, currentBlock.GetHeight(), latest); err != nil {
-				log.Error("[Controller][Watcher]  error while processing behind block", err, "height", currentBlock.GetHeight(), "latestBlockHeight", latestBlockHeight)
+				log.Error("[Controller][Watcher] error while processing behind block", "err", err, "height", currentBlock.GetHeight(), "latestBlockHeight", latestBlockHeight)
 				continue
 			} else {
 				currentBlock = listener.GetCurrentBlock()
@@ -494,6 +513,7 @@ func (c *Controller) processBatchLogs(listener types.IListener, fromHeight, toHe
 		}
 	}
 	retry := 0
+	batchSize := uint64(listener.Config().GetLogsBatchSize)
 	for fromHeight <= toHeight {
 		if retry == 10 {
 			break
@@ -502,8 +522,8 @@ func (c *Controller) processBatchLogs(listener types.IListener, fromHeight, toHe
 			Start:   fromHeight,
 			Context: c.ctx,
 		}
-		if fromHeight+defaultBatchSize < toHeight {
-			to := fromHeight + defaultBatchSize
+		if fromHeight+batchSize < toHeight {
+			to := fromHeight + batchSize
 			opts.End = &to
 		} else {
 			opts.End = &toHeight

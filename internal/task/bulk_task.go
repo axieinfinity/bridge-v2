@@ -29,7 +29,6 @@ type bulkTask struct {
 	client         *ethclient.Client
 	contracts      map[string]string
 	chainId        *big.Int
-	ticker         time.Duration
 	maxTry         int
 	taskType       string
 	listener       types.IListener
@@ -45,7 +44,6 @@ func newBulkTask(listener types.IListener, client *ethclient.Client, store types
 		client:         client,
 		contracts:      contracts,
 		chainId:        chainId,
-		ticker:         ticker,
 		maxTry:         maxTry,
 		taskType:       taskType,
 		listener:       listener,

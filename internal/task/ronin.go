@@ -16,9 +16,10 @@ import (
 )
 
 const (
-	defaultLimitRecords = 50
-	defaultMaxTry       = 5
-	defaultReceiptCheck = 50
+	defaultLimitRecords       = 50
+	defaultMaxTry             = 5
+	defaultReceiptCheck       = 50
+	defaultMaxProcessingTasks = 200
 )
 
 var defaultTaskInterval = 10 * time.Second
@@ -47,7 +48,8 @@ type RoninTask struct {
 
 	releaseTasksCh chan int
 
-	processingIdsMap sync.Map
+	processingIdsMap   sync.Map
+	maxProcessingTasks int
 }
 
 func NewRoninTask(listener types.IListener, util utils.IUtils) (*RoninTask, error) {
@@ -62,21 +64,22 @@ func NewRoninTask(listener types.IListener, util utils.IUtils) (*RoninTask, erro
 	}
 	newCtx, cancelFunc := context.WithCancel(listener.Context())
 	task := &RoninTask{
-		ctx:             newCtx,
-		cancelFunc:      cancelFunc,
-		listener:        listener,
-		store:           listener.GetStore(),
-		taskInterval:    defaultTaskInterval,
-		txCheckInterval: defaultTaskInterval,
-		secret:          config.Secret,
-		contracts:       config.Contracts,
-		client:          client,
-		chainId:         chainId,
-		util:            util,
-		validator:       listener.(types.IEthListener).GetValidatorKey(),
-		relayer:         listener.(types.IEthListener).GetRelayerKey(),
-		limitQuery:      defaultLimitRecords,
-		releaseTasksCh:  make(chan int, defaultLimitRecords),
+		ctx:                newCtx,
+		cancelFunc:         cancelFunc,
+		listener:           listener,
+		store:              listener.GetStore(),
+		taskInterval:       defaultTaskInterval,
+		txCheckInterval:    defaultReceiptCheck,
+		secret:             config.Secret,
+		contracts:          config.Contracts,
+		client:             client,
+		chainId:            chainId,
+		util:               util,
+		validator:          listener.(types.IEthListener).GetValidatorKey(),
+		relayer:            listener.(types.IEthListener).GetRelayerKey(),
+		limitQuery:         defaultLimitRecords,
+		releaseTasksCh:     make(chan int, defaultLimitRecords),
+		maxProcessingTasks: defaultMaxProcessingTasks,
 	}
 	if config.TaskInterval > 0 {
 		task.taskInterval = config.TaskInterval * time.Second
@@ -87,12 +90,15 @@ func NewRoninTask(listener types.IListener, util utils.IUtils) (*RoninTask, erro
 	if config.MaxTasksQuery > 0 {
 		task.limitQuery = config.MaxTasksQuery
 	}
+	if config.MaxProcessingTasks > 0 {
+		task.maxProcessingTasks = config.MaxProcessingTasks
+	}
 	return task, nil
 }
 
 func (r *RoninTask) Start() {
 	taskTicker := time.NewTicker(r.taskInterval)
-	processingTicker := time.NewTicker(time.Duration(defaultReceiptCheck) * time.Second)
+	processingTicker := time.NewTicker(r.txCheckInterval)
 	for {
 		select {
 		case <-taskTicker.C:
@@ -112,7 +118,6 @@ func (r *RoninTask) Start() {
 
 		case <-r.ctx.Done():
 			r.client.Close()
-			r.Close()
 			return
 		}
 	}
@@ -130,6 +135,17 @@ func (r *RoninTask) GetListener() types.IListener {
 	return r.listener
 }
 
+// getLimitQuery gets limitQuery which makes sure total processing tasks are within maxProcessingTasks
+func (r *RoninTask) getLimitQuery(numberOfExcludedIds int) int {
+	if numberOfExcludedIds >= r.maxProcessingTasks {
+		return 0
+	}
+	if r.maxProcessingTasks-numberOfExcludedIds < r.limitQuery {
+		return r.maxProcessingTasks - numberOfExcludedIds
+	}
+	return r.limitQuery
+}
+
 func (r *RoninTask) processPending() error {
 	defer func() {
 		if err := recover(); err != nil {
@@ -142,8 +158,12 @@ func (r *RoninTask) processPending() error {
 		excludeIds = append(excludeIds, key.(int))
 		return true
 	})
-
-	tasks, err := r.store.GetTaskStore().GetTasks(hexutil.EncodeBig(r.chainId), types.STATUS_PENDING, r.limitQuery, 10, 0, excludeIds)
+	// get limitQuery, if limitQuery = 0 then do nothing and wait until processing tasks are released
+	limitQuery := r.getLimitQuery(len(excludeIds))
+	if limitQuery == 0 {
+		return nil
+	}
+	tasks, err := r.store.GetTaskStore().GetTasks(hexutil.EncodeBig(r.chainId), types.STATUS_PENDING, limitQuery, 10, 0, excludeIds)
 	if err != nil {
 		return err
 	}
