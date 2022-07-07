@@ -220,16 +220,13 @@ func bridge(ctx *cli.Context) {
 	if err = controller.Start(); err != nil {
 		panic(err)
 	}
-	go func() {
-		sigc := make(chan os.Signal, 1)
-		signal.Notify(sigc, syscall.SIGINT, syscall.SIGTERM)
-		defer signal.Stop(sigc)
-		select {
-		case <-sigc:
-			controller.Close()
-		}
-	}()
-	controller.Wait()
+	sigc := make(chan os.Signal, 1)
+	signal.Notify(sigc, syscall.SIGINT, syscall.SIGTERM)
+	defer signal.Stop(sigc)
+	select {
+	case <-sigc:
+		controller.Close()
+	}
 }
 
 func main() {

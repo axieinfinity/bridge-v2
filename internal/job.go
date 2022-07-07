@@ -66,6 +66,11 @@ func (w *Worker) String() string {
 }
 
 func (w *Worker) start() {
+	defer func() {
+		if r := recover(); r != nil {
+			log.Error("[Worker][addToQueue] recover from panic", "message", r)
+		}
+	}()
 	for {
 		// push worker chan into queue
 		w.queue <- w.workerChan
@@ -79,6 +84,9 @@ func (w *Worker) start() {
 			// push the job back to mainChan
 			w.mainChan <- job
 		case <-w.ctx.Done():
+			close(w.workerChan)
+			return
+		case <-w.closeChan:
 			close(w.workerChan)
 			return
 		}

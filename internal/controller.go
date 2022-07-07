@@ -235,12 +235,6 @@ func (c *Controller) Start() error {
 				} else {
 					c.isClosed.Store(true)
 				}
-				// close all available channels
-				close(c.PrepareJobChan)
-				close(c.JobChan)
-				close(c.SuccessJobChan)
-				close(c.FailedJobChan)
-				close(c.Queue)
 
 				for {
 					if len(c.PrepareJobChan) == 0 {
@@ -283,6 +277,15 @@ func (c *Controller) Start() error {
 						break
 					}
 				}
+
+				// close all available channels
+				close(c.PrepareJobChan)
+				close(c.JobChan)
+				close(c.SuccessJobChan)
+				close(c.FailedJobChan)
+				close(c.Queue)
+
+				// send signal to stop
 				c.stop <- struct{}{}
 				break
 			}
@@ -387,6 +390,10 @@ func (c *Controller) startListener(listener types.IListener, tryCount int) {
 		case <-listener.Context().Done():
 			return
 		case <-tick.C:
+			// stop if controller is closed
+			if c.isClosed.Load().(bool) {
+				return
+			}
 			latest, err := listener.GetLatestBlockHeight()
 			if err != nil {
 				log.Error("[Controller][Watcher] error while get latest block height")
@@ -577,4 +584,5 @@ func (c *Controller) Close() {
 		log.Info("closing")
 		c.cancelFunc()
 	}
+	c.Wait()
 }
