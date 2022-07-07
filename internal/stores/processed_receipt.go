@@ -3,6 +3,7 @@ package stores
 import (
 	"github.com/axieinfinity/bridge-v2/internal/models"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type ProcessedReceiptStore struct {
@@ -14,5 +15,5 @@ func NewProcessedReceiptStore(db *gorm.DB) *ProcessedReceiptStore {
 }
 
 func (b *ProcessedReceiptStore) Save(taskId int, receiptId int64) error {
-	return b.Create(&models.ProcessedReceipt{TaskId: taskId, ReceiptId: receiptId}).Error
+	return b.Clauses(clause.OnConflict{DoNothing: true}).Create(&models.ProcessedReceipt{TaskId: taskId, ReceiptId: receiptId}).Error
 }
