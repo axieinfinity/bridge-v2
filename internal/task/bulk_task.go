@@ -135,6 +135,12 @@ func (r *bulkTask) sendDepositTransaction(tasks []*models.Task) (doneTasks, proc
 			doneTasks = append(doneTasks, t)
 			continue
 		}
+
+		// store receiptId to processed receipt
+		if err := r.store.GetProcessedReceiptStore().Save(t.ID, receipt.Id.Int64()); err != nil {
+			log.Error("[bulkTask][sendDepositTransaction] error while saving processed receipt", "err", err)
+		}
+
 		// otherwise add task to processingTasks to adjust after sending transaction
 		processingTasks = append(processingTasks, t)
 
@@ -211,6 +217,10 @@ func (r *bulkTask) sendWithdrawalSignaturesTransaction(tasks []*models.Task) (do
 			doneTasks = append(doneTasks, t)
 			continue
 		}
+		// store receiptId to processed receipt
+		if err := r.store.GetProcessedReceiptStore().Save(t.ID, receipt.Id.Int64()); err != nil {
+			log.Error("[bulkTask][sendWithdrawalSignaturesTransaction] error while saving processed receipt", "err", err)
+		}
 		// otherwise add to processingTasks
 		sigs, err := r.signWithdrawalSignatures(receipt)
 		if err != nil {
@@ -273,6 +283,10 @@ func (r *bulkTask) sendAckTransactions(tasks []*models.Task) (doneTasks, process
 		if result {
 			doneTasks = append(doneTasks, t)
 			continue
+		}
+		// store receiptId to processed receipt
+		if err := r.store.GetProcessedReceiptStore().Save(t.ID, id.Int64()); err != nil {
+			log.Error("[bulkTask][sendAckTransactions] error while saving processed receipt", "err", err)
 		}
 		// otherwise add id to ids and add task to processingTasks
 		ids = append(ids, id)

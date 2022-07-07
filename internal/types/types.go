@@ -198,10 +198,15 @@ type IMainStore interface {
 	GetDB() *gorm.DB
 	GetDepositStore() IDepositStore
 	GetWithdrawalStore() IWithdrawalStore
+	GetProcessedReceiptStore() IProcessedReceiptStore
 	GetTaskStore() ITaskStore
 	GetJobStore() IJobStore
 	GetProcessedBlockStore() IProcessedBlockStore
 	GetEventStore() IEventStore
+}
+
+type IProcessedReceiptStore interface {
+	Save(taskId int, receiptId int64) error
 }
 
 type Config struct {

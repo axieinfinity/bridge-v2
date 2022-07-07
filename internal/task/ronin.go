@@ -21,7 +21,7 @@ const (
 	defaultReceiptCheck = 50
 )
 
-var defaultTaskInterval = 3 * time.Second
+var defaultTaskInterval = 10 * time.Second
 
 type RoninTask struct {
 	ctx        context.Context

@@ -14,24 +14,26 @@ import (
 type MainStore struct {
 	*gorm.DB
 
-	DepositStore        types.IDepositStore
-	WithdrawalStore     types.IWithdrawalStore
-	JobStore            types.IJobStore
-	TaskStore           types.ITaskStore
-	ProcessedBlockStore types.IProcessedBlockStore
-	EventStore          types.IEventStore
+	DepositStore          types.IDepositStore
+	WithdrawalStore       types.IWithdrawalStore
+	JobStore              types.IJobStore
+	TaskStore             types.ITaskStore
+	ProcessedBlockStore   types.IProcessedBlockStore
+	EventStore            types.IEventStore
+	ProcessedReceiptStore types.IProcessedReceiptStore
 }
 
 func NewMainStore(db *gorm.DB) *MainStore {
 	cl := &MainStore{
 		DB: db,
 
-		JobStore:            NewJobStore(db),
-		TaskStore:           NewTaskStore(db),
-		ProcessedBlockStore: NewProcessedBlockStore(db),
-		DepositStore:        NewDepositStore(db),
-		WithdrawalStore:     NewWithdrawalStore(db),
-		EventStore:          NewEventStore(db),
+		JobStore:              NewJobStore(db),
+		TaskStore:             NewTaskStore(db),
+		ProcessedBlockStore:   NewProcessedBlockStore(db),
+		DepositStore:          NewDepositStore(db),
+		WithdrawalStore:       NewWithdrawalStore(db),
+		EventStore:            NewEventStore(db),
+		ProcessedReceiptStore: NewProcessedReceiptStore(db),
 	}
 	m := []interface{}{
 		&models.Deposit{},
@@ -40,6 +42,7 @@ func NewMainStore(db *gorm.DB) *MainStore {
 		&models.Task{},
 		&models.Withdrawal{},
 		&models.Event{},
+		&models.ProcessedReceipt{},
 	}
 	if err := cl.AutoMigrate(m...); err != nil {
 		panic(err)
@@ -73,6 +76,10 @@ func (m *MainStore) GetJobStore() types.IJobStore {
 
 func (m *MainStore) GetProcessedBlockStore() types.IProcessedBlockStore {
 	return m.ProcessedBlockStore
+}
+
+func (m *MainStore) GetProcessedReceiptStore() types.IProcessedReceiptStore {
+	return m.ProcessedReceiptStore
 }
 
 func (m *MainStore) GetEventStore() types.IEventStore {

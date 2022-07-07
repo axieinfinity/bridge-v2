@@ -44,7 +44,6 @@ type Worker struct {
 	failedChan  chan<- types.IJob
 	successChan chan<- types.IJob
 
-	closeChan chan struct{}
 	listeners map[string]types.IListener
 }
 
@@ -84,9 +83,6 @@ func (w *Worker) start() {
 			// push the job back to mainChan
 			w.mainChan <- job
 		case <-w.ctx.Done():
-			close(w.workerChan)
-			return
-		case <-w.closeChan:
 			close(w.workerChan)
 			return
 		}
