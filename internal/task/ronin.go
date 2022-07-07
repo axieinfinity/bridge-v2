@@ -21,7 +21,7 @@ const (
 	defaultReceiptCheck = 50
 )
 
-var defaultTaskInterval = 1 * time.Second
+var defaultTaskInterval = 3 * time.Second
 
 type RoninTask struct {
 	ctx        context.Context
@@ -44,6 +44,10 @@ type RoninTask struct {
 
 	limitQuery int
 	chainId    *big.Int
+
+	releaseTasksCh chan int
+
+	processingIdsMap sync.Map
 }
 
 func NewRoninTask(listener types.IListener, util utils.IUtils) (*RoninTask, error) {
@@ -72,6 +76,7 @@ func NewRoninTask(listener types.IListener, util utils.IUtils) (*RoninTask, erro
 		validator:       listener.(types.IEthListener).GetValidatorKey(),
 		relayer:         listener.(types.IEthListener).GetRelayerKey(),
 		limitQuery:      defaultLimitRecords,
+		releaseTasksCh:  make(chan int, defaultLimitRecords),
 	}
 	if config.TaskInterval > 0 {
 		task.taskInterval = config.TaskInterval * time.Second
@@ -102,6 +107,9 @@ func (r *RoninTask) Start() {
 					log.Error("[RoninTask] error while checking processing tasks", "err", err)
 				}
 			}()
+		case id := <-r.releaseTasksCh:
+			r.unlockTask(id)
+
 		case <-r.ctx.Done():
 			r.client.Close()
 			r.Close()
@@ -128,7 +136,14 @@ func (r *RoninTask) processPending() error {
 			log.Error("[RoninTask][processPending]recover from panic", "err", err)
 		}
 	}()
-	tasks, err := r.store.GetTaskStore().GetTasks(hexutil.EncodeBig(r.chainId), types.STATUS_PENDING, r.limitQuery, 10, 0)
+	// load processing tasks into excluded list
+	var excludeIds []int
+	r.processingIdsMap.Range(func(key, value interface{}) bool {
+		excludeIds = append(excludeIds, key.(int))
+		return true
+	})
+
+	tasks, err := r.store.GetTaskStore().GetTasks(hexutil.EncodeBig(r.chainId), types.STATUS_PENDING, r.limitQuery, 10, 0, excludeIds)
 	if err != nil {
 		return err
 	}
@@ -136,10 +151,13 @@ func (r *RoninTask) processPending() error {
 		return nil
 	}
 
-	bulkDepositTask := newBulkTask(r.listener, r.client, r.store, r.chainId, r.validator, r.contracts, r.txCheckInterval, defaultMaxTry, types.DEPOSIT_TASK, r.util)
-	bulkSubmitWithdrawalSignaturesTask := newBulkTask(r.listener, r.client, r.store, r.chainId, r.validator, r.contracts, r.txCheckInterval, defaultMaxTry, types.WITHDRAWAL_TASK, r.util)
-	ackWithdrewTasks := newBulkTask(r.listener, r.client, r.store, r.chainId, r.validator, r.contracts, r.txCheckInterval, defaultMaxTry, types.ACK_WITHDREW_TASK, r.util)
+	bulkDepositTask := newBulkTask(r.listener, r.client, r.store, r.chainId, r.validator, r.contracts, r.txCheckInterval, defaultMaxTry, types.DEPOSIT_TASK, r.releaseTasksCh, r.util)
+	bulkSubmitWithdrawalSignaturesTask := newBulkTask(r.listener, r.client, r.store, r.chainId, r.validator, r.contracts, r.txCheckInterval, defaultMaxTry, types.WITHDRAWAL_TASK, r.releaseTasksCh, r.util)
+	ackWithdrewTasks := newBulkTask(r.listener, r.client, r.store, r.chainId, r.validator, r.contracts, r.txCheckInterval, defaultMaxTry, types.ACK_WITHDREW_TASK, r.releaseTasksCh, r.util)
 	for _, task := range tasks {
+		// lock task
+		r.lockTask(task)
+
 		// collect tasks for bulk deposits
 		bulkDepositTask.collectTask(task)
 
@@ -155,6 +173,16 @@ func (r *RoninTask) processPending() error {
 	return nil
 }
 
+func (r *RoninTask) lockTask(t *models.Task) {
+	if t != nil {
+		r.processingIdsMap.Store(t.ID, struct{}{})
+	}
+}
+
+func (r *RoninTask) unlockTask(id int) {
+	r.processingIdsMap.Delete(id)
+}
+
 func (r *RoninTask) checkProcessingTasks() error {
 	defer func() {
 		if err := recover(); err != nil {
@@ -162,7 +190,7 @@ func (r *RoninTask) checkProcessingTasks() error {
 		}
 	}()
 	before := time.Now().Unix() - int64(r.listener.Config().SafeBlockRange*uint64(r.listener.Config().LoadInterval.Seconds()))
-	tasks, err := r.store.GetTaskStore().GetTasks(hexutil.EncodeBig(r.chainId), types.STATUS_PROCESSING, r.limitQuery, 2, before)
+	tasks, err := r.store.GetTaskStore().GetTasks(hexutil.EncodeBig(r.chainId), types.STATUS_PROCESSING, r.limitQuery, 2, before, nil)
 	if err != nil {
 		return err
 	}

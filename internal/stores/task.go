@@ -35,13 +35,16 @@ func (t *TaskStore) Update(task *models.Task) error {
 	return t.Model(&models.Task{}).Where("id = ?", task.ID).Updates(columns).Error
 }
 
-func (t *TaskStore) GetTasks(chain, status string, limit, retrySeconds int, before int64) ([]*models.Task, error) {
+func (t *TaskStore) GetTasks(chain, status string, limit, retrySeconds int, before int64, excludeIds []int) ([]*models.Task, error) {
 	// query all tasks with status and chain id and tx created time must be before specified time
 	// also apply exponential at created_time
 	var tasks []*models.Task
 	db := t.Model(&models.Task{}).Where("chain_id = ? AND status = ?", chain, status)
 	if before > 0 {
 		db = db.Where("tx_created_at <= ?", before)
+	}
+	if len(excludeIds) > 0 {
+		db = db.Where("id not in ?", excludeIds)
 	}
 	err := db.Order(fmt.Sprintf("created_at + POWER(2, retries) * %d ASC", retrySeconds)).
 		Limit(limit).Find(&tasks).Error

@@ -22,32 +22,34 @@ import (
 )
 
 type bulkTask struct {
-	util      utils.IUtils
-	tasks     []*models.Task
-	store     types.IMainStore
-	validator *ecdsa.PrivateKey
-	client    *ethclient.Client
-	contracts map[string]string
-	chainId   *big.Int
-	ticker    time.Duration
-	maxTry    int
-	taskType  string
-	listener  types.IListener
+	util           utils.IUtils
+	tasks          []*models.Task
+	store          types.IMainStore
+	validator      *ecdsa.PrivateKey
+	client         *ethclient.Client
+	contracts      map[string]string
+	chainId        *big.Int
+	ticker         time.Duration
+	maxTry         int
+	taskType       string
+	listener       types.IListener
+	releaseTasksCh chan int
 }
 
-func newBulkTask(listener types.IListener, client *ethclient.Client, store types.IMainStore, chainId *big.Int, validator *ecdsa.PrivateKey, contracts map[string]string, ticker time.Duration, maxTry int, taskType string, util utils.IUtils) *bulkTask {
+func newBulkTask(listener types.IListener, client *ethclient.Client, store types.IMainStore, chainId *big.Int, validator *ecdsa.PrivateKey, contracts map[string]string, ticker time.Duration, maxTry int, taskType string, releaseTasksCh chan int, util utils.IUtils) *bulkTask {
 	return &bulkTask{
-		util:      util,
-		tasks:     make([]*models.Task, 0),
-		store:     store,
-		validator: validator,
-		client:    client,
-		contracts: contracts,
-		chainId:   chainId,
-		ticker:    ticker,
-		maxTry:    maxTry,
-		taskType:  taskType,
-		listener:  listener,
+		util:           util,
+		tasks:          make([]*models.Task, 0),
+		store:          store,
+		validator:      validator,
+		client:         client,
+		contracts:      contracts,
+		chainId:        chainId,
+		ticker:         ticker,
+		maxTry:         maxTry,
+		taskType:       taskType,
+		listener:       listener,
+		releaseTasksCh: releaseTasksCh,
 	}
 }
 
@@ -88,10 +90,10 @@ func (r *bulkTask) sendBulkTransactions(sendTxs func(tasks []*models.Task) (done
 		doneTasks, processingTasks, failedTasks, transaction := sendTxs(r.tasks[start:next])
 
 		if transaction != nil {
-			go updateTasks(r.store, processingTasks, types.STATUS_PROCESSING, transaction.Hash().Hex(), time.Now().Unix())
+			go updateTasks(r.store, processingTasks, types.STATUS_PROCESSING, transaction.Hash().Hex(), time.Now().Unix(), r.releaseTasksCh)
 		}
-		go updateTasks(r.store, doneTasks, types.STATUS_DONE, txHash, 0)
-		go updateTasks(r.store, failedTasks, types.STATUS_FAILED, txHash, 0)
+		go updateTasks(r.store, doneTasks, types.STATUS_DONE, txHash, 0, r.releaseTasksCh)
+		go updateTasks(r.store, failedTasks, types.STATUS_FAILED, txHash, 0, r.releaseTasksCh)
 		start = next
 	}
 }
@@ -389,7 +391,7 @@ func (r *bulkTask) validateWithdrawalTask(caller *roninGateway.GatewayCaller, ta
 	return result, ronEvent.Receipt, nil
 }
 
-func updateTasks(store types.IMainStore, tasks []*models.Task, status, txHash string, timestamp int64) {
+func updateTasks(store types.IMainStore, tasks []*models.Task, status, txHash string, timestamp int64, releaseTasksCh chan int) {
 	// update tasks with given status
 	// note: if task.retries < 10 then retries++ and status still be processing
 	for _, t := range tasks {
@@ -409,6 +411,7 @@ func updateTasks(store types.IMainStore, tasks []*models.Task, status, txHash st
 		if err := store.GetTaskStore().Update(t); err != nil {
 			log.Error("error while update task", "id", t.ID, "err", err)
 		}
+		releaseTasksCh <- t.ID
 	}
 }
 

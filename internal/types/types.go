@@ -171,7 +171,7 @@ type IProcessedBlockStore interface {
 type ITaskStore interface {
 	Save(task *models.Task) error
 	Update(task *models.Task) error
-	GetTasks(chain, status string, limit, retrySeconds int, before int64) ([]*models.Task, error)
+	GetTasks(chain, status string, limit, retrySeconds int, before int64, excludeIds []int) ([]*models.Task, error)
 	UpdateTasksWithTransactionHash(txs []string, transactionStatus int, status string) error
 	DeleteTasks([]string, uint64) error
 	Count() int64
