@@ -239,32 +239,36 @@ func (c *Controller) Start() error {
 					c.isClosed.Store(true)
 				}
 
-				for {
-					if len(c.PrepareJobChan) == 0 {
-						break
-					}
-					job, more := <-c.PrepareJobChan
-					if more {
-						if err := c.prepareJob(job); err != nil {
-							log.Error("[Controller] error while storing all jobs from prepareJobChan to database in closing step", "err", err, "jobType", job.GetType(), "tx", job.GetTransaction().GetHash().Hex())
-						}
-					} else {
-						break
-					}
-				}
+				// close listeners first to prevent further tasks processing
+				c.closeListeners()
 
-				// save all success jobs
+				//// loop through prepare job chan to store all jobs to db
+				//for {
+				//	if len(c.PrepareJobChan) == 0 {
+				//		break
+				//	}
+				//	job, more := <-c.PrepareJobChan
+				//	if more {
+				//		if err := c.prepareJob(job); err != nil {
+				//			log.Error("[Controller] error while storing all jobs from prepareJobChan to database in closing step", "err", err, "jobType", job.GetType(), "tx", job.GetTransaction().GetHash().Hex())
+				//		}
+				//	} else {
+				//		break
+				//	}
+				//}
+
+				// update all success jobs
 				for {
 					log.Info("checking successJobChan")
 					if len(c.SuccessJobChan) == 0 {
 						break
 					}
 					job, more := <-c.SuccessJobChan
-					if more {
-						c.processSuccessJob(job)
-					} else {
+					if !more {
 						break
+
 					}
+					c.processSuccessJob(job)
 				}
 
 				// wait until all failed jobs are handled
@@ -274,11 +278,10 @@ func (c *Controller) Start() error {
 					}
 					log.Info("checking failedJobChan")
 					job, more := <-c.FailedJobChan
-					if more {
-						c.processFailedJob(job)
-					} else {
+					if !more {
 						break
 					}
+					c.processFailedJob(job)
 				}
 
 				// close all available channels
@@ -288,10 +291,7 @@ func (c *Controller) Start() error {
 				close(c.FailedJobChan)
 				close(c.Queue)
 
-				// close listeners
-				c.closeListeners()
-
-				// send signal to stop
+				// send signal to stop the program
 				c.stop <- struct{}{}
 				break
 			}
@@ -536,21 +536,23 @@ func (c *Controller) processBatchLogs(listener types.IListener, fromHeight, toHe
 		}
 		log.Info("[Controller][processBatchLogs] finish getting logs", "from", opts.Start, "to", *opts.End, "logs", len(logs), "listener", listener.GetName())
 		fromHeight = *opts.End + 1
-		go func() {
-			for _, eventLog := range logs {
-				eventId := eventLog.Topics[0]
-				log.Info("[Controller][processBatchLogs] processing log", "topic", eventLog.Topics[0].Hex(), "address", eventLog.Address.Hex(), "transaction", eventLog.TxHash.Hex(), "listener", listener.GetName())
-				if _, ok := eventIds[eventId]; !ok {
+		for _, eventLog := range logs {
+			eventId := eventLog.Topics[0]
+			log.Info("[Controller][processBatchLogs] processing log", "topic", eventLog.Topics[0].Hex(), "address", eventLog.Address.Hex(), "transaction", eventLog.TxHash.Hex(), "listener", listener.GetName())
+			if _, ok := eventIds[eventId]; !ok {
+				continue
+			}
+			data := eventLog.Data
+			name := eventIds[eventId]
+			tx := listener2.NewEmptyTransaction(chainId, eventLog.TxHash, eventLog.Data, nil, &eventLog.Address)
+			if job := listener.GetListenHandleJob(name, tx, eventId.Hex(), data); job != nil {
+				if err := c.prepareJob(job); err != nil {
+					log.Error("[Controller] failed on preparing job", "err", err, "jobType", job.GetType(), "tx", job.GetTransaction().GetHash().Hex())
 					continue
 				}
-				data := eventLog.Data
-				name := eventIds[eventId]
-				tx := listener2.NewEmptyTransaction(chainId, eventLog.TxHash, eventLog.Data, nil, &eventLog.Address)
-				if job := listener.GetListenHandleJob(name, tx, eventId.Hex(), data); job != nil {
-					c.PrepareJobChan <- job
-				}
+				c.JobChan <- job
 			}
-		}()
+		}
 	}
 	return fromHeight
 }
