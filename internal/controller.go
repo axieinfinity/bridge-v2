@@ -242,20 +242,19 @@ func (c *Controller) Start() error {
 				// close listeners first to prevent further tasks processing
 				c.closeListeners()
 
-				//// loop through prepare job chan to store all jobs to db
-				//for {
-				//	if len(c.PrepareJobChan) == 0 {
-				//		break
-				//	}
-				//	job, more := <-c.PrepareJobChan
-				//	if more {
-				//		if err := c.prepareJob(job); err != nil {
-				//			log.Error("[Controller] error while storing all jobs from prepareJobChan to database in closing step", "err", err, "jobType", job.GetType(), "tx", job.GetTransaction().GetHash().Hex())
-				//		}
-				//	} else {
-				//		break
-				//	}
-				//}
+				// loop through prepare job chan to store all jobs to db
+				for {
+					if len(c.PrepareJobChan) == 0 {
+						break
+					}
+					job, more := <-c.PrepareJobChan
+					if !more {
+						break
+					}
+					if err := c.prepareJob(job); err != nil {
+						log.Error("[Controller] error while storing all jobs from prepareJobChan to database in closing step", "err", err, "jobType", job.GetType(), "tx", job.GetTransaction().GetHash().Hex())
+					}
+				}
 
 				// update all success jobs
 				for {
@@ -266,7 +265,6 @@ func (c *Controller) Start() error {
 					job, more := <-c.SuccessJobChan
 					if !more {
 						break
-
 					}
 					c.processSuccessJob(job)
 				}
@@ -335,14 +333,11 @@ func (c *Controller) processPendingJobs() {
 }
 
 func (c *Controller) startListeners() {
-	// run all events listeners
+	// make sure all listeners are up-to-date
 	for _, listener := range c.listeners {
-		go listener.Start()
 		if listener.IsDisabled() {
 			continue
 		}
-		// check whether node is up-to-date or not
-		// it guarantees that blocks data are consistent to other nodes
 		for {
 			if listener.IsUpTodate() {
 				break
@@ -350,7 +345,14 @@ func (c *Controller) startListeners() {
 			// sleep for 10s
 			time.Sleep(10 * time.Second)
 		}
-		go c.startListener(listener, 0)
+	}
+	// run all events listeners
+	for _, listener := range c.listeners {
+		if listener.IsDisabled() {
+			continue
+		}
+		go listener.Start()
+		go c.startListening(listener, 0)
 	}
 }
 
@@ -365,7 +367,7 @@ func (c *Controller) Wait() {
 }
 
 // startListener starts listening events for a listener, it comes with a tryCount which close this listener if tryCount reaches 10 times
-func (c *Controller) startListener(listener types.IListener, tryCount int) {
+func (c *Controller) startListening(listener types.IListener, tryCount int) {
 	defer func() {
 		if r := recover(); r != nil {
 			log.Error("[Controller][startListener] recover from panic", "message", r)
@@ -384,7 +386,7 @@ func (c *Controller) startListener(listener types.IListener, tryCount int) {
 		log.Error("[Controller][startListener] error while get latest block", "err", err, "listener", listener.GetName())
 		// otherwise retry startListener
 		time.Sleep(time.Duration(tryCount+1) * time.Second)
-		go c.startListener(listener, tryCount+1)
+		go c.startListening(listener, tryCount+1)
 		return
 	}
 	// reset fromHeight if it is out of allowed blocks range
@@ -398,7 +400,7 @@ func (c *Controller) startListener(listener types.IListener, tryCount int) {
 		if err := c.processBehindBlock(listener, currentBlock.GetHeight(), latestBlockHeight); err != nil {
 			log.Error("[Controller][startListener] error while processing behind block", "err", err, "height", currentBlock.GetHeight(), "latestBlockHeight", latestBlockHeight)
 			time.Sleep(time.Duration(tryCount+1) * time.Second)
-			go c.startListener(listener, tryCount+1)
+			go c.startListening(listener, tryCount+1)
 		}
 	}
 	// start listening to block's events

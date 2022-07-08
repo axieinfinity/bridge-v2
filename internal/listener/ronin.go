@@ -80,7 +80,7 @@ func (l *RoninListener) IsUpTodate() bool {
 	// true if timestamp is within 1 hour
 	distance := uint64(time.Now().Unix()) - latestBlock.GetTimestamp()
 	if distance > uint64(oneHour) {
-		log.Info("Node is not up-to-date, keep waiting...", "distance", distance, "listener", l.GetName())
+		log.Info("Node is not up-to-date, keep waiting...", "distance (s)", distance, "listener", l.GetName())
 		return false
 	}
 	return true
