@@ -16,6 +16,7 @@ import (
 	"strconv"
 	"strings"
 	"syscall"
+	"time"
 )
 
 const (
@@ -27,6 +28,11 @@ const (
 	ethereumValidatorKey = "ETHEREUM_VALIDATOR_KEY"
 	ethereumRelayerKey   = "ETHEREUM_RELAYER_KEY"
 	verbosity            = "VERBOSITY"
+
+	roninTaskInterval           = "RONIN_TASK_INTERVAL"
+	roninTransactionCheckPeriod = "RONIN_TRANSACTION_CHECK_PERIOD"
+	roninMaxProcessingTasks     = "RONIN_MAX_PROCESSING_TASKS"
+	ethereumGetLogsBatchSize    = "ETHEREUM_GET_LOGS_BATCH_SIZE"
 
 	dbHost            = "DB_HOST"
 	dbPort            = "DB_PORT"
@@ -181,6 +187,34 @@ func checkEnv(cfg *types.Config) {
 
 	if os.Getenv(numberOfWorkers) != "" {
 		cfg.NumberOfWorkers, _ = strconv.Atoi(os.Getenv(numberOfWorkers))
+	}
+
+	if os.Getenv(roninTaskInterval) != "" {
+		taskInterval, _ := strconv.Atoi(os.Getenv(roninTaskInterval))
+		if taskInterval > 0 {
+			cfg.Listeners[RoninNetwork].TaskInterval = time.Duration(int64(taskInterval)) * time.Second
+		}
+	}
+
+	if os.Getenv(roninTransactionCheckPeriod) != "" {
+		txPeriod, _ := strconv.Atoi(os.Getenv(roninTransactionCheckPeriod))
+		if txPeriod > 0 {
+			cfg.Listeners[RoninNetwork].TransactionCheckPeriod = time.Duration(int64(txPeriod)) * time.Second
+		}
+	}
+
+	if os.Getenv(roninMaxProcessingTasks) != "" {
+		tasks, _ := strconv.Atoi(os.Getenv(roninMaxProcessingTasks))
+		if tasks > 0 {
+			cfg.Listeners[RoninNetwork].MaxProcessingTasks = tasks
+		}
+	}
+
+	if os.Getenv(ethereumGetLogsBatchSize) != "" {
+		batchSize, _ := strconv.Atoi(os.Getenv(ethereumGetLogsBatchSize))
+		if batchSize > 0 {
+			cfg.Listeners[EthereumNetwork].GetLogsBatchSize = batchSize
+		}
 	}
 
 	// clean key
