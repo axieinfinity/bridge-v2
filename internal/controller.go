@@ -536,6 +536,7 @@ func (c *Controller) processBatchLogs(listener types.IListener, fromHeight, toHe
 		}
 		log.Info("[Controller][processBatchLogs] finish getting logs", "from", opts.Start, "to", *opts.End, "logs", len(logs), "listener", listener.GetName())
 		fromHeight = *opts.End + 1
+		block, _ := listener.GetBlock(*opts.End)
 		for _, eventLog := range logs {
 			eventId := eventLog.Topics[0]
 			log.Info("[Controller][processBatchLogs] processing log", "topic", eventLog.Topics[0].Hex(), "address", eventLog.Address.Hex(), "transaction", eventLog.TxHash.Hex(), "listener", listener.GetName())
@@ -550,6 +551,7 @@ func (c *Controller) processBatchLogs(listener types.IListener, fromHeight, toHe
 					log.Error("[Controller] failed on preparing job", "err", err, "jobType", job.GetType(), "tx", job.GetTransaction().GetHash().Hex())
 					continue
 				}
+				listener.UpdateCurrentBlock(block)
 				c.JobChan <- job
 			}
 		}
