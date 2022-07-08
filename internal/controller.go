@@ -429,14 +429,12 @@ func (c *Controller) startListener(listener types.IListener, tryCount int) {
 			} else {
 				currentBlock = listener.GetCurrentBlock()
 			}
-			log.Info("[Controller][Watcher] start processing block", "height", currentBlock.GetHeight()+1, "listener", listener.GetName(), "latest", latest)
-			c.processBlock(listener, currentBlock.GetHeight()+1)
 		}
 	}
 }
 
 func (c *Controller) processBehindBlock(listener types.IListener, height, latestBlockHeight uint64) error {
-	if latestBlockHeight-listener.GetSafeBlockRange() > height+2 {
+	if latestBlockHeight-listener.GetSafeBlockRange() > height {
 		var (
 			safeBlock, block  types.IBlock
 			tryCount          int
@@ -466,28 +464,8 @@ func (c *Controller) processBehindBlock(listener types.IListener, height, latest
 				c.processTxs(listener, block.GetTransactions())
 			}
 		}
-		if processedToHeight < safeBlock.GetHeight() {
-			block, _ := listener.GetBlock(processedToHeight)
-			listener.UpdateCurrentBlock(block)
-			return errors.New(fmt.Sprintf("error occurred while processing behind block, expect %d but processed to %d", safeBlock.GetHeight(), processedToHeight))
-		}
-		listener.UpdateCurrentBlock(safeBlock)
 	}
 	return nil
-}
-
-func (c *Controller) processBlock(listener types.IListener, height uint64) {
-	if c.hasSubscriptionType[listener.GetName()][types.LogEvent] {
-		c.processBatchLogs(listener, height, height)
-	}
-	if c.hasSubscriptionType[listener.GetName()][types.TxEvent] {
-		block, err := listener.GetBlock(height)
-		if err != nil {
-			log.Error("[Controller][processBlock] error while get block", "err", err, "listener", listener.GetName(), "height", height)
-			return
-		}
-		c.processTxs(listener, block.GetTransactions())
-	}
 }
 
 func (c *Controller) processBatchLogs(listener types.IListener, fromHeight, toHeight uint64) uint64 {
@@ -536,7 +514,6 @@ func (c *Controller) processBatchLogs(listener types.IListener, fromHeight, toHe
 		}
 		log.Info("[Controller][processBatchLogs] finish getting logs", "from", opts.Start, "to", *opts.End, "logs", len(logs), "listener", listener.GetName())
 		fromHeight = *opts.End + 1
-		block, _ := listener.GetBlock(*opts.End)
 		for _, eventLog := range logs {
 			eventId := eventLog.Topics[0]
 			log.Info("[Controller][processBatchLogs] processing log", "topic", eventLog.Topics[0].Hex(), "address", eventLog.Address.Hex(), "transaction", eventLog.TxHash.Hex(), "listener", listener.GetName())
@@ -551,10 +528,11 @@ func (c *Controller) processBatchLogs(listener types.IListener, fromHeight, toHe
 					log.Error("[Controller] failed on preparing job", "err", err, "jobType", job.GetType(), "tx", job.GetTransaction().GetHash().Hex())
 					continue
 				}
-				listener.UpdateCurrentBlock(block)
 				c.JobChan <- job
 			}
 		}
+		block, _ := listener.GetBlock(*opts.End)
+		listener.UpdateCurrentBlock(block)
 	}
 	return fromHeight
 }

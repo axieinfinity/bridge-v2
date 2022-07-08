@@ -2,7 +2,6 @@ package stores
 
 import (
 	"fmt"
-	"github.com/axieinfinity/bridge-v2/internal/models"
 	"github.com/axieinfinity/bridge-v2/internal/types"
 	"github.com/ethereum/go-ethereum/log"
 	"gorm.io/driver/postgres"
@@ -34,18 +33,6 @@ func NewMainStore(db *gorm.DB) *MainStore {
 		WithdrawalStore:       NewWithdrawalStore(db),
 		EventStore:            NewEventStore(db),
 		ProcessedReceiptStore: NewProcessedReceiptStore(db),
-	}
-	m := []interface{}{
-		&models.Deposit{},
-		&models.Job{},
-		&models.ProcessedBlock{},
-		&models.Task{},
-		&models.Withdrawal{},
-		&models.Event{},
-		&models.ProcessedReceipt{},
-	}
-	if err := cl.AutoMigrate(m...); err != nil {
-		panic(err)
 	}
 	return cl
 }

@@ -206,7 +206,8 @@ func (e *EthereumListener) GetSubscriptions() map[string]*types.Subscribe {
 }
 
 func (e *EthereumListener) UpdateCurrentBlock(block types.IBlock) error {
-	if e.GetCurrentBlock().GetHash().Hex() != block.GetHash().Hex() {
+	if block != nil && e.GetCurrentBlock().GetHeight() < block.GetHeight() {
+		log.Info(fmt.Sprintf("[%s] UpdateCurrentBlock", e.name), "block", block.GetHeight())
 		e.currentBlock.Store(block)
 		return e.SaveCurrentBlockToDB()
 	}
