@@ -18,11 +18,13 @@ import (
 const (
 	defaultLimitRecords       = 50
 	defaultMaxTry             = 5
-	defaultReceiptCheck       = 50
 	defaultMaxProcessingTasks = 200
 )
 
-var defaultTaskInterval = 10 * time.Second
+var (
+	defaultTaskInterval = 10 * time.Second
+	defaultReceiptCheck = 50 * time.Second
+)
 
 type RoninTask struct {
 	ctx        context.Context
@@ -82,10 +84,10 @@ func NewRoninTask(listener types.IListener, util utils.IUtils) (*RoninTask, erro
 		maxProcessingTasks: defaultMaxProcessingTasks,
 	}
 	if config.TaskInterval > 0 {
-		task.taskInterval = config.TaskInterval * time.Second
+		task.taskInterval = config.TaskInterval
 	}
 	if config.TransactionCheckPeriod > 0 {
-		task.txCheckInterval = config.TransactionCheckPeriod * time.Second
+		task.txCheckInterval = config.TransactionCheckPeriod
 	}
 	if config.MaxTasksQuery > 0 {
 		task.limitQuery = config.MaxTasksQuery
@@ -97,6 +99,7 @@ func NewRoninTask(listener types.IListener, util utils.IUtils) (*RoninTask, erro
 }
 
 func (r *RoninTask) Start() {
+	log.Info("[RoninTask] starting ronin task", "taskInterval", r.taskInterval, "txCheckInterval", r.txCheckInterval, "maxProcessingTasks", r.maxProcessingTasks)
 	taskTicker := time.NewTicker(r.taskInterval)
 	processingTicker := time.NewTicker(r.txCheckInterval)
 	for {

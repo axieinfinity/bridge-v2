@@ -193,6 +193,7 @@ func checkEnv(cfg *types.Config) {
 		taskInterval, _ := strconv.Atoi(os.Getenv(roninTaskInterval))
 		if taskInterval > 0 {
 			cfg.Listeners[RoninNetwork].TaskInterval = time.Duration(int64(taskInterval)) * time.Second
+			log.Info("setting TaskInterval", "value", cfg.Listeners[RoninNetwork].TaskInterval)
 		}
 	}
 
@@ -200,6 +201,7 @@ func checkEnv(cfg *types.Config) {
 		txPeriod, _ := strconv.Atoi(os.Getenv(roninTransactionCheckPeriod))
 		if txPeriod > 0 {
 			cfg.Listeners[RoninNetwork].TransactionCheckPeriod = time.Duration(int64(txPeriod)) * time.Second
+			log.Info("setting transactionCheckPeriod", "value", cfg.Listeners[RoninNetwork].TransactionCheckPeriod)
 		}
 	}
 
@@ -207,6 +209,7 @@ func checkEnv(cfg *types.Config) {
 		tasks, _ := strconv.Atoi(os.Getenv(roninMaxProcessingTasks))
 		if tasks > 0 {
 			cfg.Listeners[RoninNetwork].MaxProcessingTasks = tasks
+			log.Info("setting MaxProcessingTasks", "value", tasks)
 		}
 	}
 
