@@ -44,6 +44,10 @@ func (l *RoninListener) GetTask() types.ITask {
 	return l.task
 }
 
+func (l *RoninListener) NewJobFromDB(job *models.Job) (types.IJob, error) {
+	return newJobFromDB(l, job)
+}
+
 // StoreMainchainWithdrawCallback stores the receipt to own database for future check from ProvideReceiptSignatureCallback
 func (l *RoninListener) StoreMainchainWithdrawCallback(fromChainId *big.Int, tx types.ITransaction, data []byte) error {
 	log.Info("[RoninListener] StoreMainchainWithdrawCallback", "tx", tx.GetHash().Hex())
