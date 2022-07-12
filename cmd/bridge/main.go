@@ -34,6 +34,8 @@ const (
 	roninMaxProcessingTasks     = "RONIN_MAX_PROCESSING_TASKS"
 	ethereumGetLogsBatchSize    = "ETHEREUM_GET_LOGS_BATCH_SIZE"
 
+	roninMaxTasksQuery = "RONIN_MAX_TASKS_QUERY"
+
 	dbHost            = "DB_HOST"
 	dbPort            = "DB_PORT"
 	dbName            = "DB_NAME"
@@ -217,6 +219,13 @@ func checkEnv(cfg *types.Config) {
 		batchSize, _ := strconv.Atoi(os.Getenv(ethereumGetLogsBatchSize))
 		if batchSize > 0 {
 			cfg.Listeners[EthereumNetwork].GetLogsBatchSize = batchSize
+		}
+	}
+
+	if os.Getenv(roninMaxTasksQuery) != "" {
+		limit, _ := strconv.Atoi(os.Getenv(roninMaxTasksQuery))
+		if limit > 0 {
+			cfg.Listeners[RoninNetwork].MaxTasksQuery = limit
 		}
 	}
 
