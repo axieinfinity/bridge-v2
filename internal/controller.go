@@ -25,6 +25,7 @@ const (
 	defaultMaxQueueSize     = 4096
 	defaultCoolDownDuration = 1
 	defaultMaxRetry         = 10
+	defaultTaskInterval     = 3
 )
 
 type Controller struct {
@@ -101,7 +102,7 @@ func New(cfg *types.Config, db *gorm.DB, helpers utils.IUtils) (*Controller, err
 	// add listeners from config
 	for name, lsConfig := range c.cfg.Listeners {
 		if lsConfig.LoadInterval <= 0 {
-			continue
+			lsConfig.LoadInterval = defaultTaskInterval
 		}
 		lsConfig.LoadInterval *= time.Second
 		lsConfig.Name = name
