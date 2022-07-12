@@ -7,6 +7,7 @@
       "safeBlockRange": 10,
       "maxTasksQuery": 1000,
       "minTasksQuery": 50,
+      "taskInterval": 3,
       "transactionCheckPeriod": 5,
       "secret": {
         "validator": "",
