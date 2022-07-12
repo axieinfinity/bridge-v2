@@ -26,11 +26,13 @@ func Migrate() *gormigrate.Migration {
 				return err
 			}
 
-			// insert
+			// insert result back to processedBlock with value - 500
+			// to make the bridge re-process past block,
+			// because the previous version of this bridge could not handle graceful shutdown nicely
 			for _, result := range results {
 				if err := tx.Create(&ProcessedBlock{
 					ChainId: result.ChainId,
-					Block:   result.Block,
+					Block:   result.Block - 500,
 				}).Error; err != nil {
 					return err
 				}
