@@ -412,3 +412,23 @@ func (e *EthCallbackJob) Update(status string) error {
 	}
 	return nil
 }
+
+func (e *EthCallbackJob) Save() error {
+	job := &models.Job{
+		Listener:         e.listener.GetName(),
+		SubscriptionName: e.subscriptionName,
+		Type:             e.jobType,
+		RetryCount:       e.retryCount,
+		Status:           types.STATUS_PENDING,
+		Data:             common.Bytes2Hex(e.data),
+		Transaction:      e.tx.GetHash().Hex(),
+		CreatedAt:        time.Now().Unix(),
+		FromChainId:      hexutil.EncodeBig(e.fromChainID),
+		Method:           e.method,
+	}
+	if err := e.listener.GetStore().GetJobStore().Save(job); err != nil {
+		return err
+	}
+	e.id = int32(job.ID)
+	return nil
+}

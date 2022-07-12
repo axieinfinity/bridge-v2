@@ -2,7 +2,6 @@ package stores
 
 import (
 	"fmt"
-	"github.com/axieinfinity/bridge-v2/internal/models"
 	"github.com/axieinfinity/bridge-v2/internal/types"
 	"github.com/ethereum/go-ethereum/log"
 	"gorm.io/driver/postgres"
@@ -14,35 +13,26 @@ import (
 type MainStore struct {
 	*gorm.DB
 
-	DepositStore        types.IDepositStore
-	WithdrawalStore     types.IWithdrawalStore
-	JobStore            types.IJobStore
-	TaskStore           types.ITaskStore
-	ProcessedBlockStore types.IProcessedBlockStore
-	EventStore          types.IEventStore
+	DepositStore          types.IDepositStore
+	WithdrawalStore       types.IWithdrawalStore
+	JobStore              types.IJobStore
+	TaskStore             types.ITaskStore
+	ProcessedBlockStore   types.IProcessedBlockStore
+	EventStore            types.IEventStore
+	ProcessedReceiptStore types.IProcessedReceiptStore
 }
 
 func NewMainStore(db *gorm.DB) *MainStore {
 	cl := &MainStore{
 		DB: db,
 
-		JobStore:            NewJobStore(db),
-		TaskStore:           NewTaskStore(db),
-		ProcessedBlockStore: NewProcessedBlockStore(db),
-		DepositStore:        NewDepositStore(db),
-		WithdrawalStore:     NewWithdrawalStore(db),
-		EventStore:          NewEventStore(db),
-	}
-	m := []interface{}{
-		&models.Deposit{},
-		&models.Job{},
-		&models.ProcessedBlock{},
-		&models.Task{},
-		&models.Withdrawal{},
-		&models.Event{},
-	}
-	if err := cl.AutoMigrate(m...); err != nil {
-		panic(err)
+		JobStore:              NewJobStore(db),
+		TaskStore:             NewTaskStore(db),
+		ProcessedBlockStore:   NewProcessedBlockStore(db),
+		DepositStore:          NewDepositStore(db),
+		WithdrawalStore:       NewWithdrawalStore(db),
+		EventStore:            NewEventStore(db),
+		ProcessedReceiptStore: NewProcessedReceiptStore(db),
 	}
 	return cl
 }
@@ -73,6 +63,10 @@ func (m *MainStore) GetJobStore() types.IJobStore {
 
 func (m *MainStore) GetProcessedBlockStore() types.IProcessedBlockStore {
 	return m.ProcessedBlockStore
+}
+
+func (m *MainStore) GetProcessedReceiptStore() types.IProcessedReceiptStore {
+	return m.ProcessedReceiptStore
 }
 
 func (m *MainStore) GetEventStore() types.IEventStore {

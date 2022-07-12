@@ -44,7 +44,6 @@ type Worker struct {
 	failedChan  chan<- types.IJob
 	successChan chan<- types.IJob
 
-	closeChan chan struct{}
 	listeners map[string]types.IListener
 }
 
@@ -66,6 +65,11 @@ func (w *Worker) String() string {
 }
 
 func (w *Worker) start() {
+	defer func() {
+		if r := recover(); r != nil {
+			log.Error("[Worker][addToQueue] recover from panic", "message", r)
+		}
+	}()
 	for {
 		// push worker chan into queue
 		w.queue <- w.workerChan

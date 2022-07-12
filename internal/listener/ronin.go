@@ -44,6 +44,10 @@ func (l *RoninListener) GetTask() types.ITask {
 	return l.task
 }
 
+func (l *RoninListener) NewJobFromDB(job *models.Job) (types.IJob, error) {
+	return newJobFromDB(l, job)
+}
+
 // StoreMainchainWithdrawCallback stores the receipt to own database for future check from ProvideReceiptSignatureCallback
 func (l *RoninListener) StoreMainchainWithdrawCallback(fromChainId *big.Int, tx types.ITransaction, data []byte) error {
 	log.Info("[RoninListener] StoreMainchainWithdrawCallback", "tx", tx.GetHash().Hex())
@@ -80,7 +84,7 @@ func (l *RoninListener) IsUpTodate() bool {
 	// true if timestamp is within 1 hour
 	distance := uint64(time.Now().Unix()) - latestBlock.GetTimestamp()
 	if distance > uint64(oneHour) {
-		log.Info("Node is not up-to-date, keep waiting...", "distance", distance, "listener", l.GetName())
+		log.Info("Node is not up-to-date, keep waiting...", "distance (s)", distance, "listener", l.GetName())
 		return false
 	}
 	return true

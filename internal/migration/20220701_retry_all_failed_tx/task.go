@@ -17,7 +17,6 @@ type Task struct {
 	FromTransaction   string `json:"fromTransaction" gorm:"from_transaction;index:idx_task_from_transaction;not null"`
 	TransactionStatus int    `json:"transactionStatus" gorm:"transaction_status;index:idx_task_transaction_status;not null"`
 	CreatedAt         int64  `json:"createdAt" gorm:"column:created_at;type:bigint;index:idx_task_created_at;not null"`
-	TxCreatedAt       int64  `json:"txCreatedAt" gorm:"column:tx_created_at;type:bigint;index:idx_task_tx_created_at;not null;default:0"`
 }
 
 func (m Task) BeforeCreate(tx *gorm.DB) (err error) {

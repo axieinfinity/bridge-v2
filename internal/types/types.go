@@ -171,12 +171,11 @@ type IProcessedBlockStore interface {
 type ITaskStore interface {
 	Save(task *models.Task) error
 	Update(task *models.Task) error
-	GetTasks(chain, status string, limit, retrySeconds int) ([]*models.Task, error)
-	UpdateTaskWithIds(ids []int, transactionStatus int, status string) error
+	GetTasks(chain, status string, limit, retrySeconds int, before int64, excludeIds []int) ([]*models.Task, error)
 	UpdateTasksWithTransactionHash(txs []string, transactionStatus int, status string) error
-	IncrementRetries(ids []int) error
 	DeleteTasks([]string, uint64) error
 	Count() int64
+	ResetTo(ids []string, status string) error
 }
 
 type IDepositStore interface {
@@ -199,10 +198,15 @@ type IMainStore interface {
 	GetDB() *gorm.DB
 	GetDepositStore() IDepositStore
 	GetWithdrawalStore() IWithdrawalStore
+	GetProcessedReceiptStore() IProcessedReceiptStore
 	GetTaskStore() ITaskStore
 	GetJobStore() IJobStore
 	GetProcessedBlockStore() IProcessedBlockStore
 	GetEventStore() IEventStore
+}
+
+type IProcessedReceiptStore interface {
+	Save(taskId int, receiptId int64) error
 }
 
 type Config struct {
@@ -255,6 +259,13 @@ type LsConfig struct {
 
 	MaxTasksQuery int `json:"maxTasksQuery"`
 	MinTasksQuery int `json:"minTasksQuery"`
+
+	// GetLogsBatchSize is used at batch size when calling processBatchLogs
+	GetLogsBatchSize int `json:"getLogsBatchSize"`
+
+	// MaxProcessingTasks is used to specify max processing tasks allowed while processing tasks
+	// if number of tasks reaches this number, it waits until this number decrease
+	MaxProcessingTasks int `json:"maxProcessingTasks"`
 }
 
 type Secret struct {

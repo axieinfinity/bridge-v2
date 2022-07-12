@@ -7,7 +7,8 @@
       "safeBlockRange": 10,
       "maxTasksQuery": 1000,
       "minTasksQuery": 50,
-      "transactionCheckPeriod": 5,
+      "taskInterval": 10,
+      "transactionCheckPeriod": 50,
       "secret": {
         "validator": "",
         "relayer": ""
@@ -61,6 +62,7 @@
       "blockTime": 15,
       "safeBlockRange": 8,
       "transactionCheckPeriod": 15,
+      "getLogsBatchSize": 200,
       "secret": {
         "validator": "",
         "relayer": ""

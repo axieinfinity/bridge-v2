@@ -7,20 +7,21 @@
       "safeBlockRange": 10,
       "maxTasksQuery": 1000,
       "minTasksQuery": 50,
+      "taskInterval": 3,
       "transactionCheckPeriod": 5,
       "secret": {
         "validator": "",
         "relayer": ""
       },
-      "fromHeight": 6508284,
+      "fromHeight": 8010875,
       "processWithinBlocks": 864000,
       "contracts": {
-        "Gateway": "0x03d1F13c7391F6B5A651143a31034cf728A93694",
-        "EthGateway": "0x3b6371EB912bFd5C0E249A16000ffbC6B881555A"
+        "Gateway": "0xA8D61A5427a778be28Bd9bb5990956b33385c738",
+        "EthGateway": "0x4E4D9B21B157CCD52b978C3a3BCd1dc5eBAE7167"
       },
       "subscriptions": {
         "MainchainWithdrewSubscription": {
-          "to": "0x03d1F13c7391F6B5A651143a31034cf728A93694",
+          "to": "0xA8D61A5427a778be28Bd9bb5990956b33385c738",
           "type": 1,
           "handler": {
             "abi": "contracts/ronin/RoninGatewayV2.abi",
@@ -31,7 +32,7 @@
           }
         },
         "WithdrawalRequestedSubscription": {
-          "to": "0x03d1F13c7391F6B5A651143a31034cf728A93694",
+          "to": "0xA8D61A5427a778be28Bd9bb5990956b33385c738",
           "type": 1,
           "handler": {
             "abi": "contracts/ronin/RoninGatewayV2.abi",
@@ -42,7 +43,7 @@
           }
         },
         "WithdrawalSignaturesRequestedSubscription": {
-          "to": "0x03d1F13c7391F6B5A651143a31034cf728A93694",
+          "to": "0xA8D61A5427a778be28Bd9bb5990956b33385c738",
           "type": 1,
           "handler": {
             "abi": "contracts/ronin/RoninGatewayV2.abi",
@@ -65,14 +66,14 @@
         "validator": "",
         "relayer": ""
       },
-      "fromHeight": 12234008,
+      "fromHeight": 12522064,
       "processWithinBlocks": 198720,
       "contracts": {
-        "Gateway": "0x03d1F13c7391F6B5A651143a31034cf728A93694"
+        "Gateway": "0xA8D61A5427a778be28Bd9bb5990956b33385c738"
       },
       "subscriptions": {
         "DepositRequestedSubscription": {
-          "to": "0x3b6371EB912bFd5C0E249A16000ffbC6B881555A",
+          "to": "0x4E4D9B21B157CCD52b978C3a3BCd1dc5eBAE7167",
           "type": 1,
           "handler": {
             "abi": "contracts/ethereum/MainchainGatewayV2.abi",
@@ -83,7 +84,7 @@
           }
         },
         "WithdrewSubscription": {
-          "to": "0x3b6371EB912bFd5C0E249A16000ffbC6B881555A",
+          "to": "0x4E4D9B21B157CCD52b978C3a3BCd1dc5eBAE7167",
           "type": 1,
           "handler": {
             "abi": "contracts/ethereum/MainchainGatewayV2.abi",

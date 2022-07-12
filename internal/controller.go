@@ -20,11 +20,12 @@ import (
 )
 
 const (
-	defaultBatchSize        = 500
+	defaultBatchSize        = 100
 	defaultWorkers          = 8182
 	defaultMaxQueueSize     = 4096
 	defaultCoolDownDuration = 1
 	defaultMaxRetry         = 10
+	defaultTaskInterval     = 3
 )
 
 type Controller struct {
@@ -101,7 +102,7 @@ func New(cfg *types.Config, db *gorm.DB, helpers utils.IUtils) (*Controller, err
 	// add listeners from config
 	for name, lsConfig := range c.cfg.Listeners {
 		if lsConfig.LoadInterval <= 0 {
-			continue
+			lsConfig.LoadInterval = defaultTaskInterval
 		}
 		lsConfig.LoadInterval *= time.Second
 		lsConfig.Name = name
@@ -124,6 +125,10 @@ func New(cfg *types.Config, db *gorm.DB, helpers utils.IUtils) (*Controller, err
 		}
 		c.listeners[name] = l
 		c.hasSubscriptionType[name] = make(map[int]bool)
+
+		if lsConfig.GetLogsBatchSize == 0 {
+			lsConfig.GetLogsBatchSize = defaultBatchSize
+		}
 
 		// filtering subscription, get all subscriptionType available for each listener
 		for _, subscription := range l.GetSubscriptions() {
@@ -157,6 +162,9 @@ func (c *Controller) LoadABIsFromConfig(lsConfig *types.LsConfig) (err error) {
 
 // prepareJob saves new job to database
 func (c *Controller) prepareJob(job types.IJob) error {
+	if job == nil {
+		return nil
+	}
 	if job.GetID() == 0 {
 		return job.Save()
 	}
@@ -168,11 +176,13 @@ func (c *Controller) processSuccessJob(job types.IJob) {
 	if job == nil {
 		return
 	}
+
 	log.Info("process job success", "id", job.GetID())
 	if err := job.Update(types.STATUS_DONE); err != nil {
 		log.Error("[Controller] failed on updating success job", "err", err, "jobType", job.GetType(), "tx", job.GetTransaction().GetHash().Hex())
 		// send back job to successJobChan
 		c.SuccessJobChan <- job
+		return
 	}
 }
 
@@ -181,11 +191,13 @@ func (c *Controller) processFailedJob(job types.IJob) {
 	if job == nil {
 		return
 	}
+
 	log.Info("process job failed", "id", job.GetID())
 	if err := job.Update(types.STATUS_FAILED); err != nil {
 		log.Error("[Controller] failed on updating failed job", "err", err, "jobType", job.GetType(), "tx", job.GetTransaction().GetHash().Hex())
 		// send back job to failedJobChan
 		c.FailedJobChan <- job
+		return
 	}
 }
 
@@ -201,9 +213,6 @@ func (c *Controller) Start() error {
 			case job := <-c.FailedJobChan:
 				c.processFailedJob(job)
 			case job := <-c.PrepareJobChan:
-				if job == nil {
-					continue
-				}
 				// add new job to database before processing
 				if err := c.prepareJob(job); err != nil {
 					log.Error("[Controller] failed on preparing job", "err", err, "jobType", job.GetType(), "tx", job.GetTransaction().GetHash().Hex())
@@ -230,39 +239,35 @@ func (c *Controller) Start() error {
 				} else {
 					c.isClosed.Store(true)
 				}
-				// close all available channels
-				close(c.PrepareJobChan)
-				close(c.JobChan)
-				close(c.SuccessJobChan)
-				close(c.FailedJobChan)
-				close(c.Queue)
 
+				// close listeners first to prevent further tasks processing
+				c.closeListeners()
+
+				// loop through prepare job chan to store all jobs to db
 				for {
 					if len(c.PrepareJobChan) == 0 {
 						break
 					}
 					job, more := <-c.PrepareJobChan
-					if more {
-						if err := c.prepareJob(job); err != nil {
-							log.Error("[Controller] error while storing all jobs from prepareJobChan to database in closing step", "err", err, "jobType", job.GetType(), "tx", job.GetTransaction().GetHash().Hex())
-						}
-					} else {
+					if !more {
 						break
+					}
+					if err := c.prepareJob(job); err != nil {
+						log.Error("[Controller] error while storing all jobs from prepareJobChan to database in closing step", "err", err, "jobType", job.GetType(), "tx", job.GetTransaction().GetHash().Hex())
 					}
 				}
 
-				// save all success jobs
+				// update all success jobs
 				for {
 					log.Info("checking successJobChan")
 					if len(c.SuccessJobChan) == 0 {
 						break
 					}
 					job, more := <-c.SuccessJobChan
-					if more {
-						c.processSuccessJob(job)
-					} else {
+					if !more {
 						break
 					}
+					c.processSuccessJob(job)
 				}
 
 				// wait until all failed jobs are handled
@@ -272,18 +277,31 @@ func (c *Controller) Start() error {
 					}
 					log.Info("checking failedJobChan")
 					job, more := <-c.FailedJobChan
-					if more {
-						c.processFailedJob(job)
-					} else {
+					if !more {
 						break
 					}
+					c.processFailedJob(job)
 				}
+
+				// close all available channels
+				close(c.PrepareJobChan)
+				close(c.JobChan)
+				close(c.SuccessJobChan)
+				close(c.FailedJobChan)
+				close(c.Queue)
+
+				// send signal to stop the program
 				c.stop <- struct{}{}
 				break
 			}
 		}
 	}()
+	c.processPendingJobs()
+	c.startListeners()
+	return nil
+}
 
+func (c *Controller) processPendingJobs() {
 	// load all pending jobs from database
 	jobs, err := c.store.GetJobStore().GetPendingJobs()
 	if err != nil {
@@ -313,15 +331,14 @@ func (c *Controller) Start() error {
 			c.JobChan <- j
 		}
 	}
+}
 
-	// run all events listeners
+func (c *Controller) startListeners() {
+	// make sure all listeners are up-to-date
 	for _, listener := range c.listeners {
-		go listener.Start()
 		if listener.IsDisabled() {
 			continue
 		}
-		// check whether node is up-to-date or not
-		// it guarantees that blocks data are consistent to other nodes
 		for {
 			if listener.IsUpTodate() {
 				break
@@ -329,9 +346,21 @@ func (c *Controller) Start() error {
 			// sleep for 10s
 			time.Sleep(10 * time.Second)
 		}
-		go c.startListener(listener, 0)
 	}
-	return nil
+	// run all events listeners
+	for _, listener := range c.listeners {
+		if listener.IsDisabled() {
+			continue
+		}
+		go listener.Start()
+		go c.startListening(listener, 0)
+	}
+}
+
+func (c *Controller) closeListeners() {
+	for _, listener := range c.listeners {
+		listener.Close()
+	}
 }
 
 func (c *Controller) Wait() {
@@ -339,7 +368,7 @@ func (c *Controller) Wait() {
 }
 
 // startListener starts listening events for a listener, it comes with a tryCount which close this listener if tryCount reaches 10 times
-func (c *Controller) startListener(listener types.IListener, tryCount int) {
+func (c *Controller) startListening(listener types.IListener, tryCount int) {
 	defer func() {
 		if r := recover(); r != nil {
 			log.Error("[Controller][startListener] recover from panic", "message", r)
@@ -358,7 +387,7 @@ func (c *Controller) startListener(listener types.IListener, tryCount int) {
 		log.Error("[Controller][startListener] error while get latest block", "err", err, "listener", listener.GetName())
 		// otherwise retry startListener
 		time.Sleep(time.Duration(tryCount+1) * time.Second)
-		go c.startListener(listener, tryCount+1)
+		go c.startListening(listener, tryCount+1)
 		return
 	}
 	// reset fromHeight if it is out of allowed blocks range
@@ -372,7 +401,7 @@ func (c *Controller) startListener(listener types.IListener, tryCount int) {
 		if err := c.processBehindBlock(listener, currentBlock.GetHeight(), latestBlockHeight); err != nil {
 			log.Error("[Controller][startListener] error while processing behind block", "err", err, "height", currentBlock.GetHeight(), "latestBlockHeight", latestBlockHeight)
 			time.Sleep(time.Duration(tryCount+1) * time.Second)
-			go c.startListener(listener, tryCount+1)
+			go c.startListening(listener, tryCount+1)
 		}
 	}
 	// start listening to block's events
@@ -382,9 +411,14 @@ func (c *Controller) startListener(listener types.IListener, tryCount int) {
 		case <-listener.Context().Done():
 			return
 		case <-tick.C:
+			// stop if controller is closed
+			if c.isClosed.Load().(bool) {
+				return
+			}
 			latest, err := listener.GetLatestBlockHeight()
 			if err != nil {
-				log.Error("[Controller][Watcher] error while get latest block height")
+				log.Error("[Controller][Watcher] error while get latest block height", "err", err)
+				continue
 			}
 			currentBlock = listener.GetCurrentBlock()
 			// do nothing if currentBlock is within safe block range
@@ -393,19 +427,17 @@ func (c *Controller) startListener(listener types.IListener, tryCount int) {
 			}
 			// if current block is behind safeBlockRange then process without waiting
 			if err := c.processBehindBlock(listener, currentBlock.GetHeight(), latest); err != nil {
-				log.Error("[Controller][Watcher]  error while processing behind block", err, "height", currentBlock.GetHeight(), "latestBlockHeight", latestBlockHeight)
+				log.Error("[Controller][Watcher] error while processing behind block", "err", err, "height", currentBlock.GetHeight(), "latestBlockHeight", latestBlockHeight)
 				continue
 			} else {
 				currentBlock = listener.GetCurrentBlock()
 			}
-			log.Info("[Controller][Watcher] start processing block", "height", currentBlock.GetHeight()+1, "listener", listener.GetName(), "latest", latest)
-			c.processBlock(listener, currentBlock.GetHeight()+1)
 		}
 	}
 }
 
 func (c *Controller) processBehindBlock(listener types.IListener, height, latestBlockHeight uint64) error {
-	if latestBlockHeight-listener.GetSafeBlockRange() > height+2 {
+	if latestBlockHeight-listener.GetSafeBlockRange() > height {
 		var (
 			safeBlock, block  types.IBlock
 			tryCount          int
@@ -435,28 +467,8 @@ func (c *Controller) processBehindBlock(listener types.IListener, height, latest
 				c.processTxs(listener, block.GetTransactions())
 			}
 		}
-		if processedToHeight < safeBlock.GetHeight() {
-			block, _ := listener.GetBlock(processedToHeight)
-			listener.UpdateCurrentBlock(block)
-			return errors.New(fmt.Sprintf("error occurred while processing behind block, expect %d but processed to %d", safeBlock.GetHeight(), processedToHeight))
-		}
-		listener.UpdateCurrentBlock(safeBlock)
 	}
 	return nil
-}
-
-func (c *Controller) processBlock(listener types.IListener, height uint64) {
-	if c.hasSubscriptionType[listener.GetName()][types.LogEvent] {
-		c.processBatchLogs(listener, height, height)
-	}
-	if c.hasSubscriptionType[listener.GetName()][types.TxEvent] {
-		block, err := listener.GetBlock(height)
-		if err != nil {
-			log.Error("[Controller][processBlock] error while get block", "err", err, "listener", listener.GetName(), "height", height)
-			return
-		}
-		c.processTxs(listener, block.GetTransactions())
-	}
 }
 
 func (c *Controller) processBatchLogs(listener types.IListener, fromHeight, toHeight uint64) uint64 {
@@ -482,6 +494,7 @@ func (c *Controller) processBatchLogs(listener types.IListener, fromHeight, toHe
 		}
 	}
 	retry := 0
+	batchSize := uint64(listener.Config().GetLogsBatchSize)
 	for fromHeight <= toHeight {
 		if retry == 10 {
 			break
@@ -490,8 +503,8 @@ func (c *Controller) processBatchLogs(listener types.IListener, fromHeight, toHe
 			Start:   fromHeight,
 			Context: c.ctx,
 		}
-		if fromHeight+defaultBatchSize < toHeight {
-			to := fromHeight + defaultBatchSize
+		if fromHeight+batchSize < toHeight {
+			to := fromHeight + batchSize
 			opts.End = &to
 		} else {
 			opts.End = &toHeight
@@ -504,21 +517,25 @@ func (c *Controller) processBatchLogs(listener types.IListener, fromHeight, toHe
 		}
 		log.Info("[Controller][processBatchLogs] finish getting logs", "from", opts.Start, "to", *opts.End, "logs", len(logs), "listener", listener.GetName())
 		fromHeight = *opts.End + 1
-		go func() {
-			for _, eventLog := range logs {
-				eventId := eventLog.Topics[0]
-				log.Info("[Controller][processBatchLogs] processing log", "topic", eventLog.Topics[0].Hex(), "address", eventLog.Address.Hex(), "transaction", eventLog.TxHash.Hex(), "listener", listener.GetName())
-				if _, ok := eventIds[eventId]; !ok {
+		for _, eventLog := range logs {
+			eventId := eventLog.Topics[0]
+			log.Info("[Controller][processBatchLogs] processing log", "topic", eventLog.Topics[0].Hex(), "address", eventLog.Address.Hex(), "transaction", eventLog.TxHash.Hex(), "listener", listener.GetName())
+			if _, ok := eventIds[eventId]; !ok {
+				continue
+			}
+			data := eventLog.Data
+			name := eventIds[eventId]
+			tx := listener2.NewEmptyTransaction(chainId, eventLog.TxHash, eventLog.Data, nil, &eventLog.Address)
+			if job := listener.GetListenHandleJob(name, tx, eventId.Hex(), data); job != nil {
+				if err := c.prepareJob(job); err != nil {
+					log.Error("[Controller] failed on preparing job", "err", err, "jobType", job.GetType(), "tx", job.GetTransaction().GetHash().Hex())
 					continue
 				}
-				data := eventLog.Data
-				name := eventIds[eventId]
-				tx := listener2.NewEmptyTransaction(chainId, eventLog.TxHash, eventLog.Data, nil, &eventLog.Address)
-				if job := listener.GetListenHandleJob(name, tx, eventId.Hex(), data); job != nil {
-					c.PrepareJobChan <- job
-				}
+				c.JobChan <- job
 			}
-		}()
+		}
+		block, _ := listener.GetBlock(*opts.End)
+		listener.UpdateCurrentBlock(block)
 	}
 	return fromHeight
 }
@@ -572,4 +589,5 @@ func (c *Controller) Close() {
 		log.Info("closing")
 		c.cancelFunc()
 	}
+	c.Wait()
 }

@@ -206,7 +206,8 @@ func (e *EthereumListener) GetSubscriptions() map[string]*types.Subscribe {
 }
 
 func (e *EthereumListener) UpdateCurrentBlock(block types.IBlock) error {
-	if e.GetCurrentBlock().GetHash().Hex() != block.GetHash().Hex() {
+	if block != nil && e.GetCurrentBlock().GetHeight() < block.GetHeight() {
+		log.Info(fmt.Sprintf("[%s] UpdateCurrentBlock", e.name), "block", block.GetHeight())
 		e.currentBlock.Store(block)
 		return e.SaveCurrentBlockToDB()
 	}
@@ -309,16 +310,20 @@ func (e *EthereumListener) GetReceipt(txHash common.Hash) (*ethtypes.Receipt, er
 }
 
 func (e *EthereumListener) NewJobFromDB(job *models.Job) (types.IJob, error) {
+	return newJobFromDB(e, job)
+}
+
+func newJobFromDB(listener types.IListener, job *models.Job) (types.IJob, error) {
 	chainId, err := hexutil.DecodeBig(job.FromChainId)
 	if err != nil {
 		return nil, err
 	}
 	// get transaction from hash
-	tx, _, err := e.client.TransactionByHash(e.ctx, common.HexToHash(job.Transaction))
+	tx, _, err := listener.GetEthClient().TransactionByHash(context.Background(), common.HexToHash(job.Transaction))
 	if err != nil {
 		return nil, err
 	}
-	transaction, err := NewEthTransaction(e.chainId, tx)
+	transaction, err := NewEthTransaction(chainId, tx)
 	if err != nil {
 		return nil, err
 	}
@@ -335,19 +340,19 @@ func (e *EthereumListener) NewJobFromDB(job *models.Job) (types.IJob, error) {
 				data:             common.Hex2Bytes(job.Data),
 				tx:               transaction,
 				subscriptionName: job.SubscriptionName,
-				listener:         e,
-				utilsWrapper:     e.utilsWrapper,
+				listener:         listener,
+				utilsWrapper:     &utils.Utils{},
 				fromChainID:      chainId,
 				id:               int32(job.ID),
 			},
 		}, nil
 	case types.CallbackHandler:
-		if job.Method != "" {
+		if job.Method == "" {
 			return nil, nil
 		}
 		return &EthCallbackJob{
 			BaseJob: &BaseJob{
-				utilsWrapper: e.utilsWrapper,
+				utilsWrapper: &utils.Utils{},
 				jobType:      types.CallbackHandler,
 				retryCount:   job.RetryCount,
 				maxTry:       20,
@@ -355,7 +360,7 @@ func (e *EthereumListener) NewJobFromDB(job *models.Job) (types.IJob, error) {
 				backOff:      5,
 				data:         common.Hex2Bytes(job.Data),
 				tx:           transaction,
-				listener:     e,
+				listener:     listener,
 				fromChainID:  chainId,
 				id:           int32(job.ID),
 			},
