@@ -128,6 +128,8 @@ func prepare(ctx *cli.Context) *types.Config {
 		if err := json.Unmarshal(plan, &cfg); err != nil {
 			panic(err)
 		}
+		cfg.Listeners[RoninNetwork].TaskInterval *= time.Second // convert to nanosecond
+		cfg.Listeners[RoninNetwork].TransactionCheckPeriod *= time.Second
 	}
 
 	checkEnv(cfg)
