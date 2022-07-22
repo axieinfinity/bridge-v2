@@ -3,14 +3,15 @@ package types
 import (
 	"context"
 	"crypto/ecdsa"
+	"math/big"
+	"time"
+
 	"github.com/axieinfinity/bridge-v2/internal/models"
 	"github.com/axieinfinity/bridge-v2/internal/utils"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"gorm.io/gorm"
-	"math/big"
-	"time"
 )
 
 const (

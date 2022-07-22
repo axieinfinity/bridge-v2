@@ -4,19 +4,21 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
+	"sync"
+	"sync/atomic"
+	"time"
+
 	listener2 "github.com/axieinfinity/bridge-v2/internal/listener"
 	"github.com/axieinfinity/bridge-v2/internal/stores"
 	"github.com/axieinfinity/bridge-v2/internal/types"
 	"github.com/axieinfinity/bridge-v2/internal/utils"
+	"github.com/axieinfinity/bridge-v2/metrics"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/log"
 	"gorm.io/gorm"
-	"strings"
-	"sync"
-	"sync/atomic"
-	"time"
 )
 
 const (
@@ -71,6 +73,7 @@ func New(cfg *types.Config, db *gorm.DB, helpers utils.IUtils) (*Controller, err
 	if cfg.NumberOfWorkers <= 0 {
 		cfg.NumberOfWorkers = defaultWorkers
 	}
+
 	ctx, cancel := context.WithCancel(context.Background())
 	c := &Controller{
 		cfg:                 cfg,
@@ -89,6 +92,11 @@ func New(cfg *types.Config, db *gorm.DB, helpers utils.IUtils) (*Controller, err
 		isClosed:            atomic.Value{},
 		hasSubscriptionType: make(map[string]map[int]bool),
 	}
+
+	metrics.RunPusher(ctx)
+	c.store.GetTaskStore().Count()
+	c.store.GetEventStore().Count()
+
 	c.isClosed.Store(false)
 	if helpers != nil {
 		c.utilWrapper = helpers
@@ -137,12 +145,15 @@ func New(cfg *types.Config, db *gorm.DB, helpers utils.IUtils) (*Controller, err
 			}
 			c.hasSubscriptionType[name][subscription.Type] = true
 		}
+
 	}
 
 	// init workers
 	for i := 0; i < cfg.NumberOfWorkers; i++ {
-		c.Workers = append(c.Workers, NewWorker(ctx, i, c.PrepareJobChan, c.FailedJobChan, c.SuccessJobChan, c.Queue, c.MaxQueueSize, c.listeners))
+		w := NewWorker(ctx, i, c.PrepareJobChan, c.FailedJobChan, c.SuccessJobChan, c.Queue, c.MaxQueueSize, c.listeners)
+		c.Workers = append(c.Workers, w)
 	}
+
 	return c, nil
 }
 
@@ -216,8 +227,10 @@ func (c *Controller) Start() error {
 				// add new job to database before processing
 				if err := c.prepareJob(job); err != nil {
 					log.Error("[Controller] failed on preparing job", "err", err, "jobType", job.GetType(), "tx", job.GetTransaction().GetHash().Hex())
+					metrics.Pusher.IncrCounter(metrics.PreparingFailedJobMetric, 1)
 					continue
 				}
+				metrics.Pusher.IncrCounter(metrics.PreparingSuccessJobMetric, 1)
 				c.JobChan <- job
 			case job := <-c.JobChan:
 				if job == nil {
@@ -529,8 +542,11 @@ func (c *Controller) processBatchLogs(listener types.IListener, fromHeight, toHe
 			if job := listener.GetListenHandleJob(name, tx, eventId.Hex(), data); job != nil {
 				if err := c.prepareJob(job); err != nil {
 					log.Error("[Controller] failed on preparing job", "err", err, "jobType", job.GetType(), "tx", job.GetTransaction().GetHash().Hex())
+					metrics.Pusher.IncrCounter(metrics.PreparingFailedJobMetric, 1)
 					continue
 				}
+				metrics.Pusher.IncrCounter(metrics.PreparingSuccessJobMetric, 1)
+				metrics.Pusher.IncrCounter(metrics.ProcessingJobMetric, 1)
 				c.JobChan <- job
 			}
 		}

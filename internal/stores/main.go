@@ -2,13 +2,18 @@ package stores
 
 import (
 	"fmt"
+	"time"
+
+	"github.com/axieinfinity/bridge-v2/configs"
 	"github.com/axieinfinity/bridge-v2/internal/types"
 	"github.com/ethereum/go-ethereum/log"
 	"gorm.io/driver/postgres"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
-	"time"
+	gormprometheus "gorm.io/plugin/prometheus"
 )
+
+var ()
 
 type MainStore struct {
 	*gorm.DB
@@ -93,7 +98,20 @@ func MustConnectDatabase(cfg *types.Config) (*gorm.DB, error) {
 	pgDB.SetConnMaxLifetime(time.Duration(cfg.DB.ConnMaxLifetime) * time.Hour)
 	pgDB.SetMaxIdleConns(cfg.DB.MaxIdleConns)
 	pgDB.SetMaxOpenConns(cfg.DB.MaxOpenConns)
-
+	if err := db.Use(gormprometheus.New(gormprometheus.Config{
+		DBName:          cfg.DB.DBName,                        // use `DBName` as metrics label
+		RefreshInterval: 15,                                   // Refresh metrics interval (default 15 seconds)
+		PushAddr:        configs.AppConfig.Prometheus.PushURL, // push metrics if `PushAddr` configured
+		StartServer:     true,                                 // start http server to expose metrics
+		HTTPServerPort:  8082,                                 // configure http server port, default port 8080 (if you have configured multiple instances, only the first `HTTPServerPort` will be used to start server)
+		MetricsCollector: []gormprometheus.MetricsCollector{
+			&gormprometheus.Postgres{
+				VariableNames: []string{"Threads_running"},
+			},
+		}, // user defined metrics
+	})); err != nil {
+		panic(err)
+	}
 	err = db.Raw("SELECT 1").Error
 	if err != nil {
 		log.Error("error querying SELECT 1", "err", err)
@@ -128,6 +146,21 @@ func MustConnectDatabaseWithName(cfg *types.Config, dbName string) (*gorm.DB, er
 		pgDB.SetConnMaxLifetime(time.Duration(cfg.DB.ConnMaxLifetime) * time.Hour)
 		pgDB.SetMaxIdleConns(cfg.DB.MaxIdleConns)
 		pgDB.SetMaxOpenConns(cfg.DB.MaxOpenConns)
+	}
+
+	if err := db.Use(gormprometheus.New(gormprometheus.Config{
+		DBName:          cfg.DB.DBName,    // use `DBName` as metrics label
+		RefreshInterval: 15,               // Refresh metrics interval (default 15 seconds)
+		PushAddr:        "localhost:9091", // push metrics if `PushAddr` configured
+		StartServer:     true,             // start http server to expose metrics
+		HTTPServerPort:  8082,             // configure http server port, default port 8080 (if you have configured multiple instances, only the first `HTTPServerPort` will be used to start server)
+		MetricsCollector: []gormprometheus.MetricsCollector{
+			&gormprometheus.Postgres{
+				VariableNames: []string{"Threads_running"},
+			},
+		}, // user defined metrics
+	})); err != nil {
+		panic(err)
 	}
 
 	err = db.Raw("SELECT 1").Error

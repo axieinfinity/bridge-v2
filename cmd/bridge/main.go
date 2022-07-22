@@ -3,13 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/axieinfinity/bridge-v2/cmd/utils"
-	"github.com/axieinfinity/bridge-v2/internal"
-	"github.com/axieinfinity/bridge-v2/internal/migration"
-	"github.com/axieinfinity/bridge-v2/internal/stores"
-	"github.com/axieinfinity/bridge-v2/internal/types"
-	"github.com/ethereum/go-ethereum/log"
-	"gopkg.in/urfave/cli.v1"
 	"io/ioutil"
 	"os"
 	"os/signal"
@@ -17,6 +10,15 @@ import (
 	"strings"
 	"syscall"
 	"time"
+
+	"github.com/axieinfinity/bridge-v2/cmd/utils"
+	"github.com/axieinfinity/bridge-v2/configs"
+	"github.com/axieinfinity/bridge-v2/internal"
+	"github.com/axieinfinity/bridge-v2/internal/migration"
+	"github.com/axieinfinity/bridge-v2/internal/stores"
+	"github.com/axieinfinity/bridge-v2/internal/types"
+	"github.com/ethereum/go-ethereum/log"
+	"gopkg.in/urfave/cli.v1"
 )
 
 const (
@@ -71,6 +73,8 @@ func init() {
 	app.Commands = []cli.Command{
 		cleanerCommand,
 	}
+
+	configs.New()
 }
 
 func setRpcUrlFromEnv(cfg *types.Config, rpc, network string) {

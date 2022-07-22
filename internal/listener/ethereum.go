@@ -5,18 +5,20 @@ import (
 	"crypto/ecdsa"
 	"errors"
 	"fmt"
+	"math/big"
+	"sync"
+	"sync/atomic"
+	"time"
+
 	"github.com/axieinfinity/bridge-v2/internal/models"
 	"github.com/axieinfinity/bridge-v2/internal/types"
 	"github.com/axieinfinity/bridge-v2/internal/utils"
+	"github.com/axieinfinity/bridge-v2/metrics"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/log"
-	"math/big"
-	"sync"
-	"sync/atomic"
-	"time"
 )
 
 type EthereumListener struct {
@@ -227,7 +229,13 @@ func (e *EthereumListener) SaveCurrentBlockToDB() error {
 	if err != nil {
 		return err
 	}
-	return e.store.GetProcessedBlockStore().Save(hexutil.EncodeBig(chainId), int64(e.GetCurrentBlock().GetHeight()))
+
+	if err := e.store.GetProcessedBlockStore().Save(hexutil.EncodeBig(chainId), int64(e.GetCurrentBlock().GetHeight())); err != nil {
+		return err
+	}
+
+	metrics.Pusher.IncrCounter(metrics.EthereumProcessedBlockMetric, 1)
+	return nil
 }
 
 func (e *EthereumListener) SaveTransactionsToDB(txs []types.ITransaction) error {

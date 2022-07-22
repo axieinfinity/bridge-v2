@@ -3,11 +3,15 @@ package task
 import (
 	"crypto/ecdsa"
 	"fmt"
+	"math/big"
+	"time"
+
 	"github.com/axieinfinity/bridge-v2/generated_contracts/ethereum/gateway"
 	roninGateway "github.com/axieinfinity/bridge-v2/generated_contracts/ronin/gateway"
 	"github.com/axieinfinity/bridge-v2/internal/models"
 	"github.com/axieinfinity/bridge-v2/internal/types"
 	"github.com/axieinfinity/bridge-v2/internal/utils"
+	"github.com/axieinfinity/bridge-v2/metrics"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
@@ -17,8 +21,6 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/signer/core/apitypes"
-	"math/big"
-	"time"
 )
 
 type bulkTask struct {
@@ -89,9 +91,12 @@ func (r *bulkTask) sendBulkTransactions(sendTxs func(tasks []*models.Task) (done
 
 		if transaction != nil {
 			go updateTasks(r.store, processingTasks, types.STATUS_PROCESSING, transaction.Hash().Hex(), time.Now().Unix(), r.releaseTasksCh)
+			metrics.Pusher.IncrCounter(metrics.ProcessingTaskMetric, 1)
 		}
 		go updateTasks(r.store, doneTasks, types.STATUS_DONE, txHash, 0, r.releaseTasksCh)
 		go updateTasks(r.store, failedTasks, types.STATUS_FAILED, txHash, 0, r.releaseTasksCh)
+		metrics.Pusher.IncrCounter(metrics.SuccessTaskMetric, len(doneTasks))
+		metrics.Pusher.IncrCounter(metrics.FailedTaskMetric, len(failedTasks))
 		start = next
 	}
 }
@@ -165,6 +170,8 @@ func (r *bulkTask) sendDepositTransaction(tasks []*models.Task) (doneTasks, proc
 			},
 		})
 	}
+	metrics.Pusher.IncrCounter(metrics.DepositTaskMetric, len(tasks))
+
 	if len(receipts) > 0 {
 		tx, err = r.util.SendContractTransaction(r.validator, r.chainId, func(opts *bind.TransactOpts) (*ethtypes.Transaction, error) {
 			return transactor.TryBulkDepositFor(opts, receipts)
@@ -234,6 +241,7 @@ func (r *bulkTask) sendWithdrawalSignaturesTransaction(tasks []*models.Task) (do
 		signatures = append(signatures, sigs)
 		ids = append(ids, receipt.Id)
 	}
+	metrics.Pusher.IncrCounter(metrics.WithdrawalTaskMetric, len(tasks))
 
 	if len(ids) > 0 {
 		tx, err = r.util.SendContractTransaction(r.validator, r.chainId, func(opts *bind.TransactOpts) (*ethtypes.Transaction, error) {
@@ -299,6 +307,8 @@ func (r *bulkTask) sendAckTransactions(tasks []*models.Task) (doneTasks, process
 		ids = append(ids, id)
 		processingTasks = append(processingTasks, t)
 	}
+
+	metrics.Pusher.IncrCounter(metrics.AckWithdrawalTaskMetric, len(tasks))
 	if len(ids) > 0 {
 		tx, err = r.util.SendContractTransaction(r.validator, r.chainId, func(opts *bind.TransactOpts) (*ethtypes.Transaction, error) {
 			return transactor.TryBulkAcknowledgeMainchainWithdrew(opts, ids)
