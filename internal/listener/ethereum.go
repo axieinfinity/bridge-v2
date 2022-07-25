@@ -234,7 +234,7 @@ func (e *EthereumListener) SaveCurrentBlockToDB() error {
 		return err
 	}
 
-	metrics.Pusher.IncrCounter(metrics.EthereumProcessedBlockMetric, 1)
+	metrics.Pusher.IncrCounter(fmt.Sprintf(metrics.ListenerProcessedBlockMetric, e.GetName()), 1)
 	return nil
 }
 
