@@ -66,7 +66,7 @@ func (p *PusherAdapter) IncrGauge(name string, value int) {
 	defer p.lock.RUnlock()
 
 	if _, ok := p.gauges[name]; !ok {
-		p.AddCounter(name, "")
+		return
 	}
 
 	p.gauges[name].Add(float64(value))
