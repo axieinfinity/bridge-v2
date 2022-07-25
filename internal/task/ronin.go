@@ -260,9 +260,6 @@ func (r *RoninTask) checkProcessingTasks() error {
 		successTxs     []string
 		failedTxs      []string
 		resetToPending []string
-
-		successTaskCount int
-		failedTaskCount  int
 	)
 
 	// loop through successTasks, if receipt is failed then reset to pending and retry if retry is not reached to 10
@@ -270,12 +267,10 @@ func (r *RoninTask) checkProcessingTasks() error {
 		task := key.(*models.Task)
 		if value.(uint64) == 1 {
 			successTxs = append(successTxs, task.TransactionHash)
-			successTaskCount++
 		} else {
 			if task.Retries+1 >= 10 {
 				// append to failedTxs and update all tasks with this transactionHash to failed
 				failedTxs = append(failedTxs, task.TransactionHash)
-				failedTaskCount++
 			} else {
 				// append to resetToPending and update all tasks with this transactionHash to pending
 				resetToPending = append(resetToPending, task.TransactionHash)
@@ -299,7 +294,7 @@ func (r *RoninTask) checkProcessingTasks() error {
 
 	// update success tasks with transaction's status = 1 (success)
 	if len(successTxs) > 0 {
-		metrics.Pusher.IncrCounter(metrics.SuccessTaskMetric, successTaskCount)
+		metrics.Pusher.IncrCounter(metrics.SuccessTaskMetric, len(successTxs))
 		if err = r.store.GetTaskStore().UpdateTasksWithTransactionHash(successTxs, 1, types.STATUS_DONE); err != nil {
 			log.Error("[RoninTask][checkProcessingTasks] error while update tasks with success transactions", "err", err)
 		}
@@ -307,7 +302,7 @@ func (r *RoninTask) checkProcessingTasks() error {
 
 	// update success tasks with transaction's status = 0 (failed)
 	if len(failedTxs) > 0 {
-		metrics.Pusher.IncrCounter(metrics.FailedTaskMetric, failedTaskCount)
+		metrics.Pusher.IncrCounter(metrics.FailedTaskMetric, len(failedTxs))
 
 		if err = r.store.GetTaskStore().UpdateTasksWithTransactionHash(failedTxs, 0, types.STATUS_FAILED); err != nil {
 			log.Error("[RoninTask][checkProcessingTasks] error while update tasks with failed transactions", "err", err)
