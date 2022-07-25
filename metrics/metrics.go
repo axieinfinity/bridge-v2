@@ -36,7 +36,7 @@ func RunPusher(ctx context.Context) {
 	Pusher.AddCounter(ProcessedSuccessJobMetric, "count number of processed jobs successfully")
 	Pusher.AddCounter(ProcessedFailedJobMetric, "count number of failed jobs")
 	Pusher.AddCounter(PendingTaskMetric, "count number of pending tasks in queue")
-	Pusher.AddCounter(ProcessingJobMetric, "count number of processing tasks")
+	Pusher.AddCounter(ProcessingTaskMetric, "count number of processing tasks")
 	Pusher.AddCounter(ProcessedSuccessJobMetric, "count number of success tasks")
 	Pusher.AddCounter(ProcessedFailedJobMetric, "count number failed tasks")
 	Pusher.AddCounter(WithdrawalTaskMetric, "count number of ronin’s withdrawal tasks occurred")
