@@ -99,11 +99,9 @@ func MustConnectDatabase(cfg *types.Config) (*gorm.DB, error) {
 	pgDB.SetMaxIdleConns(cfg.DB.MaxIdleConns)
 	pgDB.SetMaxOpenConns(cfg.DB.MaxOpenConns)
 	if err := db.Use(gormprometheus.New(gormprometheus.Config{
-		DBName:          cfg.DB.DBName,                        // use `DBName` as metrics label
-		RefreshInterval: 15,                                   // Refresh metrics interval (default 15 seconds)
-		PushAddr:        configs.AppConfig.Prometheus.PushURL, // push metrics if `PushAddr` configured
-		StartServer:     true,                                 // start http server to expose metrics
-		HTTPServerPort:  8082,                                 // configure http server port, default port 8080 (if you have configured multiple instances, only the first `HTTPServerPort` will be used to start server)
+		DBName:          cfg.DB.DBName,                                     // use `DBName` as metrics label
+		RefreshInterval: uint32(configs.AppConfig.Prometheus.PushInterval), // Refresh metrics interval (default 15 seconds)
+		PushAddr:        configs.AppConfig.Prometheus.PushURL,              // push metrics if `PushAddr` configured
 		MetricsCollector: []gormprometheus.MetricsCollector{
 			&gormprometheus.Postgres{
 				VariableNames: []string{"Threads_running"},
@@ -149,11 +147,9 @@ func MustConnectDatabaseWithName(cfg *types.Config, dbName string) (*gorm.DB, er
 	}
 
 	if err := db.Use(gormprometheus.New(gormprometheus.Config{
-		DBName:          cfg.DB.DBName,    // use `DBName` as metrics label
-		RefreshInterval: 15,               // Refresh metrics interval (default 15 seconds)
-		PushAddr:        "localhost:9091", // push metrics if `PushAddr` configured
-		StartServer:     true,             // start http server to expose metrics
-		HTTPServerPort:  8082,             // configure http server port, default port 8080 (if you have configured multiple instances, only the first `HTTPServerPort` will be used to start server)
+		DBName:          cfg.DB.DBName,                                     // use `DBName` as metrics label
+		RefreshInterval: uint32(configs.AppConfig.Prometheus.PushInterval), // Refresh metrics interval (default 15 seconds)
+		PushAddr:        configs.AppConfig.Prometheus.PushURL,              // push metrics if `PushAddr` configured
 		MetricsCollector: []gormprometheus.MetricsCollector{
 			&gormprometheus.Postgres{
 				VariableNames: []string{"Threads_running"},
