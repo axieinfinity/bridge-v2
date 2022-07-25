@@ -94,8 +94,6 @@ func New(cfg *types.Config, db *gorm.DB, helpers utils.IUtils) (*Controller, err
 	}
 
 	metrics.RunPusher(ctx)
-	c.store.GetTaskStore().Count()
-	c.store.GetEventStore().Count()
 
 	c.isClosed.Store(false)
 	if helpers != nil {
