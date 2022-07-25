@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	EthereumProcessedBlockMetric string = "ethereum/processedBlock"
+	ListenerProcessedBlockMetric string = "%s/processedBlock"
 
 	PreparingFailedJobMetric  string = "jobs/prepare/failed"
 	PreparingSuccessJobMetric string = "jobs/prepare/success"
