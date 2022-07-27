@@ -2,7 +2,6 @@ package prometheus
 
 import (
 	"context"
-	"sync"
 	"time"
 
 	"github.com/axieinfinity/bridge-v2/configs"
@@ -10,18 +9,14 @@ import (
 	"github.com/prometheus/client_golang/prometheus/push"
 )
 
-type PusherAdapter struct {
+type Pusher struct {
 	counters map[string]prometheus.Counter
 	gauges   map[string]prometheus.Gauge
 	registry *prometheus.Registry
 	pusher   *push.Pusher
-	lock     sync.RWMutex
 }
 
-func (p *PusherAdapter) AddCounter(name string, description string) *PusherAdapter {
-	p.lock.Lock()
-	defer p.lock.Unlock()
-
+func (p *Pusher) AddCounter(name string, description string) *Pusher {
 	if _, ok := p.counters[name]; ok {
 		return p
 	}
@@ -35,20 +30,14 @@ func (p *PusherAdapter) AddCounter(name string, description string) *PusherAdapt
 	return p
 }
 
-func (p *PusherAdapter) IncrCounter(name string, value int) {
-	p.lock.RLock()
-	defer p.lock.RUnlock()
-
+func (p *Pusher) IncrCounter(name string, value int) {
 	if _, ok := p.counters[name]; !ok {
 		return
 	}
 	p.counters[name].Add(float64(value))
 }
 
-func (p *PusherAdapter) AddGauge(name string, description string) *PusherAdapter {
-	p.lock.Lock()
-	defer p.lock.Unlock()
-
+func (p *Pusher) AddGauge(name string, description string) *Pusher {
 	if _, ok := p.gauges[name]; ok {
 		return p
 	}
@@ -61,10 +50,7 @@ func (p *PusherAdapter) AddGauge(name string, description string) *PusherAdapter
 	return p
 }
 
-func (p *PusherAdapter) IncrGauge(name string, value int) {
-	p.lock.RLock()
-	defer p.lock.RUnlock()
-
+func (p *Pusher) IncrGauge(name string, value int) {
 	if _, ok := p.gauges[name]; !ok {
 		return
 	}
@@ -72,11 +58,11 @@ func (p *PusherAdapter) IncrGauge(name string, value int) {
 	p.gauges[name].Add(float64(value))
 }
 
-func (p *PusherAdapter) Push() error {
+func (p *Pusher) Push() error {
 	return p.pusher.Push()
 }
 
-func (p *PusherAdapter) Start(ctx context.Context) {
+func (p *Pusher) Start(ctx context.Context) {
 	ticker := time.NewTicker(time.Second * time.Duration(configs.AppConfig.Prometheus.PushInterval))
 	select {
 	case <-ticker.C:
@@ -86,9 +72,9 @@ func (p *PusherAdapter) Start(ctx context.Context) {
 	}
 }
 
-func NewPusher() *PusherAdapter {
+func NewPusher() *Pusher {
 	pusher := push.New(configs.AppConfig.Prometheus.PushURL, configs.AppConfig.Prometheus.PushJob)
-	return &PusherAdapter{
+	return &Pusher{
 		pusher:   pusher,
 		counters: make(map[string]prometheus.Counter),
 		gauges:   make(map[string]prometheus.Gauge),
