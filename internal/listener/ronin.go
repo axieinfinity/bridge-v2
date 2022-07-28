@@ -73,6 +73,7 @@ func (l *RoninListener) StoreMainchainWithdrawCallback(fromChainId *big.Int, tx 
 		TokenId:              receipt.Info.Id.Int64(),
 		TokenQuantity:        receipt.Info.Quantity.String(),
 		Transaction:          tx.GetHash().Hex(),
+		CreatedAt:            time.Now().Unix(),
 	})
 }
 
