@@ -2,6 +2,9 @@ package listener
 
 import (
 	"context"
+	"math/big"
+	"time"
+
 	"github.com/axieinfinity/bridge-v2/generated_contracts/ethereum/gateway"
 	gateway2 "github.com/axieinfinity/bridge-v2/generated_contracts/ronin/gateway"
 	"github.com/axieinfinity/bridge-v2/internal/models"
@@ -12,8 +15,6 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/log"
-	"math/big"
-	"time"
 )
 
 const oneHour = 3600
