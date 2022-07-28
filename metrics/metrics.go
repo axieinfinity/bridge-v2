@@ -25,7 +25,7 @@ const (
 )
 
 var (
-	Pusher *prometheus.PusherAdapter
+	Pusher *prometheus.Pusher
 )
 
 func RunPusher(ctx context.Context) {
