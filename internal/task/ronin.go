@@ -3,16 +3,18 @@ package task
 import (
 	"context"
 	"crypto/ecdsa"
+	"math/big"
+	"sync"
+	"time"
+
 	"github.com/axieinfinity/bridge-v2/internal/models"
 	"github.com/axieinfinity/bridge-v2/internal/types"
 	"github.com/axieinfinity/bridge-v2/internal/utils"
+	"github.com/axieinfinity/bridge-v2/metrics"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/log"
-	"math/big"
-	"sync"
-	"time"
 )
 
 const (
@@ -173,10 +175,12 @@ func (r *RoninTask) processPending() error {
 	if len(tasks) == 0 {
 		return nil
 	}
+	metrics.Pusher.IncrCounter(metrics.PendingTaskMetric, len(tasks))
 
 	bulkDepositTask := newBulkTask(r.listener, r.client, r.store, r.chainId, r.validator, r.contracts, r.txCheckInterval, defaultMaxTry, types.DEPOSIT_TASK, r.releaseTasksCh, r.util)
 	bulkSubmitWithdrawalSignaturesTask := newBulkTask(r.listener, r.client, r.store, r.chainId, r.validator, r.contracts, r.txCheckInterval, defaultMaxTry, types.WITHDRAWAL_TASK, r.releaseTasksCh, r.util)
 	ackWithdrewTasks := newBulkTask(r.listener, r.client, r.store, r.chainId, r.validator, r.contracts, r.txCheckInterval, defaultMaxTry, types.ACK_WITHDREW_TASK, r.releaseTasksCh, r.util)
+
 	for _, task := range tasks {
 		// lock task
 		r.lockTask(task)
@@ -227,7 +231,7 @@ func (r *RoninTask) checkProcessingTasks() error {
 
 	var wg sync.WaitGroup
 	wg.Add(len(tasks))
-
+	metrics.Pusher.IncrCounter(metrics.ProcessingTaskMetric, -len(tasks))
 	for _, t := range tasks {
 		if _, ok := processedTx[t.TransactionHash]; ok {
 			wg.Done()
@@ -290,6 +294,7 @@ func (r *RoninTask) checkProcessingTasks() error {
 
 	// update success tasks with transaction's status = 1 (success)
 	if len(successTxs) > 0 {
+		metrics.Pusher.IncrCounter(metrics.SuccessTaskMetric, len(successTxs))
 		if err = r.store.GetTaskStore().UpdateTasksWithTransactionHash(successTxs, 1, types.STATUS_DONE); err != nil {
 			log.Error("[RoninTask][checkProcessingTasks] error while update tasks with success transactions", "err", err)
 		}
@@ -297,6 +302,8 @@ func (r *RoninTask) checkProcessingTasks() error {
 
 	// update success tasks with transaction's status = 0 (failed)
 	if len(failedTxs) > 0 {
+		metrics.Pusher.IncrCounter(metrics.FailedTaskMetric, len(failedTxs))
+
 		if err = r.store.GetTaskStore().UpdateTasksWithTransactionHash(failedTxs, 0, types.STATUS_FAILED); err != nil {
 			log.Error("[RoninTask][checkProcessingTasks] error while update tasks with failed transactions", "err", err)
 		}

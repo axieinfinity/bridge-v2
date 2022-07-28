@@ -3,11 +3,13 @@ package internal
 import (
 	"context"
 	"fmt"
+	"time"
+
 	"github.com/axieinfinity/bridge-v2/internal/types"
 	"github.com/axieinfinity/bridge-v2/internal/utils"
+	"github.com/axieinfinity/bridge-v2/metrics"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/log"
-	"time"
 )
 
 type Job struct {
@@ -94,6 +96,8 @@ func (w *Worker) processJob(job types.IJob) {
 		err error
 		val []byte
 	)
+	defer metrics.Pusher.IncrCounter(metrics.ProcessingJobMetric, -1)
+
 	val, err = job.Process()
 	if err != nil {
 		log.Error("[Worker] failed while processing job", "id", job.GetID(), "err", err)
@@ -102,9 +106,12 @@ func (w *Worker) processJob(job types.IJob) {
 	if job.GetType() == types.ListenHandler {
 		job.GetListener().SendCallbackJobs(w.listeners, job.GetSubscriptionName(), job.GetTransaction(), val)
 	}
+	metrics.Pusher.IncrCounter(metrics.ProcessedSuccessJobMetric, 1)
 	w.successChan <- job
 	return
 ERROR:
+	metrics.Pusher.IncrCounter(metrics.ProcessedFailedJobMetric, 1)
+
 	if job.GetRetryCount()+1 > job.GetMaxTry() {
 		log.Info("[Worker][processJob] job reaches its maxTry", "jobTransaction", job.GetTransaction().GetHash().Hex())
 		w.failedChan <- job
