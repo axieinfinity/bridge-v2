@@ -14,6 +14,7 @@ import (
 	"github.com/axieinfinity/bridge-v2/cmd/utils"
 	"github.com/axieinfinity/bridge-v2/configs"
 	"github.com/axieinfinity/bridge-v2/internal"
+	"github.com/axieinfinity/bridge-v2/internal/debug"
 	"github.com/axieinfinity/bridge-v2/internal/migration"
 	"github.com/axieinfinity/bridge-v2/internal/stores"
 	"github.com/axieinfinity/bridge-v2/internal/types"
@@ -70,6 +71,14 @@ func init() {
 	app.HideVersion = true // we have a command to print the version
 	app.Copyright = "Copyright 2022 The Sky Mavis Authors"
 	app.Flags = append(app.Flags, ConfigFlag, LogLvlFlag)
+	app.Flags = append(app.Flags, debug.Flags...)
+	app.Before = func(ctx *cli.Context) error {
+		return debug.Setup(ctx)
+	}
+	app.After = func(ctx *cli.Context) error {
+		debug.Exit()
+		return nil
+	}
 	app.Commands = []cli.Command{
 		cleanerCommand,
 	}

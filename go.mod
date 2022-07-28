@@ -4,8 +4,12 @@ go 1.17
 
 require (
 	github.com/ethereum/go-ethereum v1.10.17
+	github.com/fjl/memsize v0.0.0-20190710130421-bcb5799ab5e5
 	github.com/go-co-op/gocron v1.13.0
 	github.com/go-gormigrate/gormigrate/v2 v2.0.1
+	github.com/hashicorp/go-bexpr v0.1.10
+	github.com/mattn/go-colorable v0.1.8
+	github.com/mattn/go-isatty v0.0.12
 	github.com/stretchr/testify v1.7.1
 	golang.org/x/crypto v0.0.0-20220427172511-eb4f295cb31f
 	golang.org/x/text v0.3.7
@@ -41,6 +45,8 @@ require (
 	github.com/kelseyhightower/envconfig v1.4.0 // indirect
 	github.com/mattn/go-sqlite3 v1.14.12 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.1 // indirect
+	github.com/mitchellh/mapstructure v1.4.1 // indirect
+	github.com/mitchellh/pointerstructure v1.2.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/prometheus/client_golang v1.12.2 // indirect
 	github.com/prometheus/client_model v0.2.0 // indirect
