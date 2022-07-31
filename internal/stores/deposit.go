@@ -5,14 +5,14 @@ import (
 	"gorm.io/gorm"
 )
 
-type DepositStore struct {
+type depositStore struct {
 	*gorm.DB
 }
 
-func NewDepositStore(db *gorm.DB) *DepositStore {
-	return &DepositStore{db}
+func NewDepositStore(db *gorm.DB) *depositStore {
+	return &depositStore{db}
 }
 
-func (d *DepositStore) Save(deposit *models.Deposit) error {
+func (d *depositStore) Save(deposit *models.Deposit) error {
 	return d.Create(deposit).Error
 }

@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/axieinfinity/bridge-v2/internal"
 	"io/ioutil"
 	"os"
 	"os/signal"
@@ -11,13 +12,12 @@ import (
 	"syscall"
 	"time"
 
+	bridgeCore "github.com/axieinfinity/bridge-core"
+	"github.com/axieinfinity/bridge-core/adapters"
+	bridgeCoreStore "github.com/axieinfinity/bridge-core/stores"
+	migration "github.com/axieinfinity/bridge-migrations"
 	"github.com/axieinfinity/bridge-v2/cmd/utils"
-	"github.com/axieinfinity/bridge-v2/configs"
-	"github.com/axieinfinity/bridge-v2/internal"
 	"github.com/axieinfinity/bridge-v2/internal/debug"
-	"github.com/axieinfinity/bridge-v2/internal/migration"
-	"github.com/axieinfinity/bridge-v2/internal/stores"
-	"github.com/axieinfinity/bridge-v2/internal/types"
 	"github.com/ethereum/go-ethereum/log"
 	"gopkg.in/urfave/cli.v1"
 )
@@ -83,10 +83,10 @@ func init() {
 		cleanerCommand,
 	}
 
-	configs.New()
+	adapters.New()
 }
 
-func setRpcUrlFromEnv(cfg *types.Config, rpc, network string) {
+func setRpcUrlFromEnv(cfg *bridgeCore.Config, rpc, network string) {
 	if rpc == "" {
 		return
 	}
@@ -95,7 +95,7 @@ func setRpcUrlFromEnv(cfg *types.Config, rpc, network string) {
 	}
 }
 
-func setKeyFromEnv(cfg *types.Config, isValidator bool, key, network string) {
+func setKeyFromEnv(cfg *bridgeCore.Config, isValidator bool, key, network string) {
 	if key == "" {
 		return
 	}
@@ -110,7 +110,7 @@ func setKeyFromEnv(cfg *types.Config, isValidator bool, key, network string) {
 	}
 }
 
-func prepare(ctx *cli.Context) *types.Config {
+func prepare(ctx *cli.Context) *bridgeCore.Config {
 	// load log level
 	logLvl := log.LvlInfo
 	if os.Getenv(verbosity) != "" {
@@ -123,7 +123,7 @@ func prepare(ctx *cli.Context) *types.Config {
 	}
 	log.Root().SetHandler(log.LvlFilterHandler(logLvl, log.StreamHandler(os.Stderr, log.TerminalFormat(true))))
 
-	cfg := &types.Config{}
+	cfg := &bridgeCore.Config{}
 
 	if os.Getenv(configPath) != "" {
 		if err := ctx.GlobalSet(ConfigFlag.Name, os.Getenv(configPath)); err != nil {
@@ -153,7 +153,7 @@ func prepare(ctx *cli.Context) *types.Config {
 	return cfg
 }
 
-func checkEnv(cfg *types.Config) {
+func checkEnv(cfg *bridgeCore.Config) {
 	setRpcUrlFromEnv(cfg, os.Getenv(roninRpc), RoninNetwork)
 	setKeyFromEnv(cfg, true, os.Getenv(roninValidatorKey), RoninNetwork)
 	setKeyFromEnv(cfg, false, os.Getenv(roninRelayKey), RoninNetwork)
@@ -162,7 +162,7 @@ func checkEnv(cfg *types.Config) {
 	setKeyFromEnv(cfg, false, os.Getenv(ethereumRelayerKey), EthereumNetwork)
 
 	if cfg.DB == nil {
-		cfg.DB = &types.Database{}
+		cfg.DB = &bridgeCoreStore.Database{}
 	}
 
 	if os.Getenv(dbHost) != "" {
@@ -251,8 +251,8 @@ func checkEnv(cfg *types.Config) {
 	os.Setenv(ethereumRelayerKey, "")
 }
 
-func createPgDb(cfg *types.Config) {
-	db, err := stores.MustConnectDatabaseWithName(cfg, "postgres")
+func createPgDb(cfg *bridgeCore.Config) {
+	db, err := bridgeCoreStore.MustConnectDatabaseWithName(cfg.DB, "postgres", false)
 	if err != nil {
 		panic(err)
 	}
@@ -263,9 +263,8 @@ func createPgDb(cfg *types.Config) {
 
 func bridge(ctx *cli.Context) {
 	cfg := prepare(ctx)
-
 	// init db
-	db, err := stores.MustConnectDatabase(cfg)
+	db, err := bridgeCoreStore.MustConnectDatabase(cfg.DB, false)
 	if err != nil {
 		panic(err)
 	}
@@ -274,7 +273,7 @@ func bridge(ctx *cli.Context) {
 		panic(err)
 	}
 	//init controller
-	controller, err := internal.New(cfg, db, nil)
+	controller, err := internal.NewBridgeController(cfg, db, nil)
 	if err != nil {
 		panic(err)
 	}

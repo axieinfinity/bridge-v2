@@ -3,18 +3,18 @@ package task
 import (
 	"context"
 	"crypto/ecdsa"
-	"math/big"
-	"sync"
-	"time"
-
+	bridgeCore "github.com/axieinfinity/bridge-core"
+	"github.com/axieinfinity/bridge-core/metrics"
+	"github.com/axieinfinity/bridge-core/utils"
 	"github.com/axieinfinity/bridge-v2/internal/models"
-	"github.com/axieinfinity/bridge-v2/internal/types"
-	"github.com/axieinfinity/bridge-v2/internal/utils"
-	"github.com/axieinfinity/bridge-v2/metrics"
+	"github.com/axieinfinity/bridge-v2/internal/stores"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/log"
+	"math/big"
+	"sync"
+	"time"
 )
 
 const (
@@ -22,6 +22,12 @@ const (
 	defaultMaxTry             = 5
 	defaultMaxProcessingTasks = 200
 )
+
+type IEthListener interface {
+	bridgeCore.Listener
+	GetValidatorKey() *ecdsa.PrivateKey
+	GetRelayerKey() *ecdsa.PrivateKey
+}
 
 var (
 	defaultTaskInterval = 10 * time.Second
@@ -32,14 +38,14 @@ type RoninTask struct {
 	ctx        context.Context
 	cancelFunc context.CancelFunc
 
-	util utils.IUtils
+	util utils.Utils
 
-	listener types.IListener
-	store    types.IMainStore
+	listener bridgeCore.Listener
+	store    *stores.ListenHandlerStore
 
 	taskInterval    time.Duration
 	txCheckInterval time.Duration
-	secret          *types.Secret
+	secret          *bridgeCore.Secret
 
 	client    *ethclient.Client
 	contracts map[string]string
@@ -56,7 +62,7 @@ type RoninTask struct {
 	maxProcessingTasks int
 }
 
-func NewRoninTask(listener types.IListener, util utils.IUtils) (*RoninTask, error) {
+func NewRoninTask(listener bridgeCore.Listener, taskStore *stores.ListenHandlerStore, util utils.Utils) (*RoninTask, error) {
 	config := listener.Config()
 	client, err := ethclient.Dial(config.RpcUrl)
 	if err != nil {
@@ -71,7 +77,7 @@ func NewRoninTask(listener types.IListener, util utils.IUtils) (*RoninTask, erro
 		ctx:                newCtx,
 		cancelFunc:         cancelFunc,
 		listener:           listener,
-		store:              listener.GetStore(),
+		store:              taskStore,
 		taskInterval:       defaultTaskInterval,
 		txCheckInterval:    defaultReceiptCheck,
 		secret:             config.Secret,
@@ -79,8 +85,8 @@ func NewRoninTask(listener types.IListener, util utils.IUtils) (*RoninTask, erro
 		client:             client,
 		chainId:            chainId,
 		util:               util,
-		validator:          listener.(types.IEthListener).GetValidatorKey(),
-		relayer:            listener.(types.IEthListener).GetRelayerKey(),
+		validator:          listener.(IEthListener).GetValidatorKey(),
+		relayer:            listener.(IEthListener).GetRelayerKey(),
 		limitQuery:         defaultLimitRecords,
 		releaseTasksCh:     make(chan int, defaultLimitRecords),
 		maxProcessingTasks: defaultMaxProcessingTasks,
@@ -136,7 +142,7 @@ func (r *RoninTask) Close() {
 	r.cancelFunc()
 }
 
-func (r *RoninTask) GetListener() types.IListener {
+func (r *RoninTask) GetListener() bridgeCore.Listener {
 	return r.listener
 }
 
@@ -168,7 +174,7 @@ func (r *RoninTask) processPending() error {
 	if limitQuery == 0 {
 		return nil
 	}
-	tasks, err := r.store.GetTaskStore().GetTasks(hexutil.EncodeBig(r.chainId), types.STATUS_PENDING, limitQuery, 10, 0, excludeIds)
+	tasks, err := r.store.GetTaskStore().GetTasks(hexutil.EncodeBig(r.chainId), STATUS_PENDING, limitQuery, 10, 0, excludeIds)
 	if err != nil {
 		return err
 	}
@@ -177,9 +183,9 @@ func (r *RoninTask) processPending() error {
 	}
 	metrics.Pusher.IncrCounter(metrics.PendingTaskMetric, len(tasks))
 
-	bulkDepositTask := newBulkTask(r.listener, r.client, r.store, r.chainId, r.validator, r.contracts, r.txCheckInterval, defaultMaxTry, types.DEPOSIT_TASK, r.releaseTasksCh, r.util)
-	bulkSubmitWithdrawalSignaturesTask := newBulkTask(r.listener, r.client, r.store, r.chainId, r.validator, r.contracts, r.txCheckInterval, defaultMaxTry, types.WITHDRAWAL_TASK, r.releaseTasksCh, r.util)
-	ackWithdrewTasks := newBulkTask(r.listener, r.client, r.store, r.chainId, r.validator, r.contracts, r.txCheckInterval, defaultMaxTry, types.ACK_WITHDREW_TASK, r.releaseTasksCh, r.util)
+	bulkDepositTask := newBulkTask(r.listener, r.client, r.store, r.chainId, r.validator, r.contracts, r.txCheckInterval, defaultMaxTry, DEPOSIT_TASK, r.releaseTasksCh, r.util)
+	bulkSubmitWithdrawalSignaturesTask := newBulkTask(r.listener, r.client, r.store, r.chainId, r.validator, r.contracts, r.txCheckInterval, defaultMaxTry, WITHDRAWAL_TASK, r.releaseTasksCh, r.util)
+	ackWithdrewTasks := newBulkTask(r.listener, r.client, r.store, r.chainId, r.validator, r.contracts, r.txCheckInterval, defaultMaxTry, ACK_WITHDREW_TASK, r.releaseTasksCh, r.util)
 
 	for _, task := range tasks {
 		// lock task
@@ -217,7 +223,7 @@ func (r *RoninTask) checkProcessingTasks() error {
 		}
 	}()
 	before := time.Now().Unix() - int64(r.listener.Config().SafeBlockRange*uint64(r.listener.Config().LoadInterval.Seconds()))
-	tasks, err := r.store.GetTaskStore().GetTasks(hexutil.EncodeBig(r.chainId), types.STATUS_PROCESSING, r.limitQuery, 2, before, nil)
+	tasks, err := r.store.GetTaskStore().GetTasks(hexutil.EncodeBig(r.chainId), STATUS_PROCESSING, r.limitQuery, 2, before, nil)
 	if err != nil {
 		return err
 	}
@@ -295,7 +301,7 @@ func (r *RoninTask) checkProcessingTasks() error {
 	// update success tasks with transaction's status = 1 (success)
 	if len(successTxs) > 0 {
 		metrics.Pusher.IncrCounter(metrics.SuccessTaskMetric, len(successTxs))
-		if err = r.store.GetTaskStore().UpdateTasksWithTransactionHash(successTxs, 1, types.STATUS_DONE); err != nil {
+		if err = r.store.GetTaskStore().UpdateTasksWithTransactionHash(successTxs, 1, STATUS_DONE); err != nil {
 			log.Error("[RoninTask][checkProcessingTasks] error while update tasks with success transactions", "err", err)
 		}
 	}
@@ -304,7 +310,7 @@ func (r *RoninTask) checkProcessingTasks() error {
 	if len(failedTxs) > 0 {
 		metrics.Pusher.IncrCounter(metrics.FailedTaskMetric, len(failedTxs))
 
-		if err = r.store.GetTaskStore().UpdateTasksWithTransactionHash(failedTxs, 0, types.STATUS_FAILED); err != nil {
+		if err = r.store.GetTaskStore().UpdateTasksWithTransactionHash(failedTxs, 0, STATUS_FAILED); err != nil {
 			log.Error("[RoninTask][checkProcessingTasks] error while update tasks with failed transactions", "err", err)
 		}
 	}
@@ -312,7 +318,7 @@ func (r *RoninTask) checkProcessingTasks() error {
 	// update all tasks contain failed txs to pending
 	if len(resetToPending) > 0 {
 		log.Info("[RoninTask][checkProcessingTasks] reset tasks to pending", "transactionHash", resetToPending)
-		if err = r.store.GetTaskStore().ResetTo(resetToPending, types.STATUS_PENDING); err != nil {
+		if err = r.store.GetTaskStore().ResetTo(resetToPending, STATUS_PENDING); err != nil {
 			log.Error("[RoninTask][checkProcessingTasks] error while reset tasks to pending", "err", err)
 		}
 	}
