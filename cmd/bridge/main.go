@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/axieinfinity/bridge-v2/internal"
 	"io/ioutil"
 	"os"
 	"os/signal"
@@ -12,9 +11,12 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/axieinfinity/bridge-v2/internal"
+
 	bridgeCore "github.com/axieinfinity/bridge-core"
 	"github.com/axieinfinity/bridge-core/adapters"
 	bridgeCoreStore "github.com/axieinfinity/bridge-core/stores"
+	bridgeCoreUtils "github.com/axieinfinity/bridge-core/utils"
 	migration "github.com/axieinfinity/bridge-migrations"
 	"github.com/axieinfinity/bridge-v2/cmd/utils"
 	"github.com/axieinfinity/bridge-v2/internal/debug"
@@ -103,9 +105,13 @@ func setKeyFromEnv(cfg *bridgeCore.Config, isValidator bool, key, network string
 		// delete prefix 0x or ronin: and lower key
 		key = strings.ToLower(strings.Replace(strings.Replace(key, "0x", "", 1), "ronin:", "", 1))
 		if isValidator {
-			cfg.Listeners[network].Secret.Validator = key
+			cfg.Listeners[network].Secret.Validator = &bridgeCoreUtils.SignMethodConfig{
+				PlainPrivateKey: key,
+			}
 		} else {
-			cfg.Listeners[network].Secret.Relayer = key
+			cfg.Listeners[network].Secret.Relayer = &bridgeCoreUtils.SignMethodConfig{
+				PlainPrivateKey: key,
+			}
 		}
 	}
 }
