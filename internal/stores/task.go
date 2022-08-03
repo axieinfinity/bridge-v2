@@ -6,19 +6,19 @@ import (
 	"gorm.io/gorm"
 )
 
-type TaskStore struct {
+type taskStore struct {
 	*gorm.DB
 }
 
-func NewTaskStore(db *gorm.DB) *TaskStore {
-	return &TaskStore{db}
+func NewTaskStore(db *gorm.DB) TaskStore {
+	return &taskStore{db}
 }
 
-func (t *TaskStore) Save(task *models.Task) error {
+func (t *taskStore) Save(task *models.Task) error {
 	return t.Create(task).Error
 }
 
-func (t *TaskStore) Update(task *models.Task) error {
+func (t *taskStore) Update(task *models.Task) error {
 	columns := map[string]interface{}{
 		"status":  task.Status,
 		"retries": task.Retries,
@@ -35,7 +35,7 @@ func (t *TaskStore) Update(task *models.Task) error {
 	return t.Model(&models.Task{}).Where("id = ?", task.ID).Updates(columns).Error
 }
 
-func (t *TaskStore) GetTasks(chain, status string, limit, retrySeconds int, before int64, excludeIds []int) ([]*models.Task, error) {
+func (t *taskStore) GetTasks(chain, status string, limit, retrySeconds int, before int64, excludeIds []int) ([]*models.Task, error) {
 	// query all tasks with status and chain id and tx created time must be before specified time
 	// also apply exponential at created_time
 	var tasks []*models.Task
@@ -51,14 +51,14 @@ func (t *TaskStore) GetTasks(chain, status string, limit, retrySeconds int, befo
 	return tasks, err
 }
 
-func (t *TaskStore) UpdateTasksWithTransactionHash(txs []string, transactionStatus int, status string) error {
+func (t *taskStore) UpdateTasksWithTransactionHash(txs []string, transactionStatus int, status string) error {
 	return t.Model(&models.Task{}).Where("transaction_hash in ?", txs).Updates(map[string]interface{}{
 		"status":             status,
 		"transaction_status": transactionStatus,
 	}).Error
 }
 
-func (t *TaskStore) ResetTo(txs []string, status string) error {
+func (t *taskStore) ResetTo(txs []string, status string) error {
 	columns := map[string]interface{}{
 		"status":  status,
 		"retries": gorm.Expr("retries + 1"),
@@ -66,11 +66,11 @@ func (t *TaskStore) ResetTo(txs []string, status string) error {
 	return t.Model(&models.Task{}).Where("transaction_hash in ?", txs).Updates(columns).Error
 }
 
-func (t *TaskStore) DeleteTasks(status []string, fromTime uint64) error {
+func (t *taskStore) DeleteTasks(status []string, fromTime uint64) error {
 	return t.Where("status in ? AND created_at <= ?", status, fromTime).Delete(&models.Task{}).Error
 }
 
-func (t *TaskStore) Count() int64 {
+func (t *taskStore) Count() int64 {
 	var count int64
 	t.Model(&models.Task{}).Select("id").Count(&count)
 	return count

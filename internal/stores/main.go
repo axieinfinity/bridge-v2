@@ -1,168 +1,82 @@
 package stores
 
 import (
-	"fmt"
-	"time"
-
-	"github.com/axieinfinity/bridge-v2/configs"
-	"github.com/axieinfinity/bridge-v2/internal/types"
-	"github.com/ethereum/go-ethereum/log"
-	"gorm.io/driver/postgres"
-	"gorm.io/driver/sqlite"
+	"github.com/axieinfinity/bridge-v2/internal/models"
 	"gorm.io/gorm"
-	gormprometheus "gorm.io/plugin/prometheus"
 )
 
-var ()
+type TaskStore interface {
+	Save(task *models.Task) error
+	Update(task *models.Task) error
+	GetTasks(chain, status string, limit, retrySeconds int, before int64, excludeIds []int) ([]*models.Task, error)
+	UpdateTasksWithTransactionHash(txs []string, transactionStatus int, status string) error
+	DeleteTasks([]string, uint64) error
+	Count() int64
+	ResetTo(ids []string, status string) error
+}
 
-type MainStore struct {
+type DepositStore interface {
+	Save(deposit *models.Deposit) error
+}
+
+type ProcessedReceiptStore interface {
+	Save(taskId int, receiptId int64) error
+}
+
+type WithdrawalStore interface {
+	Save(withdraw *models.Withdrawal) error
+	Update(withdraw *models.Withdrawal) error
+	GetWithdrawalById(withdrawalId int64) (*models.Withdrawal, error)
+}
+
+type BridgeStore interface {
+	GetDepositStore() DepositStore
+	GetWithdrawalStore() WithdrawalStore
+	GetTaskStore() TaskStore
+	GetProcessedReceiptStore() ProcessedReceiptStore
+}
+
+type bridgeStore struct {
 	*gorm.DB
 
-	DepositStore          types.IDepositStore
-	WithdrawalStore       types.IWithdrawalStore
-	JobStore              types.IJobStore
-	TaskStore             types.ITaskStore
-	ProcessedBlockStore   types.IProcessedBlockStore
-	EventStore            types.IEventStore
-	ProcessedReceiptStore types.IProcessedReceiptStore
+	DepositStore          DepositStore
+	WithdrawalStore       WithdrawalStore
+	TaskStore             TaskStore
+	ProcessedReceiptStore ProcessedReceiptStore
 }
 
-func NewMainStore(db *gorm.DB) *MainStore {
-	cl := &MainStore{
+func NewBridgeStore(db *gorm.DB) BridgeStore {
+	store := &bridgeStore{
 		DB: db,
 
-		JobStore:              NewJobStore(db),
 		TaskStore:             NewTaskStore(db),
-		ProcessedBlockStore:   NewProcessedBlockStore(db),
 		DepositStore:          NewDepositStore(db),
 		WithdrawalStore:       NewWithdrawalStore(db),
-		EventStore:            NewEventStore(db),
 		ProcessedReceiptStore: NewProcessedReceiptStore(db),
 	}
-	return cl
+	return store
 }
 
-func (m *MainStore) RelationalDatabaseCheck() error {
+func (m *bridgeStore) RelationalDatabaseCheck() error {
 	return m.Raw("SELECT 1").Error
 }
 
-func (m *MainStore) GetDB() *gorm.DB {
+func (m *bridgeStore) GetDB() *gorm.DB {
 	return m.DB
 }
 
-func (m *MainStore) GetDepositStore() types.IDepositStore {
+func (m *bridgeStore) GetDepositStore() DepositStore {
 	return m.DepositStore
 }
 
-func (m *MainStore) GetWithdrawalStore() types.IWithdrawalStore {
+func (m *bridgeStore) GetWithdrawalStore() WithdrawalStore {
 	return m.WithdrawalStore
 }
 
-func (m *MainStore) GetTaskStore() types.ITaskStore {
+func (m *bridgeStore) GetTaskStore() TaskStore {
 	return m.TaskStore
 }
 
-func (m *MainStore) GetJobStore() types.IJobStore {
-	return m.JobStore
-}
-
-func (m *MainStore) GetProcessedBlockStore() types.IProcessedBlockStore {
-	return m.ProcessedBlockStore
-}
-
-func (m *MainStore) GetProcessedReceiptStore() types.IProcessedReceiptStore {
+func (m *bridgeStore) GetProcessedReceiptStore() ProcessedReceiptStore {
 	return m.ProcessedReceiptStore
-}
-
-func (m *MainStore) GetEventStore() types.IEventStore {
-	return m.EventStore
-}
-
-func MustConnectDatabase(cfg *types.Config) (*gorm.DB, error) {
-	// load sqlite db for testing purpose
-	if cfg.Testing {
-		return gorm.Open(sqlite.Open("gorm.db"), &gorm.Config{})
-	}
-
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%d sslmode=disable", cfg.DB.Host, cfg.DB.User, cfg.DB.Password, cfg.DB.DBName, cfg.DB.Port)
-	dialect := postgres.Open(dsn)
-	db, err := gorm.Open(dialect, &gorm.Config{})
-	if err != nil {
-		panic(err)
-	}
-	pgDB, err := db.DB()
-	if err != nil {
-		panic(err)
-	}
-
-	pgDB.SetConnMaxLifetime(time.Duration(cfg.DB.ConnMaxLifetime) * time.Hour)
-	pgDB.SetMaxIdleConns(cfg.DB.MaxIdleConns)
-	pgDB.SetMaxOpenConns(cfg.DB.MaxOpenConns)
-	if err := db.Use(gormprometheus.New(gormprometheus.Config{
-		DBName:          cfg.DB.DBName,                                     // use `DBName` as metrics label
-		RefreshInterval: uint32(configs.AppConfig.Prometheus.PushInterval), // Refresh metrics interval (default 15 seconds)
-		PushAddr:        configs.AppConfig.Prometheus.PushURL,              // push metrics if `PushAddr` configured
-		MetricsCollector: []gormprometheus.MetricsCollector{
-			&gormprometheus.Postgres{
-				VariableNames: []string{"Threads_running"},
-			},
-		}, // user defined metrics
-	})); err != nil {
-		panic(err)
-	}
-	err = db.Raw("SELECT 1").Error
-	if err != nil {
-		log.Error("error querying SELECT 1", "err", err)
-		panic(err)
-	}
-	return db, err
-}
-
-func MustConnectDatabaseWithName(cfg *types.Config, dbName string) (*gorm.DB, error) {
-	var (
-		err error
-		db  *gorm.DB
-	)
-	// load sqlite db for testing purpose
-	if cfg.Testing {
-		db, err = gorm.Open(sqlite.Open("gorm.db"), &gorm.Config{})
-		if err != nil {
-			panic(err)
-		}
-	} else {
-		dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%d sslmode=disable", cfg.DB.Host, cfg.DB.User, cfg.DB.Password, dbName, cfg.DB.Port)
-		dialect := postgres.Open(dsn)
-		db, err = gorm.Open(dialect, &gorm.Config{})
-		if err != nil {
-			panic(err)
-		}
-		pgDB, err := db.DB()
-		if err != nil {
-			panic(err)
-		}
-
-		pgDB.SetConnMaxLifetime(time.Duration(cfg.DB.ConnMaxLifetime) * time.Hour)
-		pgDB.SetMaxIdleConns(cfg.DB.MaxIdleConns)
-		pgDB.SetMaxOpenConns(cfg.DB.MaxOpenConns)
-	}
-
-	if err := db.Use(gormprometheus.New(gormprometheus.Config{
-		DBName:          cfg.DB.DBName,                                     // use `DBName` as metrics label
-		RefreshInterval: uint32(configs.AppConfig.Prometheus.PushInterval), // Refresh metrics interval (default 15 seconds)
-		PushAddr:        configs.AppConfig.Prometheus.PushURL,              // push metrics if `PushAddr` configured
-		MetricsCollector: []gormprometheus.MetricsCollector{
-			&gormprometheus.Postgres{
-				VariableNames: []string{"Threads_running"},
-			},
-		}, // user defined metrics
-	})); err != nil {
-		panic(err)
-	}
-
-	err = db.Raw("SELECT 1").Error
-	if err != nil {
-		log.Error("error querying SELECT 1", "err", err)
-		panic(err)
-	}
-	return db, err
 }

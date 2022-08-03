@@ -6,14 +6,14 @@ import (
 	"gorm.io/gorm/clause"
 )
 
-type ProcessedReceiptStore struct {
+type processedReceiptStore struct {
 	*gorm.DB
 }
 
-func NewProcessedReceiptStore(db *gorm.DB) *ProcessedReceiptStore {
-	return &ProcessedReceiptStore{db}
+func NewProcessedReceiptStore(db *gorm.DB) ProcessedReceiptStore {
+	return &processedReceiptStore{db}
 }
 
-func (b *ProcessedReceiptStore) Save(taskId int, receiptId int64) error {
+func (b *processedReceiptStore) Save(taskId int, receiptId int64) error {
 	return b.Clauses(clause.OnConflict{DoNothing: true}).Create(&models.ProcessedReceipt{TaskId: taskId, ReceiptId: receiptId}).Error
 }

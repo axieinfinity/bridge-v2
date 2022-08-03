@@ -2,12 +2,15 @@ package listener
 
 import (
 	"context"
-	"github.com/axieinfinity/bridge-v2/generated_contracts/ethereum/gateway"
-	gateway2 "github.com/axieinfinity/bridge-v2/generated_contracts/ronin/gateway"
+	"github.com/axieinfinity/bridge-contracts/generated_contracts/ethereum/gateway"
+	gateway2 "github.com/axieinfinity/bridge-contracts/generated_contracts/ronin/gateway"
+	bridgeCore "github.com/axieinfinity/bridge-core"
+	bridgeCoreModels "github.com/axieinfinity/bridge-core/models"
+	bridgeCoreStores "github.com/axieinfinity/bridge-core/stores"
+	"github.com/axieinfinity/bridge-core/utils"
 	"github.com/axieinfinity/bridge-v2/internal/models"
+	"github.com/axieinfinity/bridge-v2/internal/stores"
 	"github.com/axieinfinity/bridge-v2/internal/task"
-	"github.com/axieinfinity/bridge-v2/internal/types"
-	"github.com/axieinfinity/bridge-v2/internal/utils"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
@@ -20,36 +23,28 @@ const oneHour = 3600
 
 type RoninListener struct {
 	*EthereumListener
-	task types.ITask
+	bridgeStore stores.BridgeStore
 }
 
-func NewRoninListener(ctx context.Context, cfg *types.LsConfig, helpers utils.IUtils, store types.IMainStore, prepareJobChan chan types.IJob) (*RoninListener, error) {
-	listener, err := NewEthereumListener(ctx, cfg, helpers, store, prepareJobChan)
+func NewRoninListener(ctx context.Context, cfg *bridgeCore.LsConfig, helpers utils.Utils, store bridgeCoreStores.MainStore) (*RoninListener, error) {
+	listener, err := NewEthereumListener(ctx, cfg, helpers, store)
 	if err != nil {
 		panic(err)
 	}
 	l := &RoninListener{EthereumListener: listener}
-	l.task, err = task.NewRoninTask(l, l.utilsWrapper)
+	l.bridgeStore = stores.NewBridgeStore(store.GetDB())
 	if err != nil {
 		return nil, err
 	}
 	return l, nil
 }
 
-func (l *RoninListener) Start() {
-	go l.task.Start()
-}
-
-func (l *RoninListener) GetTask() types.ITask {
-	return l.task
-}
-
-func (l *RoninListener) NewJobFromDB(job *models.Job) (types.IJob, error) {
+func (l *RoninListener) NewJobFromDB(job *bridgeCoreModels.Job) (bridgeCore.JobHandler, error) {
 	return newJobFromDB(l, job)
 }
 
 // StoreMainchainWithdrawCallback stores the receipt to own database for future check from ProvideReceiptSignatureCallback
-func (l *RoninListener) StoreMainchainWithdrawCallback(fromChainId *big.Int, tx types.ITransaction, data []byte) error {
+func (l *RoninListener) StoreMainchainWithdrawCallback(fromChainId *big.Int, tx bridgeCore.Transaction, data []byte) error {
 	log.Info("[RoninListener] StoreMainchainWithdrawCallback", "tx", tx.GetHash().Hex())
 	ronEvent := new(gateway2.GatewayMainchainWithdrew)
 	ronGatewayAbi, err := gateway2.GatewayMetaData.GetAbi()
@@ -61,7 +56,7 @@ func (l *RoninListener) StoreMainchainWithdrawCallback(fromChainId *big.Int, tx 
 	}
 	receipt := ronEvent.Receipt
 	// store ronEvent to database at withdrawal
-	return l.store.GetWithdrawalStore().Save(&models.Withdrawal{
+	return l.bridgeStore.GetWithdrawalStore().Save(&models.Withdrawal{
 		WithdrawalId:         receipt.Id.Int64(),
 		ExternalAddress:      receipt.Mainchain.Addr.Hex(),
 		ExternalTokenAddress: receipt.Mainchain.TokenAddr.Hex(),
@@ -90,7 +85,7 @@ func (l *RoninListener) IsUpTodate() bool {
 	return true
 }
 
-func (l *RoninListener) ProvideReceiptSignatureCallback(fromChainId *big.Int, tx types.ITransaction, data []byte) error {
+func (l *RoninListener) ProvideReceiptSignatureCallback(fromChainId *big.Int, tx bridgeCore.Transaction, data []byte) error {
 	// check database if receipt exist then do nothing
 	// Unpack event from data
 	ronEvent := new(gateway2.GatewayMainchainWithdrew)
@@ -104,13 +99,13 @@ func (l *RoninListener) ProvideReceiptSignatureCallback(fromChainId *big.Int, tx
 	receipt := ronEvent.Receipt
 
 	// try getting withdrawal data from database by receipt.id
-	withdrawal, _ := l.store.GetWithdrawalStore().GetWithdrawalById(receipt.Id.Int64())
+	withdrawal, _ := l.bridgeStore.GetWithdrawalStore().GetWithdrawalById(receipt.Id.Int64())
 	if withdrawal != nil && withdrawal.ID > 0 {
 		return nil
 	}
 	// try checking on smart contract
 	// create caller
-	caller, err := gateway2.NewGatewayCaller(common.HexToAddress(l.config.Contracts[types.GATEWAY_CONTRACT]), l.client)
+	caller, err := gateway2.NewGatewayCaller(common.HexToAddress(l.config.Contracts[task.GATEWAY_CONTRACT]), l.client)
 	if err != nil {
 		return err
 	}
@@ -131,19 +126,19 @@ func (l *RoninListener) ProvideReceiptSignatureCallback(fromChainId *big.Int, tx
 			ChainId:         hexutil.EncodeBig(chainId),
 			FromChainId:     hexutil.EncodeBig(fromChainId),
 			FromTransaction: tx.GetHash().Hex(),
-			Type:            types.WITHDRAWAL_TASK,
+			Type:            task.WITHDRAWAL_TASK,
 			Data:            common.Bytes2Hex(data),
 			Retries:         0,
-			Status:          types.STATUS_PENDING,
+			Status:          task.STATUS_PENDING,
 			LastError:       "",
 			CreatedAt:       time.Now().Unix(),
 		}
-		return l.store.GetTaskStore().Save(withdrawalTask)
+		return l.bridgeStore.GetTaskStore().Save(withdrawalTask)
 	}
 	return nil
 }
 
-func (l *RoninListener) DepositRequestedCallback(fromChainId *big.Int, tx types.ITransaction, data []byte) error {
+func (l *RoninListener) DepositRequestedCallback(fromChainId *big.Int, tx bridgeCore.Transaction, data []byte) error {
 	log.Info("[RoninListener] DepositRequestedCallback", "tx", tx.GetHash().Hex())
 	// check whether deposit is done or not
 	// Unpack event data
@@ -157,7 +152,7 @@ func (l *RoninListener) DepositRequestedCallback(fromChainId *big.Int, tx types.
 		return err
 	}
 	// create caller
-	caller, err := gateway2.NewGatewayCaller(common.HexToAddress(l.config.Contracts[types.GATEWAY_CONTRACT]), l.client)
+	caller, err := gateway2.NewGatewayCaller(common.HexToAddress(l.config.Contracts[task.GATEWAY_CONTRACT]), l.client)
 	if err != nil {
 		return err
 	}
@@ -173,7 +168,7 @@ func (l *RoninListener) DepositRequestedCallback(fromChainId *big.Int, tx types.
 		return err
 	}
 	log.Info("[RoninListener][DepositRequestedCallback] result of calling DepositVote function", "status", result.Status, "finalHash", common.Bytes2Hex(result.FinalHash[:]), "receiptId", ethEvent.Receipt.Id, "tx", tx.GetHash().Hex())
-	if result.Status == types.VoteStatusExecuted {
+	if result.Status == task.VoteStatusExecuted {
 		return nil
 	}
 
@@ -192,17 +187,17 @@ func (l *RoninListener) DepositRequestedCallback(fromChainId *big.Int, tx types.
 		ChainId:         hexutil.EncodeBig(chainId),
 		FromChainId:     hexutil.EncodeBig(fromChainId),
 		FromTransaction: tx.GetHash().Hex(),
-		Type:            types.DEPOSIT_TASK,
+		Type:            task.DEPOSIT_TASK,
 		Data:            common.Bytes2Hex(data),
 		Retries:         0,
-		Status:          types.STATUS_PENDING,
+		Status:          task.STATUS_PENDING,
 		LastError:       "",
 		CreatedAt:       time.Now().Unix(),
 	}
-	return l.store.GetTaskStore().Save(depositTask)
+	return l.bridgeStore.GetTaskStore().Save(depositTask)
 }
 
-func (l *RoninListener) WithdrewCallback(fromChainId *big.Int, tx types.ITransaction, data []byte) error {
+func (l *RoninListener) WithdrewCallback(fromChainId *big.Int, tx bridgeCore.Transaction, data []byte) error {
 	log.Info("[RoninListener] WithdrewCallback", "tx", tx.GetHash().Hex())
 	// Unpack event data
 	ethEvent := new(gateway.GatewayWithdrew)
@@ -215,7 +210,7 @@ func (l *RoninListener) WithdrewCallback(fromChainId *big.Int, tx types.ITransac
 		return err
 	}
 	// create caller
-	caller, err := gateway2.NewGatewayCaller(common.HexToAddress(l.config.Contracts[types.GATEWAY_CONTRACT]), l.client)
+	caller, err := gateway2.NewGatewayCaller(common.HexToAddress(l.config.Contracts[task.GATEWAY_CONTRACT]), l.client)
 	if err != nil {
 		return err
 	}
@@ -231,14 +226,14 @@ func (l *RoninListener) WithdrewCallback(fromChainId *big.Int, tx types.ITransac
 		if err != nil {
 			return err
 		}
-		return l.store.GetTaskStore().Save(&models.Task{
+		return l.bridgeStore.GetTaskStore().Save(&models.Task{
 			ChainId:         hexutil.EncodeBig(chainId),
 			FromChainId:     hexutil.EncodeBig(fromChainId),
 			FromTransaction: tx.GetHash().Hex(),
-			Type:            types.ACK_WITHDREW_TASK,
+			Type:            task.ACK_WITHDREW_TASK,
 			Data:            common.Bytes2Hex(data),
 			Retries:         0,
-			Status:          types.STATUS_PENDING,
+			Status:          task.STATUS_PENDING,
 			LastError:       "",
 			CreatedAt:       time.Now().Unix(),
 		})

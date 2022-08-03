@@ -1,7 +1,8 @@
 package main
 
 import (
-	"github.com/axieinfinity/bridge-v2/internal/types"
+	bridgeCore "github.com/axieinfinity/bridge-core"
+	bridgeCoreStores "github.com/axieinfinity/bridge-core/stores"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/go-co-op/gocron"
 	"os"
@@ -13,9 +14,9 @@ var wg sync.WaitGroup
 
 func TestCleaner(t *testing.T) {
 	log.Root().SetHandler(log.LvlFilterHandler(log.LvlInfo, log.StreamHandler(os.Stderr, log.TerminalFormat(true))))
-	cfg := &types.Config{
-		Cleaner: types.Cleaner{
-			"TestCleaner": &types.CleanerConfig{
+	cfg := &bridgeCore.Config{
+		Cleaner: bridgeCore.Cleaner{
+			"TestCleaner": &bridgeCore.CleanerConfig{
 				Cron:           "0/1 * * * *",
 				RemoveAfter:    100,
 				SkipIfLessThan: 10,
@@ -34,7 +35,7 @@ func TestCleaner(t *testing.T) {
 	wg.Wait()
 }
 
-func (c *cleaner) ExecTestCleaner(scheduler *gocron.Scheduler, store types.IMainStore, cfg *types.CleanerConfig) error {
+func (c *cleaner) ExecTestCleaner(scheduler *gocron.Scheduler, store bridgeCoreStores.MainStore, cfg *bridgeCore.CleanerConfig) error {
 	_, err := scheduler.Cron(cfg.Cron).Do(func() {
 		println("test cleaner has been reached, cancelling...")
 		wg.Done()

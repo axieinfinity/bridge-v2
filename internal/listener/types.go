@@ -2,10 +2,10 @@ package listener
 
 import (
 	"context"
-	"fmt"
-	"github.com/axieinfinity/bridge-v2/internal/models"
-	"github.com/axieinfinity/bridge-v2/internal/types"
-	"github.com/axieinfinity/bridge-v2/internal/utils"
+	bridgeCore "github.com/axieinfinity/bridge-core"
+	bridgeCoreModels "github.com/axieinfinity/bridge-core/models"
+	"github.com/axieinfinity/bridge-core/utils"
+	"github.com/axieinfinity/bridge-v2/internal/task"
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
@@ -17,8 +17,8 @@ import (
 
 type EthBlock struct {
 	block *ethtypes.Block
-	txs   []types.ITransaction
-	logs  []types.ILog
+	txs   []bridgeCore.Transaction
+	logs  []bridgeCore.Log
 }
 
 func NewEthBlock(client utils.EthClient, chainId *big.Int, block *ethtypes.Block, getLogs bool) (*EthBlock, error) {
@@ -55,11 +55,11 @@ func NewEthBlock(client utils.EthClient, chainId *big.Int, block *ethtypes.Block
 func (b *EthBlock) GetHash() common.Hash { return b.block.Hash() }
 func (b *EthBlock) GetHeight() uint64    { return b.block.NumberU64() }
 
-func (b *EthBlock) GetTransactions() []types.ITransaction {
+func (b *EthBlock) GetTransactions() []bridgeCore.Transaction {
 	return b.txs
 }
 
-func (b *EthBlock) GetLogs() []types.ILog {
+func (b *EthBlock) GetLogs() []bridgeCore.Log {
 	return b.logs
 }
 
@@ -190,199 +190,63 @@ func (e *EthLog) GetTransactionHash() string {
 	return e.TxHash.Hex()
 }
 
-type BaseJob struct {
-	utilsWrapper utils.IUtils
-
-	id      int32
-	jobType int
-
-	retryCount int
-	maxTry     int
-	nextTry    int64
-	backOff    int
-
-	data []byte
-	tx   types.ITransaction
-
-	subscriptionName string
-	listener         types.IListener
-
-	fromChainID *big.Int
-}
-
-func (e *BaseJob) FromChainID() *big.Int {
-	return e.fromChainID
-}
-
-func (e *BaseJob) GetID() int32 {
-	return e.id
-}
-
-func (e *BaseJob) GetType() int {
-	return e.jobType
-}
-
-func (e *BaseJob) GetRetryCount() int {
-	return e.retryCount
-}
-
-func (e *BaseJob) GetNextTry() int64 {
-	return e.nextTry
-}
-
-func (e *BaseJob) GetMaxTry() int {
-	return e.maxTry
-}
-
-func (e *BaseJob) GetData() []byte {
-	return e.data
-}
-
-func (e *BaseJob) GetValue() *big.Int {
-	return e.tx.GetValue()
-}
-
-func (e *BaseJob) GetBackOff() int {
-	return e.backOff
-}
-
-func (e *BaseJob) Process() ([]byte, error) {
-	return nil, nil
-}
-
-func (e *BaseJob) Hash() common.Hash {
-	return common.BytesToHash([]byte(fmt.Sprintf("j-%d-%d-%d", e.id, e.retryCount, e.nextTry)))
-}
-
-func (e *BaseJob) IncreaseRetryCount() {
-	e.retryCount++
-}
-func (e *BaseJob) UpdateNextTry(nextTry int64) {
-	e.nextTry = nextTry
-}
-
-func (e *BaseJob) GetListener() types.IListener {
-	return e.listener
-}
-
-func (e *BaseJob) GetSubscriptionName() string {
-	return e.subscriptionName
-}
-
-func (e *BaseJob) GetTransaction() types.ITransaction {
-	return e.tx
-}
-
-func (e *BaseJob) Save() error {
-	job := &models.Job{
-		Listener:         e.listener.GetName(),
-		SubscriptionName: e.subscriptionName,
-		Type:             e.jobType,
-		RetryCount:       e.retryCount,
-		Status:           types.STATUS_PENDING,
-		Data:             common.Bytes2Hex(e.data),
-		Transaction:      e.tx.GetHash().Hex(),
-		CreatedAt:        time.Now().Unix(),
-		FromChainId:      hexutil.EncodeBig(e.fromChainID),
-	}
-	if err := e.listener.GetStore().GetJobStore().Save(job); err != nil {
-		return err
-	}
-	e.id = int32(job.ID)
-	return nil
-}
-
-func (e *BaseJob) Update(status string) error {
-	job := &models.Job{
-		ID:               int(e.id),
-		Listener:         e.listener.GetName(),
-		SubscriptionName: e.subscriptionName,
-		Type:             e.jobType,
-		RetryCount:       e.retryCount,
-		Status:           status,
-		Data:             common.Bytes2Hex(e.data),
-		Transaction:      e.tx.GetHash().Hex(),
-		CreatedAt:        time.Now().Unix(),
-		FromChainId:      hexutil.EncodeBig(e.fromChainID),
-	}
-	if err := e.listener.GetStore().GetJobStore().Update(job); err != nil {
-		return err
-	}
-	return nil
-}
-
 type EthListenJob struct {
-	*BaseJob
+	*bridgeCore.BaseJob
 }
 
-func NewEthListenJob(jobType int, listener types.IListener, subscriptionName string, tx types.ITransaction, data []byte) *EthListenJob {
+func NewEthListenJob(jobType int, listener bridgeCore.Listener, subscriptionName string, tx bridgeCore.Transaction, data []byte) *EthListenJob {
 	chainId, err := listener.GetChainID()
 	if err != nil {
 		return nil
 	}
+	job := &bridgeCoreModels.Job{
+		ID:               0,
+		SubscriptionName: subscriptionName,
+		Type:             jobType,
+		RetryCount:       0,
+		Data:             common.Bytes2Hex(data),
+		FromChainId:      hexutil.EncodeBig(chainId),
+	}
+	baseJob, err := bridgeCore.NewBaseJob(listener, job, tx)
+	if err != nil {
+		return nil
+	}
 	return &EthListenJob{
-		&BaseJob{
-			jobType:          jobType,
-			retryCount:       0,
-			maxTry:           20,
-			nextTry:          0,
-			backOff:          5,
-			data:             data,
-			tx:               tx,
-			subscriptionName: subscriptionName,
-			listener:         listener,
-			utilsWrapper:     &utils.Utils{},
-			fromChainID:      chainId,
-		},
+		baseJob,
 	}
-}
-
-func (e *EthListenJob) Process() ([]byte, error) {
-	// save event data to database
-	subscription, ok := e.listener.GetSubscriptions()[e.subscriptionName]
-	if ok {
-		if err := e.listener.GetStore().GetEventStore().Save(&models.Event{
-			EventName:       subscription.Handler.Name,
-			TransactionHash: e.tx.GetHash().Hex(),
-			FromChainId:     hexutil.EncodeBig(e.FromChainID()),
-			CreatedAt:       time.Now().Unix(),
-		}); err != nil {
-			log.Error("[EthListenJob][Process] error while storing event to database", "err", err)
-		}
-	}
-	return e.data, nil
 }
 
 type EthCallbackJob struct {
-	*BaseJob
+	*bridgeCore.BaseJob
 	result interface{}
 	method string
 }
 
-func NewEthCallbackJob(listener types.IListener, method string, tx types.ITransaction, data []byte, fromChainID *big.Int, helpers utils.IUtils) *EthCallbackJob {
+func NewEthCallbackJob(listener bridgeCore.Listener, method string, tx bridgeCore.Transaction, data []byte, fromChainID *big.Int, helpers utils.Utils) *EthCallbackJob {
 	if helpers == nil {
-		helpers = &utils.Utils{}
+		helpers = utils.NewUtils()
 	}
+	job := &bridgeCoreModels.Job{
+		ID:          0,
+		Type:        bridgeCore.CallbackHandler,
+		RetryCount:  0,
+		Data:        common.Bytes2Hex(data),
+		FromChainId: hexutil.EncodeBig(fromChainID),
+	}
+	baseJob, err := bridgeCore.NewBaseJob(listener, job, tx)
+	if err != nil {
+		return nil
+	}
+
 	return &EthCallbackJob{
-		BaseJob: &BaseJob{
-			utilsWrapper: helpers,
-			jobType:      types.CallbackHandler,
-			retryCount:   0,
-			maxTry:       20,
-			nextTry:      0,
-			backOff:      5,
-			data:         data,
-			tx:           tx,
-			listener:     listener,
-			fromChainID:  fromChainID,
-		},
-		method: method,
+		BaseJob: baseJob,
+		method:  method,
 	}
 }
 
 func (e *EthCallbackJob) Process() ([]byte, error) {
-	log.Info("[EthCallbackJob] Start Process", "method", e.method, "jobId", e.id)
-	val, err := e.utilsWrapper.Invoke(e.listener, e.method, e.fromChainID, e.tx, e.data)
+	log.Info("[EthCallbackJob] Start Process", "method", e.method, "jobId", e.GetID())
+	val, err := e.Utils().Invoke(e.GetListener(), e.method, e.FromChainID(), e.GetTransaction(), e.GetData())
 	if err != nil {
 		return nil, err
 	}
@@ -394,41 +258,41 @@ func (e *EthCallbackJob) Process() ([]byte, error) {
 }
 
 func (e *EthCallbackJob) Update(status string) error {
-	job := &models.Job{
-		ID:               int(e.id),
-		Listener:         e.listener.GetName(),
-		SubscriptionName: e.subscriptionName,
-		Type:             e.jobType,
-		RetryCount:       e.retryCount,
+	job := &bridgeCoreModels.Job{
+		ID:               int(e.GetID()),
+		Listener:         e.GetListener().GetName(),
+		SubscriptionName: e.GetSubscriptionName(),
+		Type:             e.GetType(),
+		RetryCount:       e.GetRetryCount(),
 		Status:           status,
-		Data:             common.Bytes2Hex(e.data),
-		Transaction:      e.tx.GetHash().Hex(),
+		Data:             common.Bytes2Hex(e.GetData()),
+		Transaction:      e.GetTransaction().GetHash().Hex(),
 		CreatedAt:        time.Now().Unix(),
-		FromChainId:      hexutil.EncodeBig(e.fromChainID),
+		FromChainId:      hexutil.EncodeBig(e.FromChainID()),
 		Method:           e.method,
 	}
-	if err := e.listener.GetStore().GetJobStore().Update(job); err != nil {
+	if err := e.GetListener().GetStore().GetJobStore().Update(job); err != nil {
 		return err
 	}
 	return nil
 }
 
 func (e *EthCallbackJob) Save() error {
-	job := &models.Job{
-		Listener:         e.listener.GetName(),
-		SubscriptionName: e.subscriptionName,
-		Type:             e.jobType,
-		RetryCount:       e.retryCount,
-		Status:           types.STATUS_PENDING,
-		Data:             common.Bytes2Hex(e.data),
-		Transaction:      e.tx.GetHash().Hex(),
+	job := &bridgeCoreModels.Job{
+		Listener:         e.GetListener().GetName(),
+		SubscriptionName: e.GetSubscriptionName(),
+		Type:             e.GetType(),
+		RetryCount:       e.GetRetryCount(),
+		Status:           task.STATUS_PENDING,
+		Data:             common.Bytes2Hex(e.GetData()),
+		Transaction:      e.GetTransaction().GetHash().Hex(),
 		CreatedAt:        time.Now().Unix(),
-		FromChainId:      hexutil.EncodeBig(e.fromChainID),
+		FromChainId:      hexutil.EncodeBig(e.FromChainID()),
 		Method:           e.method,
 	}
-	if err := e.listener.GetStore().GetJobStore().Save(job); err != nil {
+	if err := e.GetListener().GetStore().GetJobStore().Save(job); err != nil {
 		return err
 	}
-	e.id = int32(job.ID)
+	e.SetID(int32(job.ID))
 	return nil
 }

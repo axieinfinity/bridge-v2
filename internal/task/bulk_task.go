@@ -3,15 +3,17 @@ package task
 import (
 	"crypto/ecdsa"
 	"fmt"
+	"github.com/axieinfinity/bridge-v2/internal/stores"
+	"github.com/ethereum/go-ethereum/signer/core"
 	"math/big"
 	"time"
 
-	"github.com/axieinfinity/bridge-v2/generated_contracts/ethereum/gateway"
-	roninGateway "github.com/axieinfinity/bridge-v2/generated_contracts/ronin/gateway"
+	"github.com/axieinfinity/bridge-contracts/generated_contracts/ethereum/gateway"
+	roninGateway "github.com/axieinfinity/bridge-contracts/generated_contracts/ronin/gateway"
+	bridgeCore "github.com/axieinfinity/bridge-core"
+	"github.com/axieinfinity/bridge-core/metrics"
+	"github.com/axieinfinity/bridge-core/utils"
 	"github.com/axieinfinity/bridge-v2/internal/models"
-	"github.com/axieinfinity/bridge-v2/internal/types"
-	"github.com/axieinfinity/bridge-v2/internal/utils"
-	"github.com/axieinfinity/bridge-v2/metrics"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
@@ -20,24 +22,23 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/signer/core/apitypes"
 )
 
 type bulkTask struct {
-	util           utils.IUtils
+	util           utils.Utils
 	tasks          []*models.Task
-	store          types.IMainStore
+	store          stores.BridgeStore
 	validator      *ecdsa.PrivateKey
 	client         *ethclient.Client
 	contracts      map[string]string
 	chainId        *big.Int
 	maxTry         int
 	taskType       string
-	listener       types.IListener
+	listener       bridgeCore.Listener
 	releaseTasksCh chan int
 }
 
-func newBulkTask(listener types.IListener, client *ethclient.Client, store types.IMainStore, chainId *big.Int, validator *ecdsa.PrivateKey, contracts map[string]string, ticker time.Duration, maxTry int, taskType string, releaseTasksCh chan int, util utils.IUtils) *bulkTask {
+func newBulkTask(listener bridgeCore.Listener, client *ethclient.Client, store stores.BridgeStore, chainId *big.Int, validator *ecdsa.PrivateKey, contracts map[string]string, ticker time.Duration, maxTry int, taskType string, releaseTasksCh chan int, util utils.Utils) *bulkTask {
 	return &bulkTask{
 		util:           util,
 		tasks:          make([]*models.Task, 0),
@@ -65,11 +66,11 @@ func (r *bulkTask) send() {
 		return
 	}
 	switch r.taskType {
-	case types.DEPOSIT_TASK:
+	case DEPOSIT_TASK:
 		r.sendBulkTransactions(r.sendDepositTransaction)
-	case types.WITHDRAWAL_TASK:
+	case WITHDRAWAL_TASK:
 		r.sendBulkTransactions(r.sendWithdrawalSignaturesTransaction)
-	case types.ACK_WITHDREW_TASK:
+	case ACK_WITHDREW_TASK:
 		r.sendBulkTransactions(r.sendAckTransactions)
 	}
 }
@@ -90,11 +91,11 @@ func (r *bulkTask) sendBulkTransactions(sendTxs func(tasks []*models.Task) (done
 		doneTasks, processingTasks, failedTasks, transaction := sendTxs(r.tasks[start:next])
 
 		if transaction != nil {
-			go updateTasks(r.store, processingTasks, types.STATUS_PROCESSING, transaction.Hash().Hex(), time.Now().Unix(), r.releaseTasksCh)
+			go updateTasks(r.store, processingTasks, STATUS_PROCESSING, transaction.Hash().Hex(), time.Now().Unix(), r.releaseTasksCh)
 			metrics.Pusher.IncrCounter(metrics.ProcessingTaskMetric, 1)
 		}
-		go updateTasks(r.store, doneTasks, types.STATUS_DONE, txHash, 0, r.releaseTasksCh)
-		go updateTasks(r.store, failedTasks, types.STATUS_FAILED, txHash, 0, r.releaseTasksCh)
+		go updateTasks(r.store, doneTasks, STATUS_DONE, txHash, 0, r.releaseTasksCh)
+		go updateTasks(r.store, failedTasks, STATUS_FAILED, txHash, 0, r.releaseTasksCh)
 		metrics.Pusher.IncrCounter(metrics.SuccessTaskMetric, len(doneTasks))
 		metrics.Pusher.IncrCounter(metrics.FailedTaskMetric, len(failedTasks))
 		start = next
@@ -106,7 +107,7 @@ func (r *bulkTask) sendDepositTransaction(tasks []*models.Task) (doneTasks, proc
 		receipts []roninGateway.TransferReceipt
 	)
 	// create caller
-	caller, err := roninGateway.NewGatewayCaller(common.HexToAddress(r.contracts[types.GATEWAY_CONTRACT]), r.client)
+	caller, err := roninGateway.NewGatewayCaller(common.HexToAddress(r.contracts[GATEWAY_CONTRACT]), r.client)
 	if err != nil {
 		for _, t := range tasks {
 			t.LastError = err.Error()
@@ -116,7 +117,7 @@ func (r *bulkTask) sendDepositTransaction(tasks []*models.Task) (doneTasks, proc
 	}
 
 	// create transactor
-	transactor, err := roninGateway.NewGatewayTransactor(common.HexToAddress(r.contracts[types.GATEWAY_CONTRACT]), r.client)
+	transactor, err := roninGateway.NewGatewayTransactor(common.HexToAddress(r.contracts[GATEWAY_CONTRACT]), r.client)
 	if err != nil {
 		for _, t := range tasks {
 			t.LastError = err.Error()
@@ -193,7 +194,7 @@ func (r *bulkTask) sendWithdrawalSignaturesTransaction(tasks []*models.Task) (do
 		signatures [][]byte
 	)
 	//create transactor
-	transactor, err := roninGateway.NewGatewayTransactor(common.HexToAddress(r.contracts[types.GATEWAY_CONTRACT]), r.client)
+	transactor, err := roninGateway.NewGatewayTransactor(common.HexToAddress(r.contracts[GATEWAY_CONTRACT]), r.client)
 	if err != nil {
 		// append all success tasks into failed tasks
 		for _, t := range tasks {
@@ -203,7 +204,7 @@ func (r *bulkTask) sendWithdrawalSignaturesTransaction(tasks []*models.Task) (do
 		return nil, nil, failedTasks, nil
 	}
 	// create caller
-	caller, err := roninGateway.NewGatewayCaller(common.HexToAddress(r.contracts[types.GATEWAY_CONTRACT]), r.client)
+	caller, err := roninGateway.NewGatewayCaller(common.HexToAddress(r.contracts[GATEWAY_CONTRACT]), r.client)
 	if err != nil {
 		// append all success tasks into failed tasks
 		for _, t := range tasks {
@@ -264,7 +265,7 @@ func (r *bulkTask) sendAckTransactions(tasks []*models.Task) (doneTasks, process
 		ids []*big.Int
 	)
 	// create transactor
-	transactor, err := roninGateway.NewGatewayTransactor(common.HexToAddress(r.contracts[types.GATEWAY_CONTRACT]), r.client)
+	transactor, err := roninGateway.NewGatewayTransactor(common.HexToAddress(r.contracts[GATEWAY_CONTRACT]), r.client)
 	if err != nil {
 		for _, t := range tasks {
 			t.LastError = err.Error()
@@ -273,7 +274,7 @@ func (r *bulkTask) sendAckTransactions(tasks []*models.Task) (doneTasks, process
 	}
 
 	// create caller
-	caller, err := roninGateway.NewGatewayCaller(common.HexToAddress(r.contracts[types.GATEWAY_CONTRACT]), r.client)
+	caller, err := roninGateway.NewGatewayCaller(common.HexToAddress(r.contracts[GATEWAY_CONTRACT]), r.client)
 	if err != nil {
 		for _, t := range tasks {
 			t.LastError = err.Error()
@@ -346,7 +347,7 @@ func (r *bulkTask) validateDepositTask(caller *roninGateway.GatewayCaller, task 
 	if err != nil {
 		return false, ethEvent.Receipt, err
 	}
-	if result.Status == types.VoteStatusExecuted {
+	if result.Status == VoteStatusExecuted {
 		return true, ethEvent.Receipt, nil
 	}
 
@@ -422,14 +423,14 @@ func (r *bulkTask) validateWithdrawalTask(caller *roninGateway.GatewayCaller, ta
 	return result, ronEvent.Receipt, nil
 }
 
-func updateTasks(store types.IMainStore, tasks []*models.Task, status, txHash string, timestamp int64, releaseTasksCh chan int) {
+func updateTasks(store stores.BridgeStore, tasks []*models.Task, status, txHash string, timestamp int64, releaseTasksCh chan int) {
 	// update tasks with given status
 	// note: if task.retries < 10 then retries++ and status still be processing
 	for _, t := range tasks {
 		if timestamp > 0 {
 			t.TxCreatedAt = timestamp
 		}
-		if status == types.STATUS_FAILED {
+		if status == STATUS_FAILED {
 			if t.Retries+1 >= 10 {
 				t.Status = status
 			} else {
@@ -447,53 +448,53 @@ func updateTasks(store types.IMainStore, tasks []*models.Task, status, txHash st
 }
 
 func (r *bulkTask) signWithdrawalSignatures(receipt roninGateway.TransferReceipt) (hexutil.Bytes, error) {
-	typedData := apitypes.TypedData{
-		Types: apitypes.Types{
-			"EIP712Domain": []apitypes.Type{
+	typedData := core.TypedData{
+		Types: core.Types{
+			"EIP712Domain": []core.Type{
 				{Name: "name", Type: "string"},
 				{Name: "version", Type: "string"},
 				{Name: "chainId", Type: "uint256"},
 				{Name: "verifyingContract", Type: "address"},
 			},
-			"Receipt": []apitypes.Type{
+			"Receipt": []core.Type{
 				{Name: "id", Type: "uint256"},
 				{Name: "kind", Type: "uint8"},
 				{Name: "mainchain", Type: "TokenOwner"},
 				{Name: "ronin", Type: "TokenOwner"},
 				{Name: "info", Type: "TokenInfo"},
 			},
-			"TokenOwner": []apitypes.Type{
+			"TokenOwner": []core.Type{
 				{Name: "addr", Type: "address"},
 				{Name: "tokenAddr", Type: "address"},
 				{Name: "chainId", Type: "uint256"},
 			},
-			"TokenInfo": []apitypes.Type{
+			"TokenInfo": []core.Type{
 				{Name: "erc", Type: "uint8"},
 				{Name: "id", Type: "uint256"},
 				{Name: "quantity", Type: "uint256"},
 			},
 		},
-		Domain: apitypes.TypedDataDomain{
+		Domain: core.TypedDataDomain{
 			Name:              "MainchainGatewayV2",
 			Version:           "2",
 			ChainId:           math.NewHexOrDecimal256(receipt.Mainchain.ChainId.Int64()),
-			VerifyingContract: r.contracts[types.ETH_GATEWAY_CONTRACT],
+			VerifyingContract: r.contracts[ETH_GATEWAY_CONTRACT],
 		},
 		PrimaryType: "Receipt",
-		Message: apitypes.TypedDataMessage{
+		Message: core.TypedDataMessage{
 			"id":   receipt.Id.String(),
 			"kind": fmt.Sprintf("%d", receipt.Kind),
-			"mainchain": apitypes.TypedDataMessage{
+			"mainchain": core.TypedDataMessage{
 				"addr":      receipt.Mainchain.Addr.Hex(),
 				"tokenAddr": receipt.Mainchain.TokenAddr.Hex(),
 				"chainId":   receipt.Mainchain.ChainId.String(),
 			},
-			"ronin": apitypes.TypedDataMessage{
+			"ronin": core.TypedDataMessage{
 				"addr":      receipt.Ronin.Addr.Hex(),
 				"tokenAddr": receipt.Ronin.TokenAddr.Hex(),
 				"chainId":   receipt.Ronin.ChainId.String(),
 			},
-			"info": apitypes.TypedDataMessage{
+			"info": core.TypedDataMessage{
 				"erc":      fmt.Sprintf("%d", receipt.Info.Erc),
 				"id":       receipt.Info.Id.String(),
 				"quantity": receipt.Info.Quantity.String(),

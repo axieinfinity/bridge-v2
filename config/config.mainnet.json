@@ -24,7 +24,7 @@
           "to": "0x0CF8fF40a508bdBc39fBe1Bb679dCBa64E65C7Df",
           "type": 1,
           "handler": {
-            "abi": "contracts/ronin/RoninGatewayV2.abi",
+            "contract": "RoninGateway",
             "name": "MainchainWithdrew"
           },
           "callbacks": {
@@ -35,7 +35,7 @@
           "to": "0x0CF8fF40a508bdBc39fBe1Bb679dCBa64E65C7Df",
           "type": 1,
           "handler": {
-            "abi": "contracts/ronin/RoninGatewayV2.abi",
+            "contract": "RoninGateway",
             "name": "WithdrawalRequested"
           },
           "callbacks": {
@@ -46,7 +46,7 @@
           "to": "0x0CF8fF40a508bdBc39fBe1Bb679dCBa64E65C7Df",
           "type": 1,
           "handler": {
-            "abi": "contracts/ronin/RoninGatewayV2.abi",
+            "contract": "RoninGateway",
             "name": "WithdrawalSignaturesRequested"
           },
           "callbacks": {
@@ -77,7 +77,7 @@
           "to": "0x64192819Ac13Ef72bF6b5AE239AC672B43a9AF08",
           "type": 1,
           "handler": {
-            "abi": "contracts/ethereum/MainchainGatewayV2.abi",
+            "contract": "EthereumGateway",
             "name": "DepositRequested"
           },
           "callbacks": {
@@ -88,7 +88,7 @@
           "to": "0x64192819Ac13Ef72bF6b5AE239AC672B43a9AF08",
           "type": 1,
           "handler": {
-            "abi": "contracts/ethereum/MainchainGatewayV2.abi",
+            "contract": "EthereumGateway",
             "name": "Withdrew"
           },
           "callbacks": {

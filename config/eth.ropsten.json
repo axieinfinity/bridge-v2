@@ -35,7 +35,7 @@
           "to": "0x3b6371EB912bFd5C0E249A16000ffbC6B881555A",
           "type": 1,
           "handler": {
-            "abi": "contracts/ethereum/MainchainGatewayV2.abi",
+            "contract": "EthereumGateway",
             "name": "DepositRequested"
           },
           "callbacks": {
@@ -46,7 +46,7 @@
           "to": "0x3b6371EB912bFd5C0E249A16000ffbC6B881555A",
           "type": 1,
           "handler": {
-            "abi": "contracts/ethereum/MainchainGatewayV2.abi",
+            "contract": "EthereumGateway",
             "name": "Withdrew"
           },
           "callbacks": {
