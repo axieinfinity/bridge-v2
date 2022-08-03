@@ -45,6 +45,7 @@ type EthereumListener struct {
 	store          stores.MainStore
 
 	prepareJobChan chan bridgeCore.JobHandler
+	tasks          []bridgeCore.TaskHandler
 }
 
 func NewEthereumListener(ctx context.Context, cfg *bridgeCore.LsConfig, helpers utils.Utils, store stores.MainStore) (*EthereumListener, error) {
@@ -61,27 +62,28 @@ func NewEthereumListener(ctx context.Context, cfg *bridgeCore.LsConfig, helpers 
 		config:         cfg,
 		chainId:        hexutil.MustDecodeBig(cfg.ChainId),
 		safeBlockRange: cfg.SafeBlockRange,
+		tasks:          make([]bridgeCore.TaskHandler, 0),
 	}
 	if helpers != nil {
 		ethListener.utilsWrapper = helpers
 	}
 	client, err := ethListener.utilsWrapper.NewEthClient(cfg.RpcUrl)
 	if err != nil {
-		log.Error("[NewEthereumListener] error while dialing rpc client", "err", err, "url", cfg.RpcUrl)
+		log.Error(fmt.Sprintf("[New%sListener] error while dialing rpc client", cfg.Name), "err", err, "url", cfg.RpcUrl)
 		return nil, err
 	}
 	ethListener.client = client
 	if cfg.Secret.Validator != "" {
 		ethListener.validatorKey, err = crypto.HexToECDSA(cfg.Secret.Validator)
 		if err != nil {
-			log.Error("[NewEthereumListener] error while getting validator key", "err", err)
+			log.Error(fmt.Sprintf("[New%sListener] error while getting validator key", cfg.Name), "err", err)
 			return nil, err
 		}
 	}
 	if cfg.Secret.Relayer != "" {
 		ethListener.relayerKey, err = crypto.HexToECDSA(cfg.Secret.Relayer)
 		if err != nil {
-			log.Error("[NewEthereumListener] error while getting relayer key", "err", err)
+			log.Error(fmt.Sprintf("[New%sListener] error while getting relayer key", cfg.Name), "err", err)
 			return nil, err
 		}
 	}
@@ -97,6 +99,9 @@ func (e *EthereumListener) Config() *bridgeCore.LsConfig {
 }
 
 func (e *EthereumListener) Start() {
+	for _, task := range e.tasks {
+		go task.Start()
+	}
 }
 
 func (e *EthereumListener) GetName() string {
@@ -123,8 +128,16 @@ func (e *EthereumListener) GetInitHeight() uint64 {
 	return e.fromHeight
 }
 
-func (e *EthereumListener) GetTask() bridgeCore.TaskHandler {
-	return nil
+func (e *EthereumListener) GetTask(index int) bridgeCore.TaskHandler {
+	return e.tasks[index]
+}
+
+func (e *EthereumListener) GetTasks() []bridgeCore.TaskHandler {
+	return e.tasks
+}
+
+func (e *EthereumListener) AddTask(task bridgeCore.TaskHandler) {
+	e.tasks = append(e.tasks, task)
 }
 
 func (e *EthereumListener) GetCurrentBlock() bridgeCore.Block {
@@ -135,11 +148,11 @@ func (e *EthereumListener) GetCurrentBlock() bridgeCore.Block {
 		)
 		block, err = e.GetProcessedBlock()
 		if err != nil {
-			log.Error(fmt.Sprintf("[%s] error on getting processed block from database", e.GetName()), "err", err)
+			log.Error(fmt.Sprintf("[%sListener] error on getting processed block from database", e.GetName()), "err", err)
 			if e.fromHeight > 0 {
 				block, err = e.GetBlock(e.fromHeight)
 				if err != nil {
-					log.Error(fmt.Sprintf("[%s] error on getting block from rpc", e.GetName()), "err", err, "fromHeight", e.fromHeight)
+					log.Error(fmt.Sprintf("[%sListener] error on getting block from rpc", e.GetName()), "err", err, "fromHeight", e.fromHeight)
 				}
 			}
 		}
@@ -147,7 +160,7 @@ func (e *EthereumListener) GetCurrentBlock() bridgeCore.Block {
 		if block == nil {
 			block, err = e.GetLatestBlock()
 			if err != nil {
-				log.Error(fmt.Sprintf("[%s] error on getting latest block from rpc", e.GetName()), "err", err)
+				log.Error(fmt.Sprintf("[%sListener] error on getting latest block from rpc", e.GetName()), "err", err)
 				return nil
 			}
 		}
@@ -164,13 +177,13 @@ func (e *EthereumListener) IsUpTodate() bool {
 func (e *EthereumListener) GetProcessedBlock() (bridgeCore.Block, error) {
 	chainId, err := e.GetChainID()
 	if err != nil {
-		log.Error("[EthereumListener][GetLatestBlock] error while getting chainId", "err", err)
+		log.Error(fmt.Sprintf("[%sListener][GetLatestBlock] error while getting chainId", e.GetName()), "err", err)
 		return nil, err
 	}
 	encodedChainId := hexutil.EncodeBig(chainId)
 	height, err := e.store.GetProcessedBlockStore().GetLatestBlock(encodedChainId)
 	if err != nil {
-		log.Error("[EthereumListener][GetLatestBlock] error while getting latest height from database", "err", err, "chainId", encodedChainId)
+		log.Error(fmt.Sprintf("[%sListener][GetLatestBlock] error while getting latest height from database", e.GetName()), "err", err, "chainId", encodedChainId)
 		return nil, err
 	}
 	block, err := e.client.BlockByNumber(e.ctx, big.NewInt(height))
@@ -209,7 +222,7 @@ func (e *EthereumListener) GetSubscriptions() map[string]*bridgeCore.Subscribe {
 
 func (e *EthereumListener) UpdateCurrentBlock(block bridgeCore.Block) error {
 	if block != nil && e.GetCurrentBlock().GetHeight() < block.GetHeight() {
-		log.Info(fmt.Sprintf("[%s] UpdateCurrentBlock", e.name), "block", block.GetHeight())
+		log.Info(fmt.Sprintf("[%sListener] UpdateCurrentBlock", e.name), "block", block.GetHeight())
 		e.currentBlock.Store(block)
 		return e.SaveCurrentBlockToDB()
 	}
@@ -280,19 +293,19 @@ func (e *EthereumListener) GetListenHandleJob(subscriptionName string, tx bridge
 }
 
 func (e *EthereumListener) SendCallbackJobs(listeners map[string]bridgeCore.Listener, subscriptionName string, tx bridgeCore.Transaction, inputData []byte) {
-	log.Info("[EthereumListener][SendCallbackJobs] Start", "subscriptionName", subscriptionName, "listeners", len(listeners), "fromTx", tx.GetHash().Hex())
+	log.Info(fmt.Sprintf("[%sListener][SendCallbackJobs] Start", e.GetName()), "subscriptionName", subscriptionName, "listeners", len(listeners), "fromTx", tx.GetHash().Hex())
 	chainId, err := e.GetChainID()
 	if err != nil {
 		return
 	}
 	subscription, ok := e.GetSubscriptions()[subscriptionName]
 	if !ok {
-		log.Warn("[EthereumListener][SendCallbackJobs] cannot find subscription", "subscriptionName", subscriptionName)
+		log.Warn(fmt.Sprintf("[%sListener][SendCallbackJobs] cannot find subscription", e.GetName()), "subscriptionName", subscriptionName)
 		return
 	}
-	log.Info("[EthereumListener][SendCallbackJobs] subscription found", "subscriptionName", subscriptionName, "numberOfCallbacks", len(subscription.CallBacks))
+	log.Info(fmt.Sprintf("[%sListener][SendCallbackJobs] subscription found", e.GetName()), "subscriptionName", subscriptionName, "numberOfCallbacks", len(subscription.CallBacks))
 	for listenerName, methodName := range subscription.CallBacks {
-		log.Info("[EthereumListener][SendCallbackJobs] Loop through callbacks", "subscriptionName", subscriptionName, "listenerName", listenerName, "methodName", methodName)
+		log.Info(fmt.Sprintf("[%sListener][SendCallbackJobs] Loop through callbacks", e.GetName()), "subscriptionName", subscriptionName, "listenerName", listenerName, "methodName", methodName)
 		l := listeners[listenerName]
 		job := NewEthCallbackJob(l, methodName, tx, inputData, chainId, e.utilsWrapper)
 		if job != nil {

@@ -32,7 +32,7 @@ var (
 )
 
 type cleanerStore struct {
-	stores.ListenHandlerStore
+	stores.BridgeStore
 	bridgeCoreStore.MainStore
 }
 
@@ -48,7 +48,7 @@ func start(cfg *bridgeCore.Config) error {
 	if err != nil {
 		return err
 	}
-	listenHandlerStore := stores.NewListenHandlerStore(db)
+	listenHandlerStore := stores.NewBridgeStore(db)
 	bridgeStore := bridgeCoreStore.NewMainStore(db)
 	store := &cleanerStore{listenHandlerStore, bridgeStore}
 	u := bridgeCoreUtils.NewUtils()

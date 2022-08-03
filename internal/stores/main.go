@@ -29,14 +29,14 @@ type WithdrawalStore interface {
 	GetWithdrawalById(withdrawalId int64) (*models.Withdrawal, error)
 }
 
-type ListenHandlerStore interface {
+type BridgeStore interface {
 	GetDepositStore() DepositStore
 	GetWithdrawalStore() WithdrawalStore
 	GetTaskStore() TaskStore
 	GetProcessedReceiptStore() ProcessedReceiptStore
 }
 
-type listenHandlerStore struct {
+type bridgeStore struct {
 	*gorm.DB
 
 	DepositStore          DepositStore
@@ -45,8 +45,8 @@ type listenHandlerStore struct {
 	ProcessedReceiptStore ProcessedReceiptStore
 }
 
-func NewListenHandlerStore(db *gorm.DB) ListenHandlerStore {
-	store := &listenHandlerStore{
+func NewBridgeStore(db *gorm.DB) BridgeStore {
+	store := &bridgeStore{
 		DB: db,
 
 		TaskStore:             NewTaskStore(db),
@@ -57,26 +57,26 @@ func NewListenHandlerStore(db *gorm.DB) ListenHandlerStore {
 	return store
 }
 
-func (m *listenHandlerStore) RelationalDatabaseCheck() error {
+func (m *bridgeStore) RelationalDatabaseCheck() error {
 	return m.Raw("SELECT 1").Error
 }
 
-func (m *listenHandlerStore) GetDB() *gorm.DB {
+func (m *bridgeStore) GetDB() *gorm.DB {
 	return m.DB
 }
 
-func (m *listenHandlerStore) GetDepositStore() DepositStore {
+func (m *bridgeStore) GetDepositStore() DepositStore {
 	return m.DepositStore
 }
 
-func (m *listenHandlerStore) GetWithdrawalStore() WithdrawalStore {
+func (m *bridgeStore) GetWithdrawalStore() WithdrawalStore {
 	return m.WithdrawalStore
 }
 
-func (m *listenHandlerStore) GetTaskStore() TaskStore {
+func (m *bridgeStore) GetTaskStore() TaskStore {
 	return m.TaskStore
 }
 
-func (m *listenHandlerStore) GetProcessedReceiptStore() ProcessedReceiptStore {
+func (m *bridgeStore) GetProcessedReceiptStore() ProcessedReceiptStore {
 	return m.ProcessedReceiptStore
 }

@@ -27,7 +27,7 @@ import (
 type bulkTask struct {
 	util           utils.Utils
 	tasks          []*models.Task
-	store          stores.ListenHandlerStore
+	store          stores.BridgeStore
 	validator      *ecdsa.PrivateKey
 	client         *ethclient.Client
 	contracts      map[string]string
@@ -38,7 +38,7 @@ type bulkTask struct {
 	releaseTasksCh chan int
 }
 
-func newBulkTask(listener bridgeCore.Listener, client *ethclient.Client, store stores.ListenHandlerStore, chainId *big.Int, validator *ecdsa.PrivateKey, contracts map[string]string, ticker time.Duration, maxTry int, taskType string, releaseTasksCh chan int, util utils.Utils) *bulkTask {
+func newBulkTask(listener bridgeCore.Listener, client *ethclient.Client, store stores.BridgeStore, chainId *big.Int, validator *ecdsa.PrivateKey, contracts map[string]string, ticker time.Duration, maxTry int, taskType string, releaseTasksCh chan int, util utils.Utils) *bulkTask {
 	return &bulkTask{
 		util:           util,
 		tasks:          make([]*models.Task, 0),
@@ -423,7 +423,7 @@ func (r *bulkTask) validateWithdrawalTask(caller *roninGateway.GatewayCaller, ta
 	return result, ronEvent.Receipt, nil
 }
 
-func updateTasks(store stores.ListenHandlerStore, tasks []*models.Task, status, txHash string, timestamp int64, releaseTasksCh chan int) {
+func updateTasks(store stores.BridgeStore, tasks []*models.Task, status, txHash string, timestamp int64, releaseTasksCh chan int) {
 	// update tasks with given status
 	// note: if task.retries < 10 then retries++ and status still be processing
 	for _, t := range tasks {

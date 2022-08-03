@@ -141,8 +141,6 @@ func prepare(ctx *cli.Context) *bridgeCore.Config {
 		if err := json.Unmarshal(plan, &cfg); err != nil {
 			panic(err)
 		}
-		cfg.Listeners[RoninNetwork].TaskInterval *= time.Second // convert to nanosecond
-		cfg.Listeners[RoninNetwork].TransactionCheckPeriod *= time.Second
 	}
 
 	checkEnv(cfg)
@@ -154,13 +152,6 @@ func prepare(ctx *cli.Context) *bridgeCore.Config {
 }
 
 func checkEnv(cfg *bridgeCore.Config) {
-	setRpcUrlFromEnv(cfg, os.Getenv(roninRpc), RoninNetwork)
-	setKeyFromEnv(cfg, true, os.Getenv(roninValidatorKey), RoninNetwork)
-	setKeyFromEnv(cfg, false, os.Getenv(roninRelayKey), RoninNetwork)
-	setRpcUrlFromEnv(cfg, os.Getenv(ethereumRpc), EthereumNetwork)
-	setKeyFromEnv(cfg, true, os.Getenv(ethereumValidatorKey), EthereumNetwork)
-	setKeyFromEnv(cfg, false, os.Getenv(ethereumRelayerKey), EthereumNetwork)
-
 	if cfg.DB == nil {
 		cfg.DB = &bridgeCoreStore.Database{}
 	}
@@ -206,42 +197,55 @@ func checkEnv(cfg *bridgeCore.Config) {
 		cfg.NumberOfWorkers, _ = strconv.Atoi(os.Getenv(numberOfWorkers))
 	}
 
-	if os.Getenv(roninTaskInterval) != "" {
-		taskInterval, _ := strconv.Atoi(os.Getenv(roninTaskInterval))
-		if taskInterval > 0 {
-			cfg.Listeners[RoninNetwork].TaskInterval = time.Duration(int64(taskInterval)) * time.Second
-			log.Info("setting TaskInterval", "value", cfg.Listeners[RoninNetwork].TaskInterval)
+	if cfg.Listeners[RoninNetwork] != nil {
+
+		if os.Getenv(roninTaskInterval) != "" {
+			taskInterval, _ := strconv.Atoi(os.Getenv(roninTaskInterval))
+			if taskInterval > 0 {
+				cfg.Listeners[RoninNetwork].TaskInterval = time.Duration(int64(taskInterval)) * time.Second
+				log.Info("setting TaskInterval", "value", cfg.Listeners[RoninNetwork].TaskInterval)
+			}
 		}
+
+		if os.Getenv(roninTransactionCheckPeriod) != "" {
+			txPeriod, _ := strconv.Atoi(os.Getenv(roninTransactionCheckPeriod))
+			if txPeriod > 0 {
+				cfg.Listeners[RoninNetwork].TransactionCheckPeriod = time.Duration(int64(txPeriod)) * time.Second
+				log.Info("setting transactionCheckPeriod", "value", cfg.Listeners[RoninNetwork].TransactionCheckPeriod)
+			}
+		}
+
+		if os.Getenv(roninMaxProcessingTasks) != "" {
+			tasks, _ := strconv.Atoi(os.Getenv(roninMaxProcessingTasks))
+			if tasks > 0 {
+				cfg.Listeners[RoninNetwork].MaxProcessingTasks = tasks
+				log.Info("setting MaxProcessingTasks", "value", tasks)
+			}
+		}
+
+		if os.Getenv(roninMaxTasksQuery) != "" {
+			limit, _ := strconv.Atoi(os.Getenv(roninMaxTasksQuery))
+			if limit > 0 {
+				cfg.Listeners[RoninNetwork].MaxTasksQuery = limit
+			}
+		}
+
+		setRpcUrlFromEnv(cfg, os.Getenv(roninRpc), RoninNetwork)
+		setKeyFromEnv(cfg, true, os.Getenv(roninValidatorKey), RoninNetwork)
+		setKeyFromEnv(cfg, false, os.Getenv(roninRelayKey), RoninNetwork)
 	}
 
-	if os.Getenv(roninTransactionCheckPeriod) != "" {
-		txPeriod, _ := strconv.Atoi(os.Getenv(roninTransactionCheckPeriod))
-		if txPeriod > 0 {
-			cfg.Listeners[RoninNetwork].TransactionCheckPeriod = time.Duration(int64(txPeriod)) * time.Second
-			log.Info("setting transactionCheckPeriod", "value", cfg.Listeners[RoninNetwork].TransactionCheckPeriod)
+	if cfg.Listeners[EthereumNetwork] != nil {
+		if os.Getenv(ethereumGetLogsBatchSize) != "" {
+			batchSize, _ := strconv.Atoi(os.Getenv(ethereumGetLogsBatchSize))
+			if batchSize > 0 {
+				cfg.Listeners[EthereumNetwork].GetLogsBatchSize = batchSize
+			}
 		}
-	}
 
-	if os.Getenv(roninMaxProcessingTasks) != "" {
-		tasks, _ := strconv.Atoi(os.Getenv(roninMaxProcessingTasks))
-		if tasks > 0 {
-			cfg.Listeners[RoninNetwork].MaxProcessingTasks = tasks
-			log.Info("setting MaxProcessingTasks", "value", tasks)
-		}
-	}
-
-	if os.Getenv(ethereumGetLogsBatchSize) != "" {
-		batchSize, _ := strconv.Atoi(os.Getenv(ethereumGetLogsBatchSize))
-		if batchSize > 0 {
-			cfg.Listeners[EthereumNetwork].GetLogsBatchSize = batchSize
-		}
-	}
-
-	if os.Getenv(roninMaxTasksQuery) != "" {
-		limit, _ := strconv.Atoi(os.Getenv(roninMaxTasksQuery))
-		if limit > 0 {
-			cfg.Listeners[RoninNetwork].MaxTasksQuery = limit
-		}
+		setRpcUrlFromEnv(cfg, os.Getenv(ethereumRpc), EthereumNetwork)
+		setKeyFromEnv(cfg, true, os.Getenv(ethereumValidatorKey), EthereumNetwork)
+		setKeyFromEnv(cfg, false, os.Getenv(ethereumRelayerKey), EthereumNetwork)
 	}
 
 	// clean key

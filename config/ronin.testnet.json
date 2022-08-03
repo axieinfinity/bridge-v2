@@ -19,7 +19,7 @@
           "to": "0x03d1F13c7391F6B5A651143a31034cf728A93694",
           "type": 1,
           "handler": {
-            "abi": "contracts/ronin/RoninGatewayV2.abi",
+            "contract": "RoninGateway",
             "name": "MainchainWithdrew"
           },
           "callbacks": {
@@ -30,7 +30,7 @@
           "to": "0x03d1F13c7391F6B5A651143a31034cf728A93694",
           "type": 1,
           "handler": {
-            "abi": "contracts/ronin/RoninGatewayV2.abi",
+            "contract": "RoninGateway",
             "name": "WithdrawalRequested"
           },
           "callbacks": {
@@ -41,7 +41,7 @@
           "to": "0x03d1F13c7391F6B5A651143a31034cf728A93694",
           "type": 1,
           "handler": {
-            "abi": "contracts/ronin/RoninGatewayV2.abi",
+            "contract": "RoninGateway",
             "name": "WithdrawalSignaturesRequested"
           },
           "callbacks": {

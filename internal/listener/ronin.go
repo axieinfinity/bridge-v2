@@ -23,8 +23,7 @@ const oneHour = 3600
 
 type RoninListener struct {
 	*EthereumListener
-	task      bridgeCore.TaskHandler
-	taskStore stores.ListenHandlerStore
+	bridgeStore stores.BridgeStore
 }
 
 func NewRoninListener(ctx context.Context, cfg *bridgeCore.LsConfig, helpers utils.Utils, store bridgeCoreStores.MainStore) (*RoninListener, error) {
@@ -33,21 +32,11 @@ func NewRoninListener(ctx context.Context, cfg *bridgeCore.LsConfig, helpers uti
 		panic(err)
 	}
 	l := &RoninListener{EthereumListener: listener}
-	l.taskStore = stores.NewListenHandlerStore(store.GetDB())
-	l.task, err = task.NewRoninTask(l, l.taskStore, l.utilsWrapper)
+	l.bridgeStore = stores.NewBridgeStore(store.GetDB())
 	if err != nil {
 		return nil, err
 	}
-
 	return l, nil
-}
-
-func (l *RoninListener) Start() {
-	go l.task.Start()
-}
-
-func (l *RoninListener) GetTask() bridgeCore.TaskHandler {
-	return l.task
 }
 
 func (l *RoninListener) NewJobFromDB(job *bridgeCoreModels.Job) (bridgeCore.JobHandler, error) {
@@ -67,7 +56,7 @@ func (l *RoninListener) StoreMainchainWithdrawCallback(fromChainId *big.Int, tx 
 	}
 	receipt := ronEvent.Receipt
 	// store ronEvent to database at withdrawal
-	return l.taskStore.GetWithdrawalStore().Save(&models.Withdrawal{
+	return l.bridgeStore.GetWithdrawalStore().Save(&models.Withdrawal{
 		WithdrawalId:         receipt.Id.Int64(),
 		ExternalAddress:      receipt.Mainchain.Addr.Hex(),
 		ExternalTokenAddress: receipt.Mainchain.TokenAddr.Hex(),
@@ -110,7 +99,7 @@ func (l *RoninListener) ProvideReceiptSignatureCallback(fromChainId *big.Int, tx
 	receipt := ronEvent.Receipt
 
 	// try getting withdrawal data from database by receipt.id
-	withdrawal, _ := l.taskStore.GetWithdrawalStore().GetWithdrawalById(receipt.Id.Int64())
+	withdrawal, _ := l.bridgeStore.GetWithdrawalStore().GetWithdrawalById(receipt.Id.Int64())
 	if withdrawal != nil && withdrawal.ID > 0 {
 		return nil
 	}
@@ -144,7 +133,7 @@ func (l *RoninListener) ProvideReceiptSignatureCallback(fromChainId *big.Int, tx
 			LastError:       "",
 			CreatedAt:       time.Now().Unix(),
 		}
-		return l.taskStore.GetTaskStore().Save(withdrawalTask)
+		return l.bridgeStore.GetTaskStore().Save(withdrawalTask)
 	}
 	return nil
 }
@@ -205,7 +194,7 @@ func (l *RoninListener) DepositRequestedCallback(fromChainId *big.Int, tx bridge
 		LastError:       "",
 		CreatedAt:       time.Now().Unix(),
 	}
-	return l.taskStore.GetTaskStore().Save(depositTask)
+	return l.bridgeStore.GetTaskStore().Save(depositTask)
 }
 
 func (l *RoninListener) WithdrewCallback(fromChainId *big.Int, tx bridgeCore.Transaction, data []byte) error {
@@ -237,7 +226,7 @@ func (l *RoninListener) WithdrewCallback(fromChainId *big.Int, tx bridgeCore.Tra
 		if err != nil {
 			return err
 		}
-		return l.taskStore.GetTaskStore().Save(&models.Task{
+		return l.bridgeStore.GetTaskStore().Save(&models.Task{
 			ChainId:         hexutil.EncodeBig(chainId),
 			FromChainId:     hexutil.EncodeBig(fromChainId),
 			FromTransaction: tx.GetHash().Hex(),

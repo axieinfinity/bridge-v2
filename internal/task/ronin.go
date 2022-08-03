@@ -12,6 +12,7 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/log"
+	"gorm.io/gorm"
 	"math/big"
 	"sync"
 	"time"
@@ -41,7 +42,7 @@ type RoninTask struct {
 	util utils.Utils
 
 	listener bridgeCore.Listener
-	store    stores.ListenHandlerStore
+	store    stores.BridgeStore
 
 	taskInterval    time.Duration
 	txCheckInterval time.Duration
@@ -62,7 +63,7 @@ type RoninTask struct {
 	maxProcessingTasks int
 }
 
-func NewRoninTask(listener bridgeCore.Listener, taskStore stores.ListenHandlerStore, util utils.Utils) (*RoninTask, error) {
+func NewRoninTask(listener bridgeCore.Listener, db *gorm.DB, util utils.Utils) (*RoninTask, error) {
 	config := listener.Config()
 	client, err := ethclient.Dial(config.RpcUrl)
 	if err != nil {
@@ -77,7 +78,7 @@ func NewRoninTask(listener bridgeCore.Listener, taskStore stores.ListenHandlerSt
 		ctx:                newCtx,
 		cancelFunc:         cancelFunc,
 		listener:           listener,
-		store:              taskStore,
+		store:              stores.NewBridgeStore(db),
 		taskInterval:       defaultTaskInterval,
 		txCheckInterval:    defaultReceiptCheck,
 		secret:             config.Secret,
@@ -92,10 +93,10 @@ func NewRoninTask(listener bridgeCore.Listener, taskStore stores.ListenHandlerSt
 		maxProcessingTasks: defaultMaxProcessingTasks,
 	}
 	if config.TaskInterval > 0 {
-		task.taskInterval = config.TaskInterval
+		task.taskInterval = config.TaskInterval * time.Second
 	}
 	if config.TransactionCheckPeriod > 0 {
-		task.txCheckInterval = config.TransactionCheckPeriod
+		task.txCheckInterval = config.TransactionCheckPeriod * time.Second
 	}
 	if config.MaxTasksQuery > 0 {
 		task.limitQuery = config.MaxTasksQuery
