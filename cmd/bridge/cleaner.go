@@ -32,7 +32,7 @@ var (
 )
 
 type cleanerStore struct {
-	*stores.ListenHandlerStore
+	stores.ListenHandlerStore
 	bridgeCoreStore.MainStore
 }
 

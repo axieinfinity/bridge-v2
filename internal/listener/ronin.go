@@ -24,7 +24,7 @@ const oneHour = 3600
 type RoninListener struct {
 	*EthereumListener
 	task      bridgeCore.TaskHandler
-	taskStore *stores.ListenHandlerStore
+	taskStore stores.ListenHandlerStore
 }
 
 func NewRoninListener(ctx context.Context, cfg *bridgeCore.LsConfig, helpers utils.Utils, store bridgeCoreStores.MainStore) (*RoninListener, error) {

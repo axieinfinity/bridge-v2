@@ -41,7 +41,7 @@ type RoninTask struct {
 	util utils.Utils
 
 	listener bridgeCore.Listener
-	store    *stores.ListenHandlerStore
+	store    stores.ListenHandlerStore
 
 	taskInterval    time.Duration
 	txCheckInterval time.Duration
@@ -62,7 +62,7 @@ type RoninTask struct {
 	maxProcessingTasks int
 }
 
-func NewRoninTask(listener bridgeCore.Listener, taskStore *stores.ListenHandlerStore, util utils.Utils) (*RoninTask, error) {
+func NewRoninTask(listener bridgeCore.Listener, taskStore stores.ListenHandlerStore, util utils.Utils) (*RoninTask, error) {
 	config := listener.Config()
 	client, err := ethclient.Dial(config.RpcUrl)
 	if err != nil {
