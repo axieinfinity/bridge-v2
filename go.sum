@@ -107,6 +107,12 @@ github.com/aws/aws-sdk-go-v2/service/route53 v1.1.1/go.mod h1:rLiOUrPLW/Er5kRcQ7
 github.com/aws/aws-sdk-go-v2/service/sso v1.1.1/go.mod h1:SuZJxklHxLAXgLTc1iFXbEWkXs7QRTQpCLGaKIprQW0=
 github.com/aws/aws-sdk-go-v2/service/sts v1.1.1/go.mod h1:Wi0EBZwiz/K44YliU0EKxqTCJGUfYTWXrrBwkq736bM=
 github.com/aws/smithy-go v1.1.0/go.mod h1:EzMw8dbp/YJL4A5/sbhGddag+NPT7q084agLbB9LgIw=
+github.com/axieinfinity/bridge-contracts v0.0.0-20220731110242-d273b578b657 h1:ZtorefTBm9f5vU1NtDpRH/gFUFBV/pbaTX7CXucufRE=
+github.com/axieinfinity/bridge-contracts v0.0.0-20220731110242-d273b578b657/go.mod h1:/1xWUM5AIZGYgaFxl9ojlw3tCgeWF4SDg8qrzx5YHwk=
+github.com/axieinfinity/bridge-core v0.0.0-20220802075849-77abb76e9167 h1:nTIlCGcE9wNqOLtMmrSLAFhckrh6AQ28FGz9omnX+es=
+github.com/axieinfinity/bridge-core v0.0.0-20220802075849-77abb76e9167/go.mod h1:6WQWG1tdhnVsXshQ8dSfejmNZlw7wRII6sF11i4bKCk=
+github.com/axieinfinity/bridge-migrations v0.0.0-20220803051308-adab1cd1bcca h1:Bmy5XEh5VFhKIE04Yvnmvr47AjzWZFJF9I3aedxaAQE=
+github.com/axieinfinity/bridge-migrations v0.0.0-20220803051308-adab1cd1bcca/go.mod h1:jkGvoA7823lFnjPcYf1rMn4kaJv5qiYwGLP1PUc+T7o=
 github.com/aymerick/raymond v2.0.3-0.20180322193309-b565731e1464+incompatible/go.mod h1:osfaiScAUVup+UC9Nfq76eWqDhXlp+4UYaA8uhTBO6g=
 github.com/beorn7/perks v0.0.0-20180321164747-3a771d992973/go.mod h1:Dwedo/Wpr24TaqPxmxbtue+5NUziq4I4S80YR8gNf3Q=
 github.com/beorn7/perks v1.0.0/go.mod h1:KWe93zE9D1o94FZ5RNwFwVgaQK1VOXiVxmqh+CedLV8=

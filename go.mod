@@ -1,11 +1,6 @@
 module github.com/axieinfinity/bridge-v2
 
-replace (
-	github.com/axieinfinity/bridge-contracts => ../bridge-contracts
-	github.com/axieinfinity/bridge-core => ../bridge-core
-	github.com/axieinfinity/bridge-migrations => ../bridge-migrations
-	github.com/ethereum/go-ethereum => ../ronin
-)
+replace github.com/ethereum/go-ethereum => ../ronin
 
 go 1.17
 
@@ -22,9 +17,6 @@ require (
 )
 
 require (
-	github.com/axieinfinity/bridge-contracts v0.0.0-00010101000000-000000000000
-	github.com/axieinfinity/bridge-core v0.0.0-00010101000000-000000000000
-	github.com/axieinfinity/bridge-migrations v0.0.0-00010101000000-000000000000
 	github.com/deckarep/golang-set v1.8.0 // indirect
 	golang.org/x/sys v0.0.0-20220422013727-9388b58f7150 // indirect
 )
@@ -32,6 +24,9 @@ require (
 require (
 	github.com/StackExchange/wmi v1.2.1 // indirect
 	github.com/VictoriaMetrics/fastcache v1.6.0 // indirect
+	github.com/axieinfinity/bridge-contracts v0.0.0-20220731110242-d273b578b657 // indirect
+	github.com/axieinfinity/bridge-core v0.0.0-20220802075849-77abb76e9167 // indirect
+	github.com/axieinfinity/bridge-migrations v0.0.0-20220803051308-adab1cd1bcca // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/btcsuite/btcd v0.20.1-beta // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
