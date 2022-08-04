@@ -1,7 +1,7 @@
 package stores
 
 import (
-	"github.com/axieinfinity/bridge-v2/internal/models"
+	"github.com/axieinfinity/bridge-v2/models"
 	"gorm.io/gorm"
 )
 

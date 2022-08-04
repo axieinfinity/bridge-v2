@@ -2,19 +2,20 @@ package main
 
 import (
 	"fmt"
-	bridgeCore "github.com/axieinfinity/bridge-core"
-	bridgeCoreStore "github.com/axieinfinity/bridge-core/stores"
-	bridgeCoreUtils "github.com/axieinfinity/bridge-core/utils"
-	"github.com/axieinfinity/bridge-v2/cmd/utils"
-	"github.com/axieinfinity/bridge-v2/internal/stores"
-	"github.com/axieinfinity/bridge-v2/internal/task"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/go-co-op/gocron"
-	"gopkg.in/urfave/cli.v1"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	bridgeCore "github.com/axieinfinity/bridge-core"
+	bridgeCoreStore "github.com/axieinfinity/bridge-core/stores"
+	bridgeCoreUtils "github.com/axieinfinity/bridge-core/utils"
+	"github.com/axieinfinity/bridge-v2/cmd/utils"
+	"github.com/axieinfinity/bridge-v2/stores"
+	"github.com/axieinfinity/bridge-v2/task"
+	"github.com/ethereum/go-ethereum/log"
+	"github.com/go-co-op/gocron"
+	"gopkg.in/urfave/cli.v1"
 )
 
 var (

@@ -2,11 +2,12 @@ package internal
 
 import (
 	"context"
+
 	bridgeCore "github.com/axieinfinity/bridge-core"
 	bridgeCoreStores "github.com/axieinfinity/bridge-core/stores"
 	"github.com/axieinfinity/bridge-core/utils"
-	"github.com/axieinfinity/bridge-v2/internal/listener"
-	roninTask "github.com/axieinfinity/bridge-v2/internal/task"
+	"github.com/axieinfinity/bridge-v2/listener"
+	roninTask "github.com/axieinfinity/bridge-v2/task"
 	"github.com/ethereum/go-ethereum/log"
 	"gorm.io/gorm"
 )

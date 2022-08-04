@@ -2,21 +2,22 @@ package listener
 
 import (
 	"context"
+	"math/big"
+	"time"
+
 	"github.com/axieinfinity/bridge-contracts/generated_contracts/ethereum/gateway"
 	gateway2 "github.com/axieinfinity/bridge-contracts/generated_contracts/ronin/gateway"
 	bridgeCore "github.com/axieinfinity/bridge-core"
 	bridgeCoreModels "github.com/axieinfinity/bridge-core/models"
 	bridgeCoreStores "github.com/axieinfinity/bridge-core/stores"
 	"github.com/axieinfinity/bridge-core/utils"
-	"github.com/axieinfinity/bridge-v2/internal/models"
-	"github.com/axieinfinity/bridge-v2/internal/stores"
-	"github.com/axieinfinity/bridge-v2/internal/task"
+	"github.com/axieinfinity/bridge-v2/models"
+	"github.com/axieinfinity/bridge-v2/stores"
+	"github.com/axieinfinity/bridge-v2/task"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/log"
-	"math/big"
-	"time"
 )
 
 const oneHour = 3600

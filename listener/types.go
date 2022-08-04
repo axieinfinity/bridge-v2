@@ -2,17 +2,18 @@ package listener
 
 import (
 	"context"
+	"math/big"
+	"time"
+
 	bridgeCore "github.com/axieinfinity/bridge-core"
 	bridgeCoreModels "github.com/axieinfinity/bridge-core/models"
 	"github.com/axieinfinity/bridge-core/utils"
-	"github.com/axieinfinity/bridge-v2/internal/task"
+	"github.com/axieinfinity/bridge-v2/task"
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/log"
-	"math/big"
-	"time"
 )
 
 type EthBlock struct {
