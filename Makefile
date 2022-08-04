@@ -20,3 +20,6 @@ bridge:
 	@echo "Done building."
 	@echo "Run \"bridge\" to launch bridge."
 
+run:
+	@cd cmd/bridge && go run main.go cleaner.go
+	

@@ -3,19 +3,20 @@ package task
 import (
 	"context"
 	"crypto/ecdsa"
+	"math/big"
+	"sync"
+	"time"
+
 	bridgeCore "github.com/axieinfinity/bridge-core"
 	"github.com/axieinfinity/bridge-core/metrics"
 	"github.com/axieinfinity/bridge-core/utils"
-	"github.com/axieinfinity/bridge-v2/internal/models"
-	"github.com/axieinfinity/bridge-v2/internal/stores"
+	"github.com/axieinfinity/bridge-v2/models"
+	"github.com/axieinfinity/bridge-v2/stores"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/log"
 	"gorm.io/gorm"
-	"math/big"
-	"sync"
-	"time"
 )
 
 const (

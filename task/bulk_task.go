@@ -3,17 +3,18 @@ package task
 import (
 	"crypto/ecdsa"
 	"fmt"
-	"github.com/axieinfinity/bridge-v2/internal/stores"
-	"github.com/ethereum/go-ethereum/signer/core"
 	"math/big"
 	"time"
+
+	"github.com/axieinfinity/bridge-v2/stores"
+	"github.com/ethereum/go-ethereum/signer/core"
 
 	"github.com/axieinfinity/bridge-contracts/generated_contracts/ethereum/gateway"
 	roninGateway "github.com/axieinfinity/bridge-contracts/generated_contracts/ronin/gateway"
 	bridgeCore "github.com/axieinfinity/bridge-core"
 	"github.com/axieinfinity/bridge-core/metrics"
 	"github.com/axieinfinity/bridge-core/utils"
-	"github.com/axieinfinity/bridge-v2/internal/models"
+	"github.com/axieinfinity/bridge-v2/models"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
