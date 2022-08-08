@@ -22,6 +22,8 @@ import (
 	"github.com/axieinfinity/bridge-v2/internal/debug"
 	"github.com/ethereum/go-ethereum/log"
 	"gopkg.in/urfave/cli.v1"
+
+	kms "github.com/axieinfinity/ronin-kms-client"
 )
 
 const (
@@ -33,6 +35,30 @@ const (
 	ethereumValidatorKey = "ETHEREUM_VALIDATOR_KEY"
 	ethereumRelayerKey   = "ETHEREUM_RELAYER_KEY"
 	verbosity            = "VERBOSITY"
+
+	roninValidatorKmsKeyTokenPath = "RONIN_VALIDATOR_KMS_KEY_TOKEN_PATH"
+	roninValidatorKmsSslCertPath  = "RONIN_VALIDATOR_KMS_SSL_CERT_PATH"
+	roninValidatorKmsServerAddr   = "RONIN_VALIDATOR_KMS_SERVER_ADDR"
+	roninValidatorKmsSourceAddr   = "RONIN_VALIDATOR_KMS_SOURCE_ADDR"
+	roninValidatorKmsSignTimeout  = "RONIN_VALIDATOR_KMS_SIGN_TIMEOUT"
+
+	roninRelayerKmsKeyTokenPath = "RONIN_RELAYER_KMS_KEY_TOKEN_PATH"
+	roninRelayerKmsSslCertPath  = "RONIN_RELAYER_KMS_SSL_CERT_PATH"
+	roninRelayerKmsServerAddr   = "RONIN_RELAYER_KMS_SERVER_ADDR"
+	roninRelayerKmsSourceAddr   = "RONIN_RELAYER_KMS_SOURCE_ADDR"
+	roninRelayerKmsSignTimeout  = "RONIN_RELAYER_KMS_SIGN_TIMEOUT"
+
+	ethereumValidatorKmsKeyTokenPath = "ETHEREUM_VALIDATOR_KMS_KEY_TOKEN_PATH"
+	ethereumValidatorKmsSslCertPath  = "ETHEREUM_VALIDATOR_KMS_SSL_CERT_PATH"
+	ethereumValidatorKmsServerAddr   = "ETHEREUM_VALIDATOR_KMS_SERVER_ADDR"
+	ethereumValidatorKmsSourceAddr   = "ETHEREUM_VALIDATOR_KMS_SOURCE_ADDR"
+	ethereumValidatorKmsSignTimeout  = "ETHEREUM_VALIDATOR_KMS_SIGN_TIMEOUT"
+
+	ethereumRelayerKmsKeyTokenPath = "ETHEREUM_RELAYER_KMS_KEY_TOKEN_PATH"
+	ethereumRelayerKmsSslCertPath  = "ETHEREUM_RELAYER_KMS_SSL_CERT_PATH"
+	ethereumRelayerKmsServerAddr   = "ETHEREUM_RELAYER_KMS_SERVER_ADDR"
+	ethereumRelayerKmsSourceAddr   = "ETHEREUM_RELAYER_KMS_SOURCE_ADDR"
+	ethereumRelayerKmsSignTimeout  = "ETHEREUM_RELAYER_KMS_SIGN_TIMEOUT"
 
 	roninTaskInterval           = "RONIN_TASK_INTERVAL"
 	roninTransactionCheckPeriod = "RONIN_TRANSACTION_CHECK_PERIOD"
@@ -114,6 +140,21 @@ func setKeyFromEnv(cfg *bridgeCore.Config, isValidator bool, key, network string
 			}
 		}
 	}
+}
+
+func setKmsFromEnv(cfg *bridgeCore.Config, isValidator bool, config *kms.KmsConfig, network string) {
+	if _, ok := cfg.Listeners[network]; ok {
+		if isValidator {
+			cfg.Listeners[network].Secret.Validator = &bridgeCoreUtils.SignMethodConfig{
+				KmsConfig: config,
+			}
+		} else {
+			cfg.Listeners[network].Secret.Relayer = &bridgeCoreUtils.SignMethodConfig{
+				KmsConfig: config,
+			}
+		}
+	}
+
 }
 
 func prepare(ctx *cli.Context) *bridgeCore.Config {
@@ -237,8 +278,34 @@ func checkEnv(cfg *bridgeCore.Config) {
 		}
 
 		setRpcUrlFromEnv(cfg, os.Getenv(roninRpc), RoninNetwork)
-		setKeyFromEnv(cfg, true, os.Getenv(roninValidatorKey), RoninNetwork)
-		setKeyFromEnv(cfg, false, os.Getenv(roninRelayKey), RoninNetwork)
+
+		if os.Getenv(roninValidatorKey) != "" {
+			setKeyFromEnv(cfg, true, os.Getenv(roninValidatorKey), RoninNetwork)
+		} else if os.Getenv(roninValidatorKmsKeyTokenPath) != "" {
+			signTimeout, _ := strconv.Atoi(os.Getenv(roninValidatorKmsSignTimeout))
+			config := &kms.KmsConfig{
+				KeyTokenPath:  os.Getenv(roninValidatorKmsKeyTokenPath),
+				SslCertPath:   os.Getenv(roninValidatorKmsSslCertPath),
+				KmsServerAddr: os.Getenv(roninValidatorKmsServerAddr),
+				KmsSourceAddr: os.Getenv(roninValidatorKmsSourceAddr),
+				SignTimeout:   int64(signTimeout),
+			}
+			setKmsFromEnv(cfg, true, config, RoninNetwork)
+		}
+
+		if os.Getenv(roninRelayKey) != "" {
+			setKeyFromEnv(cfg, false, os.Getenv(roninRelayKey), RoninNetwork)
+		} else if os.Getenv(roninRelayerKmsKeyTokenPath) != "" {
+			signTimeout, _ := strconv.Atoi(os.Getenv(roninRelayerKmsSignTimeout))
+			config := &kms.KmsConfig{
+				KeyTokenPath:  os.Getenv(roninRelayerKmsKeyTokenPath),
+				SslCertPath:   os.Getenv(roninRelayerKmsSslCertPath),
+				KmsServerAddr: os.Getenv(roninRelayerKmsServerAddr),
+				KmsSourceAddr: os.Getenv(roninRelayerKmsSourceAddr),
+				SignTimeout:   int64(signTimeout),
+			}
+			setKmsFromEnv(cfg, false, config, RoninNetwork)
+		}
 	}
 
 	if cfg.Listeners[EthereumNetwork] != nil {
@@ -250,8 +317,34 @@ func checkEnv(cfg *bridgeCore.Config) {
 		}
 
 		setRpcUrlFromEnv(cfg, os.Getenv(ethereumRpc), EthereumNetwork)
-		setKeyFromEnv(cfg, true, os.Getenv(ethereumValidatorKey), EthereumNetwork)
-		setKeyFromEnv(cfg, false, os.Getenv(ethereumRelayerKey), EthereumNetwork)
+
+		if os.Getenv(ethereumValidatorKey) != "" {
+			setKeyFromEnv(cfg, true, os.Getenv(ethereumValidatorKey), EthereumNetwork)
+		} else if os.Getenv(ethereumValidatorKmsKeyTokenPath) != "" {
+			signTimeout, _ := strconv.Atoi(os.Getenv(ethereumValidatorKmsSignTimeout))
+			config := &kms.KmsConfig{
+				KeyTokenPath:  os.Getenv(ethereumValidatorKmsKeyTokenPath),
+				SslCertPath:   os.Getenv(ethereumValidatorKmsSslCertPath),
+				KmsServerAddr: os.Getenv(ethereumValidatorKmsServerAddr),
+				KmsSourceAddr: os.Getenv(ethereumValidatorKmsSourceAddr),
+				SignTimeout:   int64(signTimeout),
+			}
+			setKmsFromEnv(cfg, true, config, EthereumNetwork)
+		}
+
+		if os.Getenv(ethereumRelayerKey) != "" {
+			setKeyFromEnv(cfg, false, os.Getenv(ethereumRelayerKey), EthereumNetwork)
+		} else if os.Getenv(ethereumRelayerKmsKeyTokenPath) != "" {
+			signTimeout, _ := strconv.Atoi(os.Getenv(ethereumRelayerKmsSignTimeout))
+			config := &kms.KmsConfig{
+				KeyTokenPath:  os.Getenv(ethereumRelayerKmsKeyTokenPath),
+				SslCertPath:   os.Getenv(ethereumRelayerKmsSslCertPath),
+				KmsServerAddr: os.Getenv(ethereumRelayerKmsServerAddr),
+				KmsSourceAddr: os.Getenv(ethereumRelayerKmsSourceAddr),
+				SignTimeout:   int64(signTimeout),
+			}
+			setKmsFromEnv(cfg, false, config, EthereumNetwork)
+		}
 	}
 
 	// clean key
