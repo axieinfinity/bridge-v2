@@ -82,10 +82,10 @@ func NewRoninTask(listener bridgeCore.Listener, db *gorm.DB, util utils.Utils) (
 		maxProcessingTasks: defaultMaxProcessingTasks,
 	}
 	if config.TaskInterval > 0 {
-		task.taskInterval = config.TaskInterval * time.Second
+		task.taskInterval = config.TaskInterval
 	}
 	if config.TransactionCheckPeriod > 0 {
-		task.txCheckInterval = config.TransactionCheckPeriod * time.Second
+		task.txCheckInterval = config.TransactionCheckPeriod
 	}
 	if config.MaxTasksQuery > 0 {
 		task.limitQuery = config.MaxTasksQuery
