@@ -91,7 +91,7 @@ func (r *bulkTask) sendBulkTransactions(sendTxs func(tasks []*models.Task) (done
 
 		if transaction != nil {
 			go updateTasks(r.store, processingTasks, STATUS_PROCESSING, transaction.Hash().Hex(), time.Now().Unix(), r.releaseTasksCh)
-			metrics.Pusher.IncrCounter(metrics.ProcessingTaskMetric, 1)
+			metrics.Pusher.IncrGauge(metrics.ProcessingTaskMetric, 1)
 		}
 		go updateTasks(r.store, doneTasks, STATUS_DONE, txHash, 0, r.releaseTasksCh)
 		go updateTasks(r.store, failedTasks, STATUS_FAILED, txHash, 0, r.releaseTasksCh)

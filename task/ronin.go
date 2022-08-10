@@ -227,7 +227,7 @@ func (r *RoninTask) checkProcessingTasks() error {
 
 	var wg sync.WaitGroup
 	wg.Add(len(tasks))
-	metrics.Pusher.IncrCounter(metrics.ProcessingTaskMetric, -len(tasks))
+	metrics.Pusher.IncrGauge(metrics.ProcessingTaskMetric, -len(tasks))
 	for _, t := range tasks {
 		if _, ok := processedTx[t.TransactionHash]; ok {
 			wg.Done()
