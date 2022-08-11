@@ -2,7 +2,6 @@ package task
 
 import (
 	"context"
-	"crypto/ecdsa"
 	"math/big"
 	"sync"
 	"time"
@@ -25,12 +24,6 @@ const (
 	defaultMaxProcessingTasks = 200
 )
 
-type IEthListener interface {
-	bridgeCore.Listener
-	GetValidatorKey() *ecdsa.PrivateKey
-	GetRelayerKey() *ecdsa.PrivateKey
-}
-
 var (
 	defaultTaskInterval = 10 * time.Second
 	defaultReceiptCheck = 50 * time.Second
@@ -51,9 +44,6 @@ type RoninTask struct {
 
 	client    *ethclient.Client
 	contracts map[string]string
-
-	validator *ecdsa.PrivateKey
-	relayer   *ecdsa.PrivateKey
 
 	limitQuery int
 	chainId    *big.Int
@@ -87,17 +77,15 @@ func NewRoninTask(listener bridgeCore.Listener, db *gorm.DB, util utils.Utils) (
 		client:             client,
 		chainId:            chainId,
 		util:               util,
-		validator:          listener.(IEthListener).GetValidatorKey(),
-		relayer:            listener.(IEthListener).GetRelayerKey(),
 		limitQuery:         defaultLimitRecords,
 		releaseTasksCh:     make(chan int, defaultLimitRecords),
 		maxProcessingTasks: defaultMaxProcessingTasks,
 	}
 	if config.TaskInterval > 0 {
-		task.taskInterval = config.TaskInterval * time.Second
+		task.taskInterval = config.TaskInterval
 	}
 	if config.TransactionCheckPeriod > 0 {
-		task.txCheckInterval = config.TransactionCheckPeriod * time.Second
+		task.txCheckInterval = config.TransactionCheckPeriod
 	}
 	if config.MaxTasksQuery > 0 {
 		task.limitQuery = config.MaxTasksQuery
@@ -185,9 +173,9 @@ func (r *RoninTask) processPending() error {
 	}
 	metrics.Pusher.IncrCounter(metrics.PendingTaskMetric, len(tasks))
 
-	bulkDepositTask := newBulkTask(r.listener, r.client, r.store, r.chainId, r.validator, r.contracts, r.txCheckInterval, defaultMaxTry, DEPOSIT_TASK, r.releaseTasksCh, r.util)
-	bulkSubmitWithdrawalSignaturesTask := newBulkTask(r.listener, r.client, r.store, r.chainId, r.validator, r.contracts, r.txCheckInterval, defaultMaxTry, WITHDRAWAL_TASK, r.releaseTasksCh, r.util)
-	ackWithdrewTasks := newBulkTask(r.listener, r.client, r.store, r.chainId, r.validator, r.contracts, r.txCheckInterval, defaultMaxTry, ACK_WITHDREW_TASK, r.releaseTasksCh, r.util)
+	bulkDepositTask := newBulkTask(r.listener, r.client, r.store, r.chainId, r.contracts, r.txCheckInterval, defaultMaxTry, DEPOSIT_TASK, r.releaseTasksCh, r.util)
+	bulkSubmitWithdrawalSignaturesTask := newBulkTask(r.listener, r.client, r.store, r.chainId, r.contracts, r.txCheckInterval, defaultMaxTry, WITHDRAWAL_TASK, r.releaseTasksCh, r.util)
+	ackWithdrewTasks := newBulkTask(r.listener, r.client, r.store, r.chainId, r.contracts, r.txCheckInterval, defaultMaxTry, ACK_WITHDREW_TASK, r.releaseTasksCh, r.util)
 
 	for _, task := range tasks {
 		// lock task
@@ -239,7 +227,7 @@ func (r *RoninTask) checkProcessingTasks() error {
 
 	var wg sync.WaitGroup
 	wg.Add(len(tasks))
-	metrics.Pusher.IncrCounter(metrics.ProcessingTaskMetric, -len(tasks))
+	metrics.Pusher.IncrGauge(metrics.ProcessingTaskMetric, -len(tasks))
 	for _, t := range tasks {
 		if _, ok := processedTx[t.TransactionHash]; ok {
 			wg.Done()

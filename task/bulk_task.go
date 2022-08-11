@@ -20,7 +20,6 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/common/math"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/log"
 )
@@ -39,12 +38,11 @@ type bulkTask struct {
 	releaseTasksCh chan int
 }
 
-func newBulkTask(listener bridgeCore.Listener, client *ethclient.Client, store stores.BridgeStore, chainId *big.Int, validator *ecdsa.PrivateKey, contracts map[string]string, ticker time.Duration, maxTry int, taskType string, releaseTasksCh chan int, util utils.Utils) *bulkTask {
+func newBulkTask(listener bridgeCore.Listener, client *ethclient.Client, store stores.BridgeStore, chainId *big.Int, contracts map[string]string, ticker time.Duration, maxTry int, taskType string, releaseTasksCh chan int, util utils.Utils) *bulkTask {
 	return &bulkTask{
 		util:           util,
 		tasks:          make([]*models.Task, 0),
 		store:          store,
-		validator:      validator,
 		client:         client,
 		contracts:      contracts,
 		chainId:        chainId,
@@ -93,7 +91,7 @@ func (r *bulkTask) sendBulkTransactions(sendTxs func(tasks []*models.Task) (done
 
 		if transaction != nil {
 			go updateTasks(r.store, processingTasks, STATUS_PROCESSING, transaction.Hash().Hex(), time.Now().Unix(), r.releaseTasksCh)
-			metrics.Pusher.IncrCounter(metrics.ProcessingTaskMetric, 1)
+			metrics.Pusher.IncrGauge(metrics.ProcessingTaskMetric, 1)
 		}
 		go updateTasks(r.store, doneTasks, STATUS_DONE, txHash, 0, r.releaseTasksCh)
 		go updateTasks(r.store, failedTasks, STATUS_FAILED, txHash, 0, r.releaseTasksCh)
@@ -175,7 +173,7 @@ func (r *bulkTask) sendDepositTransaction(tasks []*models.Task) (doneTasks, proc
 	metrics.Pusher.IncrCounter(metrics.DepositTaskMetric, len(tasks))
 
 	if len(receipts) > 0 {
-		tx, err = r.util.SendContractTransaction(r.validator, r.chainId, func(opts *bind.TransactOpts) (*ethtypes.Transaction, error) {
+		tx, err = r.util.SendContractTransaction(r.listener.GetValidatorSign(), r.chainId, func(opts *bind.TransactOpts) (*ethtypes.Transaction, error) {
 			return transactor.TryBulkDepositFor(opts, receipts)
 		})
 		if err != nil {
@@ -246,7 +244,7 @@ func (r *bulkTask) sendWithdrawalSignaturesTransaction(tasks []*models.Task) (do
 	metrics.Pusher.IncrCounter(metrics.WithdrawalTaskMetric, len(tasks))
 
 	if len(ids) > 0 {
-		tx, err = r.util.SendContractTransaction(r.validator, r.chainId, func(opts *bind.TransactOpts) (*ethtypes.Transaction, error) {
+		tx, err = r.util.SendContractTransaction(r.listener.GetValidatorSign(), r.chainId, func(opts *bind.TransactOpts) (*ethtypes.Transaction, error) {
 			return transactor.BulkSubmitWithdrawalSignatures(opts, ids, signatures)
 		})
 		if err != nil {
@@ -312,7 +310,7 @@ func (r *bulkTask) sendAckTransactions(tasks []*models.Task) (doneTasks, process
 
 	metrics.Pusher.IncrCounter(metrics.AckWithdrawalTaskMetric, len(tasks))
 	if len(ids) > 0 {
-		tx, err = r.util.SendContractTransaction(r.validator, r.chainId, func(opts *bind.TransactOpts) (*ethtypes.Transaction, error) {
+		tx, err = r.util.SendContractTransaction(r.listener.GetValidatorSign(), r.chainId, func(opts *bind.TransactOpts) (*ethtypes.Transaction, error) {
 			return transactor.TryBulkAcknowledgeMainchainWithdrew(opts, ids)
 		})
 		if err != nil {
@@ -353,7 +351,7 @@ func (r *bulkTask) validateDepositTask(caller *roninGateway.GatewayCaller, task 
 	}
 
 	// check if current validator has been voted for this deposit or not
-	voted, err := caller.DepositVoted(nil, ethEvent.Receipt.Mainchain.ChainId, ethEvent.Receipt.Id, crypto.PubkeyToAddress(r.validator.PublicKey))
+	voted, err := caller.DepositVoted(nil, ethEvent.Receipt.Mainchain.ChainId, ethEvent.Receipt.Id, r.listener.GetValidatorSign().GetAddress())
 	if err != nil {
 		return false, ethEvent.Receipt, err
 	}
@@ -387,7 +385,7 @@ func (r *bulkTask) validateAckWithdrawalTask(caller *roninGateway.GatewayCaller,
 	}
 
 	// check if withdrew has been voted or not
-	voted, err := caller.MainchainWithdrewVoted(nil, ethEvent.Receipt.Id, crypto.PubkeyToAddress(r.validator.PublicKey))
+	voted, err := caller.MainchainWithdrewVoted(nil, ethEvent.Receipt.Id, r.listener.GetValidatorSign().GetAddress())
 	if err != nil {
 		return false, nil, err
 	}
@@ -502,5 +500,5 @@ func (r *bulkTask) signWithdrawalSignatures(receipt roninGateway.TransferReceipt
 			},
 		},
 	}
-	return r.util.SignTypedData(typedData, r.validator)
+	return r.util.SignTypedData(typedData, r.listener.GetValidatorSign())
 }

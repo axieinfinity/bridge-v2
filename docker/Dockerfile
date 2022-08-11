@@ -41,7 +41,6 @@ ENV CLEANER ''
 
 COPY --from=builder /go/bin/bridge /usr/local/bin/bridge
 COPY --from=builder /opt/config/ ./
-COPY --from=builder /opt/contracts ./contracts
 COPY --from=builder /opt/docker/entrypoint.sh ./
 
 ENTRYPOINT ["./entrypoint.sh"]

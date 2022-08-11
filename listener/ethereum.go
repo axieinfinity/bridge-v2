@@ -2,7 +2,6 @@ package listener
 
 import (
 	"context"
-	"crypto/ecdsa"
 	"errors"
 	"fmt"
 	"math/big"
@@ -15,10 +14,10 @@ import (
 	bridgeCoreModels "github.com/axieinfinity/bridge-core/models"
 	"github.com/axieinfinity/bridge-core/stores"
 	"github.com/axieinfinity/bridge-core/utils"
+	bridgeCoreUtils "github.com/axieinfinity/bridge-core/utils"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/log"
 )
 
@@ -40,8 +39,8 @@ type EthereumListener struct {
 	batches        sync.Map
 	utilsWrapper   utils.Utils
 	client         utils.EthClient
-	validatorKey   *ecdsa.PrivateKey
-	relayerKey     *ecdsa.PrivateKey
+	validatorSign  bridgeCoreUtils.ISign
+	relayerSign    bridgeCoreUtils.ISign
 	store          stores.MainStore
 
 	prepareJobChan chan bridgeCore.JobHandler
@@ -73,15 +72,16 @@ func NewEthereumListener(ctx context.Context, cfg *bridgeCore.LsConfig, helpers 
 		return nil, err
 	}
 	ethListener.client = client
-	if cfg.Secret.Validator != "" {
-		ethListener.validatorKey, err = crypto.HexToECDSA(cfg.Secret.Validator)
+
+	if cfg.Secret.Validator != nil {
+		ethListener.validatorSign, err = bridgeCoreUtils.NewSignMethod(cfg.Secret.Validator)
 		if err != nil {
 			log.Error(fmt.Sprintf("[New%sListener] error while getting validator key", cfg.Name), "err", err)
 			return nil, err
 		}
 	}
-	if cfg.Secret.Relayer != "" {
-		ethListener.relayerKey, err = crypto.HexToECDSA(cfg.Secret.Relayer)
+	if cfg.Secret.Relayer != nil {
+		ethListener.relayerSign, err = bridgeCoreUtils.NewSignMethod(cfg.Secret.Relayer)
 		if err != nil {
 			log.Error(fmt.Sprintf("[New%sListener] error while getting relayer key", cfg.Name), "err", err)
 			return nil, err
@@ -229,14 +229,6 @@ func (e *EthereumListener) UpdateCurrentBlock(block bridgeCore.Block) error {
 	return nil
 }
 
-func (e *EthereumListener) GetValidatorKey() *ecdsa.PrivateKey {
-	return e.validatorKey
-}
-
-func (e *EthereumListener) GetRelayerKey() *ecdsa.PrivateKey {
-	return e.relayerKey
-}
-
 func (e *EthereumListener) SaveCurrentBlockToDB() error {
 	chainId, err := e.GetChainID()
 	if err != nil {
@@ -376,4 +368,12 @@ func newJobFromDB(listener bridgeCore.Listener, job *bridgeCoreModels.Job) (brid
 func (e *EthereumListener) Close() {
 	e.client.Close()
 	e.cancelCtx()
+}
+
+func (e *EthereumListener) GetValidatorSign() bridgeCoreUtils.ISign {
+	return e.validatorSign
+}
+
+func (e *EthereumListener) GetRelayerSign() bridgeCoreUtils.ISign {
+	return e.relayerSign
 }

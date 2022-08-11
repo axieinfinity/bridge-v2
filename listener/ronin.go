@@ -16,7 +16,6 @@ import (
 	"github.com/axieinfinity/bridge-v2/task"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/log"
 )
 
@@ -174,7 +173,7 @@ func (l *RoninListener) DepositRequestedCallback(fromChainId *big.Int, tx bridge
 	}
 
 	// check if current validator has been voted for this deposit or not
-	voted, err := caller.DepositVoted(nil, ethEvent.Receipt.Mainchain.ChainId, ethEvent.Receipt.Id, crypto.PubkeyToAddress(l.validatorKey.PublicKey))
+	voted, err := caller.DepositVoted(nil, ethEvent.Receipt.Mainchain.ChainId, ethEvent.Receipt.Id, l.GetValidatorSign().GetAddress())
 	if err != nil {
 		return err
 	}

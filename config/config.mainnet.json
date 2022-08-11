@@ -10,8 +10,18 @@
       "taskInterval": 10,
       "transactionCheckPeriod": 50,
       "secret": {
-        "validator": "",
-        "relayer": ""
+        "validator": {
+          "kmsConfig": {
+            "keyTokenPath": "./key",
+            "sslCertPath": "./ssl.crt",
+            "kmsServerAddr": "127.0.0.1:1234",
+            "kmsSourceAddr": ":5000",
+            "signTimeout": 3000
+          }
+        },
+        "relayer": {
+          "plainPrivateKey": ""
+        }
       },
       "fromHeight": 14763470,
       "processWithinBlocks": 864000,
@@ -64,8 +74,18 @@
       "transactionCheckPeriod": 15,
       "getLogsBatchSize": 200,
       "secret": {
-        "validator": "",
-        "relayer": ""
+        "validator": {
+          "kmsConfig": {
+            "keyTokenPath": "./key",
+            "sslCertPath": "./ssl.crt",
+            "kmsServerAddr": "127.0.0.1:1234",
+            "kmsSourceAddr": ":6000",
+            "signTimeout": 3000
+          }
+        },
+        "relayer": {
+          "plainPrivateKey": ""
+        }
       },
       "fromHeight": 15006540,
       "processWithinBlocks": 198720,
