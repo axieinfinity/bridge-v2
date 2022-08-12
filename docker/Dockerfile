@@ -1,10 +1,15 @@
-# Build Geth in a stock Go builder container
-FROM golang:1.17.0-alpine3.13 as builder
+#syntax=docker/dockerfile:experimental
+#-----------------------------------------------
+FROM golang:1.17-buster as builder
 
-RUN apk add --no-cache make gcc musl-dev linux-headers git
+ENV GO111MODULE=on
+ENV GOPRIVATE="github.com/axieinfinity/*"
+
+RUN git config --global url."git@github.com:".insteadOf "https://github.com/"
+RUN mkdir -p -m 0600 ~/.ssh && ssh-keyscan github.com >> ~/.ssh/known_hosts
 
 COPY . /opt
-RUN cd /opt && make bridge
+RUN --mount=type=ssh,mode=741,uid=100,gid=102 cd /opt && make bridge
 
 FROM alpine:3.15
 
