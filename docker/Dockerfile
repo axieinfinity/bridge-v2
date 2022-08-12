@@ -1,7 +1,8 @@
 #syntax=docker/dockerfile:experimental
 #-----------------------------------------------
-FROM golang:1.17-buster as builder
+FROM gcr.io/test-servers-256610/ronin_ronin-base-image:base-image-0c47779be as builder
 
+WORKDIR /opt
 ENV GO111MODULE=on
 ENV GOPRIVATE="github.com/axieinfinity/*"
 
