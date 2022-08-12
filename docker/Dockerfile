@@ -3,14 +3,15 @@
 FROM gcr.io/test-servers-256610/ronin_ronin-base-image:base-image-0c47779be as builder
 
 WORKDIR /opt
+
 ENV GO111MODULE=on
 ENV GOPRIVATE="github.com/axieinfinity/*"
 
 RUN git config --global url."git@github.com:".insteadOf "https://github.com/"
 RUN mkdir -p -m 0600 ~/.ssh && ssh-keyscan github.com >> ~/.ssh/known_hosts
 
-COPY . /opt
-RUN --mount=type=ssh,mode=741,uid=100,gid=102 cd /opt && make bridge
+COPY . /opt/bridge
+RUN --mount=type=ssh,mode=741,uid=100,gid=102 cd bridge && make bridge
 
 FROM alpine:3.15
 
