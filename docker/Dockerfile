@@ -1,10 +1,17 @@
-# Build Geth in a stock Go builder container
-FROM golang:1.17.0-alpine3.13 as builder
+#syntax=docker/dockerfile:experimental
+#-----------------------------------------------
+FROM gcr.io/test-servers-256610/ronin_ronin-base-image:base-image-0c47779be as builder
 
-RUN apk add --no-cache make gcc musl-dev linux-headers git
+WORKDIR /opt
 
-COPY . /opt
-RUN cd /opt && make bridge
+ENV GO111MODULE=on
+ENV GOPRIVATE="github.com/axieinfinity/*"
+
+RUN git config --global url."git@github.com:".insteadOf "https://github.com/"
+RUN mkdir -p -m 0600 ~/.ssh && ssh-keyscan github.com >> ~/.ssh/known_hosts
+
+COPY . /opt/bridge
+RUN --mount=type=ssh,mode=741,uid=100,gid=102 cd bridge && make bridge
 
 FROM alpine:3.15
 
@@ -40,7 +47,7 @@ ENV DB_MAX_OPEN_CONNS ''
 ENV CLEANER ''
 
 COPY --from=builder /go/bin/bridge /usr/local/bin/bridge
-COPY --from=builder /opt/config/ ./
-COPY --from=builder /opt/docker/entrypoint.sh ./
+COPY --from=builder /opt/bridge/config/ ./
+COPY --from=builder /opt/bridge/docker/entrypoint.sh ./
 
 ENTRYPOINT ["./entrypoint.sh"]
