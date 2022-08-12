@@ -47,7 +47,7 @@ ENV DB_MAX_OPEN_CONNS ''
 ENV CLEANER ''
 
 COPY --from=builder /go/bin/bridge /usr/local/bin/bridge
-COPY --from=builder /opt/config/ ./
-COPY --from=builder /opt/docker/entrypoint.sh ./
+COPY --from=builder /opt/bridge/config/ ./
+COPY --from=builder /opt/bridge/docker/entrypoint.sh ./
 
 ENTRYPOINT ["./entrypoint.sh"]
