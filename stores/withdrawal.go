@@ -3,6 +3,7 @@ package stores
 import (
 	"github.com/axieinfinity/bridge-v2/models"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type withdrawalStore struct {
@@ -14,7 +15,7 @@ func NewWithdrawalStore(db *gorm.DB) WithdrawalStore {
 }
 
 func (w *withdrawalStore) Save(withdraw *models.Withdrawal) error {
-	return w.Create(withdraw).Error
+	return w.Clauses(clause.OnConflict{DoNothing: true}).Create(withdraw).Error
 }
 
 func (w *withdrawalStore) Update(withdraw *models.Withdrawal) error {
