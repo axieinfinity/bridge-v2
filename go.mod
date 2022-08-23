@@ -23,13 +23,13 @@ require (
 
 require (
 	github.com/axieinfinity/bridge-contracts v0.0.0-20220731110242-d273b578b657
-	github.com/axieinfinity/bridge-migrations v0.0.0-20220803051308-adab1cd1bcca
 	github.com/axieinfinity/ronin-kms-client v0.0.0-20220805072849-960e04981b70
 )
 
 require (
 	github.com/VictoriaMetrics/fastcache v1.10.0 // indirect
-	github.com/axieinfinity/bridge-core v0.0.2-0.20220811064506-9d6ea6eac174 // indirect
+	github.com/axieinfinity/bridge-core v0.0.2-0.20220823035850-c7ef3424a11b // indirect
+	github.com/axieinfinity/bridge-migrations v0.0.0-20220803051308-adab1cd1bcca // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/btcsuite/btcd v0.20.1-beta // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
