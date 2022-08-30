@@ -5,7 +5,6 @@ replace github.com/ethereum/go-ethereum => ../ronin
 go 1.17
 
 require (
-	github.com/ethereum/go-ethereum v1.10.21
 	github.com/fjl/memsize v0.0.0-20190710130421-bcb5799ab5e5
 	github.com/go-co-op/gocron v1.13.0
 	github.com/hashicorp/go-bexpr v0.1.10
@@ -23,13 +22,14 @@ require (
 
 require (
 	github.com/axieinfinity/bridge-contracts v0.0.0-20220731110242-d273b578b657
+	github.com/axieinfinity/bridge-core v0.0.2-0.20220830044851-02cce8eb15b9
+	github.com/axieinfinity/bridge-migrations v0.0.0-20220803051308-adab1cd1bcca
 	github.com/axieinfinity/ronin-kms-client v0.0.0-20220805072849-960e04981b70
+	github.com/ethereum/go-ethereum v1.10.21
 )
 
 require (
 	github.com/VictoriaMetrics/fastcache v1.10.0 // indirect
-	github.com/axieinfinity/bridge-core v0.0.2-0.20220830044851-02cce8eb15b9 // indirect
-	github.com/axieinfinity/bridge-migrations v0.0.0-20220803051308-adab1cd1bcca // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/btcsuite/btcd v0.20.1-beta // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
