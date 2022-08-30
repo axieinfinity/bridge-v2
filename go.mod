@@ -22,7 +22,7 @@ require (
 
 require (
 	github.com/axieinfinity/bridge-contracts v0.0.0-20220731110242-d273b578b657
-	github.com/axieinfinity/bridge-core v0.0.2-0.20220830044851-02cce8eb15b9
+	github.com/axieinfinity/bridge-core v0.0.2-0.20220830070452-846a10849354
 	github.com/axieinfinity/bridge-migrations v0.0.0-20220803051308-adab1cd1bcca
 	github.com/axieinfinity/ronin-kms-client v0.0.0-20220805072849-960e04981b70
 	github.com/ethereum/go-ethereum v1.10.21
