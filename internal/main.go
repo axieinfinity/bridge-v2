@@ -2,8 +2,10 @@ package internal
 
 import (
 	"context"
+	"fmt"
 
 	bridgeCore "github.com/axieinfinity/bridge-core"
+	"github.com/axieinfinity/bridge-core/metrics"
 	bridgeCoreStores "github.com/axieinfinity/bridge-core/stores"
 	"github.com/axieinfinity/bridge-core/utils"
 	"github.com/axieinfinity/bridge-v2/listener"
@@ -32,6 +34,7 @@ func InitEthereum(ctx context.Context, lsConfig *bridgeCore.LsConfig, store brid
 		log.Error("[EthereumListener]Error while init new ethereum listener", "err", err)
 		return nil
 	}
+	metrics.Pusher.AddCounter(fmt.Sprintf(metrics.ListenerProcessedBlockMetric, ethListener.GetName()), "count number of processed block in ethereum listener")
 	return ethListener
 }
 
@@ -41,6 +44,8 @@ func InitRonin(ctx context.Context, lsConfig *bridgeCore.LsConfig, store bridgeC
 		log.Error("[RoninListener]Error while init new ronin listener", "err", err)
 		return nil
 	}
+	metrics.Pusher.AddCounter(fmt.Sprintf(metrics.ListenerProcessedBlockMetric, roninListener.GetName()), "count number of processed block in ethereum listener")
+
 	task, err := roninTask.NewRoninTask(roninListener, store.GetDB(), helpers)
 	if err != nil {
 		log.Error("[RoninListener][InitRonin] Error while adding new task", "err", err)
