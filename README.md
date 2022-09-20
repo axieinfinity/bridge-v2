@@ -70,6 +70,32 @@ period of checking whether a transaction is mined or not by querying its transac
 stores private key of validator and relayer. These fields can be empty and passed via environment variables through 2 variables: `RONIN_VALIDATOR_KEY`, `RONIN_RELAYER_KEY` and Ethereum are: `ETHEREUM_VALIDATOR_KEY`, `ETHEREUM_RELAYER_KEY`
 ##### syntax: `<key>`
 ##### example: `xxxx4563e6591c1eba4b932a3513006cb5bcd1a6f69c32295dxxxx`
+if KMS is used, set these environments
+ - `RONIN_VALIDATOR_KMS_KEY_TOKEN_PATH`
+ - `RONIN_VALIDATOR_KMS_SSL_CERT_PATH`
+ - `RONIN_VALIDATOR_KMS_SERVER_ADDR`
+ - `RONIN_VALIDATOR_KMS_SOURCE_ADDR`
+ - `RONIN_VALIDATOR_KMS_SIGN_TIMEOUT`
+
+replace `RONIN` with `ETHEREUM`, `VALIDATOR` with `RELAYER` when needed
+
+format in config file
+```json
+"secret": {
+  "validator": {
+    "kmsConfig": {
+      "keyTokenPath": "./key",
+      "sslCertPath": "./ssl.crt",
+      "kmsServerAddr": "127.0.0.1:1234",
+      "kmsSourceAddr": ":5000",
+      "signTimeout": 3000
+    }
+  },
+  "relayer": {
+    "plainPrivateKey": ""
+  }
+}
+```
 
 #### 8. fromHeight
 Initially, bridge uses this property to load data from this block. After that, bridge will store latest processed block into `processed_block` table and use value from this table to continue.
