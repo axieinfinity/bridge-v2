@@ -13,9 +13,11 @@ RUN mkdir -p -m 0600 ~/.ssh && ssh-keyscan github.com >> ~/.ssh/known_hosts
 COPY . /opt/bridge
 RUN --mount=type=ssh,mode=741,uid=100,gid=102 cd bridge && make bridge
 
-FROM alpine:3.15
+FROM debian:buster
 
-RUN apk add --no-cache ca-certificates
+RUN apt-get update  && apt-get install -y --no-install-recommends ca-certificates
+RUN update-ca-certificates
+
 WORKDIR "/opt"
 
 ENV CONFIG_PATH ''
