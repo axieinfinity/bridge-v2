@@ -11,13 +11,7 @@
       "transactionCheckPeriod": 50,
       "secret": {
         "validator": {
-          "kmsConfig": {
-            "keyTokenPath": "./key",
-            "sslCertPath": "./ssl.crt",
-            "kmsServerAddr": "127.0.0.1:1234",
-            "kmsSourceAddr": ":5000",
-            "signTimeout": 3000
-          }
+          "plainPrivateKey": ""
         },
         "relayer": {
           "plainPrivateKey": ""
@@ -75,13 +69,7 @@
       "getLogsBatchSize": 200,
       "secret": {
         "validator": {
-          "kmsConfig": {
-            "keyTokenPath": "./key",
-            "sslCertPath": "./ssl.crt",
-            "kmsServerAddr": "127.0.0.1:1234",
-            "kmsSourceAddr": ":6000",
-            "signTimeout": 3000
-          }
+          "plainPrivateKey": ""
         },
         "relayer": {
           "plainPrivateKey": ""
