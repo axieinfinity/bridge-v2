@@ -61,7 +61,7 @@
     },
     "Ethereum": {
       "disabled": false,
-      "chainId": "0x3",
+      "chainId": "0x5",
       "rpcUrl": "",
       "blockTime": 15,
       "safeBlockRange": 8,
