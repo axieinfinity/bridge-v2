@@ -31,15 +31,9 @@ then run bridge with
 bridge --config <path-to-config>
 ```
 
-to run cleaner, use `cleaner` command
-
-```
-bridge cleaner --config <path-to-config>
-```
-
 ## Configuration
 
-Config file can be found in `config` directory. There are 3 main components in configuration: listeners, database and cleaner
+Config file can be found in `config` directory. There are 3 main components in configuration: listeners and database
 
 ### Listeners
 List all chains that bridge is listening to. Each name reflects to a specific function defined [here](https://github.com/axieinfinity/bridge-v2/blob/master/internal/init_listeners.go).
@@ -147,25 +141,3 @@ Database configuration is defined within key `database`. Basic properties includ
 }
 ```
 
-### Cleaner
-
-cleaner configuration indicates time to clean data from database. It is defined within key `cleaner`, it is the map where key is the function name and the value is the config for this function.
-
-```json
-{
-  "cleaner": {
-    "ClearSuccessTasks": {
-      "cron": "0 0 1 * *",
-      "removeAfter": 7776000,
-      "skipIfLessThan": 1000,
-      "description": "triggered at 00:00 on day-of-month 1"
-    }
-  }
-}
-```
-
-Above sample will trigger `ExecClearSuccessTasks` function and start cleaning data every first day of month.
-- cron: cron job
-- removeAfter: delete data that is created before this time, 7776000 (seconds) is 90 days
-- skipIfLessThan: skip cleaning data if there is less than 1000 records left over
-- description: describe the task.
