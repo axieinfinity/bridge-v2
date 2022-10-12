@@ -22,4 +22,3 @@ bridge:
 
 run:
 	@cd cmd/bridge && go run main.go
-	
