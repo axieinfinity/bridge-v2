@@ -46,8 +46,6 @@ ENV DB_CONN_MAX_LIFE_TIME ''
 ENV DB_MAX_IDLE_CONNS ''
 ENV DB_MAX_OPEN_CONNS ''
 
-ENV CLEANER ''
-
 COPY --from=builder /go/bin/bridge /usr/local/bin/bridge
 COPY --from=builder /opt/bridge/config/ ./
 COPY --from=builder /opt/bridge/docker/entrypoint.sh ./

@@ -107,9 +107,6 @@ func init() {
 		debug.Exit()
 		return nil
 	}
-	app.Commands = []cli.Command{
-		cleanerCommand,
-	}
 
 	adapters.New()
 }
