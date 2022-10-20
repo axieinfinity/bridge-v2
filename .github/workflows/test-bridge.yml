@@ -1,0 +1,19 @@
+name: 'Testing Bridge'
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to run tests against'
+        required: true
+        type: choice
+        default: 'staging'
+        options:
+        - staging
+jobs:
+  qa:
+    uses: axieinfinity/workflows-samples/.github/workflows/qa-automation.yml@main
+    with:
+      mvn_options: '-Dtags=regression:bridge'
+      checkout_repository: 'axieinfinity/qa-automation'
+    secrets: inherit
