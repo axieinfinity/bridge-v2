@@ -13,6 +13,8 @@ abigen:
 	abigen --abi=./contracts/common/BridgeAdmin.abi --pkg=common --out=generated_contracts/ronin/common/bridge_admin.go
 	abigen --abi=./contracts/ethereum/MainchainGatewayV2.abi --pkg=gateway --out=./generated_contracts/ethereum/gateway/mainchain_gateway_v2.go
 	abigen --abi=./contracts/ronin/RoninGatewayV2.abi --pkg=gateway --out=./generated_contracts/ronin/gateway/ronin_gateway_v2.go
+	abigen --abi=./contracts/ronin/RoninTrustedOrganization.abi --pkg=gateway --out=./generated_contracts/ronin/trusted_org/ronin_trusted_org.go
+	abigen --abi=./contracts/ronin/RoninGovernanceAdmin.abi --pkg=gateway --out=./generated_contracts/ronin/governance/ronin_governance_admin.go
 	abigen --abi=./contracts/common/RoninValidator.abi --pkg=validator --out=./generated_contracts/ronin/validator/ronin_validator.go
 
 bridge:
