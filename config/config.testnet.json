@@ -21,7 +21,10 @@
       "processWithinBlocks": 864000,
       "contracts": {
         "Gateway": "0xA8D61A5427a778be28Bd9bb5990956b33385c738",
-        "EthGateway": "0xb68cbBDd4C7b3e4e39C035Bd356FC5BDb7E2a50E"
+        "EthGateway": "0xb68cbBDd4C7b3e4e39C035Bd356FC5BDb7E2a50E",
+        "Governance": "",
+        "EthGovernance": "",
+        "TrustedOrgs": ""
       },
       "subscriptions": {
         "MainchainWithdrewSubscription": {

@@ -216,9 +216,10 @@ func (l *RoninListener) BridgeOperatorsUpdatedCallback(fromChainId *big.Int, tx 
 	if err = ronGatewayAbi.UnpackIntoInterface(ronEvent, "BridgeOperatorsUpdated", data); err != nil {
 		return err
 	}
+	log.Debug("[RoninListener][BridgeOperatorsUpdatedCallback] Unpack data into BridgeOperatorsUpdated", "ronEvent", ronEvent)
 
 	// create caller
-	transactor, err := governance2.NewGatewayTransactor(common.HexToAddress(l.config.Contracts[task.GATEWAY_CONTRACT]), l.client)
+	transactor, err := governance2.NewGatewayTransactor(common.HexToAddress(l.config.Contracts[task.GOVERNANCE_CONTRACT]), l.client)
 	if err != nil {
 		return err
 	}
@@ -259,6 +260,7 @@ func (l *RoninListener) BridgeOperatorsUpdatedCallback(fromChainId *big.Int, tx 
 }
 
 func (l *RoninListener) BridgeOperatorsApprovedCallback(fromChainId *big.Int, tx bridgeCore.Transaction, data []byte) error {
+	log.Info("[RoninListener][BridgeOperatorsApprovedCallback] Received new transaction", "tx", tx.GetHash().Hex())
 	ronEvent := new(gateway2.GatewayBridgeOperatorsApproved)
 	ronGatewayAbi, err := gateway2.GatewayMetaData.GetAbi()
 	if err != nil {
@@ -268,9 +270,10 @@ func (l *RoninListener) BridgeOperatorsApprovedCallback(fromChainId *big.Int, tx
 	if err = ronGatewayAbi.UnpackIntoInterface(ronEvent, "BridgeOperatorsUpdated", data); err != nil {
 		return err
 	}
+	log.Debug("[RoninListener][BridgeOperatorsApprovedCallback] Unpack data into BridgeOperatorsApproved", "ronEvent", ronEvent)
 
 	// create caller
-	trustedCaller2, err := trustedOrg2.NewGatewayCaller(common.HexToAddress(l.config.Contracts[task.GATEWAY_CONTRACT]), l.client)
+	trustedCaller2, err := trustedOrg2.NewGatewayCaller(common.HexToAddress(l.config.Contracts[task.TRUSTED_ORGS_CONTRACT]), l.client)
 	if err != nil {
 		return err
 	}
@@ -279,13 +282,14 @@ func (l *RoninListener) BridgeOperatorsApprovedCallback(fromChainId *big.Int, tx
 	if err != nil {
 		return err
 	}
+	log.Debug("[RoninListener][BridgeOperatorsApprovedCallback] Trusted organization", "trustedOrgs", trustedOrgs)
 
 	var voters []common.Address
 	for _, node := range trustedOrgs {
 		voters = append(voters, node.BridgeVoter)
 	}
 
-	governanceCaller2, err := governance2.NewGatewayCaller(common.HexToAddress(l.config.Contracts[task.GATEWAY_CONTRACT]), l.client)
+	governanceCaller2, err := governance2.NewGatewayCaller(common.HexToAddress(l.config.Contracts[task.GOVERNANCE_CONTRACT]), l.client)
 	if err != nil {
 		return err
 	}
@@ -294,8 +298,9 @@ func (l *RoninListener) BridgeOperatorsApprovedCallback(fromChainId *big.Int, tx
 	if err != nil {
 		return err
 	}
+	log.Debug("[RoninListener][BridgeOperatorsApprovedCallback] Voting signatures", "signatures", signatures)
 
-	governanceTransactor, err := governance.NewGatewayTransactor(common.HexToAddress(l.config.Contracts[task.GATEWAY_CONTRACT]), l.client)
+	governanceTransactor, err := governance.NewGatewayTransactor(common.HexToAddress(l.config.Contracts[task.ETH_GOVERNANCE_CONTRACT]), l.client)
 	if err != nil {
 		return err
 	}
