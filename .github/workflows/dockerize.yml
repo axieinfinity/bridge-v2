@@ -1,0 +1,21 @@
+name: Dockerize
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  scan:
+    uses: axieinfinity/workflows-samples/.github/workflows/security-basic-scan.yml@main
+
+  docker:
+    needs: scan
+    uses: axieinfinity/workflows-samples/.github/workflows/docker-build-submodule.yml@main
+    with:
+      checkout_submodules: true
+      image_repository: gcr.io/test-servers-256610/bridge-v2
+    secrets: inherit
