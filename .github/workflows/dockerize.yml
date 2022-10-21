@@ -9,11 +9,7 @@ on:
       - master
 
 jobs:
-  scan:
-    uses: axieinfinity/workflows-samples/.github/workflows/security-basic-scan.yml@main
-
   docker:
-    needs: scan
     uses: axieinfinity/workflows-samples/.github/workflows/docker-build-submodule.yml@main
     with:
       checkout_submodules: true
