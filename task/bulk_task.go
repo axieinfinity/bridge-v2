@@ -3,6 +3,7 @@ package task
 import (
 	"crypto/ecdsa"
 	"fmt"
+	governance2 "github.com/axieinfinity/bridge-contracts/generated_contracts/ronin/governance"
 	"math/big"
 	"time"
 
@@ -71,10 +72,14 @@ func (r *bulkTask) send() {
 		r.sendBulkTransactions(r.sendWithdrawalSignaturesTransaction)
 	case ACK_WITHDREW_TASK:
 		r.sendBulkTransactions(r.sendAckTransactions)
+	case VOTE_BRIDGE_OPERATORS:
+		r.sendBulkTransactions(r.voteBridgeOperatorsBySignature)
+	case RELAY_BRIDGE_OPERATORS:
+		r.sendBulkTransactions(r.relayBridgeOperators)
 	}
 }
 
-func (r *bulkTask) sendBulkTransactions(sendTxs func(tasks []*models.Task) (doneTasks, processingTasks, failedTasks []*models.Task, tx *ethtypes.Transaction)) {
+func (r *bulkTask) sendBulkTransactions(sendTxs func(tasks []*models.Task) (doneTasks, processingTasks, failedTasks []*models.Task, txs []*ethtypes.Transaction)) {
 	start, end := 0, len(r.tasks)
 	for start < end {
 		var (
@@ -87,10 +92,14 @@ func (r *bulkTask) sendBulkTransactions(sendTxs func(tasks []*models.Task) (done
 			next = end
 		}
 		log.Info("[bulkTask][sendBulkTransactions] start sending txs", "start", start, "end", end, "type", r.taskType)
-		doneTasks, processingTasks, failedTasks, transaction := sendTxs(r.tasks[start:next])
+		doneTasks, processingTasks, failedTasks, txs := sendTxs(r.tasks[start:next])
 
-		if transaction != nil {
-			go updateTasks(r.store, processingTasks, STATUS_PROCESSING, transaction.Hash().Hex(), time.Now().Unix(), r.releaseTasksCh)
+		if txs != nil {
+			for _, tx := range txs {
+				if tx != nil {
+					go updateTasks(r.store, processingTasks, STATUS_PROCESSING, tx.Hash().Hex(), time.Now().Unix(), r.releaseTasksCh)
+				}
+			}
 			metrics.Pusher.IncrGauge(metrics.ProcessingTaskMetric, len(processingTasks))
 		}
 		go updateTasks(r.store, doneTasks, STATUS_DONE, txHash, 0, r.releaseTasksCh)
@@ -101,7 +110,66 @@ func (r *bulkTask) sendBulkTransactions(sendTxs func(tasks []*models.Task) (done
 	}
 }
 
-func (r *bulkTask) sendDepositTransaction(tasks []*models.Task) (doneTasks, processingTasks, failedTasks []*models.Task, tx *ethtypes.Transaction) {
+func (r *bulkTask) voteBridgeOperatorsBySignature(tasks []*models.Task) (doneTasks, processingTasks, failedTasks []*models.Task, txs []*ethtypes.Transaction) {
+	// create caller
+	transactor, err := governance2.NewGatewayTransactor(common.HexToAddress(r.contracts[GOVERNANCE_CONTRACT]), r.client)
+	if err != nil {
+		for _, t := range tasks {
+			t.LastError = err.Error()
+			failedTasks = append(failedTasks, t)
+		}
+		return nil, nil, failedTasks, nil
+	}
+	// create caller
+	if err != nil {
+		// append all success tasks into failed tasks
+		for _, t := range tasks {
+			t.LastError = err.Error()
+			failedTasks = append(failedTasks, t)
+		}
+		return nil, nil, failedTasks, nil
+	}
+
+	for _, t := range tasks {
+		event, err := r.unpackBridgeOperatorsUpdatedEvent(t)
+		if err != nil {
+			t.LastError = err.Error()
+			failedTasks = append(failedTasks, t)
+			continue
+		}
+
+		// otherwise add task to processingTasks to adjust after sending transaction
+		processingTasks = append(processingTasks, t)
+
+		signatures, err := r.signBridgeOperatorsBallot(event.Period, event.BridgeOperators)
+		if err != nil {
+			t.LastError = err.Error()
+			failedTasks = append(failedTasks, t)
+			continue
+		}
+
+		tx, err := r.util.SendContractTransaction(r.listener.GetValidatorSign(), r.chainId, func(opts *bind.TransactOpts) (*ethtypes.Transaction, error) {
+			return transactor.VoteBridgeOperatorsBySignatures(opts, event.Period, event.BridgeOperators, parseSignatureAsRsv(signatures))
+		})
+
+		if err != nil {
+			t.LastError = err.Error()
+			failedTasks = append(failedTasks, t)
+			continue
+		}
+
+		txs = append(txs, tx)
+		doneTasks = append(doneTasks, t)
+	}
+
+	return
+}
+
+func (r *bulkTask) relayBridgeOperators(tasks []*models.Task) (doneTasks, processingTasks, failedTasks []*models.Task, txs []*ethtypes.Transaction) {
+	return nil, nil, nil, nil
+}
+
+func (r *bulkTask) sendDepositTransaction(tasks []*models.Task) (doneTasks, processingTasks, failedTasks []*models.Task, txs []*ethtypes.Transaction) {
 	var (
 		receipts []roninGateway.TransferReceipt
 	)
@@ -173,7 +241,7 @@ func (r *bulkTask) sendDepositTransaction(tasks []*models.Task) (doneTasks, proc
 	metrics.Pusher.IncrCounter(metrics.DepositTaskMetric, len(tasks))
 
 	if len(receipts) > 0 {
-		tx, err = r.util.SendContractTransaction(r.listener.GetValidatorSign(), r.chainId, func(opts *bind.TransactOpts) (*ethtypes.Transaction, error) {
+		tx, err := r.util.SendContractTransaction(r.listener.GetValidatorSign(), r.chainId, func(opts *bind.TransactOpts) (*ethtypes.Transaction, error) {
 			return transactor.TryBulkDepositFor(opts, receipts)
 		})
 		if err != nil {
@@ -183,11 +251,13 @@ func (r *bulkTask) sendDepositTransaction(tasks []*models.Task) (doneTasks, proc
 			}
 			return doneTasks, nil, failedTasks, nil
 		}
+
+		txs = append(txs, tx)
 	}
 	return
 }
 
-func (r *bulkTask) sendWithdrawalSignaturesTransaction(tasks []*models.Task) (doneTasks, processingTasks, failedTasks []*models.Task, tx *ethtypes.Transaction) {
+func (r *bulkTask) sendWithdrawalSignaturesTransaction(tasks []*models.Task) (doneTasks, processingTasks, failedTasks []*models.Task, txs []*ethtypes.Transaction) {
 	var (
 		ids        []*big.Int
 		signatures [][]byte
@@ -244,7 +314,7 @@ func (r *bulkTask) sendWithdrawalSignaturesTransaction(tasks []*models.Task) (do
 	metrics.Pusher.IncrCounter(metrics.WithdrawalTaskMetric, len(tasks))
 
 	if len(ids) > 0 {
-		tx, err = r.util.SendContractTransaction(r.listener.GetValidatorSign(), r.chainId, func(opts *bind.TransactOpts) (*ethtypes.Transaction, error) {
+		tx, err := r.util.SendContractTransaction(r.listener.GetValidatorSign(), r.chainId, func(opts *bind.TransactOpts) (*ethtypes.Transaction, error) {
 			return transactor.BulkSubmitWithdrawalSignatures(opts, ids, signatures)
 		})
 		if err != nil {
@@ -255,11 +325,12 @@ func (r *bulkTask) sendWithdrawalSignaturesTransaction(tasks []*models.Task) (do
 			}
 			return doneTasks, nil, failedTasks, nil
 		}
+		txs = append(txs, tx)
 	}
 	return
 }
 
-func (r *bulkTask) sendAckTransactions(tasks []*models.Task) (doneTasks, processingTasks, failedTasks []*models.Task, tx *ethtypes.Transaction) {
+func (r *bulkTask) sendAckTransactions(tasks []*models.Task) (doneTasks, processingTasks, failedTasks []*models.Task, txs []*ethtypes.Transaction) {
 	var (
 		ids []*big.Int
 	)
@@ -310,7 +381,7 @@ func (r *bulkTask) sendAckTransactions(tasks []*models.Task) (doneTasks, process
 
 	metrics.Pusher.IncrCounter(metrics.AckWithdrawalTaskMetric, len(tasks))
 	if len(ids) > 0 {
-		tx, err = r.util.SendContractTransaction(r.listener.GetValidatorSign(), r.chainId, func(opts *bind.TransactOpts) (*ethtypes.Transaction, error) {
+		tx, err := r.util.SendContractTransaction(r.listener.GetValidatorSign(), r.chainId, func(opts *bind.TransactOpts) (*ethtypes.Transaction, error) {
 			return transactor.TryBulkAcknowledgeMainchainWithdrew(opts, ids)
 		})
 		if err != nil {
@@ -321,6 +392,7 @@ func (r *bulkTask) sendAckTransactions(tasks []*models.Task) (doneTasks, process
 			}
 			return doneTasks, nil, failedTasks, nil
 		}
+		txs = append(txs, tx)
 	}
 	return
 }
@@ -422,6 +494,20 @@ func (r *bulkTask) validateWithdrawalTask(caller *roninGateway.GatewayCaller, ta
 	return result, ronEvent.Receipt, nil
 }
 
+func (r *bulkTask) unpackBridgeOperatorsUpdatedEvent(task *models.Task) (*roninGateway.GatewayBridgeOperatorsUpdated, error) {
+	ronEvent := new(roninGateway.GatewayBridgeOperatorsUpdated)
+	ronGatewayAbi, err := roninGateway.GatewayMetaData.GetAbi()
+	if err != nil {
+		return ronEvent, err
+	}
+
+	if err = ronGatewayAbi.UnpackIntoInterface(ronEvent, "BridgeOperatorsUpdated", common.Hex2Bytes(task.Data)); err != nil {
+		return ronEvent, err
+	}
+
+	return ronEvent, nil
+}
+
 func updateTasks(store stores.BridgeStore, tasks []*models.Task, status, txHash string, timestamp int64, releaseTasksCh chan int) {
 	// update tasks with given status
 	// note: if task.retries < 10 then retries++ and status still be processing
@@ -444,6 +530,59 @@ func updateTasks(store stores.BridgeStore, tasks []*models.Task, status, txHash 
 		}
 		releaseTasksCh <- t.ID
 	}
+}
+
+func parseSignatureAsRsv(signature []byte) governance2.SignatureConsumerSignature {
+	rawR := signature[0:32]
+	rawS := signature[32:64]
+	v := signature[64]
+
+	if v < 27 {
+		v += 27
+	}
+
+	var r, s [32]byte
+	copy(r[:], rawR)
+	copy(s[:], rawS)
+
+	return governance2.SignatureConsumerSignature{
+		R: r,
+		S: s,
+		V: v,
+	}
+}
+
+func (r *bulkTask) signBridgeOperatorsBallot(period *big.Int, bridgeOperators []common.Address) ([]byte, error) {
+	bridgeOperatorsBallotTypes := core.TypedData{
+		Types: core.Types{
+			"BridgeOperatorsBallot": []core.Type{
+				{
+					Name: "period", Type: "uint256",
+				},
+				{
+					Name: "operators", Type: "address[]",
+				},
+			},
+		},
+		PrimaryType: "RoninGatewayV2",
+		Domain: core.TypedDataDomain{
+			Name:              "RoninGatewayV2",
+			Version:           "2",
+			ChainId:           math.NewHexOrDecimal256(r.chainId.Int64()),
+			VerifyingContract: r.contracts[GATEWAY_CONTRACT],
+		},
+		Message: core.TypedDataMessage{
+			"period":    period,
+			"operators": bridgeOperators,
+		},
+	}
+
+	signature, err := r.util.SignTypedData(bridgeOperatorsBallotTypes, r.listener.GetValidatorSign())
+	if err != nil {
+		return nil, err
+	}
+
+	return signature, nil
 }
 
 func (r *bulkTask) signWithdrawalSignatures(receipt roninGateway.TransferReceipt) (hexutil.Bytes, error) {

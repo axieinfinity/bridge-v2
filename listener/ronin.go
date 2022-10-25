@@ -3,9 +3,7 @@ package listener
 import (
 	"context"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	"github.com/ethereum/go-ethereum/common/math"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/signer/core"
 	"math/big"
 	"time"
 
@@ -218,45 +216,25 @@ func (l *RoninListener) BridgeOperatorsUpdatedCallback(fromChainId *big.Int, tx 
 	}
 	log.Debug("[RoninListener][BridgeOperatorsUpdatedCallback] Unpack data into BridgeOperatorsUpdated", "ronEvent", ronEvent)
 
-	// create caller
-	transactor, err := governance2.NewGatewayTransactor(common.HexToAddress(l.config.Contracts[task.GOVERNANCE_CONTRACT]), l.client)
+	// get chainID
+	chainId, err := l.GetChainID()
 	if err != nil {
 		return err
 	}
 
-	bridgeOperatorsBallotTypes := core.TypedData{
-		Types: core.Types{
-			"BridgeOperatorsBallot": []core.Type{
-				{
-					Name: "period", Type: "uint256",
-				},
-				{
-					Name: "operators", Type: "address[]",
-				},
-			},
-		},
-		PrimaryType: "RoninGatewayV2",
-		Domain: core.TypedDataDomain{
-			Name:              "RoninGatewayV2",
-			Version:           "2",
-			ChainId:           math.NewHexOrDecimal256(fromChainId.Int64()),
-			VerifyingContract: l.config.Contracts[task.GATEWAY_CONTRACT],
-		},
-		Message: core.TypedDataMessage{
-			"period":    ronEvent.Period,
-			"operators": ronEvent.BridgeOperators,
-		},
-	}
-	signatures, err := l.utilsWrapper.SignTypedData(bridgeOperatorsBallotTypes, l.GetValidatorSign())
-	if err != nil {
-		return err
+	voteTask := &models.Task{
+		ChainId:         hexutil.EncodeBig(chainId),
+		FromChainId:     hexutil.EncodeBig(fromChainId),
+		FromTransaction: tx.GetHash().Hex(),
+		Type:            task.DEPOSIT_TASK,
+		Data:            common.Bytes2Hex(data),
+		Retries:         0,
+		Status:          task.STATUS_PENDING,
+		LastError:       "",
+		CreatedAt:       time.Now().Unix(),
 	}
 
-	_, err = l.utilsWrapper.SendContractTransaction(l.EthereumListener.GetValidatorSign(), fromChainId, func(opts *bind.TransactOpts) (*ethtypes.Transaction, error) {
-		return transactor.VoteBridgeOperatorsBySignatures(opts, ronEvent.Period, ronEvent.BridgeOperators, string(signatures))
-	})
-
-	return err
+	return l.bridgeStore.GetTaskStore().Save(voteTask)
 }
 
 func (l *RoninListener) BridgeOperatorsApprovedCallback(fromChainId *big.Int, tx bridgeCore.Transaction, data []byte) error {

@@ -1,9 +1,11 @@
 package task
 
 const (
-	ACK_WITHDREW_TASK = "acknowledgeWithdrew"
-	DEPOSIT_TASK      = "deposit"
-	WITHDRAWAL_TASK   = "withdrawal"
+	ACK_WITHDREW_TASK      = "acknowledgeWithdrew"
+	DEPOSIT_TASK           = "deposit"
+	WITHDRAWAL_TASK        = "withdrawal"
+	VOTE_BRIDGE_OPERATORS  = "voteBridgeOperatorsBySignatures"
+	RELAY_BRIDGE_OPERATORS = "relayBridgeOperators"
 
 	STATUS_PENDING    = "pending"
 	STATUS_FAILED     = "failed"
