@@ -3,7 +3,9 @@ package task
 import (
 	"crypto/ecdsa"
 	"fmt"
-	governance2 "github.com/axieinfinity/bridge-contracts/generated_contracts/ronin/governance"
+	ethGovernance "github.com/axieinfinity/bridge-contracts/generated_contracts/ethereum/governance"
+	roninGovernance "github.com/axieinfinity/bridge-contracts/generated_contracts/ronin/governance"
+	roninTrustedOrg "github.com/axieinfinity/bridge-contracts/generated_contracts/ronin/trusted_org"
 	"math/big"
 	"time"
 
@@ -112,7 +114,7 @@ func (r *bulkTask) sendBulkTransactions(sendTxs func(tasks []*models.Task) (done
 
 func (r *bulkTask) voteBridgeOperatorsBySignature(tasks []*models.Task) (doneTasks, processingTasks, failedTasks []*models.Task, txs []*ethtypes.Transaction) {
 	// create caller
-	transactor, err := governance2.NewGatewayTransactor(common.HexToAddress(r.contracts[GOVERNANCE_CONTRACT]), r.client)
+	transactor, err := roninGovernance.NewGatewayTransactor(common.HexToAddress(r.contracts[GOVERNANCE_CONTRACT]), r.client)
 	if err != nil {
 		for _, t := range tasks {
 			t.LastError = err.Error()
@@ -166,7 +168,77 @@ func (r *bulkTask) voteBridgeOperatorsBySignature(tasks []*models.Task) (doneTas
 }
 
 func (r *bulkTask) relayBridgeOperators(tasks []*models.Task) (doneTasks, processingTasks, failedTasks []*models.Task, txs []*ethtypes.Transaction) {
-	return nil, nil, nil, nil
+	// create caller
+	roninTrustedCaller, err := roninTrustedOrg.NewGatewayCaller(common.HexToAddress(r.contracts[TRUSTED_ORGS_CONTRACT]), r.client)
+	if err != nil {
+		for _, t := range tasks {
+			t.LastError = err.Error()
+			failedTasks = append(failedTasks, t)
+		}
+		return nil, nil, failedTasks, nil
+	}
+
+	trustedOrgs, err := roninTrustedCaller.GetAllTrustedOrganizations(nil)
+	if err != nil {
+		for _, t := range tasks {
+			t.LastError = err.Error()
+			failedTasks = append(failedTasks, t)
+		}
+		return nil, nil, failedTasks, nil
+	}
+	log.Debug("[RoninListener][BridgeOperatorsApprovedCallback] Trusted organization", "trustedOrgs", trustedOrgs)
+
+	var voters []common.Address
+	for _, node := range trustedOrgs {
+		voters = append(voters, node.BridgeVoter)
+	}
+
+	roninGovernanceCaller, err := roninGovernance.NewGatewayCaller(common.HexToAddress(r.contracts[GOVERNANCE_CONTRACT]), r.client)
+	if err != nil {
+		for _, t := range tasks {
+			t.LastError = err.Error()
+			failedTasks = append(failedTasks, t)
+		}
+		return nil, nil, failedTasks, nil
+	}
+
+	ethGovernanceTransactor, err := ethGovernance.NewGatewayTransactor(common.HexToAddress(r.contracts[ETH_GOVERNANCE_CONTRACT]), r.client)
+	if err != nil {
+		for _, t := range tasks {
+			t.LastError = err.Error()
+			failedTasks = append(failedTasks, t)
+		}
+		return nil, nil, failedTasks, nil
+	}
+
+	for _, t := range tasks {
+		event, err := r.unpackBridgeOperatorsApprovedEvent(t)
+		if err != nil {
+			t.LastError = err.Error()
+			failedTasks = append(failedTasks, t)
+			continue
+		}
+
+		// otherwise add task to processingTasks to adjust after sending transaction
+		processingTasks = append(processingTasks, t)
+
+		signatures, err := roninGovernanceCaller.GetBridgeOperatorVotingSignatures(nil, event.Period, voters)
+		if err != nil {
+			t.LastError = err.Error()
+			failedTasks = append(failedTasks, t)
+			continue
+		}
+		log.Debug("[RoninListener][BridgeOperatorsApprovedCallback] Voting signatures", "signatures", signatures)
+
+		tx, err := r.util.SendContractTransaction(r.listener.GetValidatorSign(), r.chainId, func(opts *bind.TransactOpts) (*ethtypes.Transaction, error) {
+			return ethGovernanceTransactor.RelayBridgeOperators(opts, event.Period, event.BridgeOperators, signatures)
+		})
+
+		txs = append(txs, tx)
+		doneTasks = append(doneTasks, t)
+	}
+
+	return
 }
 
 func (r *bulkTask) sendDepositTransaction(tasks []*models.Task) (doneTasks, processingTasks, failedTasks []*models.Task, txs []*ethtypes.Transaction) {
@@ -508,6 +580,20 @@ func (r *bulkTask) unpackBridgeOperatorsUpdatedEvent(task *models.Task) (*roninG
 	return ronEvent, nil
 }
 
+func (r *bulkTask) unpackBridgeOperatorsApprovedEvent(task *models.Task) (*roninGateway.GatewayBridgeOperatorsApproved, error) {
+	ronEvent := new(roninGateway.GatewayBridgeOperatorsApproved)
+	ronGatewayAbi, err := roninGateway.GatewayMetaData.GetAbi()
+	if err != nil {
+		return nil, err
+	}
+
+	if err = ronGatewayAbi.UnpackIntoInterface(ronEvent, "BridgeOperatorsApproved", common.Hex2Bytes(task.Data)); err != nil {
+		return nil, err
+	}
+
+	return ronEvent, nil
+}
+
 func updateTasks(store stores.BridgeStore, tasks []*models.Task, status, txHash string, timestamp int64, releaseTasksCh chan int) {
 	// update tasks with given status
 	// note: if task.retries < 10 then retries++ and status still be processing
@@ -532,7 +618,7 @@ func updateTasks(store stores.BridgeStore, tasks []*models.Task, status, txHash 
 	}
 }
 
-func parseSignatureAsRsv(signature []byte) governance2.SignatureConsumerSignature {
+func parseSignatureAsRsv(signature []byte) roninGovernance.SignatureConsumerSignature {
 	rawR := signature[0:32]
 	rawS := signature[32:64]
 	v := signature[64]
@@ -545,7 +631,7 @@ func parseSignatureAsRsv(signature []byte) governance2.SignatureConsumerSignatur
 	copy(r[:], rawR)
 	copy(s[:], rawS)
 
-	return governance2.SignatureConsumerSignature{
+	return roninGovernance.SignatureConsumerSignature{
 		R: r,
 		S: s,
 		V: v,

@@ -2,16 +2,11 @@ package listener
 
 import (
 	"context"
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"math/big"
 	"time"
 
 	"github.com/axieinfinity/bridge-contracts/generated_contracts/ethereum/gateway"
-	governance "github.com/axieinfinity/bridge-contracts/generated_contracts/ethereum/governance"
 	gateway2 "github.com/axieinfinity/bridge-contracts/generated_contracts/ronin/gateway"
-	governance2 "github.com/axieinfinity/bridge-contracts/generated_contracts/ronin/governance"
-	trustedOrg2 "github.com/axieinfinity/bridge-contracts/generated_contracts/ronin/trusted_org"
 	bridgeCore "github.com/axieinfinity/bridge-core"
 	bridgeCoreModels "github.com/axieinfinity/bridge-core/models"
 	bridgeCoreStores "github.com/axieinfinity/bridge-core/stores"
@@ -222,7 +217,7 @@ func (l *RoninListener) BridgeOperatorsUpdatedCallback(fromChainId *big.Int, tx 
 		return err
 	}
 
-	voteTask := &models.Task{
+	bridgeOperatorsUpdated := &models.Task{
 		ChainId:         hexutil.EncodeBig(chainId),
 		FromChainId:     hexutil.EncodeBig(fromChainId),
 		FromTransaction: tx.GetHash().Hex(),
@@ -234,7 +229,7 @@ func (l *RoninListener) BridgeOperatorsUpdatedCallback(fromChainId *big.Int, tx 
 		CreatedAt:       time.Now().Unix(),
 	}
 
-	return l.bridgeStore.GetTaskStore().Save(voteTask)
+	return l.bridgeStore.GetTaskStore().Save(bridgeOperatorsUpdated)
 }
 
 func (l *RoninListener) BridgeOperatorsApprovedCallback(fromChainId *big.Int, tx bridgeCore.Transaction, data []byte) error {
@@ -245,49 +240,30 @@ func (l *RoninListener) BridgeOperatorsApprovedCallback(fromChainId *big.Int, tx
 		return err
 	}
 
-	if err = ronGatewayAbi.UnpackIntoInterface(ronEvent, "BridgeOperatorsUpdated", data); err != nil {
+	if err = ronGatewayAbi.UnpackIntoInterface(ronEvent, "BridgeOperatorsApproved", data); err != nil {
 		return err
 	}
 	log.Debug("[RoninListener][BridgeOperatorsApprovedCallback] Unpack data into BridgeOperatorsApproved", "ronEvent", ronEvent)
 
-	// create caller
-	trustedCaller2, err := trustedOrg2.NewGatewayCaller(common.HexToAddress(l.config.Contracts[task.TRUSTED_ORGS_CONTRACT]), l.client)
+	// get chainID
+	chainId, err := l.GetChainID()
 	if err != nil {
 		return err
 	}
 
-	trustedOrgs, err := trustedCaller2.GetAllTrustedOrganizations(nil)
-	if err != nil {
-		return err
-	}
-	log.Debug("[RoninListener][BridgeOperatorsApprovedCallback] Trusted organization", "trustedOrgs", trustedOrgs)
-
-	var voters []common.Address
-	for _, node := range trustedOrgs {
-		voters = append(voters, node.BridgeVoter)
-	}
-
-	governanceCaller2, err := governance2.NewGatewayCaller(common.HexToAddress(l.config.Contracts[task.GOVERNANCE_CONTRACT]), l.client)
-	if err != nil {
-		return err
+	bridgeOperatorsApproved := &models.Task{
+		ChainId:         hexutil.EncodeBig(chainId),
+		FromChainId:     hexutil.EncodeBig(fromChainId),
+		FromTransaction: tx.GetHash().Hex(),
+		Type:            task.DEPOSIT_TASK,
+		Data:            common.Bytes2Hex(data),
+		Retries:         0,
+		Status:          task.STATUS_PENDING,
+		LastError:       "",
+		CreatedAt:       time.Now().Unix(),
 	}
 
-	signatures, err := governanceCaller2.GetBridgeOperatorVotingSignatures(nil, ronEvent.Period, voters)
-	if err != nil {
-		return err
-	}
-	log.Debug("[RoninListener][BridgeOperatorsApprovedCallback] Voting signatures", "signatures", signatures)
-
-	governanceTransactor, err := governance.NewGatewayTransactor(common.HexToAddress(l.config.Contracts[task.ETH_GOVERNANCE_CONTRACT]), l.client)
-	if err != nil {
-		return err
-	}
-
-	_, err = l.utilsWrapper.SendContractTransaction(l.EthereumListener.GetValidatorSign(), fromChainId, func(opts *bind.TransactOpts) (*ethtypes.Transaction, error) {
-		return governanceTransactor.RelayBridgeOperators(opts, ronEvent.Period, ronEvent.BridgeOperators, signatures)
-	})
-
-	return err
+	return l.bridgeStore.GetTaskStore().Save(bridgeOperatorsApproved)
 }
 
 func (l *RoninListener) WithdrewCallback(fromChainId *big.Int, tx bridgeCore.Transaction, data []byte) error {
