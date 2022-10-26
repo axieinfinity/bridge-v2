@@ -185,6 +185,11 @@ func prepare(ctx *cli.Context) *bridgeCore.Config {
 		if err := json.Unmarshal(plan, &cfg); err != nil {
 			panic(err)
 		}
+
+		for _, v := range cfg.Listeners {
+			v.TransactionCheckPeriod *= time.Second
+			v.TaskInterval *= time.Second
+		}
 	}
 
 	checkEnv(cfg)
@@ -242,7 +247,6 @@ func checkEnv(cfg *bridgeCore.Config) {
 	}
 
 	if cfg.Listeners[RoninNetwork] != nil {
-
 		if os.Getenv(roninTaskInterval) != "" {
 			taskInterval, _ := strconv.Atoi(os.Getenv(roninTaskInterval))
 			if taskInterval > 0 {
@@ -380,6 +384,7 @@ func bridge(ctx *cli.Context) {
 	if err = controller.Start(); err != nil {
 		panic(err)
 	}
+
 	sigc := make(chan os.Signal, 1)
 	signal.Notify(sigc, syscall.SIGINT, syscall.SIGTERM)
 	defer signal.Stop(sigc)
