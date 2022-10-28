@@ -16,7 +16,7 @@ const (
 
 	GATEWAY_CONTRACT        = "Gateway"
 	GOVERNANCE_CONTRACT     = "Governance"
-	ETH_GOVERNANCE_CONTRACT = "Governance"
+	ETH_GOVERNANCE_CONTRACT = "EthGovernance"
 	TRUSTED_ORGS_CONTRACT   = "TrustedOrgs"
 	ETH_GATEWAY_CONTRACT    = "EthGateway"
 	BRIDGEADMIN_CONTRACT    = "BridgeAdmin"
