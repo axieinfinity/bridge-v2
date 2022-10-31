@@ -23,7 +23,7 @@ contract EthGovernance {
         uint256 _period,
         address[] calldata _voters
     ) public view returns (Signature[] memory) {
-        Signature[] memory _signatures;
+        Signature[] memory _signatures = new Signature[](_voters.length);
         for (uint i = 0; i < _voters.length; i++) {
             _signatures[i] = signatures[_period][_voters[i]];
         }

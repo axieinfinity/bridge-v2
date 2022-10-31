@@ -34,7 +34,7 @@ type SimulatedSuite struct {
 }
 
 func (s *SimulatedSuite) SetupTest() {
-	key, _ := crypto.GenerateKey()
+	key, _ := crypto.HexToECDSA("927a004a8a0e854813d4950517551eb5b0eb87a82e466438dcbc1b906572b125")
 	s.privateKey = fmt.Sprintf("%x", crypto.FromECDSA(key))
 	s.auth = bind.NewKeyedTransactor(key)
 	s.address = s.auth.From
@@ -102,10 +102,37 @@ func (s *VoteBridgeOperatorsSuite) TestVoteBridgeOperatorsBySignatureSuccess() {
 		TransactionHash: common.Bytes2Hex([]byte{100}),
 		FromTransaction: common.Bytes2Hex([]byte{101}),
 	})
+	s.sim.Commit()
 
 	s.Equal(len(doneTasks), 1)
 	s.Equal(len(processingTasks), 1)
 	s.Equal(len(failedTasks), 0)
+
+	// Get back the signatures to validate to tx
+	signatures, err := s.roninGovernance.GetBridgeOperatorVotingSignatures(&bind.CallOpts{
+		Pending:     false,
+		From:        s.address,
+		BlockNumber: nil,
+		Context:     context.Background(),
+	}, common.Big1, []common.Address{
+		common.HexToAddress("0xB6bc5bc0410773A3F86B1537ce7495C52e38f88B"),
+		common.HexToAddress("0x4a4bc674A97737376cFE990aE2fE0d2B6E738393"),
+	})
+	s.Nil(err)
+	s.Equal(len(signatures), 2)
+
+	expected := gateway.SignatureConsumerSignature{
+		V: 28,
+		R: [32]byte{1, 171, 188, 209, 13, 186, 74, 245, 70, 36, 19, 117, 63, 191, 153, 154, 207, 130, 125, 248, 13, 250, 51, 93, 232, 96, 47, 115, 130, 215, 253, 206},
+		S: [32]byte{26, 224, 80, 166, 50, 231, 111, 165, 175, 75, 142, 62, 226, 200, 148, 112, 229, 112, 137, 87, 142, 240, 123, 221, 197, 60, 164, 40, 65, 145, 27, 234},
+	}
+	s.Equal(signatures[0].R[:], expected.R[:])
+	s.Equal(signatures[0].S[:], expected.S[:])
+	s.Equal(signatures[0].V, expected.V)
+
+	s.Equal(signatures[1].R[:], expected.R[:])
+	s.Equal(signatures[1].S[:], expected.S[:])
+	s.Equal(signatures[1].V, expected.V)
 }
 
 type RelayBridgeOperatorsSuite struct {
@@ -164,18 +191,11 @@ func (s *RelayBridgeOperatorsSuite) TestRelayBridgeOperatorsSuccess() {
 	r := newMockRoninTask(s.sim, roninListener, gormDB, s.utilWrapper)
 	relayBridgeOperatorsTask := newTask(r.listener, r.client, r.store, r.chainId, r.contracts, defaultMaxTry, RELAY_BRIDGE_OPERATORS_TASK, r.releaseTasksCh, r.util)
 
-	// Setup trusted organizations
-	_, err := r.util.SendContractTransaction(r.listener.GetValidatorSign(), r.chainId, func(opts *bind.TransactOpts) (*ethtypes.Transaction, error) {
-		return s.roninTrustedOrg.SetTrustedOrganizations(opts, []common.Address{
-			common.BytesToAddress([]byte{200}),
-			common.BytesToAddress([]byte{201}),
-			common.BytesToAddress([]byte{202}),
-		})
-	})
-	s.Nil(err)
+	// Setup operators signatures
+	voteBridgeOperatorsTask := newTask(r.listener, r.client, r.store, r.chainId, r.contracts, defaultMaxTry, VOTE_BRIDGE_OPERATORS_TASK, r.releaseTasksCh, r.util)
 
 	data := "000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000002000000000000000000000000b6bc5bc0410773a3f86b1537ce7495c52e38f88b0000000000000000000000004a4bc674a97737376cfe990ae2fe0d2b6e738393"
-	doneTasks, processingTasks, failedTasks, _ := relayBridgeOperatorsTask.relayBridgeOperators(&bridgeModels.Task{
+	doneTasks, processingTasks, failedTasks, _ := voteBridgeOperatorsTask.voteBridgeOperatorsBySignature(&bridgeModels.Task{
 		ChainId:         RoninChainId,
 		FromChainId:     EthereumChainId,
 		Type:            VOTE_BRIDGE_OPERATORS_TASK,
@@ -190,12 +210,64 @@ func (s *RelayBridgeOperatorsSuite) TestRelayBridgeOperatorsSuccess() {
 	s.Equal(len(doneTasks), 1)
 	s.Equal(len(processingTasks), 1)
 	s.Equal(len(failedTasks), 0)
+
+	// Setup trusted organizations
+	_, err := r.util.SendContractTransaction(r.listener.GetValidatorSign(), r.chainId, func(opts *bind.TransactOpts) (*ethtypes.Transaction, error) {
+		return s.roninTrustedOrg.SetTrustedOrganizations(opts, []common.Address{
+			common.HexToAddress("0xB6bc5bc0410773A3F86B1537ce7495C52e38f88B"),
+			common.HexToAddress("0x4a4bc674A97737376cFE990aE2fE0d2B6E738393"),
+		})
+	})
+	s.Nil(err)
+	s.sim.Commit()
+
+	// Run the actual test
+	data = "000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000002000000000000000000000000b6bc5bc0410773a3f86b1537ce7495c52e38f88b0000000000000000000000004a4bc674a97737376cfe990ae2fe0d2b6e738393"
+	doneTasks, processingTasks, failedTasks, _ = relayBridgeOperatorsTask.relayBridgeOperators(&bridgeModels.Task{
+		ChainId:         RoninChainId,
+		FromChainId:     EthereumChainId,
+		Type:            VOTE_BRIDGE_OPERATORS_TASK,
+		Data:            data,
+		Retries:         0,
+		Status:          STATUS_PENDING,
+		LastError:       "",
+		TransactionHash: common.Bytes2Hex([]byte{100}),
+		FromTransaction: common.Bytes2Hex([]byte{101}),
+	})
+	s.sim.Commit()
+
+	s.Equal(len(doneTasks), 1)
+	s.Equal(len(processingTasks), 1)
+	s.Equal(len(failedTasks), 0)
+
+	// Get the result from smart contract to verify again
+	signatures, err := s.ethGovernance.GetBridgeOperatorVotingSignatures(nil, common.Big1, []common.Address{
+		common.HexToAddress("0xB6bc5bc0410773A3F86B1537ce7495C52e38f88B"),
+		common.HexToAddress("0x4a4bc674A97737376cFE990aE2fE0d2B6E738393"),
+	})
+	expected := gateway.SignatureConsumerSignature{
+		V: 28,
+		R: [32]byte{1, 171, 188, 209, 13, 186, 74, 245, 70, 36, 19, 117, 63, 191, 153, 154, 207, 130, 125, 248, 13, 250, 51, 93, 232, 96, 47, 115, 130, 215, 253, 206},
+		S: [32]byte{26, 224, 80, 166, 50, 231, 111, 165, 175, 75, 142, 62, 226, 200, 148, 112, 229, 112, 137, 87, 142, 240, 123, 221, 197, 60, 164, 40, 65, 145, 27, 234},
+	}
+
+	s.Nil(err)
+	s.Equal(len(signatures), 2)
+
+	s.Equal(signatures[0].R[:], expected.R[:])
+	s.Equal(signatures[0].S[:], expected.S[:])
+	s.Equal(signatures[0].V, expected.V)
+
+	s.Equal(signatures[1].R[:], expected.R[:])
+	s.Equal(signatures[1].S[:], expected.S[:])
+	s.Equal(signatures[1].V, expected.V)
 }
 
 type CommonTestSuite struct {
 	suite.Suite
 	SimulatedSuite
-	roninTask *MockRoninTask
+	roninTask       *MockRoninTask
+	roninGovernance *contract_tests.RoninGovernance
 }
 
 func TestRunCommonSuite(t *testing.T) {
@@ -208,9 +280,16 @@ func (s *CommonTestSuite) SetupTest() {
 	gormDB, sqlDB, _, _ := newMockDB()
 	defer sqlDB.Close()
 
+	address, _, contract, err := contract_tests.DeployRoninGovernance(s.auth, s.sim)
+	s.roninGovernance = contract
+	s.Nil(err)
+	s.sim.Commit()
+
 	utilWrapper := utils.NewUtils()
 	store := stores.NewMainStore(gormDB)
-	config := newMockConfig(s.privateKey, map[string]string{})
+	config := newMockConfig(s.privateKey, map[string]string{
+		GOVERNANCE_CONTRACT: address.Hex(),
+	})
 
 	roninListener := newMockListener(s.sim, context.Background(), config, utilWrapper, store)
 	s.roninTask = newMockRoninTask(s.sim, roninListener, gormDB, utilWrapper)
@@ -222,7 +301,7 @@ func (s *CommonTestSuite) TestUnpackBridgeOperatorsApprovedEventSuccess() {
 		Data: data,
 	})
 
-	expectedPeriod := big.NewInt(1)
+	expectedPeriod := common.Big1
 	expectedBridgeOperators := []common.Address{
 		common.HexToAddress("0xB6bc5bc0410773A3F86B1537ce7495C52e38f88B"),
 		common.HexToAddress("0x4a4bc674A97737376cFE990aE2fE0d2B6E738393"),
@@ -238,7 +317,7 @@ func (s *CommonTestSuite) TestUnpackBridgeOperatorsUpdatedEventSuccess() {
 		Data: data,
 	})
 
-	expectedPeriod := big.NewInt(1)
+	expectedPeriod := common.Big1
 	expectedBridgeOperators := []common.Address{
 		common.HexToAddress("0xB6bc5bc0410773A3F86B1537ce7495C52e38f88B"),
 		common.HexToAddress("0x4a4bc674A97737376cFE990aE2fE0d2B6E738393"),
@@ -256,7 +335,7 @@ func (s *CommonTestSuite) TestSignBridgeOperatorsBallotSuccess() {
 
 	hash, err := signBridgeOperatorsBallot(&signDataOpts{
 		ChainId:           math.NewHexOrDecimal256(s.roninTask.chainId.Int64()),
-		VerifyingContract: s.roninTask.contracts[GATEWAY_CONTRACT],
+		VerifyingContract: s.roninTask.contracts[GOVERNANCE_CONTRACT],
 		SignTypedDataCallback: func(typedData core2.TypedData) (hexutil.Bytes, error) {
 			return s.roninTask.util.SignTypedData(typedData, s.roninTask.listener.GetValidatorSign())
 		},
@@ -264,17 +343,8 @@ func (s *CommonTestSuite) TestSignBridgeOperatorsBallotSuccess() {
 	sig := parseSignatureAsRsv(hash)
 	expected := gateway.SignatureConsumerSignature{
 		V: 28,
-		R: [32]byte{68, 51, 43, 101, 96, 121, 145, 131,
-			26, 25, 235, 92, 56, 252, 36, 99,
-			87, 60, 74, 70, 70, 139, 67, 174,
-			78, 162, 65, 55, 210, 49, 49, 78,
-		},
-		S: [32]byte{
-			119, 84, 228, 229, 174, 119, 108, 82,
-			71, 10, 41, 145, 158, 121, 52, 97,
-			164, 243, 191, 169, 174, 187, 101, 99,
-			190, 151, 76, 97, 143, 143, 18, 68,
-		},
+		R: [32]byte{34, 85, 150, 68, 71, 72, 216, 50, 144, 16, 124, 240, 132, 182, 39, 100, 171, 165, 116, 88, 19, 157, 177, 176, 236, 136, 93, 46, 98, 79, 58, 121},
+		S: [32]byte{124, 127, 93, 159, 169, 72, 75, 170, 233, 137, 56, 201, 209, 119, 2, 223, 117, 127, 93, 2, 69, 101, 21, 43, 102, 52, 44, 28, 146, 170, 177, 138},
 	}
 	s.Equal(sig.R[:], expected.R[:])
 	s.Equal(sig.S[:], expected.S[:])

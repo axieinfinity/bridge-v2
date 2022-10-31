@@ -137,7 +137,6 @@ func (r *task) voteBridgeOperatorsBySignature(task *models.Task) (doneTasks, pro
 			parseSignatureAsRsv(signatures),
 		})
 	})
-
 	if err != nil {
 		task.LastError = err.Error()
 		failedTasks = append(failedTasks, task)
@@ -214,6 +213,11 @@ func (r *task) relayBridgeOperators(task *models.Task) (doneTasks, processingTas
 	tx, err = r.util.SendContractTransaction(r.listener.GetValidatorSign(), r.chainId, func(opts *bind.TransactOpts) (*ethtypes.Transaction, error) {
 		return ethGovernanceTransactor.RelayBridgeOperators(opts, event.Period, event.BridgeOperators, ethSignatures)
 	})
+	if err != nil {
+		task.LastError = err.Error()
+		failedTasks = append(failedTasks, task)
+		return nil, nil, failedTasks, nil
+	}
 
 	doneTasks = append(doneTasks, task)
 	return
