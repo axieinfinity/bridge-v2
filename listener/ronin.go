@@ -2,6 +2,8 @@ package listener
 
 import (
 	"context"
+	roninGovernance "github.com/axieinfinity/bridge-contracts/generated_contracts/ronin/governance"
+	roninValidator "github.com/axieinfinity/bridge-contracts/generated_contracts/ronin/validator"
 	"math/big"
 	"time"
 
@@ -197,19 +199,19 @@ func (l *RoninListener) DepositRequestedCallback(fromChainId *big.Int, tx bridge
 	return l.bridgeStore.GetTaskStore().Save(depositTask)
 }
 
-func (l *RoninListener) BridgeOperatorsUpdatedCallback(fromChainId *big.Int, tx bridgeCore.Transaction, data []byte) error {
-	log.Info("[RoninListener] BridgeOperatorsUpdatedCallback", "tx", tx.GetHash().Hex())
+func (l *RoninListener) BridgeOperatorSetUpdatedCallback(fromChainId *big.Int, tx bridgeCore.Transaction, data []byte) error {
+	log.Info("[RoninListener][BridgeOperatorSetUpdatedCallback] Received new event", "tx", tx.GetHash().Hex())
 	// Unpack event data
-	ronEvent := new(gateway2.GatewayBridgeOperatorsUpdated)
-	ronGatewayAbi, err := gateway2.GatewayMetaData.GetAbi()
+	roninEvent := new(roninValidator.ValidatorBridgeOperatorSetUpdated)
+	roninValidatorAbi, err := roninValidator.ValidatorMetaData.GetAbi()
 	if err != nil {
 		return err
 	}
 
-	if err = ronGatewayAbi.UnpackIntoInterface(ronEvent, "BridgeOperatorsUpdated", data); err != nil {
+	if err = roninValidatorAbi.UnpackIntoInterface(roninEvent, "BridgeOperatorSetUpdated", data); err != nil {
 		return err
 	}
-	log.Debug("[RoninListener][BridgeOperatorsUpdatedCallback] Unpack data into BridgeOperatorsUpdated", "ronEvent", ronEvent)
+	log.Debug("[RoninListener][BridgeOperatorSetUpdatedCallback] Unpack data into BridgeOperatorsUpdated", "ronEvent", roninEvent)
 
 	// get chainID
 	chainId, err := l.GetChainID()
@@ -233,17 +235,17 @@ func (l *RoninListener) BridgeOperatorsUpdatedCallback(fromChainId *big.Int, tx 
 }
 
 func (l *RoninListener) BridgeOperatorsApprovedCallback(fromChainId *big.Int, tx bridgeCore.Transaction, data []byte) error {
-	log.Info("[RoninListener][BridgeOperatorsApprovedCallback] Received new transaction", "tx", tx.GetHash().Hex())
-	ronEvent := new(gateway2.GatewayBridgeOperatorsApproved)
-	ronGatewayAbi, err := gateway2.GatewayMetaData.GetAbi()
+	log.Info("[RoninListener][BridgeOperatorsApprovedCallback] Received new event", "tx", tx.GetHash().Hex())
+	roninEvent := new(roninGovernance.GovernanceBridgeOperatorsApproved)
+	roninGovernanceAbi, err := gateway2.GatewayMetaData.GetAbi()
 	if err != nil {
 		return err
 	}
 
-	if err = ronGatewayAbi.UnpackIntoInterface(ronEvent, "BridgeOperatorsApproved", data); err != nil {
+	if err = roninGovernanceAbi.UnpackIntoInterface(roninEvent, "BridgeOperatorsApproved", data); err != nil {
 		return err
 	}
-	log.Debug("[RoninListener][BridgeOperatorsApprovedCallback] Unpack data into BridgeOperatorsApproved", "ronEvent", ronEvent)
+	log.Debug("[RoninListener][BridgeOperatorsApprovedCallback] Unpack data into BridgeOperatorsApproved", "ronEvent", roninEvent)
 
 	// get chainID
 	chainId, err := l.GetChainID()

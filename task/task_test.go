@@ -177,9 +177,9 @@ func (s *RelayBridgeOperatorsSuite) SetupTest() {
 	s.utilWrapper = utils.NewUtils()
 	s.store = stores.NewMainStore(gormDB)
 	s.config = newMockConfig(s.privateKey, map[string]string{
-		GOVERNANCE_CONTRACT:     roninGovernanceAddress.Hex(),
-		TRUSTED_ORGS_CONTRACT:   roninTrustedOrgAddress.Hex(),
-		ETH_GOVERNANCE_CONTRACT: ethGovernanceAddress.Hex(),
+		GOVERNANCE_CONTRACT:           roninGovernanceAddress.Hex(),
+		TRUSTED_ORGANIZATION_CONTRACT: roninTrustedOrgAddress.Hex(),
+		ETH_GOVERNANCE_CONTRACT:       ethGovernanceAddress.Hex(),
 	})
 }
 
@@ -307,13 +307,13 @@ func (s *CommonTestSuite) TestUnpackBridgeOperatorsApprovedEventSuccess() {
 		common.HexToAddress("0x4a4bc674A97737376cFE990aE2fE0d2B6E738393"),
 	}
 	s.Equal(expectedPeriod, event.Period)
-	s.Equal(expectedBridgeOperators, event.BridgeOperators)
+	s.Equal(expectedBridgeOperators, event.Operators)
 	s.Nil(err)
 }
 
 func (s *CommonTestSuite) TestUnpackBridgeOperatorsUpdatedEventSuccess() {
 	data := "000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000002000000000000000000000000b6bc5bc0410773a3f86b1537ce7495c52e38f88b0000000000000000000000004a4bc674a97737376cfe990ae2fe0d2b6e738393"
-	event, err := unpackBridgeOperatorsUpdatedEvent(&bridgeModels.Task{
+	event, err := unpackBridgeOperatorSetUpdatedEvent(&bridgeModels.Task{
 		Data: data,
 	})
 

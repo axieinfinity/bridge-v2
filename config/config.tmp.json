@@ -1,224 +1,85 @@
 {
   "listeners": {
-    "RoninListener": {
-      "rpcUrl": "",
-      "blockTime": 15,
-      "safeBlockRange": 0,
+    "Ronin": {
+      "chainId": "0x7e5",
+      "rpcUrl": "http://localhost:8545",
+      "blockTime": 3,
+      "safeBlockRange": 10,
+      "maxTasksQuery": 1000,
+      "minTasksQuery": 50,
+      "taskInterval": 3,
+      "transactionCheckPeriod": 5,
       "secret": {
-        "validator": "",
-        "relayer": ""
+        "validator": {
+          "plainPrivateKey": "ad45ffdf15ad48ad0e6c4769a93338c08884f7d6bcb3879066bed489f837d1ba"
+        },
+        "relayer": {
+          "plainPrivateKey": "ad45ffdf15ad48ad0e6c4769a93338c08884f7d6bcb3879066bed489f837d1ba"
+        }
       },
-      "fromHeight": 11500000,
+      "fromHeight": 0,
+      "processWithinBlocks": 400,
+      "contracts": {
+        "Gateway": "0xcaCA1c072D26E46686d932686015207FbE08FdB8",
+        "EthGateway": "0xb68cbBDd4C7b3e4e39C035Bd356FC5BDb7E2a50E",
+        "EthGovernance": "0x857d7CcFcef3A7FF8245f57Daeb042440Fd513e8",
+        "Governance": "0xFBD674ba8E716F431041e2b4195CF4f1975DdFB5",
+        "TrustedOrganization": "0x27405e2297835a17FD410341C0CD20fc7a4Cd6DE"
+      },
       "subscriptions": {
-        "ValidatorContractUpdated": {
-          "from": "0x123",
-          "to": "0x456",
-          "type": 1,
-          "handler": {
-            "abi": "./contracts/common/BridgeAdmin.abi",
-            "name": "ValidatorContractUpdated"
-          },
-          "callbacks": {
-            "RoninListener": "ValidatorContractUpdatedCallBack",
-            "EthereumListener": "ValidatorContractUpdatedCallBack"
-          }
-        },
-        // ========================== GATEWAY SUBSCRIPTIONS ==========================
-        "MainchainWithdrewSubscription": {
-          "address": "0x00...RoninGatewayV2...00",
-          "type": 0, // Event Subscription
-          "handler": {
-            "abi": "./contracts/ronin/RoninGatewayV2.abi",
-            "name": "MainchainWithdrew" // MainchainWithdrew(bytes32 receiptHash, Transfer.Receipt receipt)
-          },
-          "callbacks": {
-            "RoninListener": "StoreMainchainWithdrawCallback"
-            // TODO: stores the receipt to own database for future check from `ProvideReceiptSignatureCallback`
-          }
-        },
-        "WithdrawalRequestedSubscription": {
-          "address": "0x00...RoninGatewayV2...00",
-          "type": 0, // Event Subscription
-          "handler": {
-            "abi": "./contracts/ronin/RoninGatewayV2.abi",
-            "name": "WithdrawalRequested" // WithdrawalRequested(bytes32 receiptHash, Transfer.Receipt receipt)
-          },
-          "callbacks": {
-            "RoninListener": "ProvideReceiptSignatureCallback"
-            // TODO: validator signs `eth_signTypeDataV4` on the receipt `Transfer.Receipt` before call method `RoninGatewayV2.bulkSubmitWithdrawalSignatures()`
-            // NOTE: consider checking whether the withdrawal is done on mainchain or not (by checking in own database if has event `MainchainWithdrew` for the receipt).
-          }
-        },
-        "WithdrawalSignaturesRequestedSubscription": {
-          "address": "0x00...RoninGatewayV2...00",
-          "type": 0, // Event Subscription
-          "handler": {
-            "abi": "./contracts/ronin/RoninGatewayV2.abi",
-            "name": "WithdrawalSignaturesRequested" // WithdrawalSignaturesRequested(bytes32 receiptHash, Transfer.Receipt)
-          },
-          "callbacks": {
-            "RoninListener": "ProvideReceiptSignatureCallback"
-            // NOTE: same callback as the `WithdrawalRequestedSubscription` subscription
-          }
-        },
-        // ========================== VALIDATOR SUBSCRIPTIONS ==========================
-        // The purpose of "VALIDATOR SUBSCRIPTIONS" is to pull Validator Info list when the validator set changed
-        // and able to get the list locally while handling other subscriptions.
-        //
-        // Other ways to fetch Validator Info with less effort are welcome.
-        //
-        "ValidatorsAddedSubscription": {
-          "address": "0x00...RoninValidator...00",
-          "type": 0, // Event Subscription
-          "handler": {
-            "abi": "./contracts/ronin/RoninValidator.abi",
-            "name": "ValidatorsAdded" //ValidatorsAdded(uint256 indexed nonce, WeightedValidator[] validators)
-          },
-          "callbacks": {
-            "RoninListener": "ValidatorsAddedCallback"
-            // TODO: store the validator into the database to retrieve later in `ProposalApprovedSubscription`
-            //
-            // For example the validator table can be:
-            // .-------------------------------------------------------------------------.
-            // |    Validator (key) |             Governor             |      Weight     |
-            // .-------------------------------------------------------------------------.
-            // |      0x0000000     |             0x0000000            |        1        |
-            // .-------------------------------------------------------------------------.
-            // |      0x0000001     |             0x0000001            |        1        |
-            // .-------------------------------------------------------------------------.
-            //
-            // NOTE: the `nonce` in the `ValidatorsAdded`, `ValidatorsUpdated, `ValidatorsRemoved` and `ThresholdUpdated` is to make sure the change sequences in order.
-          },
-        "ValidatorsUpdatedSubscription": {
-            "address": "0x00...RoninValidator...00",
-            "type": 0,
-            "handler": {
-              "abi": "./contracts/ronin/RoninValidator.abi",
-              "name": "ValidatorsUpdated" //ValidatorsUpdated(uint256 indexed nonce, WeightedValidator[] validators)
-            },
-            "callbacks": {
-              "RoninListener": "ValidatorsUpdatedCallback"
-              // TODO: update the `governor` and `weight` field based on `validator` key.
-              // NOTE: the `nonce` in the `ValidatorsAdded`, `ValidatorsUpdated, `ValidatorsRemoved` and `ThresholdUpdated` is to make sure the change sequences in order.
-            }
-        },
-        "ValidatorsRemovedSubscription": {
-          "address": "0x00...RoninValidator...00",
+        "BridgeOperatorSetUpdatedSubscription": {
+          "to": "0xcaCA1c072D26E46686d932686015207FbE08FdB8",
           "type": 0,
           "handler": {
-            "abi": "./contracts/ronin/RoninValidator.abi",
-            "name": "ValidatorsRemoved" //ValidatorsRemoved(uint256 indexed nonce, address[] validators);
+            "contract": "RoninValidator",
+            "name": "BridgeOperatorSetUpdated"
           },
           "callbacks": {
-            "RoninListener": "ValidatorsRemovedCallback"
-            // TODO: remove validators
-            // NOTE: the `nonce` in the `ValidatorsAdded`, `ValidatorsUpdated, `ValidatorsRemoved` and `ThresholdUpdated` is to make sure the change sequences in order.
+            "Ronin": "BridgeOperatorSetUpdatedCallback"
           }
         },
-        // ========================== GOVERNANCE SUBSCRIPTIONS ==========================
-        "ProposalCreatedSubscription": {
-          "address": "0x00...GovernanceAdmin...00",
-          "type": 0, // Event Subscription
+        "BridgeOperatorsApprovedSubscription": {
+          "to": "0xcDA3fab494eBD8CC773ceF65C4A9885664ca54D1",
+          "type": 0,
           "handler": {
-            "abi": "./contracts/ronin/GovernanceAdmin.abi",
-            "name": "ProposalCreated" //ProposalCreated( uint256 indexed chainId, uint256 indexed round, bytes32 indexed proposalHash, Proposal.ProposalDetail proposal, address creator)
+            "contract": "RoninGovernanceAdmin",
+            "name": "BridgeOperatorsApproved"
           },
           "callbacks": {
-            "RoninListener": "ProposalCreatedCallback"
-            // NOTE: store the proposal to database
-          }
-        },
-        "GlobalProposalCreatedSubscription": {
-          "address": "0x00...GovernanceAdmin...00",
-          "type": 0, // Event Subscription
-          "handler": {
-            "abi": "./contracts/ronin/GovernanceAdmin.abi",
-            "name": "GlobalProposalCreated" // GlobalProposalCreated( uint256 indexed round, bytes32 indexed proposalHash, Proposal.ProposalDetail proposal, bytes32 globalProposalHash, BridgeProposal.GlobalProposal globalProposal, address creator)
-          },
-          "callbacks": {
-            "RoninListener": "GlobalProposalCreatedCallback"
-            // NOTE: store the global proposal (key=globalProposalHash) + proposal (key=proposalHash) to database
-          }
-        },
-        "ProposalApprovedSubscription": {
-          "address": "0x00...GovernanceAdmin...00",
-          "type": 0, // Event Subscription
-          "handler": {
-            "abi": "./contracts/ronin/GovernanceAdmin.abi",
-            "name": "ProposalApproved" //ProposalApproved(bytes32 indexed proposalHash) 
-          },
-          "callbacks": {
-            "RoninListener": "ProposalApprovedCallback",
-            "EthereumListener": "ProposalApprovedCallback",
-            "OthersListener": "ProposalApprovedCallback"
-            // TODO: apply the proposal on the relevant chain based on the proposal.chainId (proposal.chainId == 0 then the global proposal will apply on all chains).
-            //
-            // NOTE: consider checking whether the proposal is done on the current network or not.
-            //
-            // PSEUDO CODE:
-            // ```
-            //  # Retrieve the `Proposal` by the `proposalHash`
-            //  var proposal := ProposalTable.get(proposalHash);
-            //
-            //  # Check whether the task is not relayed on the **current network**:
-            //  if (CurrentNetwork.GovernanceAdminContract.vote(proposal.chainId, proposal.nonce).status == Pending`) {
-            //    var governors := ValidatorTable.selectAllGovernorAddresses();
-            //
-            //    # Collect signatures by call to `GovernanceAdmin` on the **ronin network**
-            //    # TODO: apply multi-call to fetch signature in 1 call
-            //    var supports := []
-            //    var signatures := []
-            //    for governor in governors {
-            //      var (support, signatures) := RoninNetwork.GovernanceAdminContract.getVotingSignature(proposal.chainId, proposal.nonce, governor);
-            //      supports.append(support);
-            //      signatures.append(signature);
-            //    }
-            //
-            //    # Check whether the proposal is normalized from global proposal (chainId == 0)
-            //    if (proposal.chainId == 0) {
-            //      var globalProposal := GlobalProposalTable.getGlobalProposalByProposalHash(proposal.hash)
-            //      CurrentNetwork.relayGlobalProposal(globalProposal, supports, signatures)
-            //    } else {
-            //      CurrentNetwork.relayProposal(proposal, supports, signatures)
-            //    }
-            //  }
-            // ```
+            "Ronin": "BridgeOperatorsApprovedCallback"
           }
         }
       }
     },
-    "EthereumListener": {
-      // ...configs
-      "subscriptions": {
-      // ========================== GATEWAY SUBSCRIPTION ==========================
-        "DepositRequestedSubscription": {
-          "address": "0x00...MainchainGatewayV2...00",
-          "type": 0, // Event Subscription
-          "handler": {
-            "abi": "./contracts/mainchain/MainchainGatewayV2.abi",
-            "name": "DepositRequested" // DepositRequested(bytes32 receiptHash, Transfer.Receipt receipt)
-          },
-          "callbacks": {
-            "RoninListener": "DepositRequestedCallback"
-            // TODO: use validator account to call method `RoninGatewayV2.bulkDepositFor()`
-            // NOTE: consider checking the deposit is done or not (by querying onto Ronin method `RoninGatewayV2.vote(receipt.mainchain.chainId, receipt.id).status == VoteStatus.Executed`)
-          }
+    "Ethereum": {
+      "disabled": false,
+      "chainId": "0x7e7",
+      "rpcUrl": "http://localhost:9545",
+      "blockTime": 3,
+      "safeBlockRange": 10,
+      "transactionCheckPeriod": 5,
+      "secret": {
+        "validator": {
+          "plainPrivateKey": "ad45ffdf15ad48ad0e6c4769a93338c08884f7d6bcb3879066bed489f837d1ba"
         },
-        "WithdrewSubscription": {
-          "address": "0x00...MainchainGatewayV2...00",
-          "type": 0, // Event Subscription
-          "handler": {
-            "abi": "./contracts/mainchain/MainchainGatewayV2.abi",
-            "name": "Withdrew" // Withdrew(bytes32 receiptHash, Transfer.Receipt receipt)
-          },
-          "callbacks": {
-            "RoninListener": "WithdrewCallback"
-            // TODO: use validator account to call method `RoninGatewayV2.acknowledgeMainchainWithdrew()`
-            // NOTE: consider checking the task is done or not (by querying onto Ronin method `RoninGatewayV2.mainchainWithdrew(receipt.id)`)
-          }
+        "relayer": {
+          "plainPrivateKey": "ad45ffdf15ad48ad0e6c4769a93338c08884f7d6bcb3879066bed489f837d1ba"
         }
-      }
+      },
+      "fromHeight": 0,
+      "processWithinBlocks": 400,
+      "contracts": {
+        "Gateway": "0xA8D61A5427a778be28Bd9bb5990956b33385c738"
+      },
+      "subscriptions": {}
     }
   },
-  "numberOfWorkers": 1024
+  "database": {
+    "host": "localhost",
+    "user": "postgres",
+    "password": "example",
+    "dbName": "bridge",
+    "port": 5432,
+    "maxOpenConns": 500
+  }
 }
