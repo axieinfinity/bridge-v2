@@ -3,8 +3,8 @@ package task
 import (
 	"crypto/ecdsa"
 	ethGovernance "github.com/axieinfinity/bridge-contracts/generated_contracts/ethereum/governance"
-	roninTrustedOrganization "github.com/axieinfinity/bridge-contracts/generated_contracts/multi_chains"
 	roninGovernance "github.com/axieinfinity/bridge-contracts/generated_contracts/ronin/governance"
+	roninTrustedOrganization "github.com/axieinfinity/bridge-contracts/generated_contracts/ronin/trusted_organization"
 	roninValidator "github.com/axieinfinity/bridge-contracts/generated_contracts/ronin/validator"
 	bridgeCore "github.com/axieinfinity/bridge-core"
 	"github.com/axieinfinity/bridge-core/metrics"

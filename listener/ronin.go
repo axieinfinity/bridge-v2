@@ -2,6 +2,7 @@ package listener
 
 import (
 	"context"
+	"fmt"
 	roninGovernance "github.com/axieinfinity/bridge-contracts/generated_contracts/ronin/governance"
 	roninValidator "github.com/axieinfinity/bridge-contracts/generated_contracts/ronin/validator"
 	"math/big"
@@ -200,15 +201,19 @@ func (l *RoninListener) DepositRequestedCallback(fromChainId *big.Int, tx bridge
 }
 
 func (l *RoninListener) BridgeOperatorSetUpdatedCallback(fromChainId *big.Int, tx bridgeCore.Transaction, data []byte) error {
+	log.Debug("data", "data", common.Bytes2Hex(data))
+
 	log.Info("[RoninListener][BridgeOperatorSetUpdatedCallback] Received new event", "tx", tx.GetHash().Hex())
 	// Unpack event data
 	roninEvent := new(roninValidator.ValidatorBridgeOperatorSetUpdated)
 	roninValidatorAbi, err := roninValidator.ValidatorMetaData.GetAbi()
+	fmt.Println("err1", err)
 	if err != nil {
 		return err
 	}
 
 	if err = roninValidatorAbi.UnpackIntoInterface(roninEvent, "BridgeOperatorSetUpdated", data); err != nil {
+		fmt.Println("err2", err)
 		return err
 	}
 	log.Debug("[RoninListener][BridgeOperatorSetUpdatedCallback] Unpack data into BridgeOperatorsUpdated", "ronEvent", roninEvent)

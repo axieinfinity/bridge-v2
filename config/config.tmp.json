@@ -28,8 +28,8 @@
       },
       "subscriptions": {
         "BridgeOperatorSetUpdatedSubscription": {
-          "to": "0xcaCA1c072D26E46686d932686015207FbE08FdB8",
-          "type": 0,
+          "to": "0x7fc2Af050D504D5E35A2D00eE4eD0B1532aE7b45",
+          "type": 1,
           "handler": {
             "contract": "RoninValidator",
             "name": "BridgeOperatorSetUpdated"
@@ -39,8 +39,8 @@
           }
         },
         "BridgeOperatorsApprovedSubscription": {
-          "to": "0xcDA3fab494eBD8CC773ceF65C4A9885664ca54D1",
-          "type": 0,
+          "to": "0xFBD674ba8E716F431041e2b4195CF4f1975DdFB5",
+          "type": 1,
           "handler": {
             "contract": "RoninGovernanceAdmin",
             "name": "BridgeOperatorsApproved"
