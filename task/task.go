@@ -126,13 +126,15 @@ func (r *task) voteBridgeOperatorsBySignature(task *models.Task) (doneTasks, pro
 		return nil, nil, failedTasks, nil
 	}
 
-	a := parseSignatureAsRsv(signature)
-	log.Debug("data", "r", a.R, "s", a.S, "v", a.V, "period", event.Period.Int64(), "bridgeOperators", bridgeOperators)
+	signatureStruct := parseSignatureAsRsv(signature)
+	log.Debug("data", "r", signatureStruct.R, "s", signatureStruct.S, "v", signatureStruct.V, "period", event.Period.Int64(), "bridgeOperators", bridgeOperators)
+
 	tx, err = r.util.SendContractTransaction(r.listener.GetValidatorSign(), r.chainId, func(opts *bind.TransactOpts) (*ethtypes.Transaction, error) {
 		return transactor.VoteBridgeOperatorsBySignatures(opts, event.Period, event.BridgeOperators, []roninGovernance.SignatureConsumerSignature{
-			parseSignatureAsRsv(signature),
+			signatureStruct,
 		})
 	})
+
 	if err != nil {
 		log.Error("Send transaction error", "err", err)
 		task.LastError = err.Error()
@@ -145,7 +147,6 @@ func (r *task) voteBridgeOperatorsBySignature(task *models.Task) (doneTasks, pro
 }
 
 func (r *task) relayBridgeOperators(task *models.Task) (doneTasks, processingTasks, failedTasks []*models.Task, tx *ethtypes.Transaction) {
-	log.Debug("testttt")
 	// create caller
 	roninTrustedCaller, err := roninTrustedOrganization.NewTrustedOrganizationCaller(common.HexToAddress(r.contracts[TRUSTED_ORGANIZATION_CONTRACT]), r.client)
 	if err != nil {
