@@ -11,10 +11,10 @@
       "transactionCheckPeriod": 5,
       "secret": {
         "validator": {
-          "plainPrivateKey": "ad45ffdf15ad48ad0e6c4769a93338c08884f7d6bcb3879066bed489f837d1ba"
+          "plainPrivateKey": ""
         },
         "relayer": {
-          "plainPrivateKey": "ad45ffdf15ad48ad0e6c4769a93338c08884f7d6bcb3879066bed489f837d1ba"
+          "plainPrivateKey": ""
         }
       },
       "fromHeight": 8010875,
@@ -93,10 +93,10 @@
       "transactionCheckPeriod": 15,
       "secret": {
         "validator": {
-          "plainPrivateKey": "ad45ffdf15ad48ad0e6c4769a93338c08884f7d6bcb3879066bed489f837d1ba"
+          "plainPrivateKey": ""
         },
         "relayer": {
-          "plainPrivateKey": "ad45ffdf15ad48ad0e6c4769a93338c08884f7d6bcb3879066bed489f837d1ba"
+          "plainPrivateKey": ""
         }
       },
       "fromHeight": 12522064,
