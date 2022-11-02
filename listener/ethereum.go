@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/ethereum/go-ethereum/ethclient"
 	"math/big"
 	"sync"
 	"sync/atomic"
@@ -39,7 +38,7 @@ type EthereumListener struct {
 	fromHeight     uint64
 	batches        sync.Map
 	utilsWrapper   utils.Utils
-	client         *ethclient.Client
+	client         utils.EthClient
 	validatorSign  bridgeCoreUtils.ISign
 	relayerSign    bridgeCoreUtils.ISign
 	store          stores.MainStore
@@ -67,7 +66,7 @@ func NewEthereumListener(ctx context.Context, cfg *bridgeCore.LsConfig, helpers 
 	if helpers != nil {
 		ethListener.utilsWrapper = helpers
 	}
-	client, err := ethclient.Dial(cfg.RpcUrl)
+	client, err := ethListener.utilsWrapper.NewEthClient(cfg.RpcUrl)
 	if err != nil {
 		log.Error(fmt.Sprintf("[New%sListener] error while dialing rpc client", cfg.Name), "err", err, "url", cfg.RpcUrl)
 		return nil, err

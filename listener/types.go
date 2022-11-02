@@ -49,7 +49,7 @@ func NewEthBlock(client utils.EthClient, chainId *big.Int, block *ethtypes.Block
 			ethBlock.logs = append(ethBlock.logs, &ethLog)
 		}
 	}
-	//log.Info("[NewEthBlock] Finish getting eth block", "block", ethBlock.block.NumberU64(), "txs", len(ethBlock.txs), "logs", len(ethBlock.logs))
+	log.Info("[NewEthBlock] Finish getting eth block", "block", ethBlock.block.NumberU64(), "txs", len(ethBlock.txs), "logs", len(ethBlock.logs))
 	return ethBlock, nil
 }
 
