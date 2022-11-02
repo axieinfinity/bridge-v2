@@ -2,7 +2,6 @@ package listener
 
 import (
 	"context"
-	"fmt"
 	roninGovernance "github.com/axieinfinity/bridge-contracts/generated_contracts/ronin/governance"
 	roninValidator "github.com/axieinfinity/bridge-contracts/generated_contracts/ronin/validator"
 	"math/big"
@@ -201,19 +200,15 @@ func (l *RoninListener) DepositRequestedCallback(fromChainId *big.Int, tx bridge
 }
 
 func (l *RoninListener) BridgeOperatorSetUpdatedCallback(fromChainId *big.Int, tx bridgeCore.Transaction, data []byte) error {
-	log.Debug("data", "data", common.Bytes2Hex(data))
-
 	log.Info("[RoninListener][BridgeOperatorSetUpdatedCallback] Received new event", "tx", tx.GetHash().Hex())
 	// Unpack event data
 	roninEvent := new(roninValidator.ValidatorBridgeOperatorSetUpdated)
 	roninValidatorAbi, err := roninValidator.ValidatorMetaData.GetAbi()
-	fmt.Println("err1", err)
 	if err != nil {
 		return err
 	}
 
-	if err = roninValidatorAbi.UnpackIntoInterface(roninEvent, "BridgeOperatorSetUpdated", data); err != nil {
-		fmt.Println("err2", err)
+	if err := l.utilsWrapper.UnpackLog(*roninValidatorAbi, roninEvent, "BridgeOperatorSetUpdated", data); err != nil {
 		return err
 	}
 	log.Debug("[RoninListener][BridgeOperatorSetUpdatedCallback] Unpack data into BridgeOperatorsUpdated", "ronEvent", roninEvent)
@@ -228,7 +223,7 @@ func (l *RoninListener) BridgeOperatorSetUpdatedCallback(fromChainId *big.Int, t
 		ChainId:         hexutil.EncodeBig(chainId),
 		FromChainId:     hexutil.EncodeBig(fromChainId),
 		FromTransaction: tx.GetHash().Hex(),
-		Type:            task.DEPOSIT_TASK,
+		Type:            task.VOTE_BRIDGE_OPERATORS_TASK,
 		Data:            common.Bytes2Hex(data),
 		Retries:         0,
 		Status:          task.STATUS_PENDING,
@@ -247,7 +242,7 @@ func (l *RoninListener) BridgeOperatorsApprovedCallback(fromChainId *big.Int, tx
 		return err
 	}
 
-	if err = roninGovernanceAbi.UnpackIntoInterface(roninEvent, "BridgeOperatorsApproved", data); err != nil {
+	if err := l.utilsWrapper.UnpackLog(*roninGovernanceAbi, roninEvent, "BridgeOperatorsApproved", data); err != nil {
 		return err
 	}
 	log.Debug("[RoninListener][BridgeOperatorsApprovedCallback] Unpack data into BridgeOperatorsApproved", "ronEvent", roninEvent)
@@ -262,7 +257,7 @@ func (l *RoninListener) BridgeOperatorsApprovedCallback(fromChainId *big.Int, tx
 		ChainId:         hexutil.EncodeBig(chainId),
 		FromChainId:     hexutil.EncodeBig(fromChainId),
 		FromTransaction: tx.GetHash().Hex(),
-		Type:            task.DEPOSIT_TASK,
+		Type:            task.RELAY_BRIDGE_OPERATORS_TASK,
 		Data:            common.Bytes2Hex(data),
 		Retries:         0,
 		Status:          task.STATUS_PENDING,

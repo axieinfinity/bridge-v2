@@ -58,7 +58,7 @@ func (r *task) collectTask(t *models.Task) {
 }
 
 func (r *task) send() {
-	log.Info("[bulk] sending transaction", "type", r.taskType)
+	log.Info("[task] sending transaction", "type", r.taskType)
 	switch r.taskType {
 	case VOTE_BRIDGE_OPERATORS_TASK:
 		r.sendTransaction(r.voteBridgeOperatorsBySignature)
@@ -70,7 +70,6 @@ func (r *task) send() {
 func (r *task) sendTransaction(sendTx func(task *models.Task) (doneTasks, processingTasks, failedTasks []*models.Task, tx *ethtypes.Transaction)) {
 	var txHash string
 
-	log.Info("[task][sendTransaction] start sending tx", "type", r.taskType)
 	doneTasks, processingTasks, failedTasks, transaction := sendTx(r.task)
 
 	if transaction != nil {
@@ -99,7 +98,7 @@ func (r *task) voteBridgeOperatorsBySignature(task *models.Task) (doneTasks, pro
 		return nil, nil, failedTasks, nil
 	}
 
-	event, err := unpackBridgeOperatorSetUpdatedEvent(task)
+	event, err := r.unpackBridgeOperatorSetUpdatedEvent(task)
 	if err != nil {
 		task.LastError = err.Error()
 		failedTasks = append(failedTasks, task)
@@ -120,19 +119,22 @@ func (r *task) voteBridgeOperatorsBySignature(task *models.Task) (doneTasks, pro
 			return r.util.SignTypedData(typedData, r.listener.GetValidatorSign())
 		},
 	}
-	signatures, err := signBridgeOperatorsBallot(opts, event.Period.Int64(), bridgeOperators)
+	signature, err := signBridgeOperatorsBallot(opts, event.Period.Int64(), bridgeOperators)
 	if err != nil {
 		task.LastError = err.Error()
 		failedTasks = append(failedTasks, task)
 		return nil, nil, failedTasks, nil
 	}
 
+	a := parseSignatureAsRsv(signature)
+	log.Debug("data", "r", a.R, "s", a.S, "v", a.V, "period", event.Period.Int64(), "bridgeOperators", bridgeOperators)
 	tx, err = r.util.SendContractTransaction(r.listener.GetValidatorSign(), r.chainId, func(opts *bind.TransactOpts) (*ethtypes.Transaction, error) {
 		return transactor.VoteBridgeOperatorsBySignatures(opts, event.Period, event.BridgeOperators, []roninGovernance.SignatureConsumerSignature{
-			parseSignatureAsRsv(signatures),
+			parseSignatureAsRsv(signature),
 		})
 	})
 	if err != nil {
+		log.Error("Send transaction error", "err", err)
 		task.LastError = err.Error()
 		failedTasks = append(failedTasks, task)
 		return nil, nil, failedTasks, nil
@@ -143,6 +145,7 @@ func (r *task) voteBridgeOperatorsBySignature(task *models.Task) (doneTasks, pro
 }
 
 func (r *task) relayBridgeOperators(task *models.Task) (doneTasks, processingTasks, failedTasks []*models.Task, tx *ethtypes.Transaction) {
+	log.Debug("testttt")
 	// create caller
 	roninTrustedCaller, err := roninTrustedOrganization.NewTrustedOrganizationCaller(common.HexToAddress(r.contracts[TRUSTED_ORGANIZATION_CONTRACT]), r.client)
 	if err != nil {
@@ -178,7 +181,7 @@ func (r *task) relayBridgeOperators(task *models.Task) (doneTasks, processingTas
 		voters = append(voters, node.BridgeVoter)
 	}
 
-	event, err := unpackBridgeOperatorsApprovedEvent(task)
+	event, err := r.unpackBridgeOperatorsApprovedEvent(task)
 	if err != nil {
 		task.LastError = err.Error()
 		failedTasks = append(failedTasks, task)
@@ -218,28 +221,28 @@ func (r *task) relayBridgeOperators(task *models.Task) (doneTasks, processingTas
 	return
 }
 
-func unpackBridgeOperatorSetUpdatedEvent(task *models.Task) (*roninValidator.ValidatorBridgeOperatorSetUpdated, error) {
+func (r *task) unpackBridgeOperatorSetUpdatedEvent(task *models.Task) (*roninValidator.ValidatorBridgeOperatorSetUpdated, error) {
 	roninEvent := new(roninValidator.ValidatorBridgeOperatorSetUpdated)
 	roninValidatorAbi, err := roninValidator.ValidatorMetaData.GetAbi()
 	if err != nil {
 		return nil, err
 	}
 
-	if err = roninValidatorAbi.UnpackIntoInterface(roninEvent, "BridgeOperatorSetUpdated", common.Hex2Bytes(task.Data)); err != nil {
+	if err = r.util.UnpackLog(*roninValidatorAbi, roninEvent, "BridgeOperatorSetUpdated", common.Hex2Bytes(task.Data)); err != nil {
 		return nil, err
 	}
 
 	return roninEvent, nil
 }
 
-func unpackBridgeOperatorsApprovedEvent(task *models.Task) (*roninGovernance.GovernanceBridgeOperatorsApproved, error) {
+func (r *task) unpackBridgeOperatorsApprovedEvent(task *models.Task) (*roninGovernance.GovernanceBridgeOperatorsApproved, error) {
 	roninEvent := new(roninGovernance.GovernanceBridgeOperatorsApproved)
 	roninGovernanceAbi, err := roninGovernance.GovernanceMetaData.GetAbi()
 	if err != nil {
 		return nil, err
 	}
 
-	if err = roninGovernanceAbi.UnpackIntoInterface(roninEvent, "BridgeOperatorsApproved", common.Hex2Bytes(task.Data)); err != nil {
+	if err = r.util.UnpackLog(*roninGovernanceAbi, roninEvent, "BridgeOperatorsApproved", common.Hex2Bytes(task.Data)); err != nil {
 		return nil, err
 	}
 

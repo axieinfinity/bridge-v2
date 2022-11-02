@@ -2,10 +2,12 @@ package task
 
 import (
 	"context"
+	"crypto/ecdsa"
 	"database/sql"
 	"fmt"
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/axieinfinity/bridge-contracts/generated_contracts/ethereum/gateway"
+	roninGovernance "github.com/axieinfinity/bridge-contracts/generated_contracts/ronin/governance"
 	internal "github.com/axieinfinity/bridge-core"
 	"github.com/axieinfinity/bridge-core/stores"
 	"github.com/axieinfinity/bridge-core/utils"
@@ -19,8 +21,10 @@ import (
 	"github.com/ethereum/go-ethereum/core"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/ethereum/go-ethereum/ethclient"
 	core2 "github.com/ethereum/go-ethereum/signer/core"
 	"github.com/stretchr/testify/suite"
+	"log"
 	"math/big"
 	"testing"
 )
@@ -56,6 +60,7 @@ type VoteBridgeOperatorsSuite struct {
 	config      *internal.LsConfig
 	sqlDB       *sql.DB
 	mockDB      sqlmock.Sqlmock
+	task        *task
 }
 
 func TestRunVoteBridgeOperatorsSuite(t *testing.T) {
@@ -80,18 +85,17 @@ func (s *VoteBridgeOperatorsSuite) SetupTest() {
 		GATEWAY_CONTRACT:    common.BytesToAddress([]byte{100}).Hex(),
 		GOVERNANCE_CONTRACT: address.Hex(),
 	})
-}
-
-func (s *VoteBridgeOperatorsSuite) TestVoteBridgeOperatorsBySignatureSuccess() {
-	gormDB, sqlDB, _, _ := newMockDB()
-	defer sqlDB.Close()
 
 	roninListener := newMockListener(s.sim, context.Background(), s.config, s.utilWrapper, s.store)
 	r := newMockRoninTask(s.sim, roninListener, gormDB, s.utilWrapper)
-	voteBridgeOperatorsTask := newTask(r.listener, r.client, r.store, r.chainId, r.contracts, defaultMaxTry, VOTE_BRIDGE_OPERATORS_TASK, r.releaseTasksCh, r.util)
+	s.task = newTask(r.listener, r.client, r.store, r.chainId, r.contracts, defaultMaxTry, VOTE_BRIDGE_OPERATORS_TASK, r.releaseTasksCh, r.util)
 
+}
+
+func (s *VoteBridgeOperatorsSuite) TestVoteBridgeOperatorsBySignatureSuccess() {
+	defer s.sqlDB.Close()
 	data := "000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000002000000000000000000000000b6bc5bc0410773a3f86b1537ce7495c52e38f88b0000000000000000000000004a4bc674a97737376cfe990ae2fe0d2b6e738393"
-	doneTasks, processingTasks, failedTasks, _ := voteBridgeOperatorsTask.voteBridgeOperatorsBySignature(&bridgeModels.Task{
+	doneTasks, processingTasks, failedTasks, _ := s.task.voteBridgeOperatorsBySignature(&bridgeModels.Task{
 		ChainId:         RoninChainId,
 		FromChainId:     EthereumChainId,
 		Type:            VOTE_BRIDGE_OPERATORS_TASK,
@@ -147,6 +151,7 @@ type RelayBridgeOperatorsSuite struct {
 	config      *internal.LsConfig
 	sqlDB       *sql.DB
 	mockDB      sqlmock.Sqlmock
+	task        *task
 }
 
 func TestRunRelayBridgeOperatorsSuite(t *testing.T) {
@@ -181,21 +186,19 @@ func (s *RelayBridgeOperatorsSuite) SetupTest() {
 		TRUSTED_ORGANIZATION_CONTRACT: roninTrustedOrgAddress.Hex(),
 		ETH_GOVERNANCE_CONTRACT:       ethGovernanceAddress.Hex(),
 	})
-}
-
-func (s *RelayBridgeOperatorsSuite) TestRelayBridgeOperatorsSuccess() {
-	gormDB, sqlDB, _, _ := newMockDB()
-	defer sqlDB.Close()
 
 	roninListener := newMockListener(s.sim, context.Background(), s.config, s.utilWrapper, s.store)
 	r := newMockRoninTask(s.sim, roninListener, gormDB, s.utilWrapper)
-	relayBridgeOperatorsTask := newTask(r.listener, r.client, r.store, r.chainId, r.contracts, defaultMaxTry, RELAY_BRIDGE_OPERATORS_TASK, r.releaseTasksCh, r.util)
+	s.task = newTask(r.listener, r.client, r.store, r.chainId, r.contracts, defaultMaxTry, RELAY_BRIDGE_OPERATORS_TASK, r.releaseTasksCh, r.util)
+
+}
+
+func (s *RelayBridgeOperatorsSuite) TestRelayBridgeOperatorsSuccess() {
+	defer s.sqlDB.Close()
 
 	// Setup operators signatures
-	voteBridgeOperatorsTask := newTask(r.listener, r.client, r.store, r.chainId, r.contracts, defaultMaxTry, VOTE_BRIDGE_OPERATORS_TASK, r.releaseTasksCh, r.util)
-
 	data := "000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000002000000000000000000000000b6bc5bc0410773a3f86b1537ce7495c52e38f88b0000000000000000000000004a4bc674a97737376cfe990ae2fe0d2b6e738393"
-	doneTasks, processingTasks, failedTasks, _ := voteBridgeOperatorsTask.voteBridgeOperatorsBySignature(&bridgeModels.Task{
+	doneTasks, processingTasks, failedTasks, _ := s.task.voteBridgeOperatorsBySignature(&bridgeModels.Task{
 		ChainId:         RoninChainId,
 		FromChainId:     EthereumChainId,
 		Type:            VOTE_BRIDGE_OPERATORS_TASK,
@@ -212,7 +215,7 @@ func (s *RelayBridgeOperatorsSuite) TestRelayBridgeOperatorsSuccess() {
 	s.Equal(len(failedTasks), 0)
 
 	// Setup trusted organizations
-	_, err := r.util.SendContractTransaction(r.listener.GetValidatorSign(), r.chainId, func(opts *bind.TransactOpts) (*ethtypes.Transaction, error) {
+	_, err := s.task.util.SendContractTransaction(s.task.listener.GetValidatorSign(), s.task.chainId, func(opts *bind.TransactOpts) (*ethtypes.Transaction, error) {
 		return s.roninTrustedOrg.SetTrustedOrganizations(opts, []common.Address{
 			common.HexToAddress("0xB6bc5bc0410773A3F86B1537ce7495C52e38f88B"),
 			common.HexToAddress("0x4a4bc674A97737376cFE990aE2fE0d2B6E738393"),
@@ -223,7 +226,7 @@ func (s *RelayBridgeOperatorsSuite) TestRelayBridgeOperatorsSuccess() {
 
 	// Run the actual test
 	data = "000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000002000000000000000000000000b6bc5bc0410773a3f86b1537ce7495c52e38f88b0000000000000000000000004a4bc674a97737376cfe990ae2fe0d2b6e738393"
-	doneTasks, processingTasks, failedTasks, _ = relayBridgeOperatorsTask.relayBridgeOperators(&bridgeModels.Task{
+	doneTasks, processingTasks, failedTasks, _ = s.task.relayBridgeOperators(&bridgeModels.Task{
 		ChainId:         RoninChainId,
 		FromChainId:     EthereumChainId,
 		Type:            VOTE_BRIDGE_OPERATORS_TASK,
@@ -267,6 +270,7 @@ type CommonTestSuite struct {
 	suite.Suite
 	SimulatedSuite
 	roninTask       *MockRoninTask
+	task            *task
 	roninGovernance *contract_tests.RoninGovernance
 }
 
@@ -293,11 +297,12 @@ func (s *CommonTestSuite) SetupTest() {
 
 	roninListener := newMockListener(s.sim, context.Background(), config, utilWrapper, store)
 	s.roninTask = newMockRoninTask(s.sim, roninListener, gormDB, utilWrapper)
+	s.task = newTask(s.roninTask.listener, s.roninTask.client, s.roninTask.store, s.roninTask.chainId, s.roninTask.contracts, defaultMaxTry, RELAY_BRIDGE_OPERATORS_TASK, s.roninTask.releaseTasksCh, s.roninTask.util)
 }
 
 func (s *CommonTestSuite) TestUnpackBridgeOperatorsApprovedEventSuccess() {
 	data := "000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000002000000000000000000000000b6bc5bc0410773a3f86b1537ce7495c52e38f88b0000000000000000000000004a4bc674a97737376cfe990ae2fe0d2b6e738393"
-	event, err := unpackBridgeOperatorsApprovedEvent(&bridgeModels.Task{
+	event, err := s.task.unpackBridgeOperatorsApprovedEvent(&bridgeModels.Task{
 		Data: data,
 	})
 
@@ -313,7 +318,7 @@ func (s *CommonTestSuite) TestUnpackBridgeOperatorsApprovedEventSuccess() {
 
 func (s *CommonTestSuite) TestUnpackBridgeOperatorsUpdatedEventSuccess() {
 	data := "000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000002000000000000000000000000b6bc5bc0410773a3f86b1537ce7495c52e38f88b0000000000000000000000004a4bc674a97737376cfe990ae2fe0d2b6e738393"
-	event, err := unpackBridgeOperatorSetUpdatedEvent(&bridgeModels.Task{
+	event, err := s.task.unpackBridgeOperatorSetUpdatedEvent(&bridgeModels.Task{
 		Data: data,
 	})
 
@@ -350,6 +355,51 @@ func (s *CommonTestSuite) TestSignBridgeOperatorsBallotSuccess() {
 	s.Equal(sig.S[:], expected.S[:])
 	s.Equal(sig.V, expected.V)
 	s.Nil(err)
+}
+
+func (s *CommonTestSuite) TestCallVoteBridgeOperatorsBySignaturesSuccess() {
+	client, _ := ethclient.Dial("http://localhost:8545")
+	privateKey, _ := crypto.HexToECDSA("")
+
+	publicKey := privateKey.Public()
+	publicKeyECDSA, ok := publicKey.(*ecdsa.PublicKey)
+	if !ok {
+		log.Fatal("error casting public key to ECDSA")
+	}
+
+	fromAddress := crypto.PubkeyToAddress(*publicKeyECDSA)
+	auth, _ := bind.NewKeyedTransactorWithChainID(privateKey, big.NewInt(2021))
+
+	nonce, err := client.PendingNonceAt(context.Background(), fromAddress)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	gasPrice, err := client.SuggestGasPrice(context.Background())
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	transactor, _ := roninGovernance.NewGovernanceTransactor(common.HexToAddress("0xFBD674ba8E716F431041e2b4195CF4f1975DdFB5"), client)
+	auth.Nonce = big.NewInt(int64(nonce))
+	auth.Value = big.NewInt(0)     // in wei
+	auth.GasLimit = uint64(300000) // in units
+	auth.GasPrice = gasPrice
+
+	tx, err := transactor.VoteBridgeOperatorsBySignatures(auth, big.NewInt(9263210), []common.Address{
+		common.HexToAddress("0xB6bc5bc0410773A3F86B1537ce7495C52e38f88B"),
+		common.HexToAddress("0x4a4bc674A97737376cFE990aE2fE0d2B6E738393"),
+	}, []roninGovernance.SignatureConsumerSignature{
+		{
+			V: 27,
+			R: [32]byte{59, 189, 60, 136, 128, 85, 64, 82, 35, 23, 82, 186, 102, 135, 98, 112, 20, 240, 39, 251, 94, 21, 150, 18, 211, 6, 82, 6, 135, 5, 166, 163},
+			S: [32]byte{90, 221, 107, 82, 153, 157, 224, 54, 243, 122, 163, 68, 13, 81, 174, 96, 80, 20, 168, 21, 17, 67, 28, 67, 209, 174, 82, 159, 87, 115, 82, 112},
+		},
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(tx.Hash().Hex())
 }
 
 func (s *CommonTestSuite) TestParseSignatureAsRsvSuccess() {
