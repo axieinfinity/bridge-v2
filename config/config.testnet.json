@@ -21,10 +21,7 @@
       "processWithinBlocks": 864000,
       "contracts": {
         "Gateway": "0xA8D61A5427a778be28Bd9bb5990956b33385c738",
-        "EthGateway": "0xb68cbBDd4C7b3e4e39C035Bd356FC5BDb7E2a50E",
-        "Governance": "",
-        "EthGovernance": "",
-        "TrustedOrgs": ""
+        "EthGateway": "0xb68cbBDd4C7b3e4e39C035Bd356FC5BDb7E2a50E"
       },
       "subscriptions": {
         "MainchainWithdrewSubscription": {
@@ -59,35 +56,13 @@
           "callbacks": {
             "Ronin": "ProvideReceiptSignatureCallback"
           }
-        },
-        "BridgeOperatorsUpdatedSubscription": {
-          "address": "0xA8D61A5427a778be28Bd9bb5990956b33385c738",
-          "type": 0,
-          "handler": {
-            "contract": "",
-            "name": "BridgeOperatorsUpdated"
-          },
-          "callbacks": {
-            "Ronin": "BridgeOperatorsUpdatedCallback"
-          }
-        },
-        "BridgeOperatorsApprovedSubscription": {
-          "to": "",
-          "type": 0,
-          "handler": {
-            "contract": "",
-            "name": "BridgeOperatorsApproved"
-          },
-          "callbacks": {
-            "Ronin": "BridgeOperatorsApprovedCallback"
-          }
         }
       }
     },
     "Ethereum": {
       "disabled": false,
       "chainId": "0x5",
-      "rpcUrl": "https://goerli.infura.io/v3/2e6dec2a86144c7d971a5f8659deebc0",
+      "rpcUrl": "",
       "blockTime": 15,
       "safeBlockRange": 8,
       "transactionCheckPeriod": 15,
