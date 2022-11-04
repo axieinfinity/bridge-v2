@@ -2,12 +2,10 @@ package task
 
 import (
 	"context"
-	"crypto/ecdsa"
 	"database/sql"
 	"fmt"
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/axieinfinity/bridge-contracts/generated_contracts/ethereum/gateway"
-	roninGovernance "github.com/axieinfinity/bridge-contracts/generated_contracts/ronin/governance"
 	internal "github.com/axieinfinity/bridge-core"
 	"github.com/axieinfinity/bridge-core/stores"
 	"github.com/axieinfinity/bridge-core/utils"
@@ -21,10 +19,8 @@ import (
 	"github.com/ethereum/go-ethereum/core"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/ethclient"
 	core2 "github.com/ethereum/go-ethereum/signer/core"
 	"github.com/stretchr/testify/suite"
-	"log"
 	"math/big"
 	"testing"
 )
@@ -38,7 +34,7 @@ type SimulatedSuite struct {
 }
 
 func (s *SimulatedSuite) SetupTest() {
-	key, _ := crypto.HexToECDSA("927a004a8a0e854813d4950517551eb5b0eb87a82e466438dcbc1b906572b125")
+	key, _ := crypto.HexToECDSA("ad45ffdf15ad48ad0e6c4769a93338c08884f7d6bcb3879066bed489f837d1ba")
 	s.privateKey = fmt.Sprintf("%x", crypto.FromECDSA(key))
 	s.auth = bind.NewKeyedTransactor(key)
 	s.address = s.auth.From
@@ -333,23 +329,32 @@ func (s *CommonTestSuite) TestUnpackBridgeOperatorsUpdatedEventSuccess() {
 }
 
 func (s *CommonTestSuite) TestSignBridgeOperatorsBallotSuccess() {
-	period := int64(1)
+	period := int64(9263652)
 	bridgeOperators := []interface{}{
-		common.HexToAddress("0xf6fd5FcA4Bd769BA495B29B98dba5F2eCF4CEED3").Hex(),
+		"0xB6bc5bc0410773A3F86B1537ce7495C52e38f88B",
+		"0x4a4bc674A97737376cFE990aE2fE0d2B6E738393",
 	}
 
 	hash, err := signBridgeOperatorsBallot(&signDataOpts{
-		ChainId:           math.NewHexOrDecimal256(s.roninTask.chainId.Int64()),
-		VerifyingContract: s.roninTask.contracts[GOVERNANCE_CONTRACT],
 		SignTypedDataCallback: func(typedData core2.TypedData) (hexutil.Bytes, error) {
 			return s.roninTask.util.SignTypedData(typedData, s.roninTask.listener.GetValidatorSign())
 		},
 	}, period, bridgeOperators)
 	sig := parseSignatureAsRsv(hash)
+	fmt.Println("hash", common.BytesToHash(hash))
+	fmt.Println("r", common.Bytes2Hex(sig.R[:]))
+	fmt.Println("s", common.Bytes2Hex(sig.S[:]))
+	fmt.Println("v", sig.V)
 	expected := gateway.SignatureConsumerSignature{
-		V: 28,
-		R: [32]byte{34, 85, 150, 68, 71, 72, 216, 50, 144, 16, 124, 240, 132, 182, 39, 100, 171, 165, 116, 88, 19, 157, 177, 176, 236, 136, 93, 46, 98, 79, 58, 121},
-		S: [32]byte{124, 127, 93, 159, 169, 72, 75, 170, 233, 137, 56, 201, 209, 119, 2, 223, 117, 127, 93, 2, 69, 101, 21, 43, 102, 52, 44, 28, 146, 170, 177, 138},
+		V: 27,
+		R: [32]byte{207, 155, 162, 143, 111, 90, 47, 92,
+			106, 236, 250, 180, 130, 207, 27, 167,
+			223, 254, 139, 65, 232, 17, 158, 68,
+			173, 175, 22, 57, 53, 248, 65, 194},
+		S: [32]byte{84, 81, 183, 143, 10, 189, 8, 112,
+			89, 210, 207, 134, 196, 25, 141, 170,
+			110, 91, 108, 244, 140, 163, 80, 245,
+			229, 200, 172, 168, 57, 94, 116, 150},
 	}
 	s.Equal(sig.R[:], expected.R[:])
 	s.Equal(sig.S[:], expected.S[:])
@@ -358,48 +363,85 @@ func (s *CommonTestSuite) TestSignBridgeOperatorsBallotSuccess() {
 }
 
 func (s *CommonTestSuite) TestCallVoteBridgeOperatorsBySignaturesSuccess() {
-	client, _ := ethclient.Dial("http://localhost:8545")
-	privateKey, _ := crypto.HexToECDSA("")
+	//client, _ := ethclient.Dial("http://localhost:8545")
+	//privateKey, _ := crypto.HexToECDSA("ad45ffdf15ad48ad0e6c4769a93338c08884f7d6bcb3879066bed489f837d1ba")
 
-	publicKey := privateKey.Public()
-	publicKeyECDSA, ok := publicKey.(*ecdsa.PublicKey)
-	if !ok {
-		log.Fatal("error casting public key to ECDSA")
-	}
-
-	fromAddress := crypto.PubkeyToAddress(*publicKeyECDSA)
-	auth, _ := bind.NewKeyedTransactorWithChainID(privateKey, big.NewInt(2021))
-
-	nonce, err := client.PendingNonceAt(context.Background(), fromAddress)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	gasPrice, err := client.SuggestGasPrice(context.Background())
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	transactor, _ := roninGovernance.NewGovernanceTransactor(common.HexToAddress("0xFBD674ba8E716F431041e2b4195CF4f1975DdFB5"), client)
-	auth.Nonce = big.NewInt(int64(nonce))
-	auth.Value = big.NewInt(0)     // in wei
-	auth.GasLimit = uint64(300000) // in units
-	auth.GasPrice = gasPrice
-
-	tx, err := transactor.VoteBridgeOperatorsBySignatures(auth, big.NewInt(9263210), []common.Address{
-		common.HexToAddress("0xB6bc5bc0410773A3F86B1537ce7495C52e38f88B"),
-		common.HexToAddress("0x4a4bc674A97737376cFE990aE2fE0d2B6E738393"),
-	}, []roninGovernance.SignatureConsumerSignature{
-		{
-			V: 27,
-			R: [32]byte{59, 189, 60, 136, 128, 85, 64, 82, 35, 23, 82, 186, 102, 135, 98, 112, 20, 240, 39, 251, 94, 21, 150, 18, 211, 6, 82, 6, 135, 5, 166, 163},
-			S: [32]byte{90, 221, 107, 82, 153, 157, 224, 54, 243, 122, 163, 68, 13, 81, 174, 96, 80, 20, 168, 21, 17, 67, 28, 67, 209, 174, 82, 159, 87, 115, 82, 112},
+	typedData := core2.TypedData{
+		Types: core2.Types{
+			"EIP712Domain": []core2.Type{
+				{
+					Name: "name", Type: "string",
+				},
+				{
+					Name: "version", Type: "string",
+				},
+				{
+					Name: "salt", Type: "string",
+				},
+			},
+			"BridgeOperatorsBallot": []core2.Type{
+				{
+					Name: "period", Type: "uint256",
+				},
+				{
+					Name: "operators", Type: "address[]",
+				},
+			},
 		},
-	})
-	if err != nil {
-		log.Fatal(err)
+		PrimaryType: "BridgeOperatorsBallot",
+		Domain: core2.TypedDataDomain{
+			Name:    "GovernanceAdmin",
+			Version: "1",
+			Salt:    "0xe3922a0bff7e80c6f7465bc1b150f6c95d9b9203f1731a09f86e759ea1eaa306",
+		},
+		Message: core2.TypedDataMessage{
+			"period": math.NewHexOrDecimal256(9263652),
+			"operators": []interface{}{
+				"0xB6bc5bc0410773A3F86B1537ce7495C52e38f88B",
+				"0x4a4bc674A97737376cFE990aE2fE0d2B6E738393",
+			},
+		},
 	}
-	fmt.Println(tx.Hash().Hex())
+	b, err := s.roninTask.util.SignTypedData(typedData, s.roninTask.listener.GetValidatorSign())
+	fmt.Println("err", err)
+	fmt.Println("sig", common.Bytes2Hex(b))
+
+	// 0x520ba520cf2ef7d0adfa6dfdf93c983f88dc0d8a05ed58a620fb1acc098e0ebd136510aaf35132cf34e773ac9fe6e32c0dd6b6ca5ee052144bf7f4391cdf2fcb1b
+
+	//domainSeparator, _ := typedData.HashStruct("EIP712Domain", typedData.Domain.Map())
+	//fmt.Println("domainSeparator", domainSeparator)
+	//typedDataHash, _ := typedData.HashStruct(typedData.PrimaryType, typedData.Message)
+	//rawData := []byte(fmt.Sprintf("\x19\x01%s%s", string(domainSeparator), string(typedDataHash)))
+	//fmt.Println("rawData", rawData)
+	//
+	//fromAddress := crypto.PubkeyToAddress(*publicKeyECDSA)
+	//auth, _ := bind.NewKeyedTransactorWithChainID(privateKey, big.NewInt(2021))
+	//nonce, _ := client.PendingNonceAt(context.Background(), fromAddress)
+	//gasPrice, _ := client.SuggestGasPrice(context.Background())
+	//transactor, _ := roninGovernance.NewGovernanceTransactor(common.HexToAddress("0xFBD674ba8E716F431041e2b4195CF4f1975DdFB5"), client)
+	//auth.Nonce = big.NewInt(int64(nonce))
+	//auth.Value = big.NewInt(0)     // in wei
+	//auth.GasLimit = uint64(300000) // in units
+	//auth.GasPrice = gasPrice
+	//
+	//tx, err := transactor.VoteBridgeOperatorsBySignatures(auth, big.NewInt(9263260), []common.Address{
+	//	common.HexToAddress("0xB6bc5bc0410773A3F86B1537ce7495C52e38f88B"),
+	//	common.HexToAddress("0x4a4bc674A97737376cFE990aE2fE0d2B6E738393"),
+	//}, []roninGovernance.SignatureConsumerSignature{
+	//	{
+	//		V: 27,
+	//		R: [32]byte{234, 4, 6, 171, 43, 100, 120, 8, 161, 178, 15, 9, 116, 119, 92, 176, 75, 244, 43, 197, 215, 90, 5, 115, 211,
+	//			23, 97, 158, 227, 85, 116, 120},
+	//		S: [32]byte{46, 107, 139, 81, 45, 73, 206, 154, 20, 252, 92, 115, 171, 56, 64, 218, 115, 100, 201, 125, 39, 238, 40, 63,
+	//			77, 226, 24, 177, 235, 209, 21, 31},
+	//	},
+	//})
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+	//fmt.Println(tx.Hash().Hex())
+	//receipt, err := client.TransactionReceipt(context.Background(), tx.Hash())
+	//fmt.Println(receipt.Status)
 }
 
 func (s *CommonTestSuite) TestParseSignatureAsRsvSuccess() {
