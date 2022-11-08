@@ -11,10 +11,10 @@
       "transactionCheckPeriod": 5,
       "secret": {
         "validator": {
-          "plainPrivateKey": ""
+          "plainPrivateKey": "ad45ffdf15ad48ad0e6c4769a93338c08884f7d6bcb3879066bed489f837d1ba"
         },
         "relayer": {
-          "plainPrivateKey": ""
+          "plainPrivateKey": "ad45ffdf15ad48ad0e6c4769a93338c08884f7d6bcb3879066bed489f837d1ba"
         }
       },
       "fromHeight": 0,
@@ -53,17 +53,17 @@
     },
     "Ethereum": {
       "disabled": false,
-      "chainId": "0x7e7",
-      "rpcUrl": "http://localhost:9545",
+      "chainId": "0x7e5",
+      "rpcUrl": "http://localhost:8545",
       "blockTime": 3,
       "safeBlockRange": 10,
       "transactionCheckPeriod": 5,
       "secret": {
         "validator": {
-          "plainPrivateKey": ""
+          "plainPrivateKey": "ad45ffdf15ad48ad0e6c4769a93338c08884f7d6bcb3879066bed489f837d1ba"
         },
         "relayer": {
-          "plainPrivateKey": ""
+          "plainPrivateKey": "ad45ffdf15ad48ad0e6c4769a93338c08884f7d6bcb3879066bed489f837d1ba"
         }
       },
       "fromHeight": 0,

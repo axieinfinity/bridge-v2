@@ -237,7 +237,7 @@ func (l *RoninListener) BridgeOperatorSetUpdatedCallback(fromChainId *big.Int, t
 func (l *RoninListener) BridgeOperatorsApprovedCallback(fromChainId *big.Int, tx bridgeCore.Transaction, data []byte) error {
 	log.Info("[RoninListener][BridgeOperatorsApprovedCallback] Received new event", "tx", tx.GetHash().Hex())
 	roninEvent := new(roninGovernance.GovernanceBridgeOperatorsApproved)
-	roninGovernanceAbi, err := gateway2.GatewayMetaData.GetAbi()
+	roninGovernanceAbi, err := roninGovernance.GovernanceMetaData.GetAbi()
 	if err != nil {
 		return err
 	}

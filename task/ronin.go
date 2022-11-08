@@ -150,7 +150,7 @@ func (r *RoninTask) getLimitQuery(numberOfExcludedIds int) int {
 func (r *RoninTask) processPending() error {
 	defer func() {
 		if err := recover(); err != nil {
-			log.Error("[RoninTask][processPending]recover from panic", "err", err)
+			log.Error("[RoninTask][processPending] recover from panic", "err", err)
 		}
 	}()
 	// load processing tasks into excluded list
@@ -219,7 +219,7 @@ func (r *RoninTask) unlockTask(id int) {
 func (r *RoninTask) checkProcessingTasks() error {
 	defer func() {
 		if err := recover(); err != nil {
-			log.Error("[RoninTask][checkProcessingTasks] recover from panic", "err", err)
+			log.Error("[RoninTask][checkProcessingTask] recover from panic", "err", err)
 		}
 	}()
 	before := time.Now().Unix() - int64(r.listener.Config().SafeBlockRange*uint64(r.listener.Config().LoadInterval.Seconds()))
