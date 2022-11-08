@@ -93,13 +93,12 @@ func (r *task) sendTransaction(sendTx func(task *models.Task) (doneTasks, proces
 func (r *task) voteBridgeOperatorsBySignature(task *models.Task) (doneTasks, processingTasks, failedTasks []*models.Task, tx *ethtypes.Transaction) {
 	log.Info("[RoninTask][BridgeOperatorSetCallback] Processing task")
 	// create caller
-	transactor, err := roninGovernance.NewGovernanceTransactor(common.HexToAddress(r.contracts[GOVERNANCE_CONTRACT]), r.client)
+	roninGovernanceTransactor, err := roninGovernance.NewGovernanceTransactor(common.HexToAddress(r.contracts[GOVERNANCE_CONTRACT]), r.client)
 	if err != nil {
 		task.LastError = err.Error()
 		failedTasks = append(failedTasks, task)
 		return nil, nil, failedTasks, nil
 	}
-	// create caller
 	if err != nil {
 		// append all success tasks into failed tasks
 		task.LastError = err.Error()
@@ -139,7 +138,7 @@ func (r *task) voteBridgeOperatorsBySignature(task *models.Task) (doneTasks, pro
 	tx, err = r.util.SendContractTransaction(r.listener.GetValidatorSign(), r.chainId, func(opts *bind.TransactOpts) (*ethtypes.Transaction, error) {
 		opts.GasLimit = 300_000
 		opts.GasPrice = big.NewInt(1000000000)
-		return transactor.VoteBridgeOperatorsBySignatures(opts, event.Period, event.BridgeOperators, []roninGovernance.SignatureConsumerSignature{
+		return roninGovernanceTransactor.VoteBridgeOperatorsBySignatures(opts, event.Period, event.BridgeOperators, []roninGovernance.SignatureConsumerSignature{
 			signatureStruct,
 		})
 	})
