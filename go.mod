@@ -2,10 +2,6 @@ module github.com/axieinfinity/bridge-v2
 
 replace github.com/ethereum/go-ethereum => ../ronin
 
-replace github.com/axieinfinity/bridge-contracts => ../bridge-contracts
-
-replace github.com/axieinfinity/bridge-core => ../bridge-core
-
 go 1.17
 
 require (
