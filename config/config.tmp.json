@@ -11,24 +11,24 @@
       "transactionCheckPeriod": 5,
       "secret": {
         "validator": {
-          "plainPrivateKey": "ad45ffdf15ad48ad0e6c4769a93338c08884f7d6bcb3879066bed489f837d1b1"
+          "plainPrivateKey": ""
         },
         "relayer": {
-          "plainPrivateKey": "ad45ffdf15ad48ad0e6c4769a93338c08884f7d6bcb3879066bed489f837d1b1"
+          "plainPrivateKey": ""
         }
       },
       "fromHeight": 0,
       "processWithinBlocks": 400,
       "contracts": {
-        "Gateway": "0xcaCA1c072D26E46686d932686015207FbE08FdB8",
-        "EthGateway": "0xb68cbBDd4C7b3e4e39C035Bd356FC5BDb7E2a50E",
-        "EthGovernance": "0x857d7CcFcef3A7FF8245f57Daeb042440Fd513e8",
-        "Governance": "0xFBD674ba8E716F431041e2b4195CF4f1975DdFB5",
-        "TrustedOrganization": "0x27405e2297835a17FD410341C0CD20fc7a4Cd6DE"
+        "Gateway": "",
+        "EthGateway": "0xaaB5926f280BF1e7630Fe6fDBB1E74655db0f978",
+        "EthGovernance": "0x823dE522dAB469Cab6189041585318836564Ebb3",
+        "Governance": "0xEe71B63121B03d79bd7c05B3774254ddd77A036A",
+        "TrustedOrganization": "0x8Fd00610153D22B9A4bbeB52Da4FF4E72b41e819"
       },
       "subscriptions": {
         "BridgeOperatorSetUpdatedSubscription": {
-          "to": "0x7fc2Af050D504D5E35A2D00eE4eD0B1532aE7b45",
+          "to": "0xb68cbBDd4C7b3e4e39C035Bd356FC5BDb7E2a50E",
           "type": 1,
           "handler": {
             "contract": "RoninValidator",
@@ -39,7 +39,7 @@
           }
         },
         "BridgeOperatorsApprovedSubscription": {
-          "to": "0xFBD674ba8E716F431041e2b4195CF4f1975DdFB5",
+          "to": "0xEe71B63121B03d79bd7c05B3774254ddd77A036A",
           "type": 1,
           "handler": {
             "contract": "RoninGovernanceAdmin",
@@ -60,10 +60,10 @@
       "transactionCheckPeriod": 5,
       "secret": {
         "validator": {
-          "plainPrivateKey": "ad45ffdf15ad48ad0e6c4769a93338c08884f7d6bcb3879066bed489f837d1b1"
+          "plainPrivateKey": ""
         },
         "relayer": {
-          "plainPrivateKey": "ad45ffdf15ad48ad0e6c4769a93338c08884f7d6bcb3879066bed489f837d1b1"
+          "plainPrivateKey": ""
         }
       },
       "fromHeight": 0,
