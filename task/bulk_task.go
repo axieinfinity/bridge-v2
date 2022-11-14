@@ -338,7 +338,7 @@ func (r *bulkTask) validateDepositTask(caller *roninGateway.GatewayCaller, task 
 	}
 
 	data := common.Hex2Bytes(task.Data)
-	if err = ethGatewayAbi.UnpackIntoInterface(ethEvent, "DepositRequested", data); err != nil {
+	if err = r.util.UnpackLog(*ethGatewayAbi, ethEvent, "DepositRequested", data); err != nil {
 		return false, ethEvent.Receipt, err
 	}
 
@@ -372,7 +372,7 @@ func (r *bulkTask) validateAckWithdrawalTask(caller *roninGateway.GatewayCaller,
 		return false, nil, err
 	}
 
-	if err = ethGatewayAbi.UnpackIntoInterface(ethEvent, "Withdrew", common.Hex2Bytes(task.Data)); err != nil {
+	if err = r.util.UnpackLog(*ethGatewayAbi, ethEvent, "Withdrew", common.Hex2Bytes(task.Data)); err != nil {
 		return false, nil, err
 	}
 
@@ -404,7 +404,7 @@ func (r *bulkTask) validateWithdrawalTask(caller *roninGateway.GatewayCaller, ta
 	if err != nil {
 		return false, ronEvent.Receipt, err
 	}
-	if err = ronGatewayAbi.UnpackIntoInterface(ronEvent, "MainchainWithdrew", common.Hex2Bytes(task.Data)); err != nil {
+	if err = r.util.UnpackLog(*ronGatewayAbi, ronEvent, "MainchainWithdrew", common.Hex2Bytes(task.Data)); err != nil {
 		return false, ronEvent.Receipt, err
 	}
 	receipt := ronEvent.Receipt
