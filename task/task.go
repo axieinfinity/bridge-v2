@@ -11,18 +11,18 @@ import (
 	"github.com/axieinfinity/bridge-core/utils"
 	"github.com/axieinfinity/bridge-v2/models"
 	"github.com/axieinfinity/bridge-v2/stores"
-	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/common/math"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/signer/core"
 	"math/big"
 	"time"
 )
+
+const SALT = "0xe3922a0bff7e80c6f7465bc1b150f6c95d9b9203f1731a09f86e759ea1eaa306"
 
 type task struct {
 	util           utils.Utils
@@ -80,7 +80,7 @@ func (r *task) sendTransaction(sendTx func(task *models.Task) (doneTasks, proces
 	doneTasks, processingTasks, failedTasks, transaction := sendTx(r.task)
 
 	if transaction != nil {
-		log.Debug("transaction", "hash", transaction.Hash().Hex())
+		log.Debug("[task] Transaction", "hash", transaction.Hash().Hex())
 		go updateTasks(r.store, processingTasks, STATUS_PROCESSING, transaction.Hash().Hex(), time.Now().Unix(), r.releaseTasksCh)
 		_ = metrics.Pusher.IncrGauge(metrics.ProcessingTaskMetric, len(processingTasks))
 	}
@@ -136,8 +136,6 @@ func (r *task) voteBridgeOperatorsBySignature(task *models.Task) (doneTasks, pro
 	log.Debug("[RoninTask][BridgeOperatorSetCallback] Prepared data", "r", common.Bytes2Hex(signatureStruct.R[:]), "s", common.Bytes2Hex(signatureStruct.S[:]), "v", signatureStruct.V, "period", event.Period.Int64(), "bridgeOperators", bridgeOperators)
 
 	tx, err = r.util.SendContractTransaction(r.listener.GetValidatorSign(), r.chainId, func(opts *bind.TransactOpts) (*ethtypes.Transaction, error) {
-		opts.GasLimit = 300_000
-		opts.GasPrice = big.NewInt(1000000000)
 		return roninGovernanceTransactor.VoteBridgeOperatorsBySignatures(opts, event.Period, event.BridgeOperators, []roninGovernance.SignatureConsumerSignature{
 			signatureStruct,
 		})
@@ -221,8 +219,6 @@ func (r *task) relayBridgeOperators(task *models.Task) (doneTasks, processingTas
 	}
 
 	tx, err = r.util.SendContractTransaction(r.listener.GetValidatorSign(), r.chainId, func(opts *bind.TransactOpts) (*ethtypes.Transaction, error) {
-		opts.GasLimit = 300_000
-		opts.GasPrice = big.NewInt(1000000000)
 		return ethGovernanceTransactor.RelayBridgeOperators(opts, event.Period, event.Operators, ethSignatures)
 	})
 	if err != nil {
@@ -244,6 +240,7 @@ func (r *task) unpackBridgeOperatorSetUpdatedEvent(task *models.Task) (*roninVal
 		return nil, err
 	}
 
+	log.Debug("Bridge operator set updated", "data", task.Data)
 	if err = r.util.UnpackLog(*roninValidatorAbi, roninEvent, "BridgeOperatorSetUpdated", common.Hex2Bytes(task.Data)); err != nil {
 		return nil, err
 	}
@@ -258,6 +255,7 @@ func (r *task) unpackBridgeOperatorsApprovedEvent(task *models.Task) (*roninGove
 		return nil, err
 	}
 
+	log.Debug("Bridge operators approved", "data", task.Data)
 	if err = r.util.UnpackLog(*roninGovernanceAbi, roninEvent, "BridgeOperatorsApproved", common.Hex2Bytes(task.Data)); err != nil {
 		return nil, err
 	}
@@ -269,39 +267,7 @@ type signDataOpts struct {
 	SignTypedDataCallback func(typedData core.TypedData) (hexutil.Bytes, error)
 }
 
-func createSalt() (*common.Hash, error) {
-	stringType, err := abi.NewType("string", "string", nil)
-	if err != nil {
-		return nil, err
-	}
-	uint256Type, err := abi.NewType("uint256", "uint256", nil)
-	if err != nil {
-		return nil, err
-	}
-	args := abi.Arguments{
-		{
-			Type: stringType,
-		},
-		{
-			Type: uint256Type,
-		},
-	}
-	encoded, err := args.Pack("RONIN_GOVERNANCE_ADMIN", big.NewInt(2020))
-	if err != nil {
-		return nil, err
-	}
-
-	salt := common.BytesToHash(crypto.Keccak256(encoded))
-
-	return &salt, nil
-}
-
 func signBridgeOperatorsBallot(opts *signDataOpts, period int64, bridgeOperators interface{}) ([]byte, error) {
-	salt, err := createSalt()
-	if err != nil {
-		return nil, err
-	}
-
 	bridgeOperatorsBallotTypes := core.TypedData{
 		Types: core.Types{
 			"EIP712Domain": []core.Type{
@@ -328,7 +294,7 @@ func signBridgeOperatorsBallot(opts *signDataOpts, period int64, bridgeOperators
 		Domain: core.TypedDataDomain{
 			Name:    "GovernanceAdmin",
 			Version: "1",
-			Salt:    salt.Hex(),
+			Salt:    SALT,
 		},
 		Message: core.TypedDataMessage{
 			"period":    math.NewHexOrDecimal256(period),
