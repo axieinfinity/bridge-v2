@@ -3,6 +3,7 @@ package task
 import (
 	"crypto/ecdsa"
 	"fmt"
+	roninGovernance "github.com/axieinfinity/bridge-contracts/generated_contracts/ronin/governance"
 	"math/big"
 	"time"
 
@@ -443,6 +444,26 @@ func updateTasks(store stores.BridgeStore, tasks []*models.Task, status, txHash 
 			log.Error("error while update task", "id", t.ID, "err", err)
 		}
 		releaseTasksCh <- t.ID
+	}
+}
+
+func parseSignatureAsRsv(signature []byte) roninGovernance.SignatureConsumerSignature {
+	rawR := signature[0:32]
+	rawS := signature[32:64]
+	v := signature[64]
+
+	if v < 27 {
+		v += 27
+	}
+
+	var r, s [32]byte
+	copy(r[:], rawR)
+	copy(s[:], rawS)
+
+	return roninGovernance.SignatureConsumerSignature{
+		R: r,
+		S: s,
+		V: v,
 	}
 }
 

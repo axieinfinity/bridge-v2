@@ -150,7 +150,7 @@ func (r *RoninTask) getLimitQuery(numberOfExcludedIds int) int {
 func (r *RoninTask) processPending() error {
 	defer func() {
 		if err := recover(); err != nil {
-			log.Error("[RoninTask][processPending]recover from panic", "err", err)
+			log.Error("[RoninTask][processPending] recover from panic", "err", err)
 		}
 	}()
 	// load processing tasks into excluded list
@@ -176,6 +176,8 @@ func (r *RoninTask) processPending() error {
 	bulkDepositTask := newBulkTask(r.listener, r.client, r.store, r.chainId, r.contracts, r.txCheckInterval, defaultMaxTry, DEPOSIT_TASK, r.releaseTasksCh, r.util)
 	bulkSubmitWithdrawalSignaturesTask := newBulkTask(r.listener, r.client, r.store, r.chainId, r.contracts, r.txCheckInterval, defaultMaxTry, WITHDRAWAL_TASK, r.releaseTasksCh, r.util)
 	ackWithdrewTasks := newBulkTask(r.listener, r.client, r.store, r.chainId, r.contracts, r.txCheckInterval, defaultMaxTry, ACK_WITHDREW_TASK, r.releaseTasksCh, r.util)
+	voteBridgeOperatorsTask := newTask(r.listener, r.client, r.store, r.chainId, r.contracts, defaultMaxTry, VOTE_BRIDGE_OPERATORS_TASK, r.releaseTasksCh, r.util)
+	relayBridgeOperatorsTask := newTask(r.listener, r.client, r.store, r.chainId, r.contracts, defaultMaxTry, RELAY_BRIDGE_OPERATORS_TASK, r.releaseTasksCh, r.util)
 
 	for _, task := range tasks {
 		// lock task
@@ -189,10 +191,18 @@ func (r *RoninTask) processPending() error {
 
 		// collect tasks for acknowledge withdrawal
 		ackWithdrewTasks.collectTask(task)
+
+		// collect task for vote bridge operators
+		voteBridgeOperatorsTask.collectTask(task)
+
+		// collect task for relay bridge operators
+		relayBridgeOperatorsTask.collectTask(task)
 	}
 	bulkDepositTask.send()
 	bulkSubmitWithdrawalSignaturesTask.send()
 	ackWithdrewTasks.send()
+	voteBridgeOperatorsTask.send()
+	relayBridgeOperatorsTask.send()
 	return nil
 }
 
@@ -209,7 +219,7 @@ func (r *RoninTask) unlockTask(id int) {
 func (r *RoninTask) checkProcessingTasks() error {
 	defer func() {
 		if err := recover(); err != nil {
-			log.Error("[RoninTask][checkProcessingTasks] recover from panic", "err", err)
+			log.Error("[RoninTask][checkProcessingTask] recover from panic", "err", err)
 		}
 	}()
 	before := time.Now().Unix() - int64(r.listener.Config().SafeBlockRange*uint64(r.listener.Config().LoadInterval.Seconds()))

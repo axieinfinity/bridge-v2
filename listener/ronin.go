@@ -2,6 +2,7 @@ package listener
 
 import (
 	"context"
+	roninTrustedOrganization "github.com/axieinfinity/bridge-contracts/generated_contracts/ronin/trusted_organization"
 	"math/big"
 	"time"
 
@@ -195,6 +196,79 @@ func (l *RoninListener) DepositRequestedCallback(fromChainId *big.Int, tx bridge
 		CreatedAt:       time.Now().Unix(),
 	}
 	return l.bridgeStore.GetTaskStore().Save(depositTask)
+}
+
+func (l *RoninListener) isTrustedNode() error {
+	roninTrustedCaller, err := roninTrustedOrganization.NewTrustedOrganizationCaller(common.HexToAddress(l.config.Contracts[task.TRUSTED_ORGANIZATION_CONTRACT]), l.client)
+	if err != nil {
+		return err
+	}
+
+	addr := l.GetValidatorSign().GetAddress()
+	node, err := roninTrustedCaller.GetTrustedOrganization(nil, addr)
+	if err != nil {
+		log.Warn("[RoninListener][BridgeOperatorSetUpdatedCallback] The current node is not trusted organization", "err", err)
+		return err
+	}
+	log.Debug("[RoninListener][BridgeOperatorSetUpdatedCallback] Trusted node info", "node", node)
+
+	return nil
+}
+
+func (l *RoninListener) BridgeOperatorSetUpdatedCallback(fromChainId *big.Int, tx bridgeCore.Transaction, data []byte) error {
+	log.Info("[RoninListener][BridgeOperatorSetUpdatedCallback] Received new event", "tx", tx.GetHash().Hex())
+
+	if err := l.isTrustedNode(); err != nil {
+		return err
+	}
+
+	// Get chainID
+	chainId, err := l.GetChainID()
+	if err != nil {
+		return err
+	}
+
+	bridgeOperatorsUpdated := &models.Task{
+		ChainId:         hexutil.EncodeBig(chainId),
+		FromChainId:     hexutil.EncodeBig(fromChainId),
+		FromTransaction: tx.GetHash().Hex(),
+		Type:            task.VOTE_BRIDGE_OPERATORS_TASK,
+		Data:            common.Bytes2Hex(data),
+		Retries:         0,
+		Status:          task.STATUS_PENDING,
+		LastError:       "",
+		CreatedAt:       time.Now().Unix(),
+	}
+
+	return l.bridgeStore.GetTaskStore().Save(bridgeOperatorsUpdated)
+}
+
+func (l *RoninListener) BridgeOperatorsApprovedCallback(fromChainId *big.Int, tx bridgeCore.Transaction, data []byte) error {
+	log.Info("[RoninListener][BridgeOperatorsApprovedCallback] Received new event", "tx", tx.GetHash().Hex())
+
+	if err := l.isTrustedNode(); err != nil {
+		return err
+	}
+
+	// Get chainID
+	chainId, err := l.GetChainID()
+	if err != nil {
+		return err
+	}
+
+	bridgeOperatorsApproved := &models.Task{
+		ChainId:         hexutil.EncodeBig(chainId),
+		FromChainId:     hexutil.EncodeBig(fromChainId),
+		FromTransaction: tx.GetHash().Hex(),
+		Type:            task.RELAY_BRIDGE_OPERATORS_TASK,
+		Data:            common.Bytes2Hex(data),
+		Retries:         0,
+		Status:          task.STATUS_PENDING,
+		LastError:       "",
+		CreatedAt:       time.Now().Unix(),
+	}
+
+	return l.bridgeStore.GetTaskStore().Save(bridgeOperatorsApproved)
 }
 
 func (l *RoninListener) WithdrewCallback(fromChainId *big.Int, tx bridgeCore.Transaction, data []byte) error {
