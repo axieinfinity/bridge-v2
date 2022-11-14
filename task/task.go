@@ -54,14 +54,14 @@ func newTask(listener bridgeCore.Listener, client bind.ContractBackend, store st
 }
 
 func (r *task) collectTask(t *models.Task) {
-	log.Debug("Review new task", "hash", t.TransactionHash, "type", t.Type)
+	log.Debug("Received new task", "hash", t.TransactionHash, "type", t.Type)
 	if t.Type == r.taskType {
 		r.task = t
 	}
 }
 
 func (r *task) send() {
-	log.Info("[task] sending transaction", "type", r.taskType)
+	log.Info("[task] Sending transaction", "type", r.taskType)
 	switch r.taskType {
 	case VOTE_BRIDGE_OPERATORS_TASK:
 		r.sendTransaction(r.voteBridgeOperatorsBySignature)
