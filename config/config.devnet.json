@@ -28,7 +28,7 @@
       },
       "subscriptions": {
         "MainchainWithdrewSubscription": {
-          "to": "0xCee681C9108c42C710c6A8A949307D5F13C9F3ca",
+          "to": "0xA8D61A5427a778be28Bd9bb5990956b33385c738",
           "type": 1,
           "handler": {
             "contract": "RoninGateway",
@@ -39,7 +39,7 @@
           }
         },
         "WithdrawalRequestedSubscription": {
-          "to": "0xCee681C9108c42C710c6A8A949307D5F13C9F3ca",
+          "to": "0xA8D61A5427a778be28Bd9bb5990956b33385c738",
           "type": 1,
           "handler": {
             "contract": "RoninGateway",
@@ -50,7 +50,7 @@
           }
         },
         "WithdrawalSignaturesRequestedSubscription": {
-          "to": "0xCee681C9108c42C710c6A8A949307D5F13C9F3ca",
+          "to": "0xA8D61A5427a778be28Bd9bb5990956b33385c738",
           "type": 1,
           "handler": {
             "contract": "RoninGateway",
@@ -102,11 +102,11 @@
       "fromHeight": 12522064,
       "processWithinBlocks": 198720,
       "contracts": {
-        "Gateway": "0xCee681C9108c42C710c6A8A949307D5F13C9F3ca"
+        "Gateway": "0xA8D61A5427a778be28Bd9bb5990956b33385c738"
       },
       "subscriptions": {
         "DepositRequestedSubscription": {
-          "to": "0xFc4319Ae9e6134C708b88D5Ad5Da1A4a83372502",
+          "to": "0xb68cbBDd4C7b3e4e39C035Bd356FC5BDb7E2a50E",
           "type": 1,
           "handler": {
             "contract": "EthereumGateway",
@@ -117,7 +117,7 @@
           }
         },
         "WithdrewSubscription": {
-          "to": "0xFc4319Ae9e6134C708b88D5Ad5Da1A4a83372502",
+          "to": "0xb68cbBDd4C7b3e4e39C035Bd356FC5BDb7E2a50E",
           "type": 1,
           "handler": {
             "contract": "EthereumGateway",
