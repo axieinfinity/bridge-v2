@@ -53,7 +53,8 @@ func (l *RoninListener) StoreMainchainWithdrawCallback(fromChainId *big.Int, tx 
 	if err != nil {
 		return err
 	}
-	if err = ronGatewayAbi.UnpackIntoInterface(ronEvent, "MainchainWithdrew", data); err != nil {
+
+	if err = l.utilsWrapper.UnpackLog(*ronGatewayAbi, ronEvent, "MainchainWithdrew", data); err != nil {
 		return err
 	}
 	receipt := ronEvent.Receipt
@@ -95,7 +96,7 @@ func (l *RoninListener) ProvideReceiptSignatureCallback(fromChainId *big.Int, tx
 	if err != nil {
 		return err
 	}
-	if err = ronGatewayAbi.UnpackIntoInterface(ronEvent, "MainchainWithdrew", data); err != nil {
+	if err = l.utilsWrapper.UnpackLog(*ronGatewayAbi, ronEvent, "MainchainWithdrew", data); err != nil {
 		return err
 	}
 	receipt := ronEvent.Receipt
@@ -132,7 +133,7 @@ func (l *RoninListener) DepositRequestedCallback(fromChainId *big.Int, tx bridge
 		return err
 	}
 
-	if err = ethGatewayAbi.UnpackIntoInterface(ethEvent, "DepositRequested", data); err != nil {
+	if err = l.utilsWrapper.UnpackLog(*ethGatewayAbi, ethEvent, "DepositRequested", data); err != nil {
 		return err
 	}
 	// create caller
@@ -253,7 +254,7 @@ func (l *RoninListener) WithdrewCallback(fromChainId *big.Int, tx bridgeCore.Tra
 		return err
 	}
 
-	if err = ethGatewayAbi.UnpackIntoInterface(ethEvent, "Withdrew", data); err != nil {
+	if err = l.utilsWrapper.UnpackLog(*ethGatewayAbi, ethEvent, "Withdrew", data); err != nil {
 		return err
 	}
 	log.Info("[RoninListener][WithdrewCallback] result of calling MainchainWithdrew function", "receiptId", ethEvent.Receipt.Id.Int64(), "tx", tx.GetHash().Hex())
