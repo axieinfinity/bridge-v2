@@ -3,9 +3,10 @@ package task
 import (
 	"crypto/ecdsa"
 	"fmt"
-	roninGovernance "github.com/axieinfinity/bridge-contracts/generated_contracts/ronin/governance"
 	"math/big"
 	"time"
+
+	roninGovernance "github.com/axieinfinity/bridge-contracts/generated_contracts/ronin/governance"
 
 	"github.com/axieinfinity/bridge-v2/stores"
 	"github.com/ethereum/go-ethereum/signer/core"
@@ -342,15 +343,6 @@ func (r *bulkTask) validateDepositTask(caller *roninGateway.GatewayCaller, task 
 		return false, ethEvent.Receipt, err
 	}
 
-	// check deposit vote
-	result, err := caller.DepositVote(nil, ethEvent.Receipt.Mainchain.ChainId, ethEvent.Receipt.Id)
-	if err != nil {
-		return false, ethEvent.Receipt, err
-	}
-	if result.Status == VoteStatusExecuted {
-		return true, ethEvent.Receipt, nil
-	}
-
 	// check if current validator has been voted for this deposit or not
 	voted, err := caller.DepositVoted(nil, ethEvent.Receipt.Mainchain.ChainId, ethEvent.Receipt.Id, r.listener.GetValidatorSign().GetAddress())
 	if err != nil {
@@ -376,15 +368,6 @@ func (r *bulkTask) validateAckWithdrawalTask(caller *roninGateway.GatewayCaller,
 		return false, nil, err
 	}
 
-	// check if withdraw has been executed or not
-	result, err := caller.MainchainWithdrew(nil, ethEvent.Receipt.Id)
-	if err != nil {
-		return false, nil, err
-	}
-	if result {
-		return true, ethEvent.Receipt.Id, nil
-	}
-
 	// check if withdrew has been voted or not
 	voted, err := caller.MainchainWithdrewVoted(nil, ethEvent.Receipt.Id, r.listener.GetValidatorSign().GetAddress())
 	if err != nil {
@@ -407,20 +390,7 @@ func (r *bulkTask) validateWithdrawalTask(caller *roninGateway.GatewayCaller, ta
 	if err = r.util.UnpackLog(*ronGatewayAbi, ronEvent, "MainchainWithdrew", common.Hex2Bytes(task.Data)); err != nil {
 		return false, ronEvent.Receipt, err
 	}
-	receipt := ronEvent.Receipt
-
-	// try getting withdrawal data from database by receipt.id, do nothing if withdrawal is found
-	withdrawal, _ := r.store.GetWithdrawalStore().GetWithdrawalById(receipt.Id.Int64())
-	if withdrawal != nil && withdrawal.ID > 0 {
-		return true, ronEvent.Receipt, nil
-	}
-
-	// check if withdraw has been executed or not
-	result, err := caller.MainchainWithdrew(nil, receipt.Id)
-	if err != nil {
-		return false, ronEvent.Receipt, err
-	}
-	return result, ronEvent.Receipt, nil
+	return true, ronEvent.Receipt, nil
 }
 
 func updateTasks(store stores.BridgeStore, tasks []*models.Task, status, txHash string, timestamp int64, releaseTasksCh chan int) {
