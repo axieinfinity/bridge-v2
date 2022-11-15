@@ -2,7 +2,6 @@ package listener
 
 import (
 	"context"
-	"errors"
 	ethGovernance "github.com/axieinfinity/bridge-contracts/generated_contracts/ethereum/governance"
 	"github.com/ethereum/go-ethereum/crypto"
 	"math/big"
@@ -214,7 +213,8 @@ func (l *RoninListener) BridgeOperatorSetUpdatedCallback(fromChainId *big.Int, t
 	log.Info("[RoninListener][BridgeOperatorSetUpdatedCallback] Received new event", "tx", tx.GetHash().Hex())
 
 	if err := l.isTrustedNode(); err != nil {
-		return err
+		log.Warn("[RoninListener][BridgeOperatorSetUpdatedCallback] The current node is not trusted node")
+		return nil
 	}
 
 	// Get chainID
@@ -246,7 +246,8 @@ func (l *RoninListener) BridgeOperatorsApprovedCallback(fromChainId *big.Int, tx
 		return err
 	}
 	if !isRelayer {
-		return errors.New("the current node is not relayer")
+		log.Warn("[RoninListener][BridgeOperatorsApprovedCallback] The current node is not relayer")
+		return nil
 	}
 
 	// Get chainID
