@@ -226,16 +226,15 @@ func (r *task) relayBridgeOperators(task *models.Task) (doneTasks, processingTas
 		// Prevent retry submit signature if the signature was already submitted
 		if err.Error() == ErrSigAlreadySubmitted {
 			log.Debug("[RoninTask][BridgeOperatorsApprovedCallback] Bridge operators already submitted")
-			doneTasks = append(doneTasks, task)
-			return
 		} else {
 			log.Error("[RoninTask][BridgeOperatorsApprovedCallback] Send transaction error", "err", err)
 			task.LastError = err.Error()
 			failedTasks = append(failedTasks, task)
 			return nil, nil, failedTasks, nil
 		}
+	} else {
+		log.Debug("[RoninTask][BridgeOperatorsApprovedCallback] Relay bridge operators", "hash", tx.Hash().Hex())
 	}
-	log.Debug("[RoninTask][BridgeOperatorsApprovedCallback] Relay bridge operators", "hash", tx.Hash().Hex())
 
 	doneTasks = append(doneTasks, task)
 	return
