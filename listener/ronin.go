@@ -2,9 +2,10 @@ package listener
 
 import (
 	"context"
-	roninTrustedOrganization "github.com/axieinfinity/bridge-contracts/generated_contracts/ronin/trusted_organization"
 	"math/big"
 	"time"
+
+	roninTrustedOrganization "github.com/axieinfinity/bridge-contracts/generated_contracts/ronin/trusted_organization"
 
 	"github.com/axieinfinity/bridge-contracts/generated_contracts/ethereum/gateway"
 	gateway2 "github.com/axieinfinity/bridge-contracts/generated_contracts/ronin/gateway"
@@ -99,44 +100,26 @@ func (l *RoninListener) ProvideReceiptSignatureCallback(fromChainId *big.Int, tx
 	}
 	receipt := ronEvent.Receipt
 
-	// try getting withdrawal data from database by receipt.id
-	withdrawal, _ := l.bridgeStore.GetWithdrawalStore().GetWithdrawalById(receipt.Id.Int64())
-	if withdrawal != nil && withdrawal.ID > 0 {
-		return nil
-	}
-	// try checking on smart contract
-	// create caller
-	caller, err := gateway2.NewGatewayCaller(common.HexToAddress(l.config.Contracts[task.GATEWAY_CONTRACT]), l.client)
+	log.Info("[RoninListener][ProvideReceiptSignatureCallback] result of calling MainchainWithdrew function", "receiptId", receipt.Id.Int64(), "tx", tx.GetHash().Hex())
+	// otherwise, create a task for submitting signature
+	// get chainID
+	chainId, err := l.GetChainID()
 	if err != nil {
 		return err
 	}
-	result, err := caller.MainchainWithdrew(nil, receipt.Id)
-	if err != nil {
-		return err
+	// create task and store to database
+	withdrawalTask := &models.Task{
+		ChainId:         hexutil.EncodeBig(chainId),
+		FromChainId:     hexutil.EncodeBig(fromChainId),
+		FromTransaction: tx.GetHash().Hex(),
+		Type:            task.WITHDRAWAL_TASK,
+		Data:            common.Bytes2Hex(data),
+		Retries:         0,
+		Status:          task.STATUS_PENDING,
+		LastError:       "",
+		CreatedAt:       time.Now().Unix(),
 	}
-	log.Info("[RoninListener][ProvideReceiptSignatureCallback] result of calling MainchainWithdrew function", "result", result, "receiptId", receipt.Id.Int64(), "tx", tx.GetHash().Hex())
-	if !result {
-		// otherwise, create a task for submitting signature
-		// get chainID
-		chainId, err := l.GetChainID()
-		if err != nil {
-			return err
-		}
-		// create task and store to database
-		withdrawalTask := &models.Task{
-			ChainId:         hexutil.EncodeBig(chainId),
-			FromChainId:     hexutil.EncodeBig(fromChainId),
-			FromTransaction: tx.GetHash().Hex(),
-			Type:            task.WITHDRAWAL_TASK,
-			Data:            common.Bytes2Hex(data),
-			Retries:         0,
-			Status:          task.STATUS_PENDING,
-			LastError:       "",
-			CreatedAt:       time.Now().Unix(),
-		}
-		return l.bridgeStore.GetTaskStore().Save(withdrawalTask)
-	}
-	return nil
+	return l.bridgeStore.GetTaskStore().Save(withdrawalTask)
 }
 
 func (l *RoninListener) DepositRequestedCallback(fromChainId *big.Int, tx bridgeCore.Transaction, data []byte) error {
@@ -161,16 +144,6 @@ func (l *RoninListener) DepositRequestedCallback(fromChainId *big.Int, tx bridge
 	chainId, err := l.GetChainID()
 	if err != nil {
 		return err
-	}
-
-	// check if deposit has been executed or not
-	result, err := caller.DepositVote(nil, ethEvent.Receipt.Mainchain.ChainId, ethEvent.Receipt.Id)
-	if err != nil {
-		return err
-	}
-	log.Info("[RoninListener][DepositRequestedCallback] result of calling DepositVote function", "status", result.Status, "finalHash", common.Bytes2Hex(result.FinalHash[:]), "receiptId", ethEvent.Receipt.Id, "tx", tx.GetHash().Hex())
-	if result.Status == task.VoteStatusExecuted {
-		return nil
 	}
 
 	// check if current validator has been voted for this deposit or not
@@ -283,36 +256,24 @@ func (l *RoninListener) WithdrewCallback(fromChainId *big.Int, tx bridgeCore.Tra
 	if err = ethGatewayAbi.UnpackIntoInterface(ethEvent, "Withdrew", data); err != nil {
 		return err
 	}
-	// create caller
-	caller, err := gateway2.NewGatewayCaller(common.HexToAddress(l.config.Contracts[task.GATEWAY_CONTRACT]), l.client)
+	log.Info("[RoninListener][WithdrewCallback] result of calling MainchainWithdrew function", "receiptId", ethEvent.Receipt.Id.Int64(), "tx", tx.GetHash().Hex())
+	// get chainID
+	chainId, err := l.GetChainID()
 	if err != nil {
 		return err
 	}
-	result, err := caller.MainchainWithdrew(nil, ethEvent.Receipt.Id)
-	if err != nil {
-		return err
+	ackWithdrewTask := &models.Task{
+		ChainId:         hexutil.EncodeBig(chainId),
+		FromChainId:     hexutil.EncodeBig(fromChainId),
+		FromTransaction: tx.GetHash().Hex(),
+		Type:            task.ACK_WITHDREW_TASK,
+		Data:            common.Bytes2Hex(data),
+		Retries:         0,
+		Status:          task.STATUS_PENDING,
+		LastError:       "",
+		CreatedAt:       time.Now().Unix(),
 	}
-	log.Info("[RoninListener][WithdrewCallback] result of calling MainchainWithdrew function", "result", result, "receiptId", ethEvent.Receipt.Id.Int64(), "tx", tx.GetHash().Hex())
-	// create ack task if result is false
-	if !result {
-		// get chainID
-		chainId, err := l.GetChainID()
-		if err != nil {
-			return err
-		}
-		return l.bridgeStore.GetTaskStore().Save(&models.Task{
-			ChainId:         hexutil.EncodeBig(chainId),
-			FromChainId:     hexutil.EncodeBig(fromChainId),
-			FromTransaction: tx.GetHash().Hex(),
-			Type:            task.ACK_WITHDREW_TASK,
-			Data:            common.Bytes2Hex(data),
-			Retries:         0,
-			Status:          task.STATUS_PENDING,
-			LastError:       "",
-			CreatedAt:       time.Now().Unix(),
-		})
-	}
-	return nil
+	return l.bridgeStore.GetTaskStore().Save(ackWithdrewTask)
 }
 
 type RoninCallBackJob struct {
