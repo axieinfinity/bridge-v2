@@ -21,7 +21,7 @@
       "processWithinBlocks": 864000,
       "contracts": {
         "Gateway": "0xCee681C9108c42C710c6A8A949307D5F13C9F3ca",
-        "EthGateway": "0xb68cbBDd4C7b3e4e39C035Bd356FC5BDb7E2a50E"
+        "EthGateway": "0xFc4319Ae9e6134C708b88D5Ad5Da1A4a83372502"
       },
       "subscriptions": {
         "MainchainWithdrewSubscription": {
@@ -81,7 +81,7 @@
       },
       "subscriptions": {
         "DepositRequestedSubscription": {
-          "to": "0xb68cbBDd4C7b3e4e39C035Bd356FC5BDb7E2a50E",
+          "to": "0xFc4319Ae9e6134C708b88D5Ad5Da1A4a83372502",
           "type": 1,
           "handler": {
             "contract": "EthereumGateway",
@@ -92,7 +92,7 @@
           }
         },
         "WithdrewSubscription": {
-          "to": "0xb68cbBDd4C7b3e4e39C035Bd356FC5BDb7E2a50E",
+          "to": "0xFc4319Ae9e6134C708b88D5Ad5Da1A4a83372502",
           "type": 1,
           "handler": {
             "contract": "EthereumGateway",
