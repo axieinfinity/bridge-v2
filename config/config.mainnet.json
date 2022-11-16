@@ -21,7 +21,10 @@
       "processWithinBlocks": 864000,
       "contracts": {
         "Gateway": "0x0CF8fF40a508bdBc39fBe1Bb679dCBa64E65C7Df",
-        "EthGateway": "0x64192819Ac13Ef72bF6b5AE239AC672B43a9AF08"
+        "EthGateway": "0x64192819Ac13Ef72bF6b5AE239AC672B43a9AF08",
+        "EthGovernance": "",
+        "Governance": "",
+        "TrustedOrganization": ""
       },
       "subscriptions": {
         "MainchainWithdrewSubscription": {
@@ -55,6 +58,28 @@
           },
           "callbacks": {
             "Ronin": "ProvideReceiptSignatureCallback"
+          }
+        },
+        "BridgeOperatorSetUpdatedSubscription": {
+          "to": "",
+          "type": 1,
+          "handler": {
+            "contract": "RoninValidator",
+            "name": "BridgeOperatorSetUpdated"
+          },
+          "callbacks": {
+            "Ronin": "BridgeOperatorSetUpdatedCallback"
+          }
+        },
+        "BridgeOperatorsApprovedSubscription": {
+          "to": "",
+          "type": 1,
+          "handler": {
+            "contract": "RoninGovernanceAdmin",
+            "name": "BridgeOperatorsApproved"
+          },
+          "callbacks": {
+            "Ronin": "BridgeOperatorsApprovedCallback"
           }
         }
       }
