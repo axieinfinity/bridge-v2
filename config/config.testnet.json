@@ -61,7 +61,7 @@
           }
         },
         "BridgeOperatorSetUpdatedSubscription": {
-          "to": "",
+          "to": "0x79D77b973aF4C896552240521C6a421C88f159EF",
           "type": 1,
           "handler": {
             "contract": "RoninValidator",
@@ -72,7 +72,7 @@
           }
         },
         "BridgeOperatorsApprovedSubscription": {
-          "to": "",
+          "to": "0x61626ba084aDdc5dBFCdFfA257e66F8618d3feAB",
           "type": 1,
           "handler": {
             "contract": "RoninGovernanceAdmin",
