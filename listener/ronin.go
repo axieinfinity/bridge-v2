@@ -185,7 +185,7 @@ func (l *RoninListener) isRelayerNode() (bool, error) {
 	addr := l.GetValidatorSign().GetAddress()
 	isRelayer, err := roninGovernanceCaller.HasRole(nil, ret, addr)
 	if err != nil {
-		log.Warn("[RoninListener][isRelayerNode] The current node is not relayer", "err", err)
+		log.Info("[RoninListener][isRelayerNode] The current node is not relayer", "err", err)
 		return false, err
 	}
 
@@ -201,7 +201,7 @@ func (l *RoninListener) isTrustedNode() error {
 	addr := l.GetValidatorSign().GetAddress()
 	node, err := roninTrustedCaller.GetTrustedOrganization(nil, addr)
 	if err != nil {
-		log.Warn("[RoninListener][isTrustedNode] The current node is not trusted organization", "err", err)
+		log.Info("[RoninListener][isTrustedNode] The current node is not trusted organization", "err", err)
 		return err
 	}
 	log.Debug("[RoninListener][isTrustedNode] Trusted node info", "node", node)
