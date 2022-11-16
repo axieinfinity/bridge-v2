@@ -3,6 +3,7 @@ package task
 import (
 	"context"
 	"math/big"
+	"runtime/debug"
 	"sync"
 	"time"
 
@@ -150,7 +151,7 @@ func (r *RoninTask) getLimitQuery(numberOfExcludedIds int) int {
 func (r *RoninTask) processPending() error {
 	defer func() {
 		if err := recover(); err != nil {
-			log.Error("[RoninTask][processPending] recover from panic", "err", err)
+			log.Error("[RoninTask][processPending] recover from panic", "err", err, "stack trace", debug.Stack())
 		}
 	}()
 	// load processing tasks into excluded list
