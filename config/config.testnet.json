@@ -22,7 +22,7 @@
       "contracts": {
         "Gateway": "0xCee681C9108c42C710c6A8A949307D5F13C9F3ca",
         "EthGateway": "0xFc4319Ae9e6134C708b88D5Ad5Da1A4a83372502",
-        "EthGovernance": "",
+        "EthGovernance": "0x456327e8961B3Cd20ea41fF8b4FcE80EA3A8A5C9",
         "Governance": "0x61626ba084aDdc5dBFCdFfA257e66F8618d3feAB",
         "TrustedOrganization": "0x642CBdc239Db60E488a917e34b833e541b623F7A"
       },
