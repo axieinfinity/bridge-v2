@@ -382,15 +382,15 @@ func (r *bulkTask) validateAckWithdrawalTask(caller *roninGateway.GatewayCaller,
 // also returns transfer receipt
 func (r *bulkTask) validateWithdrawalTask(caller *roninGateway.GatewayCaller, task *models.Task) (bool, roninGateway.TransferReceipt, error) {
 	// Unpack event from data
-	ronEvent := new(roninGateway.GatewayMainchainWithdrew)
+	ronEvent := new(roninGateway.GatewayWithdrawalRequested)
 	ronGatewayAbi, err := roninGateway.GatewayMetaData.GetAbi()
 	if err != nil {
-		return false, ronEvent.Receipt, err
+		return false, ronEvent.Arg1, err
 	}
-	if err = r.util.UnpackLog(*ronGatewayAbi, ronEvent, "MainchainWithdrew", common.Hex2Bytes(task.Data)); err != nil {
-		return false, ronEvent.Receipt, err
+	if err = r.util.UnpackLog(*ronGatewayAbi, ronEvent, "WithdrawalRequested", common.Hex2Bytes(task.Data)); err != nil {
+		return false, ronEvent.Arg1, err
 	}
-	return true, ronEvent.Receipt, nil
+	return false, ronEvent.Arg1, nil
 }
 
 func updateTasks(store stores.BridgeStore, tasks []*models.Task, status, txHash string, timestamp int64, releaseTasksCh chan int) {
