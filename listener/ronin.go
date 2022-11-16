@@ -91,7 +91,7 @@ func (l *RoninListener) IsUpTodate() bool {
 	return true
 }
 
-func (l *RoninListener) ProvideReceiptSignatureCallback(fromChainId *big.Int, tx bridgeCore.Transaction, data []byte) error {
+func (l *RoninListener) provideReceiptSignature(fromChainId *big.Int, tx bridgeCore.Transaction, data []byte, isAgain bool) error {
 	// check database if receipt exist then do nothing
 	// Unpack event from data
 	ronEvent := new(gateway2.GatewayWithdrawalRequested)
@@ -99,7 +99,15 @@ func (l *RoninListener) ProvideReceiptSignatureCallback(fromChainId *big.Int, tx
 	if err != nil {
 		return err
 	}
-	if err = l.utilsWrapper.UnpackLog(*ronGatewayAbi, ronEvent, "WithdrawalRequested", data); err != nil {
+
+	var eventName string
+	if isAgain {
+		eventName = "WithdrawalSignaturesRequested"
+	} else {
+		eventName = "WithdrawalRequested"
+	}
+
+	if err = l.utilsWrapper.UnpackLog(*ronGatewayAbi, ronEvent, eventName, data); err != nil {
 		return err
 	}
 	receipt := ronEvent.Arg1
@@ -124,6 +132,14 @@ func (l *RoninListener) ProvideReceiptSignatureCallback(fromChainId *big.Int, tx
 		CreatedAt:       time.Now().Unix(),
 	}
 	return l.bridgeStore.GetTaskStore().Save(withdrawalTask)
+}
+
+func (l *RoninListener) ProvideReceiptSignatureCallback(fromChainId *big.Int, tx bridgeCore.Transaction, data []byte) error {
+	return l.provideReceiptSignature(fromChainId, tx, data, false)
+}
+
+func (l *RoninListener) ProvideReceiptSignatureAgainCallback(fromChainId *big.Int, tx bridgeCore.Transaction, data []byte) error {
+	return l.provideReceiptSignature(fromChainId, tx, data, true)
 }
 
 func (l *RoninListener) DepositRequestedCallback(fromChainId *big.Int, tx bridgeCore.Transaction, data []byte) error {
