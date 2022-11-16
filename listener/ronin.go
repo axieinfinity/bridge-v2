@@ -2,6 +2,8 @@ package listener
 
 import (
 	"context"
+	ethGovernance "github.com/axieinfinity/bridge-contracts/generated_contracts/ethereum/governance"
+	"github.com/ethereum/go-ethereum/crypto"
 	"math/big"
 	"time"
 
@@ -172,6 +174,23 @@ func (l *RoninListener) DepositRequestedCallback(fromChainId *big.Int, tx bridge
 	return l.bridgeStore.GetTaskStore().Save(depositTask)
 }
 
+func (l *RoninListener) isRelayerNode() (bool, error) {
+	roninGovernanceCaller, err := ethGovernance.NewGovernanceCaller(common.HexToAddress(l.config.Contracts[task.ETH_GOVERNANCE_CONTRACT]), l.client)
+	if err != nil {
+		return false, err
+	}
+
+	var ret [32]byte
+	copy(ret[:], crypto.Keccak256([]byte("RELAYER_ROLE")))
+	addr := l.GetValidatorSign().GetAddress()
+	isRelayer, err := roninGovernanceCaller.HasRole(nil, ret, addr)
+	if err != nil {
+		return false, err
+	}
+
+	return isRelayer, nil
+}
+
 func (l *RoninListener) isTrustedNode() error {
 	roninTrustedCaller, err := roninTrustedOrganization.NewTrustedOrganizationCaller(common.HexToAddress(l.config.Contracts[task.TRUSTED_ORGANIZATION_CONTRACT]), l.client)
 	if err != nil {
@@ -181,10 +200,9 @@ func (l *RoninListener) isTrustedNode() error {
 	addr := l.GetValidatorSign().GetAddress()
 	node, err := roninTrustedCaller.GetTrustedOrganization(nil, addr)
 	if err != nil {
-		log.Warn("[RoninListener][BridgeOperatorSetUpdatedCallback] The current node is not trusted organization", "err", err)
 		return err
 	}
-	log.Debug("[RoninListener][BridgeOperatorSetUpdatedCallback] Trusted node info", "node", node)
+	log.Debug("[RoninListener][isTrustedNode] Trusted node info", "node", node)
 
 	return nil
 }
@@ -193,7 +211,8 @@ func (l *RoninListener) BridgeOperatorSetUpdatedCallback(fromChainId *big.Int, t
 	log.Info("[RoninListener][BridgeOperatorSetUpdatedCallback] Received new event", "tx", tx.GetHash().Hex())
 
 	if err := l.isTrustedNode(); err != nil {
-		return err
+		log.Info("[RoninListener][BridgeOperatorSetUpdatedCallback] The current node is not trusted node")
+		return nil
 	}
 
 	// Get chainID
@@ -220,8 +239,13 @@ func (l *RoninListener) BridgeOperatorSetUpdatedCallback(fromChainId *big.Int, t
 func (l *RoninListener) BridgeOperatorsApprovedCallback(fromChainId *big.Int, tx bridgeCore.Transaction, data []byte) error {
 	log.Info("[RoninListener][BridgeOperatorsApprovedCallback] Received new event", "tx", tx.GetHash().Hex())
 
-	if err := l.isTrustedNode(); err != nil {
+	isRelayer, err := l.isRelayerNode()
+	if err != nil {
 		return err
+	}
+	if !isRelayer {
+		log.Info("[RoninListener][BridgeOperatorsApprovedCallback] The current node is not relayer")
+		return nil
 	}
 
 	// Get chainID
