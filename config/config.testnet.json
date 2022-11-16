@@ -20,11 +20,11 @@
       "fromHeight": 8010875,
       "processWithinBlocks": 864000,
       "contracts": {
-        "Gateway": "0xA8D61A5427a778be28Bd9bb5990956b33385c738",
-        "EthGateway": "0xb68cbBDd4C7b3e4e39C035Bd356FC5BDb7E2a50E",
+        "Gateway": "0xCee681C9108c42C710c6A8A949307D5F13C9F3ca",
+        "EthGateway": "0xFc4319Ae9e6134C708b88D5Ad5Da1A4a83372502",
         "EthGovernance": "",
-        "Governance": "",
-        "TrustedOrganization": ""
+        "Governance": "0x61626ba084aDdc5dBFCdFfA257e66F8618d3feAB",
+        "TrustedOrganization": "0x642CBdc239Db60E488a917e34b833e541b623F7A"
       },
       "subscriptions": {
         "MainchainWithdrewSubscription": {
