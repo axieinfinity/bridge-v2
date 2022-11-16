@@ -185,7 +185,6 @@ func (l *RoninListener) isRelayerNode() (bool, error) {
 	addr := l.GetValidatorSign().GetAddress()
 	isRelayer, err := roninGovernanceCaller.HasRole(nil, ret, addr)
 	if err != nil {
-		log.Info("[RoninListener][isRelayerNode] The current node is not relayer", "err", err)
 		return false, err
 	}
 
@@ -201,7 +200,6 @@ func (l *RoninListener) isTrustedNode() error {
 	addr := l.GetValidatorSign().GetAddress()
 	node, err := roninTrustedCaller.GetTrustedOrganization(nil, addr)
 	if err != nil {
-		log.Info("[RoninListener][isTrustedNode] The current node is not trusted organization", "err", err)
 		return err
 	}
 	log.Debug("[RoninListener][isTrustedNode] Trusted node info", "node", node)
@@ -213,7 +211,7 @@ func (l *RoninListener) BridgeOperatorSetUpdatedCallback(fromChainId *big.Int, t
 	log.Info("[RoninListener][BridgeOperatorSetUpdatedCallback] Received new event", "tx", tx.GetHash().Hex())
 
 	if err := l.isTrustedNode(); err != nil {
-		log.Warn("[RoninListener][BridgeOperatorSetUpdatedCallback] The current node is not trusted node")
+		log.Info("[RoninListener][BridgeOperatorSetUpdatedCallback] The current node is not trusted node")
 		return nil
 	}
 
@@ -246,7 +244,7 @@ func (l *RoninListener) BridgeOperatorsApprovedCallback(fromChainId *big.Int, tx
 		return err
 	}
 	if !isRelayer {
-		log.Warn("[RoninListener][BridgeOperatorsApprovedCallback] The current node is not relayer")
+		log.Info("[RoninListener][BridgeOperatorsApprovedCallback] The current node is not relayer")
 		return nil
 	}
 
