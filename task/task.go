@@ -120,7 +120,7 @@ func (r *task) voteBridgeOperatorsBySignature(task *models.Task) (doneTasks, pro
 	}
 
 	if voted {
-		log.Debug("[RoninTask][BridgeOperatorSetCallback] Bridge already voted")
+		log.Debug("[RoninTask][BridgeOperatorSetCallback] Bridge already voted", "period", event.Period)
 		doneTasks = append(doneTasks, task)
 		return
 	}
