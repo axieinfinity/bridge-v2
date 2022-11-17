@@ -43,6 +43,7 @@ type RoninTask struct {
 	secret          *bridgeCore.Secret
 
 	client    *ethclient.Client
+	ethClient *ethclient.Client
 	contracts map[string]string
 
 	limitQuery int
@@ -56,10 +57,31 @@ type RoninTask struct {
 
 func NewRoninTask(listener bridgeCore.Listener, db *gorm.DB, util utils.Utils) (*RoninTask, error) {
 	config := listener.Config()
-	client, err := ethclient.Dial(config.RpcUrl)
-	if err != nil {
-		return nil, err
+	var client *ethclient.Client
+	var ethClient *ethclient.Client
+	var err error
+
+	if config.RpcUrls != nil {
+		if config.RpcUrls.Ethereum != nil {
+			ethClient, err = ethclient.Dial(*config.RpcUrls.Ethereum)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		if config.RpcUrls.Ronin != nil {
+			client, err = ethclient.Dial(*config.RpcUrls.Ronin)
+			if err != nil {
+				return nil, err
+			}
+		}
+	} else {
+		client, err = ethclient.Dial(config.RpcUrl)
+		if err != nil {
+			return nil, err
+		}
 	}
+
 	chainId, err := listener.GetChainID()
 	if err != nil {
 		return nil, err
@@ -75,6 +97,7 @@ func NewRoninTask(listener bridgeCore.Listener, db *gorm.DB, util utils.Utils) (
 		secret:             config.Secret,
 		contracts:          config.Contracts,
 		client:             client,
+		ethClient:          ethClient,
 		chainId:            chainId,
 		util:               util,
 		limitQuery:         defaultLimitRecords,
@@ -176,8 +199,8 @@ func (r *RoninTask) processPending() error {
 	bulkDepositTask := newBulkTask(r.listener, r.client, r.store, r.chainId, r.contracts, r.txCheckInterval, defaultMaxTry, DEPOSIT_TASK, r.releaseTasksCh, r.util)
 	bulkSubmitWithdrawalSignaturesTask := newBulkTask(r.listener, r.client, r.store, r.chainId, r.contracts, r.txCheckInterval, defaultMaxTry, WITHDRAWAL_TASK, r.releaseTasksCh, r.util)
 	ackWithdrewTasks := newBulkTask(r.listener, r.client, r.store, r.chainId, r.contracts, r.txCheckInterval, defaultMaxTry, ACK_WITHDREW_TASK, r.releaseTasksCh, r.util)
-	voteBridgeOperatorsTask := newTask(r.listener, r.client, r.store, r.chainId, r.contracts, defaultMaxTry, VOTE_BRIDGE_OPERATORS_TASK, r.releaseTasksCh, r.util)
-	relayBridgeOperatorsTask := newTask(r.listener, r.client, r.store, r.chainId, r.contracts, defaultMaxTry, RELAY_BRIDGE_OPERATORS_TASK, r.releaseTasksCh, r.util)
+	voteBridgeOperatorsTask := newTask(r.listener, r.client, r.ethClient, r.store, r.chainId, r.contracts, defaultMaxTry, VOTE_BRIDGE_OPERATORS_TASK, r.releaseTasksCh, r.util)
+	relayBridgeOperatorsTask := newTask(r.listener, r.client, r.ethClient, r.store, r.chainId, r.contracts, defaultMaxTry, RELAY_BRIDGE_OPERATORS_TASK, r.releaseTasksCh, r.util)
 
 	for _, task := range tasks {
 		// lock task

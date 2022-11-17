@@ -3,6 +3,10 @@
     "Ronin": {
       "chainId": "0x7e4",
       "rpcUrl": "http://localhost:8545",
+      "rpcUrls": {
+        "ronin": "http://localhost:8545",
+        "ethereum": ""
+      },
       "blockTime": 3,
       "safeBlockRange": 10,
       "maxTasksQuery": 1000,

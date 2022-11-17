@@ -1,6 +1,7 @@
 package task
 
 import (
+	"bytes"
 	"crypto/ecdsa"
 	ethGovernance "github.com/axieinfinity/bridge-contracts/generated_contracts/ethereum/governance"
 	roninGovernance "github.com/axieinfinity/bridge-contracts/generated_contracts/ronin/governance"
@@ -19,6 +20,7 @@ import (
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/signer/core"
 	"math/big"
+	"sort"
 	"time"
 )
 
@@ -31,6 +33,7 @@ type task struct {
 	store          stores.BridgeStore
 	validator      *ecdsa.PrivateKey
 	client         bind.ContractBackend
+	ethClient      bind.ContractBackend
 	contracts      map[string]string
 	chainId        *big.Int
 	maxTry         int
@@ -39,12 +42,13 @@ type task struct {
 	releaseTasksCh chan int
 }
 
-func newTask(listener bridgeCore.Listener, client bind.ContractBackend, store stores.BridgeStore, chainId *big.Int, contracts map[string]string, maxTry int, taskType string, releaseTasksCh chan int, util utils.Utils) *task {
+func newTask(listener bridgeCore.Listener, client, ethClient bind.ContractBackend, store stores.BridgeStore, chainId *big.Int, contracts map[string]string, maxTry int, taskType string, releaseTasksCh chan int, util utils.Utils) *task {
 	return &task{
 		util:           util,
 		task:           nil,
 		store:          store,
 		client:         client,
+		ethClient:      ethClient,
 		contracts:      contracts,
 		chainId:        chainId,
 		maxTry:         maxTry,
@@ -94,14 +98,8 @@ func (r *task) sendTransaction(sendTx func(task *models.Task) (doneTasks, proces
 func (r *task) voteBridgeOperatorsBySignature(task *models.Task) (doneTasks, processingTasks, failedTasks []*models.Task, tx *ethtypes.Transaction) {
 	log.Info("[RoninTask][BridgeOperatorSetCallback] Processing task")
 	// create caller
-	roninGovernanceTransactor, err := roninGovernance.NewGovernanceTransactor(common.HexToAddress(r.contracts[GOVERNANCE_CONTRACT]), r.client)
+	roninGovernanceTransactor, err := roninGovernance.NewGovernance(common.HexToAddress(r.contracts[GOVERNANCE_CONTRACT]), r.client)
 	if err != nil {
-		task.LastError = err.Error()
-		failedTasks = append(failedTasks, task)
-		return nil, nil, failedTasks, nil
-	}
-	if err != nil {
-		// append all success tasks into failed tasks
 		task.LastError = err.Error()
 		failedTasks = append(failedTasks, task)
 		return nil, nil, failedTasks, nil
@@ -112,6 +110,19 @@ func (r *task) voteBridgeOperatorsBySignature(task *models.Task) (doneTasks, pro
 		task.LastError = err.Error()
 		failedTasks = append(failedTasks, task)
 		return nil, nil, failedTasks, nil
+	}
+
+	voted, err := roninGovernanceTransactor.BridgeOperatorsVoted(nil, event.Period, r.listener.GetValidatorSign().GetAddress())
+	if err != nil {
+		task.LastError = err.Error()
+		failedTasks = append(failedTasks, task)
+		return nil, nil, failedTasks, nil
+	}
+
+	if voted {
+		log.Debug("[RoninTask][BridgeOperatorSetCallback] Bridge already voted")
+		doneTasks = append(doneTasks, task)
+		return
 	}
 
 	// otherwise add task to processingTasks to adjust after sending transaction
@@ -142,7 +153,7 @@ func (r *task) voteBridgeOperatorsBySignature(task *models.Task) (doneTasks, pro
 		})
 	})
 	if err != nil {
-		log.Error("[RoninTask][BridgeOperatorSetCallback] Send transaction error", "err", err)
+		log.Error("[RoninTask][BridgeOperatorSetCallback] Send transaction error", "err", err, "period", event.Period)
 		task.LastError = err.Error()
 		failedTasks = append(failedTasks, task)
 		return nil, nil, failedTasks, nil
@@ -170,7 +181,7 @@ func (r *task) relayBridgeOperators(task *models.Task) (doneTasks, processingTas
 		return nil, nil, failedTasks, nil
 	}
 
-	ethGovernanceTransactor, err := ethGovernance.NewGovernanceTransactor(common.HexToAddress(r.contracts[ETH_GOVERNANCE_CONTRACT]), r.client)
+	ethGovernanceTransactor, err := ethGovernance.NewGovernanceTransactor(common.HexToAddress(r.contracts[ETH_GOVERNANCE_CONTRACT]), r.ethClient)
 	if err != nil {
 		task.LastError = err.Error()
 		failedTasks = append(failedTasks, task)
@@ -188,6 +199,8 @@ func (r *task) relayBridgeOperators(task *models.Task) (doneTasks, processingTas
 	for _, node := range trustedOrgs {
 		voters = append(voters, node.BridgeVoter)
 	}
+	// Must be stored before voting
+	sort.Sort(validatorsAscending(voters))
 
 	event, err := r.unpackBridgeOperatorsApprovedEvent(task)
 	if err != nil {
@@ -311,3 +324,10 @@ func signBridgeOperatorsBallot(opts *signDataOpts, period int64, bridgeOperators
 
 	return opts.SignTypedDataCallback(bridgeOperatorsBallotTypes)
 }
+
+// validatorsAscending implements the sort interface to allow sorting a list of addresses
+type validatorsAscending []common.Address
+
+func (s validatorsAscending) Len() int           { return len(s) }
+func (s validatorsAscending) Less(i, j int) bool { return bytes.Compare(s[i][:], s[j][:]) < 0 }
+func (s validatorsAscending) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
