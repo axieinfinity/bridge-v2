@@ -55,33 +55,16 @@ type RoninTask struct {
 	maxProcessingTasks int
 }
 
-func NewRoninTask(listener bridgeCore.Listener, db *gorm.DB, util utils.Utils) (*RoninTask, error) {
+func NewRoninTask(listener bridgeCore.Listener, ethConfig *bridgeCore.LsConfig, db *gorm.DB, util utils.Utils) (*RoninTask, error) {
 	config := listener.Config()
-	var client *ethclient.Client
-	var ethClient *ethclient.Client
-	var err error
-
-	if config.RpcUrls != nil {
-		if config.RpcUrls.Ethereum != nil {
-			ethClient, err = ethclient.Dial(*config.RpcUrls.Ethereum)
-			if err != nil {
-				return nil, err
-			}
-		}
-
-		if config.RpcUrls.Ronin != nil {
-			client, err = ethclient.Dial(*config.RpcUrls.Ronin)
-			if err != nil {
-				return nil, err
-			}
-		}
-	} else {
-		client, err = ethclient.Dial(config.RpcUrl)
-		if err != nil {
-			return nil, err
-		}
+	client, err := ethclient.Dial(config.RpcUrl)
+	if err != nil {
+		return nil, err
 	}
-
+	ethClient, err := ethclient.Dial(ethConfig.RpcUrl)
+	if err != nil {
+		return nil, err
+	}
 	chainId, err := listener.GetChainID()
 	if err != nil {
 		return nil, err

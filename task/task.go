@@ -24,8 +24,11 @@ import (
 	"time"
 )
 
-const Salt = "0xe3922a0bff7e80c6f7465bc1b150f6c95d9b9203f1731a09f86e759ea1eaa306"
-const ErrSigAlreadySubmitted = "execution reverted: BOsGovernanceRelay: query for outdated period"
+const (
+	Salt                   = "0xe3922a0bff7e80c6f7465bc1b150f6c95d9b9203f1731a09f86e759ea1eaa306"
+	ErrSigAlreadySubmitted = "execution reverted: BOsGovernanceRelay: query for outdated period"
+	ErrOutdatedPeriod      = "execution reverted: BOsGovernanceProposal: query for outdated period"
+)
 
 type task struct {
 	util           utils.Utils
@@ -59,7 +62,7 @@ func newTask(listener bridgeCore.Listener, client, ethClient bind.ContractBacken
 }
 
 func (r *task) collectTask(t *models.Task) {
-	log.Debug("Received new task", "hash", t.TransactionHash, "type", t.Type)
+	log.Debug("Received new task", "id", t.ID, "status", t.Status, "type", t.Type)
 	if t.Type == r.taskType {
 		r.task = t
 	}
@@ -237,9 +240,12 @@ func (r *task) relayBridgeOperators(task *models.Task) (doneTasks, processingTas
 	})
 	if err != nil {
 		// Prevent retry submit signature if the signature was already submitted
-		if err.Error() == ErrSigAlreadySubmitted {
+		switch err.Error() {
+		case ErrOutdatedPeriod:
+			log.Debug("[RoninTask][BridgeOperatorsApprovedCallback] Bridge operators period outdated")
+		case ErrSigAlreadySubmitted:
 			log.Debug("[RoninTask][BridgeOperatorsApprovedCallback] Bridge operators already submitted")
-		} else {
+		default:
 			log.Error("[RoninTask][BridgeOperatorsApprovedCallback] Send transaction error", "err", err)
 			task.LastError = err.Error()
 			failedTasks = append(failedTasks, task)
