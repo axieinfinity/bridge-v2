@@ -2,7 +2,7 @@
 
 Bridge v2 is the second version of [bridge](https://github.com/axieinfinity/bridge) which is used for validators
 and relayers to listen to events triggered from Ronin or other chains connected to Ronin (eg: Ethereum). There are two mains
-responsibilities:
+features:
 - Listen to trusted nodes on Ronin (it currently changes in every epoch - `1 day`) and relay it into Ethereum.
 - Listen to deposit and withdraw request on Ronin/Ethereum and relay it to the others.
 
@@ -117,8 +117,8 @@ Stores a map (pair) of names and contact addresses, which can be used during pro
 Includes all subscriptions bridge is observing in a listener. Each subscription contains the subscription name and subscription config.
 - `to`: Indicates receiver/contract address that bridge uses as one of conditions to trigger a subscription
 - `type`: There are 2 types, `0` is `transaction event` and `1` is `log's event`
-- `handler`: Define contract and event that want to listen
-  - `contract`: The contract name. This is defined on repo [Bridge Contracts](https://github.com/axieinfinity/bridge-contracts/blob/master/main.go#L13-L20)
+- `handler`: Define contract and event that we want to listen
+  - `contract`: Contract name. This must be defined on repo [Bridge Contracts](https://github.com/axieinfinity/bridge-contracts/blob/master/main.go#L13-L20)
   - `name`: The event name
 - `callbacks`: List all callbacks function when data is decoded. This is a map (pair) where the key is listener's name and value is the function that is called in that listener. For example:
 
@@ -139,8 +139,7 @@ Includes all subscriptions bridge is observing in a listener. Each subscription 
 Bridge will trigger the function `StoreMainchainWithdrawCallback` in `RoninListener`
 
 #### Example
-For example, the contract `Hello` on Ronin has an event called `Welcome`, Bridge will listen to this event
-and submit it to Ethereum by calling the method `SubmitFromRonin` of the `HelloEth` contract.
+For example, Bridge will listen to event Welcomed which is defined on contract Hello and submit the data to HelloEth contract via method SubmitFromRonin
 ```json5
 {
   "MainchainWithdrewSubscription": {
