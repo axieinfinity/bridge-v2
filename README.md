@@ -45,26 +45,42 @@ For example `Ronin` reflects with function `InitRonin`
 
 Therefore, do not change the name, otherwise, the program cannot run properly.
 
-#### 1. chainId (string)
+#### 1. chainId:
+- type: `hex string`
+
 Chain's identity (ronin: 0x7e4, ethereum: 0x1)
 
-#### 2. rpcUrl (string)
+#### 2. rpcUrl:
+- type: `string`
+
 RPC URL of chain which is used to query new events or submit transactions to.
 
-#### 3. blockTime (number)
+#### 3. blockTime:
+- type: `number`
+- unit: `seconds`
+
 The time of a new block is generated which is used periodically to listen to new events from the new block,
 
-#### 4. safeBlockRange (number)
+#### 4. safeBlockRange: 
+- type: `number`
+- unit: `blocks`
+
 Safe block range which guarantees that reorg cannot happen.
 
-#### 5. maxTasksQuery (number)
+#### 5. maxTasksQuery:
+- type: `number`
+
 Maximum number of pending/processing tasks queried from the database
 
-#### 6. transactionCheckPeriod (number)
+#### 6. transactionCheckPeriod:
+- type: `number`
+
 Period of checking whether a transaction is mined or not by querying its transaction's receipt. If a receipt is found,
 it will try 3 more times to ensure the transaction is not replaced because of reorg.
 
-#### 7. secret (object)
+#### 7. secret:
+- type: `object`
+
 Stores private key of validator and relayer. These fields can be empty and passed via environment variables
 through 2 variables: `RONIN_VALIDATOR_KEY`, `RONIN_RELAYER_KEY` and Ethereum are: `ETHEREUM_VALIDATOR_KEY`, `ETHEREUM_RELAYER_KEY`
 ##### syntax: `<key>`
@@ -98,13 +114,21 @@ This is the sample secret's config
 }
 ```
 
-#### 8. fromHeight (number)
+#### 8. fromHeight:
+- type: `number`
+- unit: `blocks`
+
 Initially, Bridge uses this property to load data from this block. After that, Bridge will store the latest processed block in `processed_block` table and use the value from this table to continue.
 
-#### 9. processWithinBlocks (number)
+#### 9. processWithinBlocks:
+- type: `number`
+- unit: `blocks`
+
 This property guarantees that Bridge does not process too far. Specifically, when `latestBlock - processWithinBlocks > fromHeight`, bridge `latestBlock - processWithinBlocks` instead of `fromHeight` to process.
 
-#### 10. contracts (object)
+#### 10. contracts
+- type: `record<string, address>`
+
 Stores a map (pair) of names and contact addresses, which can be used during processing tasks or jobs of a listener. For example, in `Ronin` listener, 2 contracts which are Ronin Gateway contract (at `Gateway`) and Ethereum Gateway contract (at `EthGateway`) are used:
 ```json
 {
@@ -113,7 +137,9 @@ Stores a map (pair) of names and contact addresses, which can be used during pro
 }
 ```
 
-#### 11. subscriptions (object)
+#### 11. subscriptions
+- type: `object`
+
 Includes all subscriptions bridge is observing in a listener. Each subscription contains the subscription name and subscription config.
 - `to`: Indicates receiver/contract address that bridge uses as one of conditions to trigger a subscription
 - `type`: There are 2 types, `0` is `transaction event` and `1` is `log's event`
@@ -147,7 +173,7 @@ and submit the data to `HelloEth` contract via method `SubmitFromRonin`
     "to": "0xA8D61A5427a778be28Bd9bb5990956b33385c738",
     "type": 1,
     "handler": {
-      "contract": "Hello", // The contract name, it must be defined on [Bridge Contracts](https://github.com/axieinfinity/bridge-contracts/blob/master/main.go#L13-L20) first.
+      "contract": "RoninGateway", // The contract name, it must be defined on [Bridge Contracts](https://github.com/axieinfinity/bridge-contracts/blob/master/main.go#L13-L20) first.
       "name": "Welcome" // The event is listening
     },
     "callbacks": {
