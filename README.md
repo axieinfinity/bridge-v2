@@ -9,7 +9,7 @@ responsibilities:
 # How to run
 ## Requirements
 
-- Ronin RPC URL is used to listen/trigger events from the Ronin chain
+- Ronin RPC URL is used to listen/trigger events from Ronin chain
 - Ethereum RPC URL (Alchemy, Infura, etc.) is used to listen/trigger events from Ethereum
 - Postgres DB to store events and tasks
 
@@ -29,7 +29,7 @@ build and install bridge
 make bridge
 ```
 
-then run the bridge with
+then run Bridge with
 
 ```
 bridge --config <path-to-config>
@@ -39,7 +39,7 @@ bridge --config <path-to-config>
 The config file can be found in the `config` directory. There are 2 main components in the configuration: listeners and database
 
 ### listeners (object)
-List all chains that the bridge is listening to. Each name reflects a specific function defined [here](https://github.com/axieinfinity/bridge-v2/blob/master/internal/init_listeners.go).
+List all chains that Bridge is listening to. Each name reflects a specific function defined [here](https://github.com/axieinfinity/bridge-v2/blob/master/internal/init_listeners.go).
 
 For example `Ronin` reflects with function `InitRonin`
 
@@ -62,7 +62,7 @@ Maximum number of pending/processing tasks queried from the database
 
 #### 6. transactionCheckPeriod (number)
 Period of checking whether a transaction is mined or not by querying its transaction's receipt. If a receipt is found,
-it will try 3 more times to ensure the transaction is not replaced because of the reorg.
+it will try 3 more times to ensure the transaction is not replaced because of reorg.
 
 #### 7. secret (object)
 Stores private key of validator and relayer. These fields can be empty and passed via environment variables
@@ -99,13 +99,13 @@ This is the sample secret's config
 ```
 
 #### 8. fromHeight (number)
-Initially, the bridge uses this property to load data from this block. After that, the bridge will store the latest processed block in `processed_block` table and use the value from this table to continue.
+Initially, Bridge uses this property to load data from this block. After that, Bridge will store the latest processed block in `processed_block` table and use the value from this table to continue.
 
 #### 9. processWithinBlocks (number)
-This property guarantees that the bridge does not process too far. Specifically, when `latestBlock - processWithinBlocks > fromHeight`, bridge `latestBlock - processWithinBlocks` instead of `fromHeight` to process.
+This property guarantees that Bridge does not process too far. Specifically, when `latestBlock - processWithinBlocks > fromHeight`, bridge `latestBlock - processWithinBlocks` instead of `fromHeight` to process.
 
 #### 10. contracts (object)
-Stores a map (pair) of names and contact addresses, which can be used during processing tasks or jobs of a listener. For example, in `Ronin` listener, 2 contracts which are the Ronin Gateway contract (at `Gateway`) and the Ethereum Gateway contract (at `EthGateway`) are used:
+Stores a map (pair) of names and contact addresses, which can be used during processing tasks or jobs of a listener. For example, in `Ronin` listener, 2 contracts which are Ronin Gateway contract (at `Gateway`) and Ethereum Gateway contract (at `EthGateway`) are used:
 ```json
 {
   "Gateway": "0x03d1F13c7391F6B5A651143a31034cf728A93694",
@@ -115,12 +115,12 @@ Stores a map (pair) of names and contact addresses, which can be used during pro
 
 #### 11. subscriptions (object)
 Includes all subscriptions bridge is observing in a listener. Each subscription contains the subscription name and subscription config.
-- `to`: Indicates the receiver/contract address that bridge uses as one of the conditions to trigger a subscription
+- `to`: Indicates receiver/contract address that bridge uses as one of conditions to trigger a subscription
 - `type`: There are 2 types, `0` is `transaction event` and `1` is `log's event`
-- `handler`: Define the contract and the event that want to listen
+- `handler`: Define contract and event that want to listen
   - `contract`: The contract name. This is defined on repo [Bridge Contracts](https://github.com/axieinfinity/bridge-contracts/blob/master/main.go#L13-L20)
   - `name`: The event name
-- `callbacks`: List all callbacks function when data is decoded. This is a map (pair) where the key is the listener's name and the value is the function that is called in that listener. For example:
+- `callbacks`: List all callbacks function when data is decoded. This is a map (pair) where the key is listener's name and value is the function that is called in that listener. For example:
 
 ```json5
 {
@@ -136,10 +136,10 @@ Includes all subscriptions bridge is observing in a listener. Each subscription 
 }
 ```
 
-The bridge will trigger the function `StoreMainchainWithdrawCallback` in `RoninListener`
+Bridge will trigger the function `StoreMainchainWithdrawCallback` in `RoninListener`
 
 #### Example
-For example, the contract `Hello` on Ronin has an event called `Welcome`, the bridge will listen to this event
+For example, the contract `Hello` on Ronin has an event called `Welcome`, Bridge will listen to this event
 and submit it to Ethereum by calling the method `SubmitFromRonin` of the `HelloEth` contract.
 ```json5
 {
@@ -257,7 +257,7 @@ graph TD
 ```
 
 #### DepositRequestedSubscription
-When a user deposit ETH on Ethereum to the contract. Bridge will listen this event and send it to Ronin
+When a user deposit ETH on Ethereum to contract. Bridge will listen this event and send it to Ronin
 ```mermaid
 graph TD
   requestDepositFor --> |Emit| DepositRequested
@@ -271,7 +271,7 @@ graph TD
   StoreProcessedReceipt --> TryBulkDepositFor
 ```
 #### WithdrewSubscription
-When a user withdraw ETH from the contract. Bridge will listen this event and send it to Ronin
+When a user withdraw ETH from contract. Bridge will listen this event and send it to Ronin
 ```mermaid
 graph TD
   unlockWithdrawal --> |Emit| Withdrew
@@ -286,9 +286,9 @@ graph TD
 ```
 
 #### BridgeOperatorSetUpdatedSubscription
-At the end of each epoch, validators call `wrapUpEpoch` of the `ValidatorSet` contract to update list validator set.
+At the end of each epoch, validators call `wrapUpEpoch` of `ValidatorSet` contract to update list validator set.
 It emits an event `BridgeOperatorSetUpdated(uint256 period, []address operators)`. All trusted nodes must listen this
-event, vote by signing typed data and submit it to the `RoninGovernanceAdmin` contract. 
+event, vote by signing typed data and submit it to `RoninGovernanceAdmin` contract. 
 ```mermaid
 graph TD
   Validator -->|Call| WrapUpEpoch
@@ -303,9 +303,9 @@ graph TD
 ```
 
 #### BridgeOperatorsApprovedSubscription
-After trusted nodes submitted vote's signature to `RoninGovernanceAdmin`. The relayer needs to 
+After trusted nodes submitted vote's signature to `RoninGovernanceAdmin`. Relayer needs to 
 call `GetAllTrustedOrganizations` to get all trusted nodes, sort it as ascending. Then call `GetBridgeOperatorVotingSignatures`
-to get a list signatures that submitted on Ronin. Finally, the relayer submit these signatures to
+to get a list signatures that submitted on Ronin. Finally, relayer submits these signatures to
 `MainchainGovernanceAdmin` through `RelayBridgeOperators` method.
 ```mermaid
 graph TD
