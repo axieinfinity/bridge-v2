@@ -1,13 +1,17 @@
 # Bridge v2
 
-Bridge v2 is the second version of [bridge](https://github.com/axieinfinity/bridge) which is used for validators and relayers listen to events triggered from Ronin or other chains connected to Ronin (eg: Ethereum)
+Bridge v2 is the second version of [bridge](https://github.com/axieinfinity/bridge) which is used for validators
+and relayers to listen to events triggered from Ronin or other chains connected to Ronin (eg: Ethereum). There are two mains
+responsibilities:
+- Listen to trusted nodes on Ronin (it currently changes in every epoch - `1 day`) and relay it into Ethereum.
+- Listen to deposit and withdraw request on Ronin/Ethereum and relay it to the others.
 
 # How to run
 ## Requirements
 
-- Ronin RPC url is used to listen/trigger events from Ronin chain
-- Ethereum RPC url (alchemy, infura, etc.) is used to listen/trigger events from Ethereum
-- Postgres db to store events and tasks
+- Ronin RPC URL is used to listen/trigger events from the Ronin chain
+- Ethereum RPC URL (Alchemy, Infura, etc.) is used to listen/trigger events from Ethereum
+- Postgres DB to store events and tasks
 
 ## Install and run
 ### Using docker
@@ -16,8 +20,8 @@ There is a `docker-compose.yaml` file in `docker` directory. Modify `.env` file 
 docker-compose -f docker/docker-compose.yaml --env-file .env up -d
 ```
 ### Manually
-    
-Install postgres database, create `bridge` database
+
+Install PostgreSQL database, create `bridge` database
 
 build and install bridge
 
@@ -25,52 +29,52 @@ build and install bridge
 make bridge
 ```
 
-then run bridge with 
+then run the bridge with
 
 ```
 bridge --config <path-to-config>
 ```
 
 ## Configuration
-Config file can be found in `config` directory. There are 3 main components in configuration: listeners and database
+The config file can be found in the `config` directory. There are 2 main components in the configuration: listeners and database
 
 ### listeners (object)
-List all chains that bridge is listening to. Each name reflects to a specific function defined [here](https://github.com/axieinfinity/bridge-v2/blob/master/internal/init_listeners.go).
+List all chains that the bridge is listening to. Each name reflects a specific function defined [here](https://github.com/axieinfinity/bridge-v2/blob/master/internal/init_listeners.go).
 
-For example: `Ronin` reflects with function `InitRonin`
+For example `Ronin` reflects with function `InitRonin`
 
-Therefore, do not change the name, otherwise the program cannot run properly.
+Therefore, do not change the name, otherwise, the program cannot run properly.
 
 #### 1. chainId (string)
 Chain's identity (ronin: 0x7e4, ethereum: 0x1)
 
-#### 2. rpcUrl (string) 
-RPC Url of chain which is used to query new events or submit transaction to.
+#### 2. rpcUrl (string)
+RPC URL of chain which is used to query new events or submit transactions to.
 
 #### 3. blockTime (number)
-Time of new block is generated which is used to periodically to listen to new events from new block,
+The time of a new block is generated which is used periodically to listen to new events from the new block,
 
 #### 4. safeBlockRange (number)
 Safe block range which guarantees that reorg cannot happen.
 
 #### 5. maxTasksQuery (number)
-Maximum number of pending/processing tasks queried from database
+Maximum number of pending/processing tasks queried from the database
 
 #### 6. transactionCheckPeriod (number)
-Period of checking whether a transaction is mined or not by querying its transaction's receipt. If receipt is found, 
-it will try 3 more times to make sure the transaction is not replaced because of reorg.
+Period of checking whether a transaction is mined or not by querying its transaction's receipt. If a receipt is found,
+it will try 3 more times to ensure the transaction is not replaced because of the reorg.
 
 #### 7. secret (object)
-Stores private key of validator and relayer. These fields can be empty and passed via environment variables 
+Stores private key of validator and relayer. These fields can be empty and passed via environment variables
 through 2 variables: `RONIN_VALIDATOR_KEY`, `RONIN_RELAYER_KEY` and Ethereum are: `ETHEREUM_VALIDATOR_KEY`, `ETHEREUM_RELAYER_KEY`
 ##### syntax: `<key>`
 ##### example: `xxxx4563e6591c1eba4b932a3513006cb5bcd1a6f69c32295dxxxx`
 If KMS is used, set these environments
- - `RONIN_VALIDATOR_KMS_KEY_TOKEN_PATH`
- - `RONIN_VALIDATOR_KMS_SSL_CERT_PATH`
- - `RONIN_VALIDATOR_KMS_SERVER_ADDR`
- - `RONIN_VALIDATOR_KMS_SOURCE_ADDR`
- - `RONIN_VALIDATOR_KMS_SIGN_TIMEOUT`
+- `RONIN_VALIDATOR_KMS_KEY_TOKEN_PATH`
+- `RONIN_VALIDATOR_KMS_SSL_CERT_PATH`
+- `RONIN_VALIDATOR_KMS_SERVER_ADDR`
+- `RONIN_VALIDATOR_KMS_SOURCE_ADDR`
+- `RONIN_VALIDATOR_KMS_SIGN_TIMEOUT`
 
 Replace `RONIN` with `ETHEREUM`, `VALIDATOR` with `RELAYER` when needed
 
@@ -95,13 +99,13 @@ This is the sample secret's config
 ```
 
 #### 8. fromHeight (number)
-Initially, bridge uses this property to load data from this block. After that, bridge will store latest processed block into `processed_block` table and use value from this table to continue.
+Initially, the bridge uses this property to load data from this block. After that, the bridge will store the latest processed block in `processed_block` table and use the value from this table to continue.
 
 #### 9. processWithinBlocks (number)
-This property guarantees that bridge does not process too far. Specifically, when `latestBlock - processWithinBlocks > fromHeight`, bridge `latestBlock - processWithinBlocks` instead of `fromHeight` to process.
+This property guarantees that the bridge does not process too far. Specifically, when `latestBlock - processWithinBlocks > fromHeight`, bridge `latestBlock - processWithinBlocks` instead of `fromHeight` to process.
 
 #### 10. contracts (object)
-Stores a map (pair) of name and contract address, which can be used during processing tasks or jobs of a listener. For example, in `Ronin` listener, 2 contracts which are ronin gateway contract (at `Gateway`) and eth gateway contract (at `EthGateway`) are used:
+Stores a map (pair) of names and contact addresses, which can be used during processing tasks or jobs of a listener. For example, in `Ronin` listener, 2 contracts which are the Ronin Gateway contract (at `Gateway`) and the Ethereum Gateway contract (at `EthGateway`) are used:
 ```json
 {
   "Gateway": "0x03d1F13c7391F6B5A651143a31034cf728A93694",
@@ -110,13 +114,13 @@ Stores a map (pair) of name and contract address, which can be used during proce
 ```
 
 #### 11. subscriptions (object)
-Includes all subscriptions bridge is observing in a listener. Each subscription contains subscription's name and subscription's config.
-- `to`: Indicates the receiver/contract address that bridge uses as one of the condition to trigger a subscription
+Includes all subscriptions bridge is observing in a listener. Each subscription contains the subscription name and subscription config.
+- `to`: Indicates the receiver/contract address that bridge uses as one of the conditions to trigger a subscription
 - `type`: There are 2 types, `0` is `transaction event` and `1` is `log's event`
-- `handler`: Define the contract and the event want to listen
+- `handler`: Define the contract and the event that want to listen
   - `contract`: The contract name. This is defined on repo [Bridge Contracts](https://github.com/axieinfinity/bridge-contracts/blob/master/main.go#L13-L20)
   - `name`: The event name
-- `callbacks`: List all callbacks function when data is decoded. This is a map (pair) where key is the listener's name and value is the function that is called in that listener. For example:
+- `callbacks`: List all callbacks function when data is decoded. This is a map (pair) where the key is the listener's name and the value is the function that is called in that listener. For example:
 
 ```json5
 {
@@ -132,11 +136,11 @@ Includes all subscriptions bridge is observing in a listener. Each subscription 
 }
 ```
 
-Bridge will trigger the function `StoreMainchainWithdrawCallback` in `RoninListener`
+The bridge will trigger the function `StoreMainchainWithdrawCallback` in `RoninListener`
 
 #### Example
-For example, the contract `Hello` on Ronin have an event called `Welcome`, the bridge will listen this event
-and submit it to Ethereum by calling the method `SubmitFromRonin` of `HelloEth` contract.
+For example, the contract `Hello` on Ronin has an event called `Welcome`, the bridge will listen to this event
+and submit it to Ethereum by calling the method `SubmitFromRonin` of the `HelloEth` contract.
 ```json5
 {
   "MainchainWithdrewSubscription": {
@@ -315,7 +319,7 @@ graph TD
 ```
 
 ### Database
-Database configuration is defined within key `database`. Basic properties include: host, port, user, password and dbName.
+Database configuration is defined within the key `database`. Basic properties include host, port, user, password and dbName.
 
 ```json5
 {
