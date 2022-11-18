@@ -139,7 +139,8 @@ Includes all subscriptions bridge is observing in a listener. Each subscription 
 Bridge will trigger the function `StoreMainchainWithdrawCallback` in `RoninListener`
 
 #### Example
-For example, Bridge will listen to event Welcomed which is defined on contract Hello and submit the data to HelloEth contract via method SubmitFromRonin
+For example, Bridge will listen to event `Welcomed` which is defined on contract `Hello` 
+and submit the data to `HelloEth` contract via method `SubmitFromRonin`
 ```json5
 {
   "MainchainWithdrewSubscription": {
