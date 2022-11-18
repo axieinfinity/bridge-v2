@@ -156,10 +156,15 @@ func (r *task) voteBridgeOperatorsBySignature(task *models.Task) (doneTasks, pro
 		})
 	})
 	if err != nil {
-		log.Error("[RoninTask][BridgeOperatorSetCallback] Send transaction error", "err", err, "period", event.Period)
-		task.LastError = err.Error()
-		failedTasks = append(failedTasks, task)
-		return nil, nil, failedTasks, nil
+		switch err.Error() {
+		case ErrOutdatedPeriod:
+			log.Warn("[RoninTask][BridgeOperatorSetCallback] Bridge operators period outdated")
+		default:
+			log.Error("[RoninTask][BridgeOperatorSetCallback] Send transaction error", "err", err)
+			task.LastError = err.Error()
+			failedTasks = append(failedTasks, task)
+			return nil, nil, failedTasks, nil
+		}
 	}
 	log.Debug("[RoninTask][BridgeOperatorSetCallback] Vote bridge operators", "hash", tx.Hash().Hex())
 
@@ -241,10 +246,8 @@ func (r *task) relayBridgeOperators(task *models.Task) (doneTasks, processingTas
 	if err != nil {
 		// Prevent retry submit signature if the signature was already submitted
 		switch err.Error() {
-		case ErrOutdatedPeriod:
-			log.Debug("[RoninTask][BridgeOperatorsApprovedCallback] Bridge operators period outdated")
 		case ErrSigAlreadySubmitted:
-			log.Debug("[RoninTask][BridgeOperatorsApprovedCallback] Bridge operators already submitted")
+			log.Warn("[RoninTask][BridgeOperatorsApprovedCallback] Bridge operators already submitted")
 		default:
 			log.Error("[RoninTask][BridgeOperatorsApprovedCallback] Send transaction error", "err", err)
 			task.LastError = err.Error()
