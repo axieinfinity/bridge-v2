@@ -74,6 +74,7 @@ Maximum number of pending/processing tasks queried from the database
 
 #### 6. transactionCheckPeriod:
 - type: `number`
+- unit: `seconds`
 
 Period of checking whether a transaction is mined or not by querying its transaction's receipt. If a receipt is found,
 it will try 3 more times to ensure the transaction is not replaced because of reorg.
