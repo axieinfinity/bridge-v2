@@ -69,7 +69,6 @@ func (r *task) collectTask(t *models.Task) {
 }
 
 func (r *task) send() {
-	log.Info("[task] Sending transaction", "type", r.taskType)
 	switch r.taskType {
 	case VOTE_BRIDGE_OPERATORS_TASK:
 		r.sendTransaction(r.voteBridgeOperatorsBySignature)
@@ -88,7 +87,7 @@ func (r *task) sendTransaction(sendTx func(task *models.Task) (doneTasks, proces
 	doneTasks, processingTasks, failedTasks, transaction := sendTx(r.task)
 
 	if transaction != nil {
-		log.Debug("[task] Transaction", "hash", transaction.Hash().Hex())
+		log.Debug("[task] Transaction", "type", r.taskType, "hash", transaction.Hash().Hex())
 		go updateTasks(r.store, processingTasks, STATUS_PROCESSING, transaction.Hash().Hex(), time.Now().Unix(), r.releaseTasksCh)
 		_ = metrics.Pusher.IncrGauge(metrics.ProcessingTaskMetric, len(processingTasks))
 	}
@@ -240,7 +239,15 @@ func (r *task) relayBridgeOperators(task *models.Task) (doneTasks, processingTas
 		}
 	}
 
-	tx, err = r.util.SendContractTransaction(r.listener.GetValidatorSign(), r.chainId, func(opts *bind.TransactOpts) (*ethtypes.Transaction, error) {
+	ethListener := r.listener.GetListener("Ethereum")
+	ethChainId, err := ethListener.GetChainID()
+	if err != nil {
+		task.LastError = err.Error()
+		failedTasks = append(failedTasks, task)
+		return nil, nil, failedTasks, nil
+	}
+
+	tx, err = r.util.SendContractTransaction(r.listener.GetRelayerSign(), ethChainId, func(opts *bind.TransactOpts) (*ethtypes.Transaction, error) {
 		return ethGovernanceTransactor.RelayBridgeOperators(opts, event.Period, event.Operators, ethSignatures)
 	})
 	if err != nil {

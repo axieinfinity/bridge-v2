@@ -46,8 +46,7 @@ func InitRonin(ctx context.Context, lsConfig *bridgeCore.LsConfig, store bridgeC
 	}
 	metrics.Pusher.AddCounter(fmt.Sprintf(metrics.ListenerProcessedBlockMetric, roninListener.GetName()), "count number of processed block in ethereum listener")
 
-	ethConfig := roninListener.EthereumListener.Config()
-	task, err := roninTask.NewRoninTask(roninListener, ethConfig, store.GetDB(), helpers)
+	task, err := roninTask.NewRoninTask(roninListener, store.GetDB(), helpers)
 	if err != nil {
 		log.Error("[RoninListener][InitRonin] Error while adding new task", "err", err)
 		return nil

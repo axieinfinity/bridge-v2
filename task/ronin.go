@@ -43,7 +43,6 @@ type RoninTask struct {
 	secret          *bridgeCore.Secret
 
 	client    *ethclient.Client
-	ethClient *ethclient.Client
 	contracts map[string]string
 
 	limitQuery int
@@ -55,16 +54,13 @@ type RoninTask struct {
 	maxProcessingTasks int
 }
 
-func NewRoninTask(listener bridgeCore.Listener, ethConfig *bridgeCore.LsConfig, db *gorm.DB, util utils.Utils) (*RoninTask, error) {
+func NewRoninTask(listener bridgeCore.Listener, db *gorm.DB, util utils.Utils) (*RoninTask, error) {
 	config := listener.Config()
 	client, err := ethclient.Dial(config.RpcUrl)
 	if err != nil {
 		return nil, err
 	}
-	ethClient, err := ethclient.Dial(ethConfig.RpcUrl)
-	if err != nil {
-		return nil, err
-	}
+
 	chainId, err := listener.GetChainID()
 	if err != nil {
 		return nil, err
@@ -80,7 +76,6 @@ func NewRoninTask(listener bridgeCore.Listener, ethConfig *bridgeCore.LsConfig, 
 		secret:             config.Secret,
 		contracts:          config.Contracts,
 		client:             client,
-		ethClient:          ethClient,
 		chainId:            chainId,
 		util:               util,
 		limitQuery:         defaultLimitRecords,
@@ -106,11 +101,15 @@ func (r *RoninTask) Start() {
 	log.Info("[RoninTask] starting ronin task", "taskInterval", r.taskInterval, "txCheckInterval", r.txCheckInterval, "maxProcessingTasks", r.maxProcessingTasks)
 	taskTicker := time.NewTicker(r.taskInterval)
 	processingTicker := time.NewTicker(r.txCheckInterval)
+
+	ethConfig := r.listener.GetListener("Ethereum").Config()
+	ethClient, _ := ethclient.Dial(ethConfig.RpcUrl)
+
 	for {
 		select {
 		case <-taskTicker.C:
 			go func() {
-				if err := r.processPending(); err != nil {
+				if err := r.processPending(ethClient); err != nil {
 					log.Error("[RoninTask] error while process tasks", "err", err)
 				}
 			}()
@@ -153,7 +152,7 @@ func (r *RoninTask) getLimitQuery(numberOfExcludedIds int) int {
 	return r.limitQuery
 }
 
-func (r *RoninTask) processPending() error {
+func (r *RoninTask) processPending(ethClient *ethclient.Client) error {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Error("[RoninTask][processPending] recover from panic", "err", err)
@@ -182,8 +181,8 @@ func (r *RoninTask) processPending() error {
 	bulkDepositTask := newBulkTask(r.listener, r.client, r.store, r.chainId, r.contracts, r.txCheckInterval, defaultMaxTry, DEPOSIT_TASK, r.releaseTasksCh, r.util)
 	bulkSubmitWithdrawalSignaturesTask := newBulkTask(r.listener, r.client, r.store, r.chainId, r.contracts, r.txCheckInterval, defaultMaxTry, WITHDRAWAL_TASK, r.releaseTasksCh, r.util)
 	ackWithdrewTasks := newBulkTask(r.listener, r.client, r.store, r.chainId, r.contracts, r.txCheckInterval, defaultMaxTry, ACK_WITHDREW_TASK, r.releaseTasksCh, r.util)
-	voteBridgeOperatorsTask := newTask(r.listener, r.client, r.ethClient, r.store, r.chainId, r.contracts, defaultMaxTry, VOTE_BRIDGE_OPERATORS_TASK, r.releaseTasksCh, r.util)
-	relayBridgeOperatorsTask := newTask(r.listener, r.client, r.ethClient, r.store, r.chainId, r.contracts, defaultMaxTry, RELAY_BRIDGE_OPERATORS_TASK, r.releaseTasksCh, r.util)
+	voteBridgeOperatorsTask := newTask(r.listener, r.client, ethClient, r.store, r.chainId, r.contracts, defaultMaxTry, VOTE_BRIDGE_OPERATORS_TASK, r.releaseTasksCh, r.util)
+	relayBridgeOperatorsTask := newTask(r.listener, r.client, ethClient, r.store, r.chainId, r.contracts, defaultMaxTry, RELAY_BRIDGE_OPERATORS_TASK, r.releaseTasksCh, r.util)
 
 	for _, task := range tasks {
 		// lock task
