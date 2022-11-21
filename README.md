@@ -3,7 +3,7 @@
 Bridge v2 is the second version of [bridge](https://github.com/axieinfinity/bridge) which is used for validators
 and relayers to listen to events triggered from Ronin or other chains connected to Ronin (eg: Ethereum). There are two mains
 features:
-- Listen to trusted nodes on Ronin (it currently changes in every epoch - `1 day`) and relay it into Ethereum.
+- Voting and relaying bridge operators (it currently changes in every period - `1 day`).
 - Listen to deposit and withdraw request on Ronin/Ethereum and relay it to the others.
 
 # How to run
@@ -313,7 +313,7 @@ graph TD
 ```
 
 #### BridgeOperatorSetUpdatedSubscription
-At the end of each epoch, validators call `wrapUpEpoch` of `ValidatorSet` contract to update list validator set.
+At the end of each period, validators call `wrapUpEpoch` of `ValidatorSet` contract to update list validator set.
 It emits an event `BridgeOperatorSetUpdated(uint256 period, []address operators)`. All trusted nodes must listen this
 event, vote by signing typed data and submit it to `RoninGovernanceAdmin` contract. 
 ```mermaid
