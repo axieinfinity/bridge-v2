@@ -42,9 +42,18 @@ type EthereumListener struct {
 	validatorSign  bridgeCoreUtils.ISign
 	relayerSign    bridgeCoreUtils.ISign
 	store          stores.MainStore
+	listeners      map[string]bridgeCore.Listener
 
 	prepareJobChan chan bridgeCore.JobHandler
 	tasks          []bridgeCore.TaskHandler
+}
+
+func (e *EthereumListener) AddListeners(m map[string]bridgeCore.Listener) {
+	e.listeners = m
+}
+
+func (e *EthereumListener) GetListener(s string) bridgeCore.Listener {
+	return e.listeners[s]
 }
 
 func NewEthereumListener(ctx context.Context, cfg *bridgeCore.LsConfig, helpers utils.Utils, store stores.MainStore) (*EthereumListener, error) {
@@ -59,6 +68,7 @@ func NewEthereumListener(ctx context.Context, cfg *bridgeCore.LsConfig, helpers 
 		utilsWrapper:   utils.NewUtils(),
 		store:          store,
 		config:         cfg,
+		listeners:      make(map[string]bridgeCore.Listener),
 		chainId:        hexutil.MustDecodeBig(cfg.ChainId),
 		safeBlockRange: cfg.SafeBlockRange,
 		tasks:          make([]bridgeCore.TaskHandler, 0),

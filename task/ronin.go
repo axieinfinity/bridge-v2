@@ -11,6 +11,7 @@ import (
 	"github.com/axieinfinity/bridge-core/utils"
 	"github.com/axieinfinity/bridge-v2/models"
 	"github.com/axieinfinity/bridge-v2/stores"
+	bridgeUtils "github.com/axieinfinity/bridge-v2/utils"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -60,6 +61,7 @@ func NewRoninTask(listener bridgeCore.Listener, db *gorm.DB, util utils.Utils) (
 	if err != nil {
 		return nil, err
 	}
+
 	chainId, err := listener.GetChainID()
 	if err != nil {
 		return nil, err
@@ -100,11 +102,15 @@ func (r *RoninTask) Start() {
 	log.Info("[RoninTask] starting ronin task", "taskInterval", r.taskInterval, "txCheckInterval", r.txCheckInterval, "maxProcessingTasks", r.maxProcessingTasks)
 	taskTicker := time.NewTicker(r.taskInterval)
 	processingTicker := time.NewTicker(r.txCheckInterval)
+
+	ethConfig := r.listener.GetListener(bridgeUtils.Ethereum).Config()
+	ethClient, _ := ethclient.Dial(ethConfig.RpcUrl)
+
 	for {
 		select {
 		case <-taskTicker.C:
 			go func() {
-				if err := r.processPending(); err != nil {
+				if err := r.processPending(ethClient); err != nil {
 					log.Error("[RoninTask] error while process tasks", "err", err)
 				}
 			}()
@@ -147,7 +153,7 @@ func (r *RoninTask) getLimitQuery(numberOfExcludedIds int) int {
 	return r.limitQuery
 }
 
-func (r *RoninTask) processPending() error {
+func (r *RoninTask) processPending(ethClient *ethclient.Client) error {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Error("[RoninTask][processPending] recover from panic", "err", err)
@@ -176,8 +182,8 @@ func (r *RoninTask) processPending() error {
 	bulkDepositTask := newBulkTask(r.listener, r.client, r.store, r.chainId, r.contracts, r.txCheckInterval, defaultMaxTry, DEPOSIT_TASK, r.releaseTasksCh, r.util)
 	bulkSubmitWithdrawalSignaturesTask := newBulkTask(r.listener, r.client, r.store, r.chainId, r.contracts, r.txCheckInterval, defaultMaxTry, WITHDRAWAL_TASK, r.releaseTasksCh, r.util)
 	ackWithdrewTasks := newBulkTask(r.listener, r.client, r.store, r.chainId, r.contracts, r.txCheckInterval, defaultMaxTry, ACK_WITHDREW_TASK, r.releaseTasksCh, r.util)
-	voteBridgeOperatorsTask := newTask(r.listener, r.client, r.store, r.chainId, r.contracts, defaultMaxTry, VOTE_BRIDGE_OPERATORS_TASK, r.releaseTasksCh, r.util)
-	relayBridgeOperatorsTask := newTask(r.listener, r.client, r.store, r.chainId, r.contracts, defaultMaxTry, RELAY_BRIDGE_OPERATORS_TASK, r.releaseTasksCh, r.util)
+	voteBridgeOperatorsTask := newTask(r.listener, r.client, ethClient, r.store, r.chainId, r.contracts, defaultMaxTry, VOTE_BRIDGE_OPERATORS_TASK, r.releaseTasksCh, r.util)
+	relayBridgeOperatorsTask := newTask(r.listener, r.client, ethClient, r.store, r.chainId, r.contracts, defaultMaxTry, RELAY_BRIDGE_OPERATORS_TASK, r.releaseTasksCh, r.util)
 
 	for _, task := range tasks {
 		// lock task

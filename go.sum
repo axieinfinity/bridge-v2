@@ -51,10 +51,14 @@ github.com/allegro/bigcache v1.2.1-0.20190218064605-e24eb225f156/go.mod h1:Cb/ax
 github.com/antihax/optional v1.0.0/go.mod h1:uupD/76wgC+ih3iEmQUL+0Ugr19nfwCT1kdvxnR2qWY=
 github.com/axieinfinity/bridge-contracts v0.0.0-20221114085145-8b4c19bf4317 h1:lVc3FSS+M8/Z7KdB7YB4dfVnrXwJErf+n+aBxu3r/WI=
 github.com/axieinfinity/bridge-contracts v0.0.0-20221114085145-8b4c19bf4317/go.mod h1:/1xWUM5AIZGYgaFxl9ojlw3tCgeWF4SDg8qrzx5YHwk=
-github.com/axieinfinity/bridge-core v0.1.1 h1:zkrPwxx6S8Ww4ycyF0Ap/5MaJz/1THP7juiA9f4Lvvs=
-github.com/axieinfinity/bridge-core v0.1.1/go.mod h1:HHk3GbxJ6DTA2A/ZKOZJG4XVdwB480leaMYL29xWqCI=
+github.com/axieinfinity/bridge-contracts v0.0.0-20221121074739-65ea5ae0d105 h1:NcpDUxiFD787Jhzg/4wStgmfOucjhNp/9Ssg54m8Sx0=
+github.com/axieinfinity/bridge-contracts v0.0.0-20221121074739-65ea5ae0d105/go.mod h1:/1xWUM5AIZGYgaFxl9ojlw3tCgeWF4SDg8qrzx5YHwk=
 github.com/axieinfinity/bridge-core v0.1.2-0.20221031095024-7319520259bf h1:86AiUhF3ZQ+6qpIdD3KZSjD3Ooo9xYPexFkoQVehY+U=
 github.com/axieinfinity/bridge-core v0.1.2-0.20221031095024-7319520259bf/go.mod h1:rsKGb45uQio1Rpqsc7grYyZEBn/fEPFyamJ55pQz1Fk=
+github.com/axieinfinity/bridge-core v0.1.2-0.20221121093538-c0f4fd5d8cc2 h1:XBT70dXDQ9wbFYZeT38THrxEUSkU7PVZifJcOh8qun8=
+github.com/axieinfinity/bridge-core v0.1.2-0.20221121093538-c0f4fd5d8cc2/go.mod h1:rsKGb45uQio1Rpqsc7grYyZEBn/fEPFyamJ55pQz1Fk=
+github.com/axieinfinity/bridge-core v0.1.2-0.20221122074707-5ba9e428e8d6 h1:W2kk9Grrmb0Q3K72titE5EmqikAljVsuAeXDzi2AF+g=
+github.com/axieinfinity/bridge-core v0.1.2-0.20221122074707-5ba9e428e8d6/go.mod h1:rsKGb45uQio1Rpqsc7grYyZEBn/fEPFyamJ55pQz1Fk=
 github.com/axieinfinity/bridge-migrations v0.0.0-20220803051308-adab1cd1bcca h1:Bmy5XEh5VFhKIE04Yvnmvr47AjzWZFJF9I3aedxaAQE=
 github.com/axieinfinity/bridge-migrations v0.0.0-20220803051308-adab1cd1bcca/go.mod h1:jkGvoA7823lFnjPcYf1rMn4kaJv5qiYwGLP1PUc+T7o=
 github.com/axieinfinity/ronin-kms-client v0.0.0-20220805072849-960e04981b70 h1:4MMSxt0Ce9cCN/XB+ESc/JllU1/jklFiIsWG4gq2y+g=
@@ -90,6 +94,7 @@ github.com/cncf/xds/go v0.0.0-20211001041855-01bcc9b48dfe/go.mod h1:eXthEFrGJvWH
 github.com/cncf/xds/go v0.0.0-20211011173535-cb28da3451f1/go.mod h1:eXthEFrGJvWHgFFCl3hGmgk+/aYT6PnTQLykKQRLhEs=
 github.com/cockroachdb/apd v1.1.0 h1:3LFP3629v+1aKXU5Q37mxmRxX/pIu1nijXydLShEq5I=
 github.com/cockroachdb/apd v1.1.0/go.mod h1:8Sl8LxpKi29FqWXR16WEFZRNSz3SoPzUzeMeY4+DwBQ=
+github.com/common-nighthawk/go-figure v0.0.0-20210622060536-734e95fb86be h1:J5BL2kskAlV9ckgEsNQXscjIaLiOYiZ75d4e94E6dcQ=
 github.com/coreos/go-systemd v0.0.0-20190321100706-95778dfbb74e/go.mod h1:F5haX7vjVVG0kc13fIWeqUViNPyEJxv/OmvnBo0Yme4=
 github.com/coreos/go-systemd v0.0.0-20190719114852-fd7a80b32e1f/go.mod h1:F5haX7vjVVG0kc13fIWeqUViNPyEJxv/OmvnBo0Yme4=
 github.com/creack/pty v1.1.7/go.mod h1:lj5s0c3V2DBrqTV7llrYr5NG6My20zk30Fl46Y7DoTY=
