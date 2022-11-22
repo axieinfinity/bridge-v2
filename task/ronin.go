@@ -11,6 +11,7 @@ import (
 	"github.com/axieinfinity/bridge-core/utils"
 	"github.com/axieinfinity/bridge-v2/models"
 	"github.com/axieinfinity/bridge-v2/stores"
+	bridgeUtils "github.com/axieinfinity/bridge-v2/utils"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -102,7 +103,7 @@ func (r *RoninTask) Start() {
 	taskTicker := time.NewTicker(r.taskInterval)
 	processingTicker := time.NewTicker(r.txCheckInterval)
 
-	ethConfig := r.listener.GetListener("Ethereum").Config()
+	ethConfig := r.listener.GetListener(bridgeUtils.Ethereum).Config()
 	ethClient, _ := ethclient.Dial(ethConfig.RpcUrl)
 
 	for {
