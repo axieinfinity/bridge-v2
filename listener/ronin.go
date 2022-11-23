@@ -2,10 +2,11 @@ package listener
 
 import (
 	"context"
-	ethGovernance "github.com/axieinfinity/bridge-contracts/generated_contracts/ethereum/governance"
-	"github.com/ethereum/go-ethereum/crypto"
 	"math/big"
 	"time"
+
+	ethGovernance "github.com/axieinfinity/bridge-contracts/generated_contracts/ethereum/governance"
+	"github.com/ethereum/go-ethereum/crypto"
 
 	roninTrustedOrganization "github.com/axieinfinity/bridge-contracts/generated_contracts/ronin/trusted_organization"
 
@@ -90,18 +91,26 @@ func (l *RoninListener) IsUpTodate() bool {
 	return true
 }
 
-func (l *RoninListener) ProvideReceiptSignatureCallback(fromChainId *big.Int, tx bridgeCore.Transaction, data []byte) error {
+func (l *RoninListener) provideReceiptSignature(fromChainId *big.Int, tx bridgeCore.Transaction, data []byte, isAgain bool) error {
 	// check database if receipt exist then do nothing
 	// Unpack event from data
-	ronEvent := new(gateway2.GatewayMainchainWithdrew)
+	ronEvent := new(gateway2.GatewayWithdrawalRequested)
 	ronGatewayAbi, err := gateway2.GatewayMetaData.GetAbi()
 	if err != nil {
 		return err
 	}
-	if err = l.utilsWrapper.UnpackLog(*ronGatewayAbi, ronEvent, "MainchainWithdrew", data); err != nil {
+
+	var eventName string
+	if isAgain {
+		eventName = "WithdrawalSignaturesRequested"
+	} else {
+		eventName = "WithdrawalRequested"
+	}
+
+	if err = l.utilsWrapper.UnpackLog(*ronGatewayAbi, ronEvent, eventName, data); err != nil {
 		return err
 	}
-	receipt := ronEvent.Receipt
+	receipt := ronEvent.Arg1
 
 	log.Info("[RoninListener][ProvideReceiptSignatureCallback] result of calling MainchainWithdrew function", "receiptId", receipt.Id.Int64(), "tx", tx.GetHash().Hex())
 	// otherwise, create a task for submitting signature
@@ -123,6 +132,14 @@ func (l *RoninListener) ProvideReceiptSignatureCallback(fromChainId *big.Int, tx
 		CreatedAt:       time.Now().Unix(),
 	}
 	return l.bridgeStore.GetTaskStore().Save(withdrawalTask)
+}
+
+func (l *RoninListener) ProvideReceiptSignatureCallback(fromChainId *big.Int, tx bridgeCore.Transaction, data []byte) error {
+	return l.provideReceiptSignature(fromChainId, tx, data, false)
+}
+
+func (l *RoninListener) ProvideReceiptSignatureAgainCallback(fromChainId *big.Int, tx bridgeCore.Transaction, data []byte) error {
+	return l.provideReceiptSignature(fromChainId, tx, data, true)
 }
 
 func (l *RoninListener) DepositRequestedCallback(fromChainId *big.Int, tx bridgeCore.Transaction, data []byte) error {

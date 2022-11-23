@@ -57,7 +57,7 @@
             "name": "WithdrawalSignaturesRequested"
           },
           "callbacks": {
-            "Ronin": "ProvideReceiptSignatureCallback"
+            "Ronin": "ProvideReceiptSignatureAgainCallback"
           }
         },
         "BridgeOperatorSetUpdatedSubscription": {
