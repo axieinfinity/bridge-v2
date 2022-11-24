@@ -2,6 +2,7 @@ package listener
 
 import (
 	"context"
+	bridgeUtils "github.com/axieinfinity/bridge-v2/utils"
 	"math/big"
 	"time"
 
@@ -192,15 +193,16 @@ func (l *RoninListener) DepositRequestedCallback(fromChainId *big.Int, tx bridge
 }
 
 func (l *RoninListener) isRelayerNode() (bool, error) {
-	roninGovernanceCaller, err := ethGovernance.NewGovernanceCaller(common.HexToAddress(l.config.Contracts[task.ETH_GOVERNANCE_CONTRACT]), l.client)
+	ethClient := l.GetListener(bridgeUtils.Ethereum).GetEthClient()
+	ethGovernanceCaller, err := ethGovernance.NewGovernanceCaller(common.HexToAddress(l.config.Contracts[task.ETH_GOVERNANCE_CONTRACT]), ethClient)
 	if err != nil {
 		return false, err
 	}
 
 	var ret [32]byte
 	copy(ret[:], crypto.Keccak256([]byte("RELAYER_ROLE")))
-	addr := l.GetValidatorSign().GetAddress()
-	isRelayer, err := roninGovernanceCaller.HasRole(nil, ret, addr)
+	addr := l.GetRelayerSign().GetAddress()
+	isRelayer, err := ethGovernanceCaller.HasRole(nil, ret, addr)
 	if err != nil {
 		return false, err
 	}
