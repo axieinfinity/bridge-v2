@@ -193,6 +193,12 @@ func (l *RoninListener) DepositRequestedCallback(fromChainId *big.Int, tx bridge
 }
 
 func (l *RoninListener) isRelayerNode() (bool, error) {
+	relayerSign := l.GetRelayerSign()
+	if relayerSign == nil {
+		log.Warn("The current node is not set relayer key")
+		return false, nil
+	}
+
 	ethClient := l.GetListener(bridgeUtils.Ethereum).GetEthClient()
 	ethGovernanceCaller, err := ethGovernance.NewGovernanceCaller(common.HexToAddress(l.config.Contracts[task.ETH_GOVERNANCE_CONTRACT]), ethClient)
 	if err != nil {
@@ -201,7 +207,7 @@ func (l *RoninListener) isRelayerNode() (bool, error) {
 
 	var ret [32]byte
 	copy(ret[:], crypto.Keccak256([]byte("RELAYER_ROLE")))
-	addr := l.GetRelayerSign().GetAddress()
+	addr := relayerSign.GetAddress()
 	isRelayer, err := ethGovernanceCaller.HasRole(nil, ret, addr)
 	if err != nil {
 		return false, err
