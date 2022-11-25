@@ -158,6 +158,8 @@ func (r *task) voteBridgeOperatorsBySignature(task *models.Task) (doneTasks, pro
 		switch err.Error() {
 		case ErrOutdatedPeriod:
 			log.Warn("[RoninTask][BridgeOperatorSetCallback] Bridge operators period outdated")
+			doneTasks = append(doneTasks, task)
+			return doneTasks, nil, nil, nil
 		default:
 			log.Error("[RoninTask][BridgeOperatorSetCallback] Send transaction error", "err", err)
 			task.LastError = err.Error()
@@ -165,9 +167,8 @@ func (r *task) voteBridgeOperatorsBySignature(task *models.Task) (doneTasks, pro
 			return nil, nil, failedTasks, nil
 		}
 	}
-	log.Debug("[RoninTask][BridgeOperatorSetCallback] Vote bridge operators", "hash", tx.Hash().Hex())
 
-	doneTasks = append(doneTasks, task)
+	log.Debug("[RoninTask][BridgeOperatorSetCallback] Vote bridge operators", "hash", tx.Hash().Hex())
 	return
 }
 
