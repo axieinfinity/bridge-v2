@@ -22,7 +22,7 @@ require (
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.0
 	github.com/axieinfinity/bridge-contracts v0.0.0-20221121074739-65ea5ae0d105
-	github.com/axieinfinity/bridge-core v0.1.2-0.20221122074707-5ba9e428e8d6
+	github.com/axieinfinity/bridge-core v0.1.2-0.20221125074659-f2a055ed41aa
 	github.com/axieinfinity/bridge-migrations v0.0.0-20220803051308-adab1cd1bcca
 	github.com/axieinfinity/ronin-kms-client v0.0.0-20220805072849-960e04981b70
 	github.com/ethereum/go-ethereum v1.10.21
