@@ -256,17 +256,17 @@ func (r *task) relayBridgeOperators(task *models.Task) (doneTasks, processingTas
 		switch err.Error() {
 		case ErrSigAlreadySubmitted:
 			log.Warn("[RoninTask][BridgeOperatorsApprovedCallback] Bridge operators already submitted")
+			doneTasks = append(doneTasks, task)
+			return doneTasks, nil, nil, nil
 		default:
 			log.Error("[RoninTask][BridgeOperatorsApprovedCallback] Send transaction error", "err", err)
 			task.LastError = err.Error()
 			failedTasks = append(failedTasks, task)
 			return nil, nil, failedTasks, nil
 		}
-	} else {
-		log.Debug("[RoninTask][BridgeOperatorsApprovedCallback] Relay bridge operators", "hash", tx.Hash().Hex())
 	}
 
-	doneTasks = append(doneTasks, task)
+	log.Debug("[RoninTask][BridgeOperatorsApprovedCallback] Relay bridge operators", "hash", tx.Hash().Hex())
 	return
 }
 
