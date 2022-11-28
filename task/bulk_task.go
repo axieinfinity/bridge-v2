@@ -26,6 +26,10 @@ import (
 	"github.com/ethereum/go-ethereum/log"
 )
 
+const (
+	ErrNotBridgeOperator = "execution reverted: RoninGatewayV2: unauthorized sender"
+)
+
 type bulkTask struct {
 	util           utils.Utils
 	tasks          []*models.Task
@@ -181,7 +185,11 @@ func (r *bulkTask) sendDepositTransaction(tasks []*models.Task) (doneTasks, proc
 		if err != nil {
 			for _, t := range processingTasks {
 				t.LastError = err.Error()
-				failedTasks = append(failedTasks, t)
+				if err.Error() == ErrNotBridgeOperator {
+					doneTasks = append(doneTasks, t)
+				} else {
+					failedTasks = append(failedTasks, t)
+				}
 			}
 			return doneTasks, nil, failedTasks, nil
 		}
@@ -253,7 +261,11 @@ func (r *bulkTask) sendWithdrawalSignaturesTransaction(tasks []*models.Task) (do
 			// append all success tasks into failed tasks
 			for _, t := range processingTasks {
 				t.LastError = err.Error()
-				failedTasks = append(failedTasks, t)
+				if err.Error() == ErrNotBridgeOperator {
+					doneTasks = append(doneTasks, t)
+				} else {
+					failedTasks = append(failedTasks, t)
+				}
 			}
 			return doneTasks, nil, failedTasks, nil
 		}
@@ -319,7 +331,11 @@ func (r *bulkTask) sendAckTransactions(tasks []*models.Task) (doneTasks, process
 			// append all success tasks into failed tasks
 			for _, t := range processingTasks {
 				t.LastError = err.Error()
-				failedTasks = append(failedTasks, t)
+				if err.Error() == ErrNotBridgeOperator {
+					doneTasks = append(doneTasks, t)
+				} else {
+					failedTasks = append(failedTasks, t)
+				}
 			}
 			return doneTasks, nil, failedTasks, nil
 		}
