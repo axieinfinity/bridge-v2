@@ -31,6 +31,7 @@ const (
 	roninRpc             = "RONIN_RPC"
 	roninValidatorKey    = "RONIN_VALIDATOR_KEY"
 	roninRelayKey        = "RONIN_RELAYER_KEY"
+	roninBridgeVoterKey  = "RONIN_BRIDGE_VOTER_KEY"
 	ethereumRpc          = "ETHEREUM_RPC"
 	ethereumValidatorKey = "ETHEREUM_VALIDATOR_KEY"
 	ethereumRelayerKey   = "ETHEREUM_RELAYER_KEY"
@@ -307,6 +308,12 @@ func checkEnv(cfg *bridgeCore.Config) {
 			}
 			setKmsFromEnv(cfg, false, config, RoninNetwork)
 		}
+
+		if os.Getenv(roninBridgeVoterKey) != "" {
+			cfg.Listeners[RoninNetwork].Secret.Voter = &bridgeCoreUtils.SignMethodConfig{
+				PlainPrivateKey: os.Getenv(roninBridgeVoterKey),
+			}
+		}
 	}
 
 	if cfg.Listeners[EthereumNetwork] != nil {
@@ -353,6 +360,7 @@ func checkEnv(cfg *bridgeCore.Config) {
 	os.Setenv(roninRelayKey, "")
 	os.Setenv(ethereumValidatorKey, "")
 	os.Setenv(ethereumRelayerKey, "")
+	os.Setenv(roninBridgeVoterKey, "")
 }
 
 func createPgDb(cfg *bridgeCore.Config) {
