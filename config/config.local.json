@@ -13,6 +13,9 @@
         "validator": {
           "plainPrivateKey": ""
         },
+        "voter": {
+          "plainPrivateKey": ""
+        },
         "relayer": {
           "plainPrivateKey": ""
         }

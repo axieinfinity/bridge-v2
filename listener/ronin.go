@@ -240,6 +240,11 @@ func (l *RoninListener) BridgeOperatorSetUpdatedCallback(fromChainId *big.Int, t
 		return nil
 	}
 
+	if l.GetVoterSign() == nil {
+		log.Error("[RoninListener][BridgeOperatorSetUpdatedCallback] Voter key is missing")
+		return nil
+	}
+
 	// Get chainID
 	chainId, err := l.GetChainID()
 	if err != nil {
@@ -270,6 +275,11 @@ func (l *RoninListener) BridgeOperatorsApprovedCallback(fromChainId *big.Int, tx
 	}
 	if !isRelayer {
 		log.Info("[RoninListener][BridgeOperatorsApprovedCallback] The current node is not relayer")
+		return nil
+	}
+
+	if l.GetRelayerSign() == nil {
+		log.Error("[RoninListener][BridgeOperatorSetUpdatedCallback] Relayer key is missing")
 		return nil
 	}
 

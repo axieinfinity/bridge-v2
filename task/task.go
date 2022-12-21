@@ -114,7 +114,7 @@ func (r *task) voteBridgeOperatorsBySignature(task *models.Task) (doneTasks, pro
 		return nil, nil, failedTasks, nil
 	}
 
-	voted, err := roninGovernanceTransactor.BridgeOperatorsVoted(nil, event.Period, r.listener.GetValidatorSign().GetAddress())
+	voted, err := roninGovernanceTransactor.BridgeOperatorsVoted(nil, event.Period, r.listener.GetVoterSign().GetAddress())
 	if err != nil {
 		task.LastError = err.Error()
 		failedTasks = append(failedTasks, task)
@@ -136,7 +136,7 @@ func (r *task) voteBridgeOperatorsBySignature(task *models.Task) (doneTasks, pro
 	}
 	opts := &signDataOpts{
 		SignTypedDataCallback: func(typedData core.TypedData) (hexutil.Bytes, error) {
-			return r.util.SignTypedData(typedData, r.listener.GetValidatorSign())
+			return r.util.SignTypedData(typedData, r.listener.GetVoterSign())
 		},
 	}
 	signature, err := signBridgeOperatorsBallot(opts, event.Period.Int64(), bridgeOperators)
@@ -149,7 +149,7 @@ func (r *task) voteBridgeOperatorsBySignature(task *models.Task) (doneTasks, pro
 	signatureStruct := parseSignatureAsRsv(signature)
 	log.Debug("[RoninTask][BridgeOperatorSetCallback] Prepared data", "r", common.Bytes2Hex(signatureStruct.R[:]), "s", common.Bytes2Hex(signatureStruct.S[:]), "v", signatureStruct.V, "period", event.Period.Int64(), "bridgeOperators", bridgeOperators)
 
-	tx, err = r.util.SendContractTransaction(r.listener.GetValidatorSign(), r.chainId, func(opts *bind.TransactOpts) (*ethtypes.Transaction, error) {
+	tx, err = r.util.SendContractTransaction(r.listener.GetVoterSign(), r.chainId, func(opts *bind.TransactOpts) (*ethtypes.Transaction, error) {
 		return roninGovernanceTransactor.VoteBridgeOperatorsBySignatures(opts, event.Period, event.BridgeOperators, []roninGovernance.SignatureConsumerSignature{
 			signatureStruct,
 		})
