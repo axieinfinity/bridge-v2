@@ -279,6 +279,7 @@ func (r *RoninTask) checkProcessingTasks() error {
 		successTxs     []string
 		failedTxs      []string
 		resetToPending []string
+		releaseTasks   []*models.Task
 	)
 
 	// loop through successTasks, if receipt is failed then reset to pending and retry if retry is not reached to 10
@@ -286,10 +287,12 @@ func (r *RoninTask) checkProcessingTasks() error {
 		task := key.(*models.Task)
 		if value.(uint64) == 1 {
 			successTxs = append(successTxs, task.TransactionHash)
+			releaseTasks = append(releaseTasks, task)
 		} else {
 			if task.Retries+1 >= 10 {
 				// append to failedTxs and update all tasks with this transactionHash to failed
 				failedTxs = append(failedTxs, task.TransactionHash)
+				releaseTasks = append(releaseTasks, task)
 			} else {
 				// append to resetToPending and update all tasks with this transactionHash to pending
 				resetToPending = append(resetToPending, task.TransactionHash)
@@ -304,6 +307,7 @@ func (r *RoninTask) checkProcessingTasks() error {
 		if task.Retries+1 >= 10 {
 			// append to failedTxs and update all tasks with this transactionHash to failed
 			failedTxs = append(failedTxs, task.TransactionHash)
+			releaseTasks = append(releaseTasks, task)
 		} else {
 			// append to resetToPending and update all tasks with this transactionHash to pending
 			resetToPending = append(resetToPending, task.TransactionHash)
@@ -334,6 +338,10 @@ func (r *RoninTask) checkProcessingTasks() error {
 		if err = r.store.GetTaskStore().ResetTo(resetToPending, STATUS_PENDING); err != nil {
 			log.Error("[RoninTask][checkProcessingTasks] error while reset tasks to pending", "err", err)
 		}
+	}
+
+	for _, task := range releaseTasks {
+		r.releaseTasksCh <- task.ID
 	}
 
 	return nil
