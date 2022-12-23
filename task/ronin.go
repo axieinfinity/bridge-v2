@@ -183,9 +183,8 @@ func (r *RoninTask) processPending(ethClient *ethclient.Client) error {
 	bulkDepositTask := newBulkTask(r.listener, r.client, r.store, r.chainId, r.contracts, r.txCheckInterval, defaultMaxTry, DEPOSIT_TASK, r.releaseTasksCh, r.util)
 	bulkSubmitWithdrawalSignaturesTask := newBulkTask(r.listener, r.client, r.store, r.chainId, r.contracts, r.txCheckInterval, defaultMaxTry, WITHDRAWAL_TASK, r.releaseTasksCh, r.util)
 	ackWithdrewTasks := newBulkTask(r.listener, r.client, r.store, r.chainId, r.contracts, r.txCheckInterval, defaultMaxTry, ACK_WITHDREW_TASK, r.releaseTasksCh, r.util)
-	voteBridgeOperatorsTask := newTask(r.listener, r.client, ethClient, r.store, r.chainId, r.contracts, defaultMaxTry, VOTE_BRIDGE_OPERATORS_TASK, r.releaseTasksCh, r.util)
-	relayBridgeOperatorsTask := newTask(r.listener, r.client, ethClient, r.store, r.chainId, r.contracts, defaultMaxTry, RELAY_BRIDGE_OPERATORS_TASK, r.releaseTasksCh, r.util)
 
+	singleTasks := make([]*task, 0)
 	for _, task := range tasks {
 		// lock task
 		r.lockTask(task)
@@ -199,17 +198,24 @@ func (r *RoninTask) processPending(ethClient *ethclient.Client) error {
 		// collect tasks for acknowledge withdrawal
 		ackWithdrewTasks.collectTask(task)
 
-		// collect task for vote bridge operators
-		voteBridgeOperatorsTask.collectTask(task)
-
-		// collect task for relay bridge operators
-		relayBridgeOperatorsTask.collectTask(task)
+		switch task.Type {
+		case VOTE_BRIDGE_OPERATORS_TASK:
+			voteBridgeOperatorsTask := newTask(r.listener, r.client, ethClient, r.store, r.chainId, r.contracts, defaultMaxTry, VOTE_BRIDGE_OPERATORS_TASK, r.releaseTasksCh, r.util)
+			voteBridgeOperatorsTask.collectTask(task)
+			singleTasks = append(singleTasks, voteBridgeOperatorsTask)
+		case RELAY_BRIDGE_OPERATORS_TASK:
+			relayBridgeOperatorsTask := newTask(r.listener, r.client, ethClient, r.store, r.chainId, r.contracts, defaultMaxTry, RELAY_BRIDGE_OPERATORS_TASK, r.releaseTasksCh, r.util)
+			relayBridgeOperatorsTask.collectTask(task)
+			singleTasks = append(singleTasks, relayBridgeOperatorsTask)
+		}
 	}
 	bulkDepositTask.send()
 	bulkSubmitWithdrawalSignaturesTask.send()
 	ackWithdrewTasks.send()
-	voteBridgeOperatorsTask.send()
-	relayBridgeOperatorsTask.send()
+
+	for _, task := range singleTasks {
+		task.send()
+	}
 	return nil
 }
 
