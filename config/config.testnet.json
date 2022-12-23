@@ -27,7 +27,7 @@
         "EthGateway": "0xFc4319Ae9e6134C708b88D5Ad5Da1A4a83372502",
         "EthGovernance": "0x456327e8961B3Cd20ea41fF8b4FcE80EA3A8A5C9",
         "Governance": "0x8a320aFb578BEed1A5BB08823CF9A5f60Ea694f4",
-        "TrustedOrganization": "0x69F7F0765a347DC4497E948D2c74f9bC328871EC"
+        "TrustedOrganization": "0x7f46c5DD5f13FF0dd973317411d70800db248e7d"
       },
       "subscriptions": {
         "MainchainWithdrewSubscription": {
