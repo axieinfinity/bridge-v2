@@ -183,9 +183,8 @@ func (r *RoninTask) processPending(ethClient *ethclient.Client) error {
 	bulkDepositTask := newBulkTask(r.listener, r.client, r.store, r.chainId, r.contracts, r.txCheckInterval, defaultMaxTry, DEPOSIT_TASK, r.releaseTasksCh, r.util)
 	bulkSubmitWithdrawalSignaturesTask := newBulkTask(r.listener, r.client, r.store, r.chainId, r.contracts, r.txCheckInterval, defaultMaxTry, WITHDRAWAL_TASK, r.releaseTasksCh, r.util)
 	ackWithdrewTasks := newBulkTask(r.listener, r.client, r.store, r.chainId, r.contracts, r.txCheckInterval, defaultMaxTry, ACK_WITHDREW_TASK, r.releaseTasksCh, r.util)
-	voteBridgeOperatorsTask := newTask(r.listener, r.client, ethClient, r.store, r.chainId, r.contracts, defaultMaxTry, VOTE_BRIDGE_OPERATORS_TASK, r.releaseTasksCh, r.util)
-	relayBridgeOperatorsTask := newTask(r.listener, r.client, ethClient, r.store, r.chainId, r.contracts, defaultMaxTry, RELAY_BRIDGE_OPERATORS_TASK, r.releaseTasksCh, r.util)
 
+	singleTasks := make([]*task, 0)
 	for _, task := range tasks {
 		// lock task
 		r.lockTask(task)
@@ -199,17 +198,24 @@ func (r *RoninTask) processPending(ethClient *ethclient.Client) error {
 		// collect tasks for acknowledge withdrawal
 		ackWithdrewTasks.collectTask(task)
 
-		// collect task for vote bridge operators
-		voteBridgeOperatorsTask.collectTask(task)
-
-		// collect task for relay bridge operators
-		relayBridgeOperatorsTask.collectTask(task)
+		switch task.Type {
+		case VOTE_BRIDGE_OPERATORS_TASK:
+			voteBridgeOperatorsTask := newTask(r.listener, r.client, ethClient, r.store, r.chainId, r.contracts, defaultMaxTry, VOTE_BRIDGE_OPERATORS_TASK, r.releaseTasksCh, r.util)
+			voteBridgeOperatorsTask.collectTask(task)
+			singleTasks = append(singleTasks, voteBridgeOperatorsTask)
+		case RELAY_BRIDGE_OPERATORS_TASK:
+			relayBridgeOperatorsTask := newTask(r.listener, r.client, ethClient, r.store, r.chainId, r.contracts, defaultMaxTry, RELAY_BRIDGE_OPERATORS_TASK, r.releaseTasksCh, r.util)
+			relayBridgeOperatorsTask.collectTask(task)
+			singleTasks = append(singleTasks, relayBridgeOperatorsTask)
+		}
 	}
 	bulkDepositTask.send()
 	bulkSubmitWithdrawalSignaturesTask.send()
 	ackWithdrewTasks.send()
-	voteBridgeOperatorsTask.send()
-	relayBridgeOperatorsTask.send()
+
+	for _, task := range singleTasks {
+		task.send()
+	}
 	return nil
 }
 
@@ -273,6 +279,7 @@ func (r *RoninTask) checkProcessingTasks() error {
 		successTxs     []string
 		failedTxs      []string
 		resetToPending []string
+		releaseTasks   []*models.Task
 	)
 
 	// loop through successTasks, if receipt is failed then reset to pending and retry if retry is not reached to 10
@@ -280,10 +287,12 @@ func (r *RoninTask) checkProcessingTasks() error {
 		task := key.(*models.Task)
 		if value.(uint64) == 1 {
 			successTxs = append(successTxs, task.TransactionHash)
+			releaseTasks = append(releaseTasks, task)
 		} else {
 			if task.Retries+1 >= 10 {
 				// append to failedTxs and update all tasks with this transactionHash to failed
 				failedTxs = append(failedTxs, task.TransactionHash)
+				releaseTasks = append(releaseTasks, task)
 			} else {
 				// append to resetToPending and update all tasks with this transactionHash to pending
 				resetToPending = append(resetToPending, task.TransactionHash)
@@ -298,6 +307,7 @@ func (r *RoninTask) checkProcessingTasks() error {
 		if task.Retries+1 >= 10 {
 			// append to failedTxs and update all tasks with this transactionHash to failed
 			failedTxs = append(failedTxs, task.TransactionHash)
+			releaseTasks = append(releaseTasks, task)
 		} else {
 			// append to resetToPending and update all tasks with this transactionHash to pending
 			resetToPending = append(resetToPending, task.TransactionHash)
@@ -328,6 +338,10 @@ func (r *RoninTask) checkProcessingTasks() error {
 		if err = r.store.GetTaskStore().ResetTo(resetToPending, STATUS_PENDING); err != nil {
 			log.Error("[RoninTask][checkProcessingTasks] error while reset tasks to pending", "err", err)
 		}
+	}
+
+	for _, task := range releaseTasks {
+		r.releaseTasksCh <- task.ID
 	}
 
 	return nil
