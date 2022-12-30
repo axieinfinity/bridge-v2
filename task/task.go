@@ -132,7 +132,9 @@ func (r *task) voteBridgeOperatorsBySignature(task *models.Task) (doneTasks, pro
 
 	sort.Sort(BridgeOperatorsSorter(syncedInfo.Operators))
 
-	if !(event.Period.Cmp(syncedInfo.Period) >= 0 && syncedInfo.Epoch.Cmp(event.Period) >= 0 && !EqualOperatorSet(event.BridgeOperators, syncedInfo.Operators)) {
+	isValidatorSetHasChanged := event.Period.Cmp(syncedInfo.Period) >= 0 && event.Period.Cmp(syncedInfo.Period) >= 0 && !EqualOperatorSet(event.BridgeOperators, syncedInfo.Operators)
+	log.Info("[RoninTask][BridgeOperatorSetCallback] Is validator set has changed", "value", isValidatorSetHasChanged, "event", event, "syncedInfo", syncedInfo)
+	if !isValidatorSetHasChanged {
 		doneTasks = append(doneTasks, task)
 		return doneTasks, nil, nil, nil
 	}
@@ -155,7 +157,7 @@ func (r *task) voteBridgeOperatorsBySignature(task *models.Task) (doneTasks, pro
 			return r.util.SignTypedData(typedData, r.listener.GetVoterSign())
 		},
 	}
-	signature, err := signBridgeOperatorsBallot(opts, event.Period.Int64(), bridgeOperators)
+	signature, err := signBridgeOperatorsBallot(opts, event.Period.Int64(), event.Epoch.Int64(), bridgeOperators)
 	if err != nil {
 		task.LastError = err.Error()
 		failedTasks = append(failedTasks, task)
@@ -328,7 +330,7 @@ type signDataOpts struct {
 	SignTypedDataCallback func(typedData core.TypedData) (hexutil.Bytes, error)
 }
 
-func signBridgeOperatorsBallot(opts *signDataOpts, period int64, bridgeOperators interface{}) ([]byte, error) {
+func signBridgeOperatorsBallot(opts *signDataOpts, period, epoch int64, bridgeOperators interface{}) ([]byte, error) {
 	bridgeOperatorsBallotTypes := core.TypedData{
 		Types: core.Types{
 			"EIP712Domain": []core.Type{
@@ -347,6 +349,9 @@ func signBridgeOperatorsBallot(opts *signDataOpts, period int64, bridgeOperators
 					Name: "period", Type: "uint256",
 				},
 				{
+					Name: "epoch", Type: "uint256",
+				},
+				{
 					Name: "operators", Type: "address[]",
 				},
 			},
@@ -359,6 +364,7 @@ func signBridgeOperatorsBallot(opts *signDataOpts, period int64, bridgeOperators
 		},
 		Message: core.TypedDataMessage{
 			"period":    math.NewHexOrDecimal256(period),
+			"epoch":     math.NewHexOrDecimal256(epoch),
 			"operators": bridgeOperators,
 		},
 	}

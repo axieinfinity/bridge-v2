@@ -12,7 +12,7 @@ func (b BridgeOperatorsSorter) Len() int { return len(b) }
 func (b BridgeOperatorsSorter) Swap(i, j int) { b[i], b[j] = b[j], b[i] }
 
 func (b BridgeOperatorsSorter) Less(i, j int) bool {
-	return b[i].Hex() < b[j].Hex()
+	return bytes.Compare(b[i].Bytes(), b[j].Bytes()) == -1
 }
 
 func EqualOperatorSet(a, b []common.Address) bool {
