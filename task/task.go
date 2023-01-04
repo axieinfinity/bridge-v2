@@ -132,7 +132,7 @@ func (r *task) voteBridgeOperatorsBySignature(task *models.Task) (doneTasks, pro
 
 	sort.Sort(BridgeOperatorsSorter(syncedInfo.Operators))
 
-	isValidatorSetHasChanged := event.Period.Cmp(syncedInfo.Period) >= 0 && event.Epoch.Cmp(syncedInfo.Epoch) >= 0
+	isValidatorSetHasChanged := event.Period.Cmp(syncedInfo.Period) >= 0 && event.Epoch.Cmp(syncedInfo.Epoch) > 0
 	log.Info("[RoninTask][BridgeOperatorSetCallback] Is validator set has changed", "value", isValidatorSetHasChanged, "event", event, "syncedInfo", syncedInfo)
 	if !isValidatorSetHasChanged {
 		doneTasks = append(doneTasks, task)
