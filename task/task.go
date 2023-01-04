@@ -132,7 +132,7 @@ func (r *task) voteBridgeOperatorsBySignature(task *models.Task) (doneTasks, pro
 
 	sort.Sort(BridgeOperatorsSorter(syncedInfo.Operators))
 
-	isValidatorSetHasChanged := event.Period.Cmp(syncedInfo.Period) >= 0 && event.Period.Cmp(syncedInfo.Period) >= 0 && !EqualOperatorSet(event.BridgeOperators, syncedInfo.Operators)
+	isValidatorSetHasChanged := event.Period.Cmp(syncedInfo.Period) >= 0 && event.Epoch.Cmp(syncedInfo.Epoch) >= 0
 	log.Info("[RoninTask][BridgeOperatorSetCallback] Is validator set has changed", "value", isValidatorSetHasChanged, "event", event, "syncedInfo", syncedInfo)
 	if !isValidatorSetHasChanged {
 		doneTasks = append(doneTasks, task)
@@ -211,7 +211,7 @@ func (r *task) relayBridgeOperators(task *models.Task) (doneTasks, processingTas
 		return nil, nil, failedTasks, nil
 	}
 
-	ethGovernanceTransactor, err := ethGovernance.NewGovernanceTransactor(common.HexToAddress(r.contracts[ETH_GOVERNANCE_CONTRACT]), r.ethClient)
+	ethGovernanceTransactor, err := ethGovernance.NewGovernance(common.HexToAddress(r.contracts[ETH_GOVERNANCE_CONTRACT]), r.ethClient)
 	if err != nil {
 		task.LastError = err.Error()
 		failedTasks = append(failedTasks, task)
@@ -239,6 +239,32 @@ func (r *task) relayBridgeOperators(task *models.Task) (doneTasks, processingTas
 		return nil, nil, failedTasks, nil
 	}
 	log.Debug("[RoninTask][BridgeOperatorsApprovedCallback] Unpacked event", "event", event)
+	sort.Sort(BridgeOperatorsSorter(event.Operators))
+
+	// Ethereum call
+	ethSyncedInfo, err := ethGovernanceTransactor.LastSyncedBridgeOperatorSetInfo(nil)
+	if err != nil {
+		task.LastError = err.Error()
+		failedTasks = append(failedTasks, task)
+		return nil, nil, failedTasks, nil
+	}
+	sort.Sort(BridgeOperatorsSorter(ethSyncedInfo.Operators))
+
+	// Ronin call
+	syncedInfo, err := roninGovernanceCaller.LastSyncedBridgeOperatorSetInfo(nil)
+	if err != nil {
+		task.LastError = err.Error()
+		failedTasks = append(failedTasks, task)
+		return nil, nil, failedTasks, nil
+	}
+	sort.Sort(BridgeOperatorsSorter(syncedInfo.Operators))
+
+	isValidatorSetHasChanged := EqualOperatorSet(syncedInfo.Operators, ethSyncedInfo.Operators)
+	log.Info("[RoninTask][BridgeOperatorSetCallback] Is validator set has changed", "changed", isValidatorSetHasChanged, "event", event, "syncedInfo", syncedInfo)
+	if !isValidatorSetHasChanged {
+		doneTasks = append(doneTasks, task)
+		return doneTasks, nil, nil, nil
+	}
 
 	// otherwise add task to processingTasks to adjust after sending transaction
 	processingTasks = append(processingTasks, task)
