@@ -231,7 +231,7 @@ func (l *RoninListener) isTrustedNode() error {
 	}
 	log.Debug("[RoninListener][isTrustedNode] Trusted node info", "weight", weight)
 
-	if weight.Cmp(big.NewInt(0)) > 1 {
+	if weight.Cmp(big.NewInt(0)) == 1 {
 		return nil
 	}
 
