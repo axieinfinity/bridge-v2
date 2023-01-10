@@ -256,17 +256,17 @@ func (r *task) relayBridgeOperators(task *models.Task) (doneTasks, processingTas
 	sort.Sort(BridgeOperatorsSorter(ethSyncedInfo.Operators))
 
 	// Ronin call
-	syncedInfo, err := roninGovernanceCaller.LastSyncedBridgeOperatorSetInfo(nil)
-	if err != nil {
-		task.LastError = err.Error()
-		failedTasks = append(failedTasks, task)
-		return nil, nil, failedTasks, nil
-	}
-	sort.Sort(BridgeOperatorsSorter(syncedInfo.Operators))
+	//syncedInfo, err := roninGovernanceCaller.LastSyncedBridgeOperatorSetInfo(nil)
+	//if err != nil {
+	//	task.LastError = err.Error()
+	//	failedTasks = append(failedTasks, task)
+	//	return nil, nil, failedTasks, nil
+	//}
+	//sort.Sort(BridgeOperatorsSorter(syncedInfo.Operators))
 
-	isValidatorSetHasChanged := EqualOperatorSet(syncedInfo.Operators, ethSyncedInfo.Operators)
-	log.Info("[RoninTask][BridgeOperatorsApprovedCallback] Is validator set has changed", "changed", isValidatorSetHasChanged, "event", event, "syncedInfo", syncedInfo)
-	if !isValidatorSetHasChanged {
+	isValidatorSetEquals := EqualOperatorSet(event.Operators, ethSyncedInfo.Operators)
+	log.Info("[RoninTask][BridgeOperatorsApprovedCallback] Is validator set has changed", "changed", isValidatorSetEquals, "event", event, "ethSyncedInfo", ethSyncedInfo)
+	if isValidatorSetEquals {
 		doneTasks = append(doneTasks, task)
 		return doneTasks, nil, nil, nil
 	}
