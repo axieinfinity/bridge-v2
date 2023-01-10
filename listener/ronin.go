@@ -2,6 +2,7 @@ package listener
 
 import (
 	"context"
+	"errors"
 	"math/big"
 	"time"
 
@@ -224,13 +225,17 @@ func (l *RoninListener) isTrustedNode() error {
 	}
 
 	addr := l.GetVoterSign().GetAddress()
-	node, err := roninTrustedCaller.GetTrustedOrganization(nil, addr)
+	weight, err := roninTrustedCaller.GetBridgeVoterWeight(nil, addr)
 	if err != nil {
 		return err
 	}
-	log.Debug("[RoninListener][isTrustedNode] Trusted node info", "node", node)
+	log.Debug("[RoninListener][isTrustedNode] Trusted node info", "weight", weight)
 
-	return nil
+	if weight.Cmp(big.NewInt(0)) == 1 {
+		return nil
+	}
+
+	return errors.New("current node is not trusted node")
 }
 
 func (l *RoninListener) BridgeOperatorSetUpdatedCallback(fromChainId *big.Int, tx bridgeCore.Transaction, data []byte) error {
