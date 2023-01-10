@@ -25,8 +25,8 @@
       "contracts": {
         "Gateway": "0xCee681C9108c42C710c6A8A949307D5F13C9F3ca",
         "EthGateway": "0xFc4319Ae9e6134C708b88D5Ad5Da1A4a83372502",
-        "EthGovernance": "0x456327e8961B3Cd20ea41fF8b4FcE80EA3A8A5C9",
-        "Governance": "0x69F7F0765a347DC4497E948D2c74f9bC328871EC",
+        "EthGovernance": "0x4eAE6579953B57520Bb6d60a8161b04FBeAdeF4a",
+        "Governance": "0x9a4c6BAe92fc629D5F4554987eb5499ceA601B75",
         "TrustedOrganization": "0x7f46c5DD5f13FF0dd973317411d70800db248e7d"
       },
       "subscriptions": {
@@ -75,7 +75,7 @@
           }
         },
         "BridgeOperatorsApprovedSubscription": {
-          "to": "0x8a320aFb578BEed1A5BB08823CF9A5f60Ea694f4",
+          "to": "0x9a4c6BAe92fc629D5F4554987eb5499ceA601B75",
           "type": 1,
           "handler": {
             "contract": "RoninGovernanceAdmin",
