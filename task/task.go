@@ -25,9 +25,10 @@ import (
 )
 
 const (
-	Salt                   = "0xe3922a0bff7e80c6f7465bc1b150f6c95d9b9203f1731a09f86e759ea1eaa306"
-	ErrSigAlreadySubmitted = "execution reverted: BOsGovernanceRelay: query for outdated period"
-	ErrOutdatedPeriod      = "execution reverted: BOsGovernanceProposal: query for outdated period"
+	Salt                     = "0xe3922a0bff7e80c6f7465bc1b150f6c95d9b9203f1731a09f86e759ea1eaa306"
+	ErrSigAlreadySubmitted   = "execution reverted: BOsGovernanceRelay: query for outdated period"
+	ErrOutdatedPeriod        = "execution reverted: BOsGovernanceProposal: query for outdated period"
+	ErrOperatorsAlreadyVoted = "execution reverted: BridgeOperatorsBallot: bridge operator set is already voted"
 )
 
 type task struct {
@@ -306,6 +307,7 @@ func (r *task) relayBridgeOperators(task *models.Task) (doneTasks, processingTas
 	if err != nil {
 		// Prevent retry submit signature if the signature was already submitted
 		switch err.Error() {
+		case ErrOperatorsAlreadyVoted:
 		case ErrSigAlreadySubmitted:
 			log.Warn("[RoninTask][BridgeOperatorsApprovedCallback] Bridge operators already submitted")
 			doneTasks = append(doneTasks, task)
