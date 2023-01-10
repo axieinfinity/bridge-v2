@@ -2,9 +2,10 @@ package listener
 
 import (
 	"context"
-	bridgeUtils "github.com/axieinfinity/bridge-v2/utils"
 	"math/big"
 	"time"
+
+	bridgeUtils "github.com/axieinfinity/bridge-v2/utils"
 
 	ethGovernance "github.com/axieinfinity/bridge-contracts/generated_contracts/ethereum/governance"
 	"github.com/ethereum/go-ethereum/crypto"
@@ -222,7 +223,7 @@ func (l *RoninListener) isTrustedNode() error {
 		return err
 	}
 
-	addr := l.GetValidatorSign().GetAddress()
+	addr := l.GetVoterSign().GetAddress()
 	node, err := roninTrustedCaller.GetTrustedOrganization(nil, addr)
 	if err != nil {
 		return err
@@ -235,13 +236,13 @@ func (l *RoninListener) isTrustedNode() error {
 func (l *RoninListener) BridgeOperatorSetUpdatedCallback(fromChainId *big.Int, tx bridgeCore.Transaction, data []byte) error {
 	log.Info("[RoninListener][BridgeOperatorSetUpdatedCallback] Received new event", "tx", tx.GetHash().Hex())
 
-	if err := l.isTrustedNode(); err != nil {
-		log.Info("[RoninListener][BridgeOperatorSetUpdatedCallback] The current node is not trusted node")
+	if l.GetVoterSign() == nil {
+		log.Info("[RoninListener][BridgeOperatorSetUpdatedCallback] Voter key is missing")
 		return nil
 	}
 
-	if l.GetVoterSign() == nil {
-		log.Error("[RoninListener][BridgeOperatorSetUpdatedCallback] Voter key is missing")
+	if err := l.isTrustedNode(); err != nil {
+		log.Info("[RoninListener][BridgeOperatorSetUpdatedCallback] The current node is not trusted node")
 		return nil
 	}
 
