@@ -133,9 +133,9 @@ func (r *task) voteBridgeOperatorsBySignature(task *models.Task) (doneTasks, pro
 
 	sort.Sort(BridgeOperatorsSorter(syncedInfo.Operators))
 
-	isValidatorSetHasChanged := event.Period.Cmp(syncedInfo.Period) >= 0 && event.Epoch.Cmp(syncedInfo.Epoch) > 0
-	log.Info("[RoninTask][BridgeOperatorSetCallback] Is validator set has changed", "value", isValidatorSetHasChanged, "event", event, "syncedInfo", syncedInfo)
-	if !isValidatorSetHasChanged {
+	isValidatorSetUpdated := event.Period.Cmp(syncedInfo.Period) >= 0 && event.Epoch.Cmp(syncedInfo.Epoch) > 0
+	log.Info("[RoninTask][BridgeOperatorSetCallback] Is validator set has changed", "value", isValidatorSetUpdated, "event", event, "syncedInfo", syncedInfo)
+	if isValidatorSetUpdated {
 		doneTasks = append(doneTasks, task)
 		return doneTasks, nil, nil, nil
 	}
@@ -311,7 +311,6 @@ func (r *task) relayBridgeOperators(task *models.Task) (doneTasks, processingTas
 	if err != nil {
 		// Prevent retry submit signature if the signature was already submitted
 		switch err.Error() {
-		case ErrOperatorsAlreadyVoted:
 		case ErrSigAlreadySubmitted:
 			log.Warn("[RoninTask][BridgeOperatorsApprovedCallback] Bridge operators already submitted")
 			doneTasks = append(doneTasks, task)
