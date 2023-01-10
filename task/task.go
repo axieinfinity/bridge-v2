@@ -133,9 +133,9 @@ func (r *task) voteBridgeOperatorsBySignature(task *models.Task) (doneTasks, pro
 
 	sort.Sort(BridgeOperatorsSorter(syncedInfo.Operators))
 
-	isValidatorSetUpdated := event.Period.Cmp(syncedInfo.Period) >= 0 && event.Epoch.Cmp(syncedInfo.Epoch) > 0
-	log.Info("[RoninTask][BridgeOperatorSetCallback] Is validator set has changed", "value", isValidatorSetUpdated, "event", event, "syncedInfo", syncedInfo)
-	if isValidatorSetUpdated {
+	isValidatorSetShouldUpdate := event.Period.Cmp(syncedInfo.Period) >= 0 && event.Epoch.Cmp(syncedInfo.Epoch) > 0
+	log.Info("[RoninTask][BridgeOperatorSetCallback] Is validator set has changed", "value", isValidatorSetShouldUpdate, "event", event, "syncedInfo", syncedInfo)
+	if !isValidatorSetShouldUpdate {
 		doneTasks = append(doneTasks, task)
 		return doneTasks, nil, nil, nil
 	}
@@ -265,7 +265,7 @@ func (r *task) relayBridgeOperators(task *models.Task) (doneTasks, processingTas
 	//sort.Sort(BridgeOperatorsSorter(syncedInfo.Operators))
 
 	isValidatorSetEquals := EqualOperatorSet(event.Operators, ethSyncedInfo.Operators)
-	log.Info("[RoninTask][BridgeOperatorsApprovedCallback] Is validator set has changed", "changed", isValidatorSetEquals, "event", event, "ethSyncedInfo", ethSyncedInfo)
+	log.Info("[RoninTask][BridgeOperatorsApprovedCallback] Is validator set has changed", "changed", !isValidatorSetEquals, "event", event, "ethSyncedInfo", ethSyncedInfo)
 	if isValidatorSetEquals {
 		doneTasks = append(doneTasks, task)
 		return doneTasks, nil, nil, nil
