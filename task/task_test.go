@@ -86,7 +86,7 @@ func (s *VoteBridgeOperatorsSuite) SetupTest() {
 
 	roninListener := newMockListener(s.sim, context.Background(), s.config, s.utilWrapper, s.store)
 	r := newMockRoninTask(s.sim, roninListener, gormDB, s.utilWrapper)
-	s.task = newTask(r.listener, r.client, r.store, r.chainId, r.contracts, defaultMaxTry, VOTE_BRIDGE_OPERATORS_TASK, r.releaseTasksCh, r.util)
+	s.task = newTask(r.listener, r.client, r.client, r.store, r.chainId, r.contracts, defaultMaxTry, VOTE_BRIDGE_OPERATORS_TASK, r.releaseTasksCh, r.util)
 
 }
 
@@ -187,7 +187,7 @@ func (s *RelayBridgeOperatorsSuite) SetupTest() {
 
 	roninListener := newMockListener(s.sim, context.Background(), s.config, s.utilWrapper, s.store)
 	r := newMockRoninTask(s.sim, roninListener, gormDB, s.utilWrapper)
-	s.task = newTask(r.listener, r.client, r.store, r.chainId, r.contracts, defaultMaxTry, RELAY_BRIDGE_OPERATORS_TASK, r.releaseTasksCh, r.util)
+	s.task = newTask(r.listener, r.client, r.client, r.store, r.chainId, r.contracts, defaultMaxTry, RELAY_BRIDGE_OPERATORS_TASK, r.releaseTasksCh, r.util)
 
 }
 
@@ -296,7 +296,9 @@ func (s *CommonTestSuite) SetupTest() {
 
 	roninListener := newMockListener(s.sim, context.Background(), config, utilWrapper, store)
 	s.roninTask = newMockRoninTask(s.sim, roninListener, gormDB, utilWrapper)
-	s.task = newTask(s.roninTask.listener, s.roninTask.client, s.roninTask.store, s.roninTask.chainId, s.roninTask.contracts, defaultMaxTry, RELAY_BRIDGE_OPERATORS_TASK, s.roninTask.releaseTasksCh, s.roninTask.util)
+	client := s.roninTask.client
+	ethClient := s.roninTask.client
+	s.task = newTask(s.roninTask.listener, client, ethClient, s.roninTask.store, s.roninTask.chainId, s.roninTask.contracts, defaultMaxTry, RELAY_BRIDGE_OPERATORS_TASK, s.roninTask.releaseTasksCh, s.roninTask.util)
 }
 
 func (s *CommonTestSuite) TestUnpackBridgeOperatorsApprovedEventSuccess() {
@@ -333,6 +335,7 @@ func (s *CommonTestSuite) TestUnpackBridgeOperatorsUpdatedEventSuccess() {
 
 func (s *CommonTestSuite) TestSignBridgeOperatorsBallotSuccess() {
 	period := int64(9263652)
+	epoch := int64(9263652)
 	bridgeOperators := []interface{}{
 		"0xB6bc5bc0410773A3F86B1537ce7495C52e38f88B",
 		"0x4a4bc674A97737376cFE990aE2fE0d2B6E738393",
@@ -342,7 +345,7 @@ func (s *CommonTestSuite) TestSignBridgeOperatorsBallotSuccess() {
 		SignTypedDataCallback: func(typedData core2.TypedData) (hexutil.Bytes, error) {
 			return s.roninTask.util.SignTypedData(typedData, s.roninTask.listener.GetValidatorSign())
 		},
-	}, period, bridgeOperators)
+	}, period, epoch, bridgeOperators)
 	sig := parseSignatureAsRsv(hash)
 	fmt.Println(sig.S)
 	fmt.Println(sig.R)
@@ -379,4 +382,13 @@ func (s *CommonTestSuite) TestParseSignatureAsRsvSuccess() {
 	s.Equal(sig.R[:], expected.R[:])
 	s.Equal(sig.S[:], expected.S[:])
 	s.Equal(sig.V, expected.V)
+}
+
+func (s *CommonTestSuite) TestCreateSalt() {
+	// 0xe3922a0bff7e80c6f7465bc1b150f6c95d9b9203f1731a09f86e759ea1eaa306
+	chainId := "0x7e4"
+	hash, err := createSalt(hexutil.MustDecodeBig(chainId))
+	fmt.Println(hash.Hex())
+	s.Nil(err)
+	s.Equal("0xe3922a0bff7e80c6f7465bc1b150f6c95d9b9203f1731a09f86e759ea1eaa306", hash.Hex())
 }
