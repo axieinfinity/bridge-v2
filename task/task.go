@@ -2,6 +2,11 @@ package task
 
 import (
 	"crypto/ecdsa"
+	"math/big"
+	"sort"
+	"strings"
+	"time"
+
 	ethGovernance "github.com/axieinfinity/bridge-contracts/generated_contracts/ethereum/governance"
 	roninGovernance "github.com/axieinfinity/bridge-contracts/generated_contracts/ronin/governance"
 	roninValidator "github.com/axieinfinity/bridge-contracts/generated_contracts/ronin/validator"
@@ -19,9 +24,6 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/signer/core"
-	"math/big"
-	"sort"
-	"time"
 )
 
 const (
@@ -251,6 +253,15 @@ func (r *task) relayBridgeOperators(task *models.Task) (doneTasks, processingTas
 		return nil, nil, failedTasks, nil
 	}
 	log.Info("[RoninTask][BridgeOperatorsApprovedCallback] Bridge operator voting signatures", "signatures", signatures.Signatures, "voters", signatures.Voters)
+
+	for i := 0; i < len(signatures.Signatures)-1; i++ {
+		for j := i + 1; j < len(signatures.Signatures); j++ {
+			if strings.ToLower(signatures.Voters[j].Hex()) < strings.ToLower(signatures.Voters[i].Hex()) {
+				signatures.Voters[j], signatures.Voters[i] = signatures.Voters[i], signatures.Voters[j]
+				signatures.Signatures[j], signatures.Signatures[i] = signatures.Signatures[i], signatures.Signatures[j]
+			}
+		}
+	}
 
 	var ethSignatures []ethGovernance.SignatureConsumerSignature
 	for _, sig := range signatures.Signatures {
