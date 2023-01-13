@@ -1,33 +1,35 @@
 package task
 
 import (
-	"bytes"
 	"crypto/ecdsa"
+	"math/big"
+	"sort"
+	"strings"
+	"time"
+
 	ethGovernance "github.com/axieinfinity/bridge-contracts/generated_contracts/ethereum/governance"
 	roninGovernance "github.com/axieinfinity/bridge-contracts/generated_contracts/ronin/governance"
-	roninTrustedOrganization "github.com/axieinfinity/bridge-contracts/generated_contracts/ronin/trusted_organization"
 	roninValidator "github.com/axieinfinity/bridge-contracts/generated_contracts/ronin/validator"
 	bridgeCore "github.com/axieinfinity/bridge-core"
 	"github.com/axieinfinity/bridge-core/metrics"
 	"github.com/axieinfinity/bridge-core/utils"
 	"github.com/axieinfinity/bridge-v2/models"
 	"github.com/axieinfinity/bridge-v2/stores"
+	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/common/math"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/signer/core"
-	"math/big"
-	"sort"
-	"time"
 )
 
 const (
-	Salt                   = "0xe3922a0bff7e80c6f7465bc1b150f6c95d9b9203f1731a09f86e759ea1eaa306"
-	ErrSigAlreadySubmitted = "execution reverted: BOsGovernanceRelay: query for outdated period"
-	ErrOutdatedPeriod      = "execution reverted: BOsGovernanceProposal: query for outdated period"
+	ErrSigAlreadySubmitted   = "execution reverted: BOsGovernanceRelay: query for outdated period"
+	ErrOutdatedPeriod        = "execution reverted: BOsGovernanceProposal: query for outdated period"
+	ErrOperatorsAlreadyVoted = "execution reverted: BridgeOperatorsBallot: bridge operator set is already voted"
 )
 
 type task struct {
@@ -132,9 +134,9 @@ func (r *task) voteBridgeOperatorsBySignature(task *models.Task) (doneTasks, pro
 
 	sort.Sort(BridgeOperatorsSorter(syncedInfo.Operators))
 
-	isValidatorSetHasChanged := event.Period.Cmp(syncedInfo.Period) >= 0 && event.Epoch.Cmp(syncedInfo.Epoch) > 0
-	log.Info("[RoninTask][BridgeOperatorSetCallback] Is validator set has changed", "value", isValidatorSetHasChanged, "event", event, "syncedInfo", syncedInfo)
-	if !isValidatorSetHasChanged {
+	isValidatorSetShouldUpdate := event.Period.Cmp(syncedInfo.Period) >= 0 && event.Epoch.Cmp(syncedInfo.Epoch) > 0
+	log.Info("[RoninTask][BridgeOperatorSetCallback] Should vote", "value", isValidatorSetShouldUpdate, "event", event, "syncedInfo", syncedInfo)
+	if !isValidatorSetShouldUpdate {
 		doneTasks = append(doneTasks, task)
 		return doneTasks, nil, nil, nil
 	}
@@ -153,6 +155,7 @@ func (r *task) voteBridgeOperatorsBySignature(task *models.Task) (doneTasks, pro
 		bridgeOperators = append(bridgeOperators, address.Hex())
 	}
 	opts := &signDataOpts{
+		ChainID: r.chainId,
 		SignTypedDataCallback: func(typedData core.TypedData) (hexutil.Bytes, error) {
 			return r.util.SignTypedData(typedData, r.listener.GetVoterSign())
 		},
@@ -182,6 +185,10 @@ func (r *task) voteBridgeOperatorsBySignature(task *models.Task) (doneTasks, pro
 			log.Warn("[RoninTask][BridgeOperatorSetCallback] Bridge operators period outdated")
 			doneTasks = append(doneTasks, task)
 			return doneTasks, nil, nil, nil
+		case ErrOperatorsAlreadyVoted:
+			log.Warn("[RoninTask][BridgeOperatorSetCallback] Bridge operators have already voted")
+			doneTasks = append(doneTasks, task)
+			return doneTasks, nil, nil, nil
 		default:
 			log.Error("[RoninTask][BridgeOperatorSetCallback] Send transaction error", "err", err)
 			task.LastError = err.Error()
@@ -197,13 +204,6 @@ func (r *task) voteBridgeOperatorsBySignature(task *models.Task) (doneTasks, pro
 func (r *task) relayBridgeOperators(task *models.Task) (doneTasks, processingTasks, failedTasks []*models.Task, tx *ethtypes.Transaction) {
 	log.Info("[RoninTask][BridgeOperatorsApprovedCallback] Processing task")
 	// create caller
-	roninTrustedCaller, err := roninTrustedOrganization.NewTrustedOrganizationCaller(common.HexToAddress(r.contracts[TRUSTED_ORGANIZATION_CONTRACT]), r.client)
-	if err != nil {
-		task.LastError = err.Error()
-		failedTasks = append(failedTasks, task)
-		return nil, nil, failedTasks, nil
-	}
-
 	roninGovernanceCaller, err := roninGovernance.NewGovernanceCaller(common.HexToAddress(r.contracts[GOVERNANCE_CONTRACT]), r.client)
 	if err != nil {
 		task.LastError = err.Error()
@@ -217,20 +217,6 @@ func (r *task) relayBridgeOperators(task *models.Task) (doneTasks, processingTas
 		failedTasks = append(failedTasks, task)
 		return nil, nil, failedTasks, nil
 	}
-
-	trustedOrgs, err := roninTrustedCaller.GetAllTrustedOrganizations(nil)
-	if err != nil {
-		task.LastError = err.Error()
-		failedTasks = append(failedTasks, task)
-		return nil, nil, failedTasks, nil
-	}
-
-	var voters []common.Address
-	for _, node := range trustedOrgs {
-		voters = append(voters, node.BridgeVoter)
-	}
-	// Must be stored before voting
-	sort.Sort(validatorsAscending(voters))
 
 	event, err := r.unpackBridgeOperatorsApprovedEvent(task)
 	if err != nil {
@@ -250,18 +236,9 @@ func (r *task) relayBridgeOperators(task *models.Task) (doneTasks, processingTas
 	}
 	sort.Sort(BridgeOperatorsSorter(ethSyncedInfo.Operators))
 
-	// Ronin call
-	syncedInfo, err := roninGovernanceCaller.LastSyncedBridgeOperatorSetInfo(nil)
-	if err != nil {
-		task.LastError = err.Error()
-		failedTasks = append(failedTasks, task)
-		return nil, nil, failedTasks, nil
-	}
-	sort.Sort(BridgeOperatorsSorter(syncedInfo.Operators))
-
-	isValidatorSetHasChanged := EqualOperatorSet(syncedInfo.Operators, ethSyncedInfo.Operators)
-	log.Info("[RoninTask][BridgeOperatorSetCallback] Is validator set has changed", "changed", isValidatorSetHasChanged, "event", event, "syncedInfo", syncedInfo)
-	if !isValidatorSetHasChanged {
+	isValidatorSetEquals := EqualOperatorSet(event.Operators, ethSyncedInfo.Operators)
+	log.Info("[RoninTask][BridgeOperatorsApprovedCallback] Check operators set", "isEqual", isValidatorSetEquals, "event", event, "ethSyncedInfo", ethSyncedInfo)
+	if isValidatorSetEquals {
 		doneTasks = append(doneTasks, task)
 		return doneTasks, nil, nil, nil
 	}
@@ -269,16 +246,25 @@ func (r *task) relayBridgeOperators(task *models.Task) (doneTasks, processingTas
 	// otherwise add task to processingTasks to adjust after sending transaction
 	processingTasks = append(processingTasks, task)
 
-	signatures, err := roninGovernanceCaller.GetBridgeOperatorVotingSignatures(nil, event.Period, event.Epoch, voters)
+	signatures, err := roninGovernanceCaller.GetBridgeOperatorVotingSignatures(nil, event.Period, event.Epoch)
 	if err != nil {
 		task.LastError = err.Error()
 		failedTasks = append(failedTasks, task)
 		return nil, nil, failedTasks, nil
 	}
-	log.Debug("[RoninTask][BridgeOperatorsApprovedCallback] Voting signatures", "voters", voters)
+	log.Info("[RoninTask][BridgeOperatorsApprovedCallback] Bridge operator voting signatures", "signatures", signatures.Signatures, "voters", signatures.Voters)
+
+	for i := 0; i < len(signatures.Signatures)-1; i++ {
+		for j := i + 1; j < len(signatures.Signatures); j++ {
+			if strings.ToLower(signatures.Voters[j].Hex()) < strings.ToLower(signatures.Voters[i].Hex()) {
+				signatures.Voters[j], signatures.Voters[i] = signatures.Voters[i], signatures.Voters[j]
+				signatures.Signatures[j], signatures.Signatures[i] = signatures.Signatures[i], signatures.Signatures[j]
+			}
+		}
+	}
 
 	var ethSignatures []ethGovernance.SignatureConsumerSignature
-	for _, sig := range signatures {
+	for _, sig := range signatures.Signatures {
 		if sig.V > 0 {
 			ethSignatures = append(ethSignatures, ethGovernance.SignatureConsumerSignature{
 				V: sig.V,
@@ -353,10 +339,46 @@ func (r *task) unpackBridgeOperatorsApprovedEvent(task *models.Task) (*roninGove
 }
 
 type signDataOpts struct {
+	ChainID               *big.Int
 	SignTypedDataCallback func(typedData core.TypedData) (hexutil.Bytes, error)
 }
 
+func createSalt(chainID *big.Int) (*common.Hash, error) {
+	uint256ty, err := abi.NewType("uint256", "uint256", nil)
+	if err != nil {
+		return nil, err
+	}
+	stringTy, err := abi.NewType("string", "string", nil)
+	if err != nil {
+		return nil, err
+	}
+	args := abi.Arguments{
+		{
+			Type: stringTy,
+		},
+		{
+			Type: uint256ty,
+		},
+	}
+
+	bytes, err := args.Pack("RONIN_GOVERNANCE_ADMIN", chainID)
+	if err != nil {
+		return nil, err
+	}
+
+	hash := crypto.Keccak256Hash(bytes)
+
+	return &hash, nil
+}
+
 func signBridgeOperatorsBallot(opts *signDataOpts, period, epoch int64, bridgeOperators interface{}) ([]byte, error) {
+	salt, err := createSalt(opts.ChainID)
+	if err != nil {
+		log.Error("Can not encode salt key", "error", err)
+		return nil, err
+	}
+	log.Debug("Generated salt key", "salt", salt.Hex(), "chainID", opts.ChainID)
+
 	bridgeOperatorsBallotTypes := core.TypedData{
 		Types: core.Types{
 			"EIP712Domain": []core.Type{
@@ -385,8 +407,8 @@ func signBridgeOperatorsBallot(opts *signDataOpts, period, epoch int64, bridgeOp
 		PrimaryType: "BridgeOperatorsBallot",
 		Domain: core.TypedDataDomain{
 			Name:    "GovernanceAdmin",
-			Version: "1",
-			Salt:    Salt,
+			Version: "2",
+			Salt:    salt.Hex(),
 		},
 		Message: core.TypedDataMessage{
 			"period":    math.NewHexOrDecimal256(period),
@@ -397,10 +419,3 @@ func signBridgeOperatorsBallot(opts *signDataOpts, period, epoch int64, bridgeOp
 
 	return opts.SignTypedDataCallback(bridgeOperatorsBallotTypes)
 }
-
-// validatorsAscending implements the sort interface to allow sorting a list of addresses
-type validatorsAscending []common.Address
-
-func (s validatorsAscending) Len() int           { return len(s) }
-func (s validatorsAscending) Less(i, j int) bool { return bytes.Compare(s[i][:], s[j][:]) < 0 }
-func (s validatorsAscending) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }

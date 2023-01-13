@@ -73,6 +73,21 @@ type MockListener struct {
 	validatorSign bridgeCoreUtils.ISign
 }
 
+func (m MockListener) GetVoterSign() bridgeCoreUtils.ISign {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (m MockListener) AddListeners(m2 map[string]bridgeCore.Listener) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (m MockListener) GetListener(s string) bridgeCore.Listener {
+	//TODO implement me
+	panic("implement me")
+}
+
 func newMockListener(client *backends.SimulatedBackend, ctx context.Context, cfg *bridgeCore.LsConfig, helpers utils.Utils, store bridgeCoreStores.MainStore) *MockListener {
 	l := &MockListener{
 		ctx:          ctx,
