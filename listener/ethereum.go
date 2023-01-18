@@ -90,6 +90,12 @@ func NewEthereumListener(ctx context.Context, cfg *bridgeCore.LsConfig, helpers 
 			log.Error(fmt.Sprintf("[New%sListener] error while getting validator key", cfg.Name), "err", err)
 			return nil, err
 		}
+
+		if ethListener.validatorSign == nil {
+			log.Warn(fmt.Sprintf("[%sListener] No sign method provided for operator key", cfg.Name))
+		} else {
+			log.Info(fmt.Sprintf("[%sListener] Operator account", cfg.Name), "address", ethListener.validatorSign.GetAddress())
+		}
 	}
 	if cfg.Secret.Voter != nil {
 		ethListener.voterSign, err = bridgeCoreUtils.NewSignMethod(cfg.Secret.Voter)
@@ -97,12 +103,24 @@ func NewEthereumListener(ctx context.Context, cfg *bridgeCore.LsConfig, helpers 
 			log.Error(fmt.Sprintf("[New%sListener] error while getting voter key", cfg.Name), "err", err)
 			return nil, err
 		}
+
+		if ethListener.voterSign == nil {
+			log.Warn(fmt.Sprintf("[%sListener] No sign method provided for voter key", cfg.Name))
+		} else {
+			log.Info(fmt.Sprintf("[%sListener] Voter account", cfg.Name), "address", ethListener.voterSign.GetAddress())
+		}
 	}
 	if cfg.Secret.Relayer != nil {
 		ethListener.relayerSign, err = bridgeCoreUtils.NewSignMethod(cfg.Secret.Relayer)
 		if err != nil {
 			log.Error(fmt.Sprintf("[New%sListener] error while getting relayer key", cfg.Name), "err", err)
 			return nil, err
+		}
+
+		if ethListener.relayerSign == nil {
+			log.Warn(fmt.Sprintf("[%sListener] No sign method provided for relay key", cfg.Name))
+		} else {
+			log.Info(fmt.Sprintf("[%sListener] Relayer account", cfg.Name), "address", ethListener.relayerSign.GetAddress())
 		}
 	}
 	return ethListener, nil
