@@ -186,6 +186,7 @@ func (r *bulkTask) sendDepositTransaction(tasks []*models.Task) (doneTasks, proc
 			for _, t := range processingTasks {
 				t.LastError = err.Error()
 				if err.Error() == ErrNotBridgeOperator {
+					log.Warn("[bulkTask][sendDepositTransaction] Not a bridge operator")
 					doneTasks = append(doneTasks, t)
 				} else {
 					failedTasks = append(failedTasks, t)
@@ -262,6 +263,7 @@ func (r *bulkTask) sendWithdrawalSignaturesTransaction(tasks []*models.Task) (do
 			for _, t := range processingTasks {
 				t.LastError = err.Error()
 				if err.Error() == ErrNotBridgeOperator {
+					log.Warn("[bulkTask][sendWithdrawalSignaturesTransaction] Not a bridge operator")
 					doneTasks = append(doneTasks, t)
 				} else {
 					failedTasks = append(failedTasks, t)
@@ -332,6 +334,7 @@ func (r *bulkTask) sendAckTransactions(tasks []*models.Task) (doneTasks, process
 			for _, t := range processingTasks {
 				t.LastError = err.Error()
 				if err.Error() == ErrNotBridgeOperator {
+					log.Warn("[bulkTask][sendAckTransactions] Not a bridge operator")
 					doneTasks = append(doneTasks, t)
 				} else {
 					failedTasks = append(failedTasks, t)
