@@ -13,8 +13,8 @@ env:
   IMAGE_REPOSITORY: axieinfinity/bridge
   DOCKER_FILE: Dockerfile
 jobs:
-  push_to_registry:
-    name: Push Docker image to Docker Hub
+  push_to_docker_registry:
+    name: Push Docker image to GHCR.IO
     runs-on: ubuntu-latest
     permissions:
       contents: read
