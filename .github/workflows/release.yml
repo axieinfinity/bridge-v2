@@ -4,12 +4,13 @@ on:
     type:
       - published
     branches:
-      - master
+      - main
     tags:
       - v*.*.*
 
 env:
-  IMAGE_REPOSITORY: ghcr.io/axieinfinity/bridge
+  REGISTRY: ghcr.io
+  IMAGE_REPOSITORY: axieinfinity/bridge
   DOCKER_FILE: Dockerfile
 jobs:
   push_to_dockerhub:
@@ -33,7 +34,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@57396166ad8aefe6098280995947635806a0e6ea
         with:
-          images: ${{ env.IMAGE_REPOSITORY }}
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}
           tags: |
             type=semver,event=tag,suffix=-{{sha}},pattern={{raw}}
       # Enable Registry Cache
