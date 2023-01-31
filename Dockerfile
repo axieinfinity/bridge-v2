@@ -1,10 +1,6 @@
-FROM gcr.io/test-servers-256610/ronin_ronin-base-image:base-image-0c47779be as builder
-
-ENV GOPRIVATE="github.com/axieinfinity"
+FROM ghcr.io/axieinfinity/ronin_ronin-base-image:base-image-0c47779be as builder
 
 WORKDIR /opt
-
-RUN --mount=type=secret,id=github_token git config --global url."https://x-access-token:$(cat /run/secrets/github_token)@github.com".insteadOf "https://github.com"
 
 COPY . /opt/bridge
 RUN cd bridge && make bridge
