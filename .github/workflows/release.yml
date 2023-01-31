@@ -9,11 +9,12 @@ on:
       - v*.*.*
 
 env:
-  IMAGE_REPOSITORY: ghcr.io/axieinfinity/bridge
+  REGISTRY: ghcr.io
+  IMAGE_REPOSITORY: axieinfinity/bridge
   DOCKER_FILE: Dockerfile
 jobs:
-  push_to_dockerhub:
-    name: Push Docker image to Docker Hub
+  push_to_docker_registry:
+    name: Push Docker image to GHCR.IO
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -33,7 +34,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@57396166ad8aefe6098280995947635806a0e6ea
         with:
-          images: ${{ env.IMAGE_REPOSITORY }}
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}
           tags: |
             type=semver,event=tag,suffix=-{{sha}},pattern={{raw}}
       # Enable Registry Cache
