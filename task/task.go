@@ -125,6 +125,12 @@ func (r *task) voteBridgeOperatorsBySignature(task *models.Task) (doneTasks, pro
 		return nil, nil, failedTasks, nil
 	}
 
+	if voted {
+		log.Debug("[RoninTask][BridgeOperatorSetCallback] Bridge already voted", "period", event.Period)
+		doneTasks = append(doneTasks, task)
+		return
+	}
+
 	syncedInfo, err := roninGovernanceTransactor.LastSyncedBridgeOperatorSetInfo(nil)
 	if err != nil {
 		task.LastError = err.Error()
@@ -139,12 +145,6 @@ func (r *task) voteBridgeOperatorsBySignature(task *models.Task) (doneTasks, pro
 	if !isValidatorSetShouldUpdate {
 		doneTasks = append(doneTasks, task)
 		return doneTasks, nil, nil, nil
-	}
-
-	if voted {
-		log.Debug("[RoninTask][BridgeOperatorSetCallback] Bridge already voted", "period", event.Period)
-		doneTasks = append(doneTasks, task)
-		return
 	}
 
 	// otherwise add task to processingTasks to adjust after sending transaction
