@@ -29,7 +29,7 @@ import (
 const (
 	configPath           = "CONFIG_PATH"
 	roninRpc             = "RONIN_RPC"
-	roninValidatorKey    = "RONIN_VALIDATOR_KEY"
+	roninValidatorKey    = "RONIN_BRIDGE_OPERATOR_KEY"
 	roninRelayKey        = "RONIN_RELAYER_KEY"
 	roninBridgeVoterKey  = "RONIN_BRIDGE_VOTER_KEY"
 	ethereumRpc          = "ETHEREUM_RPC"
