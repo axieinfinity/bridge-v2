@@ -28,8 +28,8 @@ func NewBridgeController(cfg *bridgeCore.Config, db *gorm.DB, helpers utils.Util
 	return &BridgeController{controller}, nil
 }
 
-func InitEthereum(ctx context.Context, lsConfig *bridgeCore.LsConfig, store bridgeCoreStores.MainStore, helpers utils.Utils) bridgeCore.Listener {
-	ethListener, err := listener.NewEthereumListener(ctx, lsConfig, helpers, store)
+func InitEthereum(ctx context.Context, lsConfig *bridgeCore.LsConfig, store bridgeCoreStores.MainStore, helpers utils.Utils, pool *bridgeCore.Pool) bridgeCore.Listener {
+	ethListener, err := listener.NewEthereumListener(ctx, lsConfig, helpers, store, pool)
 	if err != nil {
 		log.Error("[EthereumListener]Error while init new ethereum listener", "err", err)
 		return nil
@@ -38,8 +38,8 @@ func InitEthereum(ctx context.Context, lsConfig *bridgeCore.LsConfig, store brid
 	return ethListener
 }
 
-func InitRonin(ctx context.Context, lsConfig *bridgeCore.LsConfig, store bridgeCoreStores.MainStore, helpers utils.Utils) bridgeCore.Listener {
-	roninListener, err := listener.NewRoninListener(ctx, lsConfig, helpers, store)
+func InitRonin(ctx context.Context, lsConfig *bridgeCore.LsConfig, store bridgeCoreStores.MainStore, helpers utils.Utils, pool *bridgeCore.Pool) bridgeCore.Listener {
+	roninListener, err := listener.NewRoninListener(ctx, lsConfig, helpers, store, pool)
 	if err != nil {
 		log.Error("[RoninListener]Error while init new ronin listener", "err", err)
 		return nil

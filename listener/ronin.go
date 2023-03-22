@@ -34,8 +34,8 @@ type RoninListener struct {
 	bridgeStore stores.BridgeStore
 }
 
-func NewRoninListener(ctx context.Context, cfg *bridgeCore.LsConfig, helpers utils.Utils, store bridgeCoreStores.MainStore) (*RoninListener, error) {
-	listener, err := NewEthereumListener(ctx, cfg, helpers, store)
+func NewRoninListener(ctx context.Context, cfg *bridgeCore.LsConfig, helpers utils.Utils, store bridgeCoreStores.MainStore, pool *bridgeCore.Pool) (*RoninListener, error) {
+	listener, err := NewEthereumListener(ctx, cfg, helpers, store, pool)
 	if err != nil {
 		panic(err)
 	}
