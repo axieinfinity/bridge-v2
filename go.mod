@@ -31,7 +31,7 @@ require (
 
 require (
 	github.com/VictoriaMetrics/fastcache v1.10.0 // indirect
-	github.com/axieinfinity/bridge-core v0.1.2-0.20221221074635-375d6a0ea127 // indirect
+	github.com/axieinfinity/bridge-core v0.1.2-0.20230322041938-1b27906094e6 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/btcsuite/btcd v0.20.1-beta // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect

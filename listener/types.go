@@ -8,7 +8,6 @@ import (
 	bridgeCore "github.com/axieinfinity/bridge-core"
 	bridgeCoreModels "github.com/axieinfinity/bridge-core/models"
 	"github.com/axieinfinity/bridge-core/utils"
-	"github.com/axieinfinity/bridge-v2/task"
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
@@ -278,13 +277,13 @@ func (e *EthCallbackJob) Update(status string) error {
 	return nil
 }
 
-func (e *EthCallbackJob) Save() error {
+func (e *EthCallbackJob) Save(status string) error {
 	job := &bridgeCoreModels.Job{
 		Listener:         e.GetListener().GetName(),
 		SubscriptionName: e.GetSubscriptionName(),
 		Type:             e.GetType(),
 		RetryCount:       e.GetRetryCount(),
-		Status:           task.STATUS_PENDING,
+		Status:           status,
 		Data:             common.Bytes2Hex(e.GetData()),
 		Transaction:      e.GetTransaction().GetHash().Hex(),
 		CreatedAt:        time.Now().Unix(),

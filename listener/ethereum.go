@@ -47,6 +47,7 @@ type EthereumListener struct {
 
 	prepareJobChan chan bridgeCore.JobHandler
 	tasks          []bridgeCore.TaskHandler
+	pool           *bridgeCore.Pool
 }
 
 func (e *EthereumListener) AddListeners(m map[string]bridgeCore.Listener) {
@@ -57,7 +58,7 @@ func (e *EthereumListener) GetListener(s string) bridgeCore.Listener {
 	return e.listeners[s]
 }
 
-func NewEthereumListener(ctx context.Context, cfg *bridgeCore.LsConfig, helpers utils.Utils, store stores.MainStore) (*EthereumListener, error) {
+func NewEthereumListener(ctx context.Context, cfg *bridgeCore.LsConfig, helpers utils.Utils, store stores.MainStore, pool *bridgeCore.Pool) (*EthereumListener, error) {
 	newCtx, cancelFunc := context.WithCancel(ctx)
 	ethListener := &EthereumListener{
 		name:           cfg.Name,
@@ -73,6 +74,7 @@ func NewEthereumListener(ctx context.Context, cfg *bridgeCore.LsConfig, helpers 
 		chainId:        hexutil.MustDecodeBig(cfg.ChainId),
 		safeBlockRange: cfg.SafeBlockRange,
 		tasks:          make([]bridgeCore.TaskHandler, 0),
+		pool:           pool,
 	}
 	if helpers != nil {
 		ethListener.utilsWrapper = helpers
@@ -337,7 +339,7 @@ func (e *EthereumListener) SendCallbackJobs(listeners map[string]bridgeCore.List
 		l := listeners[listenerName]
 		job := NewEthCallbackJob(l, methodName, tx, inputData, chainId, e.utilsWrapper)
 		if job != nil {
-			e.prepareJobChan <- job
+			e.pool.Enqueue(job)
 		}
 	}
 }
@@ -416,4 +418,7 @@ func (e *EthereumListener) GetVoterSign() bridgeCoreUtils.ISign {
 
 func (e *EthereumListener) GetRelayerSign() bridgeCoreUtils.ISign {
 	return e.relayerSign
+}
+
+func (e *EthereumListener) CacheBlocks(blockNumbers map[uint64]struct{}) {
 }
