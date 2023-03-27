@@ -13,6 +13,9 @@
         "validator": {
           "plainPrivateKey": ""
         },
+        "voter": {
+          "plainPrivateKey": ""
+        },
         "relayer": {
           "plainPrivateKey": ""
         }
@@ -22,9 +25,9 @@
       "contracts": {
         "Gateway": "0x0CF8fF40a508bdBc39fBe1Bb679dCBa64E65C7Df",
         "EthGateway": "0x64192819Ac13Ef72bF6b5AE239AC672B43a9AF08",
-        "EthGovernance": "",
-        "Governance": "",
-        "TrustedOrganization": ""
+        "EthGovernance": "0xB255D6A720BB7c39fee173cE22113397119cB930",
+        "Governance": "0x946397deDFd2f79b75a72B322944a21C3240c9c3",
+        "TrustedOrganization": "0x98D0230884448B3E2f09a177433D60fb1E19C090"
       },
       "subscriptions": {
         "MainchainWithdrewSubscription": {
@@ -61,7 +64,7 @@
           }
         },
         "BridgeOperatorSetUpdatedSubscription": {
-          "to": "",
+          "to": "0x617c5d73662282EA7FfD231E020eCa6D2B0D552f",
           "type": 1,
           "handler": {
             "contract": "RoninValidator",
@@ -72,7 +75,7 @@
           }
         },
         "BridgeOperatorsApprovedSubscription": {
-          "to": "",
+          "to": "0x946397deDFd2f79b75a72B322944a21C3240c9c3",
           "type": 1,
           "handler": {
             "contract": "RoninGovernanceAdmin",
