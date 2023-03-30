@@ -30,20 +30,21 @@ type EthereumListener struct {
 	chainId *big.Int
 	jobId   int32
 
-	rpcUrl         string
-	name           string
-	period         time.Duration
-	currentBlock   atomic.Value
-	safeBlockRange uint64
-	fromHeight     uint64
-	batches        sync.Map
-	utilsWrapper   utils.Utils
-	client         utils.EthClient
-	validatorSign  bridgeCoreUtils.ISign
-	voterSign      bridgeCoreUtils.ISign
-	relayerSign    bridgeCoreUtils.ISign
-	store          stores.MainStore
-	listeners      map[string]bridgeCore.Listener
+	rpcUrl                   string
+	name                     string
+	period                   time.Duration
+	currentBlock             atomic.Value
+	safeBlockRange           uint64
+	fromHeight               uint64
+	batches                  sync.Map
+	utilsWrapper             utils.Utils
+	client                   utils.EthClient
+	validatorSign            bridgeCoreUtils.ISign
+	voterSign                bridgeCoreUtils.ISign
+	relayerSign              bridgeCoreUtils.ISign
+	legacyBridgeOperatorSign bridgeCoreUtils.ISign
+	store                    stores.MainStore
+	listeners                map[string]bridgeCore.Listener
 
 	prepareJobChan chan bridgeCore.JobHandler
 	tasks          []bridgeCore.TaskHandler
@@ -123,6 +124,19 @@ func NewEthereumListener(ctx context.Context, cfg *bridgeCore.LsConfig, helpers 
 			log.Warn(fmt.Sprintf("[%sListener] No sign method provided for relay key", cfg.Name))
 		} else {
 			log.Info(fmt.Sprintf("[%sListener] Relayer account", cfg.Name), "address", ethListener.relayerSign.GetAddress())
+		}
+	}
+	if cfg.Secret.LegacyBridgeOperator != nil {
+		ethListener.legacyBridgeOperatorSign, err = bridgeCoreUtils.NewSignMethod(cfg.Secret.LegacyBridgeOperator)
+		if err != nil {
+			log.Error(fmt.Sprintf("[New%sListener] error while getting legacy bridge operator key", cfg.Name), "err", err)
+			return nil, err
+		}
+
+		if ethListener.legacyBridgeOperatorSign == nil {
+			log.Warn(fmt.Sprintf("[%sListener] No sign method provided for legacy bridge operator key", cfg.Name))
+		} else {
+			log.Info(fmt.Sprintf("[%sListener] Legacy bridge operator account", cfg.Name), "address", ethListener.legacyBridgeOperatorSign.GetAddress())
 		}
 	}
 	return ethListener, nil
@@ -418,6 +432,10 @@ func (e *EthereumListener) GetVoterSign() bridgeCoreUtils.ISign {
 
 func (e *EthereumListener) GetRelayerSign() bridgeCoreUtils.ISign {
 	return e.relayerSign
+}
+
+func (e *EthereumListener) GetLegacyBridgeOperatorSign() bridgeCoreUtils.ISign {
+	return e.legacyBridgeOperatorSign
 }
 
 func (e *EthereumListener) CacheBlocks(blockNumbers map[uint64]struct{}) {

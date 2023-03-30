@@ -27,15 +27,16 @@ import (
 )
 
 const (
-	configPath           = "CONFIG_PATH"
-	roninRpc             = "RONIN_RPC"
-	roninValidatorKey    = "RONIN_BRIDGE_OPERATOR_KEY"
-	roninRelayKey        = "RONIN_RELAYER_KEY"
-	roninBridgeVoterKey  = "RONIN_BRIDGE_VOTER_KEY"
-	ethereumRpc          = "ETHEREUM_RPC"
-	ethereumValidatorKey = "ETHEREUM_VALIDATOR_KEY"
-	ethereumRelayerKey   = "ETHEREUM_RELAYER_KEY"
-	verbosity            = "VERBOSITY"
+	configPath                   = "CONFIG_PATH"
+	roninRpc                     = "RONIN_RPC"
+	roninValidatorKey            = "RONIN_BRIDGE_OPERATOR_KEY"
+	roninRelayKey                = "RONIN_RELAYER_KEY"
+	roninBridgeVoterKey          = "RONIN_BRIDGE_VOTER_KEY"
+	roninLegacyBridgeOperatorKey = "RONIN_LEGACY_BRIDGE_OPERATOR_KEY"
+	ethereumRpc                  = "ETHEREUM_RPC"
+	ethereumValidatorKey         = "ETHEREUM_VALIDATOR_KEY"
+	ethereumRelayerKey           = "ETHEREUM_RELAYER_KEY"
+	verbosity                    = "VERBOSITY"
 
 	roninValidatorKmsKeyTokenPath = "RONIN_VALIDATOR_KMS_KEY_TOKEN_PATH"
 	roninValidatorKmsSslCertPath  = "RONIN_VALIDATOR_KMS_SSL_CERT_PATH"
@@ -312,6 +313,12 @@ func checkEnv(cfg *bridgeCore.Config) {
 		if os.Getenv(roninBridgeVoterKey) != "" {
 			cfg.Listeners[RoninNetwork].Secret.Voter = &bridgeCoreUtils.SignMethodConfig{
 				PlainPrivateKey: os.Getenv(roninBridgeVoterKey),
+			}
+		}
+
+		if os.Getenv(roninLegacyBridgeOperatorKey) != "" {
+			cfg.Listeners[RoninNetwork].Secret.LegacyBridgeOperator = &bridgeCoreUtils.SignMethodConfig{
+				PlainPrivateKey: os.Getenv(roninLegacyBridgeOperatorKey),
 			}
 		}
 	}
