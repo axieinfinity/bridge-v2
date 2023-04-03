@@ -95,28 +95,6 @@ func (l *RoninListener) IsUpTodate() bool {
 }
 
 func (l *RoninListener) provideReceiptSignature(fromChainId *big.Int, tx bridgeCore.Transaction, data []byte, isAgain bool) error {
-	// check database if receipt exist then do nothing
-	// Unpack event from data
-	ronEvent := new(gateway2.GatewayWithdrawalRequested)
-	ronGatewayAbi, err := gateway2.GatewayMetaData.GetAbi()
-	if err != nil {
-		return err
-	}
-
-	var eventName string
-	if isAgain {
-		eventName = "WithdrawalSignaturesRequested"
-	} else {
-		eventName = "WithdrawalRequested"
-	}
-
-	if err = l.utilsWrapper.UnpackLog(*ronGatewayAbi, ronEvent, eventName, data); err != nil {
-		return err
-	}
-	receipt := ronEvent.Arg1
-
-	log.Info("[RoninListener][ProvideReceiptSignatureCallback] result of calling MainchainWithdrew function", "receiptId", receipt.Id.Int64(), "tx", tx.GetHash().Hex())
-	// otherwise, create a task for submitting signature
 	// get chainID
 	chainId, err := l.GetChainID()
 	if err != nil {
@@ -147,36 +125,10 @@ func (l *RoninListener) ProvideReceiptSignatureAgainCallback(fromChainId *big.In
 
 func (l *RoninListener) DepositRequestedCallback(fromChainId *big.Int, tx bridgeCore.Transaction, data []byte) error {
 	log.Info("[RoninListener] DepositRequestedCallback", "tx", tx.GetHash().Hex())
-	// check whether deposit is done or not
-	// Unpack event data
-	ethEvent := new(gateway.GatewayDepositRequested)
-	ethGatewayAbi, err := gateway.GatewayMetaData.GetAbi()
-	if err != nil {
-		return err
-	}
-
-	if err = l.utilsWrapper.UnpackLog(*ethGatewayAbi, ethEvent, "DepositRequested", data); err != nil {
-		return err
-	}
-	// create caller
-	caller, err := gateway2.NewGatewayCaller(common.HexToAddress(l.config.Contracts[task.GATEWAY_CONTRACT]), l.client)
-	if err != nil {
-		return err
-	}
 	// get chainID
 	chainId, err := l.GetChainID()
 	if err != nil {
 		return err
-	}
-
-	// check if current validator has been voted for this deposit or not
-	voted, err := caller.DepositVoted(nil, ethEvent.Receipt.Mainchain.ChainId, ethEvent.Receipt.Id, l.GetBridgeOperatorSign().GetAddress())
-	if err != nil {
-		return err
-	}
-	log.Info("[RoninListener][DepositRequestedCallback] result of calling DepositVoted function", "voted", voted, "receiptId", ethEvent.Receipt.Id, "tx", tx.GetHash().Hex())
-	if voted {
-		return nil
 	}
 
 	// create task and store to database

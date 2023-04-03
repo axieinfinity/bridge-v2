@@ -428,7 +428,11 @@ func (r *bulkTask) validateWithdrawalTask(caller *roninGateway.GatewayCaller, ta
 		return false, ronEvent.Arg1, err
 	}
 	if err = r.util.UnpackLog(*ronGatewayAbi, ronEvent, "WithdrawalRequested", common.Hex2Bytes(task.Data)); err != nil {
-		return false, ronEvent.Arg1, err
+		if err = r.util.UnpackLog(*ronGatewayAbi, ronEvent, "WithdrawalSignaturesRequested", common.Hex2Bytes(task.Data)); err != nil {
+			return false, roninGateway.TransferReceipt{}, err
+		} else {
+			return false, ronEvent.Arg1, nil
+		}
 	}
 	return false, ronEvent.Arg1, nil
 }
