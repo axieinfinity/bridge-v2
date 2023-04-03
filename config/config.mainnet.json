@@ -10,7 +10,7 @@
       "taskInterval": 10,
       "transactionCheckPeriod": 50,
       "secret": {
-        "validator": {
+        "bridgeOperator": {
           "plainPrivateKey": ""
         },
         "voter": {
@@ -96,7 +96,7 @@
       "transactionCheckPeriod": 15,
       "getLogsBatchSize": 200,
       "secret": {
-        "validator": {
+        "bridgeOperator": {
           "plainPrivateKey": ""
         },
         "relayer": {

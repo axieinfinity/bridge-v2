@@ -2,6 +2,9 @@ package task
 
 import (
 	"context"
+	"math/big"
+	"time"
+
 	bridgeCore "github.com/axieinfinity/bridge-core"
 	bridgeCoreModels "github.com/axieinfinity/bridge-core/models"
 	bridgeCoreStore "github.com/axieinfinity/bridge-core/stores"
@@ -14,8 +17,6 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"gorm.io/gorm"
-	"math/big"
-	"time"
 )
 
 type MockRoninTask struct {
@@ -98,8 +99,8 @@ func newMockListener(client *backends.SimulatedBackend, ctx context.Context, cfg
 		client:       client,
 	}
 
-	if cfg.Secret.Validator != nil {
-		validatorSign, err := bridgeCoreUtils.NewSignMethod(cfg.Secret.Validator)
+	if cfg.Secret.BridgeOperator != nil {
+		validatorSign, err := bridgeCoreUtils.NewSignMethod(cfg.Secret.BridgeOperator)
 		if err != nil {
 			panic(err)
 		}

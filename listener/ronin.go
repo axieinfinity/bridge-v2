@@ -170,7 +170,7 @@ func (l *RoninListener) DepositRequestedCallback(fromChainId *big.Int, tx bridge
 	}
 
 	// check if current validator has been voted for this deposit or not
-	voted, err := caller.DepositVoted(nil, ethEvent.Receipt.Mainchain.ChainId, ethEvent.Receipt.Id, l.GetValidatorSign().GetAddress())
+	voted, err := caller.DepositVoted(nil, ethEvent.Receipt.Mainchain.ChainId, ethEvent.Receipt.Id, l.GetBridgeOperatorSign().GetAddress())
 	if err != nil {
 		return err
 	}

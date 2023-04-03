@@ -82,7 +82,7 @@ func (r *bulkTask) getSignMethod() utils.ISign {
 		return r.listener.GetLegacyBridgeOperatorSign()
 	} else {
 		log.Debug("[bulkTask][getSignMethod] Use new bridge operator key")
-		return r.listener.GetValidatorSign()
+		return r.listener.GetBridgeOperatorSign()
 	}
 }
 

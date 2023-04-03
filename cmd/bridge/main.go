@@ -29,7 +29,7 @@ import (
 const (
 	configPath                   = "CONFIG_PATH"
 	roninRpc                     = "RONIN_RPC"
-	roninValidatorKey            = "RONIN_BRIDGE_OPERATOR_KEY"
+	roninBridgeOperatorKey       = "RONIN_BRIDGE_OPERATOR_KEY"
 	roninRelayKey                = "RONIN_RELAYER_KEY"
 	roninBridgeVoterKey          = "RONIN_BRIDGE_VOTER_KEY"
 	roninLegacyBridgeOperatorKey = "RONIN_LEGACY_BRIDGE_OPERATOR_KEY"
@@ -130,7 +130,7 @@ func setKeyFromEnv(cfg *bridgeCore.Config, isValidator bool, key, network string
 		// delete prefix 0x or ronin: and lower key
 		key = strings.ToLower(strings.Replace(strings.Replace(key, "0x", "", 1), "ronin:", "", 1))
 		if isValidator {
-			cfg.Listeners[network].Secret.Validator = &bridgeCoreUtils.SignMethodConfig{
+			cfg.Listeners[network].Secret.BridgeOperator = &bridgeCoreUtils.SignMethodConfig{
 				PlainPrivateKey: key,
 			}
 		} else {
@@ -144,7 +144,7 @@ func setKeyFromEnv(cfg *bridgeCore.Config, isValidator bool, key, network string
 func setKmsFromEnv(cfg *bridgeCore.Config, isValidator bool, config *kms.KmsConfig, network string) {
 	if _, ok := cfg.Listeners[network]; ok {
 		if isValidator {
-			cfg.Listeners[network].Secret.Validator = &bridgeCoreUtils.SignMethodConfig{
+			cfg.Listeners[network].Secret.BridgeOperator = &bridgeCoreUtils.SignMethodConfig{
 				KmsConfig: config,
 			}
 		} else {
@@ -282,8 +282,8 @@ func checkEnv(cfg *bridgeCore.Config) {
 
 		setRpcUrlFromEnv(cfg, os.Getenv(roninRpc), RoninNetwork)
 
-		if os.Getenv(roninValidatorKey) != "" {
-			setKeyFromEnv(cfg, true, os.Getenv(roninValidatorKey), RoninNetwork)
+		if os.Getenv(roninBridgeOperatorKey) != "" {
+			setKeyFromEnv(cfg, true, os.Getenv(roninBridgeOperatorKey), RoninNetwork)
 		} else if os.Getenv(roninValidatorKmsKeyTokenPath) != "" {
 			signTimeout, _ := strconv.Atoi(os.Getenv(roninValidatorKmsSignTimeout))
 			config := &kms.KmsConfig{
@@ -363,7 +363,7 @@ func checkEnv(cfg *bridgeCore.Config) {
 	}
 
 	// clean key
-	os.Setenv(roninValidatorKey, "")
+	os.Setenv(roninBridgeOperatorKey, "")
 	os.Setenv(roninRelayKey, "")
 	os.Setenv(ethereumValidatorKey, "")
 	os.Setenv(ethereumRelayerKey, "")

@@ -39,7 +39,7 @@ type EthereumListener struct {
 	batches                  sync.Map
 	utilsWrapper             utils.Utils
 	client                   utils.EthClient
-	validatorSign            bridgeCoreUtils.ISign
+	bridgeOperatorSign       bridgeCoreUtils.ISign
 	voterSign                bridgeCoreUtils.ISign
 	relayerSign              bridgeCoreUtils.ISign
 	legacyBridgeOperatorSign bridgeCoreUtils.ISign
@@ -87,17 +87,17 @@ func NewEthereumListener(ctx context.Context, cfg *bridgeCore.LsConfig, helpers 
 	}
 	ethListener.client = client
 
-	if cfg.Secret.Validator != nil {
-		ethListener.validatorSign, err = bridgeCoreUtils.NewSignMethod(cfg.Secret.Validator)
+	if cfg.Secret.BridgeOperator != nil {
+		ethListener.bridgeOperatorSign, err = bridgeCoreUtils.NewSignMethod(cfg.Secret.BridgeOperator)
 		if err != nil {
 			log.Error(fmt.Sprintf("[New%sListener] error while getting validator key", cfg.Name), "err", err)
 			return nil, err
 		}
 
-		if ethListener.validatorSign == nil {
+		if ethListener.bridgeOperatorSign == nil {
 			log.Warn(fmt.Sprintf("[%sListener] No sign method provided for operator key", cfg.Name))
 		} else {
-			log.Info(fmt.Sprintf("[%sListener] Operator account", cfg.Name), "address", ethListener.validatorSign.GetAddress())
+			log.Info(fmt.Sprintf("[%sListener] Operator account", cfg.Name), "address", ethListener.bridgeOperatorSign.GetAddress())
 		}
 	}
 	if cfg.Secret.Voter != nil {
@@ -422,8 +422,8 @@ func (e *EthereumListener) Close() {
 	e.cancelCtx()
 }
 
-func (e *EthereumListener) GetValidatorSign() bridgeCoreUtils.ISign {
-	return e.validatorSign
+func (e *EthereumListener) GetBridgeOperatorSign() bridgeCoreUtils.ISign {
+	return e.bridgeOperatorSign
 }
 
 func (e *EthereumListener) GetVoterSign() bridgeCoreUtils.ISign {

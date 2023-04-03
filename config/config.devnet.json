@@ -10,7 +10,7 @@
       "taskInterval": 3,
       "transactionCheckPeriod": 5,
       "secret": {
-        "validator": {
+        "bridgeOperator": {
           "plainPrivateKey": ""
         },
         "voter": {
@@ -95,7 +95,7 @@
       "safeBlockRange": 8,
       "transactionCheckPeriod": 15,
       "secret": {
-        "validator": {
+        "bridgeOperator": {
           "plainPrivateKey": ""
         },
         "relayer": {
