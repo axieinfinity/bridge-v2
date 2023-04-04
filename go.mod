@@ -21,7 +21,7 @@ require (
 
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.0
-	github.com/axieinfinity/bridge-contracts v0.0.0-20230111072442-13fb0177332d
+	github.com/axieinfinity/bridge-contracts v0.0.0-20230403071733-9fca121e6448
 	github.com/axieinfinity/bridge-migrations v0.0.0-20220803051308-adab1cd1bcca
 	github.com/axieinfinity/ronin-kms-client v0.0.0-20220805072849-960e04981b70
 	github.com/ethereum/go-ethereum v1.10.21
@@ -31,7 +31,7 @@ require (
 
 require (
 	github.com/VictoriaMetrics/fastcache v1.10.0 // indirect
-	github.com/axieinfinity/bridge-core v0.1.2-0.20230322041938-1b27906094e6 // indirect
+	github.com/axieinfinity/bridge-core v0.1.2-0.20230403071736-4bfcaa15bace // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/btcsuite/btcd v0.20.1-beta // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect

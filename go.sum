@@ -59,6 +59,8 @@ github.com/axieinfinity/bridge-contracts v0.0.0-20230110090705-0f1200911126 h1:U
 github.com/axieinfinity/bridge-contracts v0.0.0-20230110090705-0f1200911126/go.mod h1:/1xWUM5AIZGYgaFxl9ojlw3tCgeWF4SDg8qrzx5YHwk=
 github.com/axieinfinity/bridge-contracts v0.0.0-20230111072442-13fb0177332d h1:vADn0MwNuNYhmUMh31FMvzmSjLtiO6WVpXfhNEy+s3o=
 github.com/axieinfinity/bridge-contracts v0.0.0-20230111072442-13fb0177332d/go.mod h1:/1xWUM5AIZGYgaFxl9ojlw3tCgeWF4SDg8qrzx5YHwk=
+github.com/axieinfinity/bridge-contracts v0.0.0-20230403071733-9fca121e6448 h1:WqnLoL92C6UmDIGPNqZhdFIq7mJiNT18++A1k+cYzFk=
+github.com/axieinfinity/bridge-contracts v0.0.0-20230403071733-9fca121e6448/go.mod h1:/1xWUM5AIZGYgaFxl9ojlw3tCgeWF4SDg8qrzx5YHwk=
 github.com/axieinfinity/bridge-core v0.1.1 h1:zkrPwxx6S8Ww4ycyF0Ap/5MaJz/1THP7juiA9f4Lvvs=
 github.com/axieinfinity/bridge-core v0.1.1/go.mod h1:HHk3GbxJ6DTA2A/ZKOZJG4XVdwB480leaMYL29xWqCI=
 github.com/axieinfinity/bridge-core v0.1.2-0.20221031095024-7319520259bf h1:86AiUhF3ZQ+6qpIdD3KZSjD3Ooo9xYPexFkoQVehY+U=
@@ -75,6 +77,8 @@ github.com/axieinfinity/bridge-core v0.1.2-0.20230321073624-320c76db2b1e h1:0Tlz
 github.com/axieinfinity/bridge-core v0.1.2-0.20230321073624-320c76db2b1e/go.mod h1:rsKGb45uQio1Rpqsc7grYyZEBn/fEPFyamJ55pQz1Fk=
 github.com/axieinfinity/bridge-core v0.1.2-0.20230322041938-1b27906094e6 h1:svBjorO/+BNW9gxmPKRM1nDkQ654ym/WL0qt7nst5jY=
 github.com/axieinfinity/bridge-core v0.1.2-0.20230322041938-1b27906094e6/go.mod h1:rsKGb45uQio1Rpqsc7grYyZEBn/fEPFyamJ55pQz1Fk=
+github.com/axieinfinity/bridge-core v0.1.2-0.20230403071736-4bfcaa15bace h1:CY9T5tZiB+d/Mda7LmnyWTOCJRvBvneRkFnvooFyjzc=
+github.com/axieinfinity/bridge-core v0.1.2-0.20230403071736-4bfcaa15bace/go.mod h1:rsKGb45uQio1Rpqsc7grYyZEBn/fEPFyamJ55pQz1Fk=
 github.com/axieinfinity/bridge-migrations v0.0.0-20220803051308-adab1cd1bcca h1:Bmy5XEh5VFhKIE04Yvnmvr47AjzWZFJF9I3aedxaAQE=
 github.com/axieinfinity/bridge-migrations v0.0.0-20220803051308-adab1cd1bcca/go.mod h1:jkGvoA7823lFnjPcYf1rMn4kaJv5qiYwGLP1PUc+T7o=
 github.com/axieinfinity/ronin-kms-client v0.0.0-20220805072849-960e04981b70 h1:4MMSxt0Ce9cCN/XB+ESc/JllU1/jklFiIsWG4gq2y+g=

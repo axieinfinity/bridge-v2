@@ -65,6 +65,27 @@ func (r *bulkTask) collectTask(t *models.Task) {
 	}
 }
 
+func (r *bulkTask) getSignMethod() utils.ISign {
+	caller, err := roninGateway.NewGatewayCaller(common.HexToAddress(r.contracts[GATEWAY_CONTRACT]), r.client)
+	if err != nil {
+		log.Error("[bulkTask][getSignMethod] Failed to create Gateway caller", "err", err)
+		return nil
+	}
+
+	// Bridge tracking contract is only avaible in DPoS version.
+	// If we get error when calling this function, it means it is
+	// in POA version, return legacy bridge operator if it is
+	// provided.
+	_, err = caller.BridgeTrackingContract(nil)
+	if err != nil && r.listener.GetLegacyBridgeOperatorSign() != nil {
+		log.Debug("[bulkTask][getSignMethod] Use legacy bridge operator key")
+		return r.listener.GetLegacyBridgeOperatorSign()
+	} else {
+		log.Debug("[bulkTask][getSignMethod] Use new bridge operator key")
+		return r.listener.GetBridgeOperatorSign()
+	}
+}
+
 func (r *bulkTask) send() {
 	log.Info("[bulkTask] sending bulk", "type", r.taskType, "tasks", len(r.tasks))
 	if len(r.tasks) == 0 {
@@ -179,7 +200,7 @@ func (r *bulkTask) sendDepositTransaction(tasks []*models.Task) (doneTasks, proc
 	metrics.Pusher.IncrCounter(metrics.DepositTaskMetric, len(tasks))
 
 	if len(receipts) > 0 {
-		tx, err = r.util.SendContractTransaction(r.listener.GetValidatorSign(), r.chainId, func(opts *bind.TransactOpts) (*ethtypes.Transaction, error) {
+		tx, err = r.util.SendContractTransaction(r.getSignMethod(), r.chainId, func(opts *bind.TransactOpts) (*ethtypes.Transaction, error) {
 			return transactor.TryBulkDepositFor(opts, receipts)
 		})
 		if err != nil {
@@ -255,7 +276,7 @@ func (r *bulkTask) sendWithdrawalSignaturesTransaction(tasks []*models.Task) (do
 	metrics.Pusher.IncrCounter(metrics.WithdrawalTaskMetric, len(tasks))
 
 	if len(ids) > 0 {
-		tx, err = r.util.SendContractTransaction(r.listener.GetValidatorSign(), r.chainId, func(opts *bind.TransactOpts) (*ethtypes.Transaction, error) {
+		tx, err = r.util.SendContractTransaction(r.getSignMethod(), r.chainId, func(opts *bind.TransactOpts) (*ethtypes.Transaction, error) {
 			return transactor.BulkSubmitWithdrawalSignatures(opts, ids, signatures)
 		})
 		if err != nil {
@@ -326,7 +347,7 @@ func (r *bulkTask) sendAckTransactions(tasks []*models.Task) (doneTasks, process
 
 	metrics.Pusher.IncrCounter(metrics.AckWithdrawalTaskMetric, len(tasks))
 	if len(ids) > 0 {
-		tx, err = r.util.SendContractTransaction(r.listener.GetValidatorSign(), r.chainId, func(opts *bind.TransactOpts) (*ethtypes.Transaction, error) {
+		tx, err = r.util.SendContractTransaction(r.getSignMethod(), r.chainId, func(opts *bind.TransactOpts) (*ethtypes.Transaction, error) {
 			return transactor.TryBulkAcknowledgeMainchainWithdrew(opts, ids)
 		})
 		if err != nil {
@@ -363,7 +384,7 @@ func (r *bulkTask) validateDepositTask(caller *roninGateway.GatewayCaller, task 
 	}
 
 	// check if current validator has been voted for this deposit or not
-	voted, err := caller.DepositVoted(nil, ethEvent.Receipt.Mainchain.ChainId, ethEvent.Receipt.Id, r.listener.GetValidatorSign().GetAddress())
+	voted, err := caller.DepositVoted(nil, ethEvent.Receipt.Mainchain.ChainId, ethEvent.Receipt.Id, r.getSignMethod().GetAddress())
 	if err != nil {
 		return false, ethEvent.Receipt, err
 	}
@@ -388,7 +409,7 @@ func (r *bulkTask) validateAckWithdrawalTask(caller *roninGateway.GatewayCaller,
 	}
 
 	// check if withdrew has been voted or not
-	voted, err := caller.MainchainWithdrewVoted(nil, ethEvent.Receipt.Id, r.listener.GetValidatorSign().GetAddress())
+	voted, err := caller.MainchainWithdrewVoted(nil, ethEvent.Receipt.Id, r.getSignMethod().GetAddress())
 	if err != nil {
 		return false, nil, err
 	}
@@ -407,7 +428,11 @@ func (r *bulkTask) validateWithdrawalTask(caller *roninGateway.GatewayCaller, ta
 		return false, ronEvent.Arg1, err
 	}
 	if err = r.util.UnpackLog(*ronGatewayAbi, ronEvent, "WithdrawalRequested", common.Hex2Bytes(task.Data)); err != nil {
-		return false, ronEvent.Arg1, err
+		if err = r.util.UnpackLog(*ronGatewayAbi, ronEvent, "WithdrawalSignaturesRequested", common.Hex2Bytes(task.Data)); err != nil {
+			return false, roninGateway.TransferReceipt{}, err
+		} else {
+			return false, ronEvent.Arg1, nil
+		}
 	}
 	return false, ronEvent.Arg1, nil
 }
@@ -510,5 +535,5 @@ func (r *bulkTask) signWithdrawalSignatures(receipt roninGateway.TransferReceipt
 			},
 		},
 	}
-	return r.util.SignTypedData(typedData, r.listener.GetValidatorSign())
+	return r.util.SignTypedData(typedData, r.getSignMethod())
 }

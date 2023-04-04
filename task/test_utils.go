@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+
 	"github.com/DATA-DOG/go-sqlmock"
 	internal "github.com/axieinfinity/bridge-core"
 	"github.com/axieinfinity/bridge-core/utils"
@@ -34,7 +35,7 @@ func newMockDB() (*gorm.DB, *sql.DB, sqlmock.Sqlmock, error) {
 func newMockConfig(privateKey string, contracts map[string]string) *internal.LsConfig {
 	return &internal.LsConfig{
 		Secret: &internal.Secret{
-			Validator: &utils.SignMethodConfig{
+			BridgeOperator: &utils.SignMethodConfig{
 				PlainPrivateKey: privateKey,
 				KmsConfig:       nil,
 			},
