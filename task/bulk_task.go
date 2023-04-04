@@ -101,6 +101,16 @@ func (r *bulkTask) send() {
 	}
 }
 
+func (r *bulkTask) isContractPaused(roninGatewayCaller *roninGateway.GatewayCaller) bool {
+	isPaused, err := roninGatewayCaller.Paused(nil)
+	if err != nil {
+		log.Error("[bulkTask] failed to check if contract is paused")
+		return false
+	}
+
+	return isPaused
+}
+
 func (r *bulkTask) sendBulkTransactions(sendTxs func(tasks []*models.Task) (doneTasks, processingTasks, failedTasks []*models.Task, tx *ethtypes.Transaction)) {
 	start, end := 0, len(r.tasks)
 	for start < end {
@@ -140,6 +150,12 @@ func (r *bulkTask) sendDepositTransaction(tasks []*models.Task) (doneTasks, proc
 			failedTasks = append(failedTasks, t)
 		}
 		return nil, nil, failedTasks, nil
+	}
+
+	// Contract is paused, leave all tasks in processing state
+	if r.isContractPaused(caller) {
+		go updateTasks(r.store, tasks, STATUS_PENDING, "", 0, r.releaseTasksCh)
+		return nil, nil, nil, nil
 	}
 
 	// create transactor
@@ -244,6 +260,12 @@ func (r *bulkTask) sendWithdrawalSignaturesTransaction(tasks []*models.Task) (do
 		}
 		return nil, nil, failedTasks, nil
 	}
+	// Contract is paused, leave all tasks in processing state
+	if r.isContractPaused(caller) {
+		go updateTasks(r.store, tasks, STATUS_PENDING, "", 0, r.releaseTasksCh)
+		return nil, nil, nil, nil
+	}
+
 	for _, t := range tasks {
 		result, receipt, err := r.validateWithdrawalTask(caller, t)
 		if err != nil {
@@ -316,6 +338,11 @@ func (r *bulkTask) sendAckTransactions(tasks []*models.Task) (doneTasks, process
 			t.LastError = err.Error()
 		}
 		return nil, nil, tasks, nil
+	}
+	// Contract is paused, leave all tasks in processing state
+	if r.isContractPaused(caller) {
+		go updateTasks(r.store, tasks, STATUS_PENDING, "", 0, r.releaseTasksCh)
+		return nil, nil, nil, nil
 	}
 
 	// loop through tasks, check if they are qualified to send ack transaction or not
