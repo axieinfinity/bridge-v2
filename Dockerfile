@@ -1,6 +1,11 @@
-FROM ghcr.io/axieinfinity/ronin_ronin-base-image:base-image-0c47779be as builder
+FROM golang:1.18-buster as builder
 
 WORKDIR /opt
+
+ENV GOPATH /go
+ENV PATH /go/bin:$PATH
+
+RUN mkdir -p ${GOPATH}/src ${GOPATH}/bin
 
 COPY . /opt/bridge
 RUN cd bridge && make bridge

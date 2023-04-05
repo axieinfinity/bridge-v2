@@ -1,8 +1,8 @@
 module github.com/axieinfinity/bridge-v2
 
-replace github.com/ethereum/go-ethereum => ../ronin
+replace github.com/ethereum/go-ethereum => github.com/axieinfinity/ronin v1.10.4-0.20230327040419-9bf4895fbd51
 
-go 1.17
+go 1.18
 
 require (
 	github.com/fjl/memsize v0.0.0-20190710130421-bcb5799ab5e5
@@ -22,6 +22,7 @@ require (
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.0
 	github.com/axieinfinity/bridge-contracts v0.0.0-20230403071733-9fca121e6448
+	github.com/axieinfinity/bridge-core v0.1.2-0.20230403071736-4bfcaa15bace
 	github.com/axieinfinity/bridge-migrations v0.0.0-20230405070530-7bb3be2afe72
 	github.com/axieinfinity/ronin-kms-client v0.0.0-20220805072849-960e04981b70
 	github.com/ethereum/go-ethereum v1.10.21
@@ -31,7 +32,6 @@ require (
 
 require (
 	github.com/VictoriaMetrics/fastcache v1.12.0 // indirect
-	github.com/axieinfinity/bridge-core v0.1.2-0.20230403071736-4bfcaa15bace // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/btcsuite/btcd v0.22.0-beta // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
@@ -60,7 +60,6 @@ require (
 	github.com/jackpal/go-nat-pmp v1.0.2 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
-	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/karalabe/usb v0.0.2 // indirect
 	github.com/kelseyhightower/envconfig v1.4.0 // indirect
 	github.com/kr/pretty v0.3.0 // indirect
@@ -69,8 +68,6 @@ require (
 	github.com/matttproud/golang_protobuf_extensions v1.0.4 // indirect
 	github.com/mitchellh/mapstructure v1.4.1 // indirect
 	github.com/mitchellh/pointerstructure v1.2.0 // indirect
-	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
-	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
 	github.com/peterh/liner v1.2.2 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
