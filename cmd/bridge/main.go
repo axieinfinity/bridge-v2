@@ -82,6 +82,8 @@ const (
 
 	EthereumNetwork = "Ethereum"
 	RoninNetwork    = "Ronin"
+
+	fromBlock = "FROM_BLOCK"
 )
 
 var (
@@ -319,6 +321,15 @@ func checkEnv(cfg *bridgeCore.Config) {
 		if os.Getenv(roninLegacyBridgeOperatorKey) != "" {
 			cfg.Listeners[RoninNetwork].Secret.LegacyBridgeOperator = &bridgeCoreUtils.SignMethodConfig{
 				PlainPrivateKey: os.Getenv(roninLegacyBridgeOperatorKey),
+			}
+		}
+
+		if os.Getenv(fromBlock) != "" {
+			fromHeight, err := strconv.ParseUint(os.Getenv(fromBlock), 10, 64)
+			if err != nil {
+				log.Error("error while parsing from block", "err", err)
+			} else {
+				cfg.Listeners[RoninNetwork].FromHeight = fromHeight
 			}
 		}
 	}
