@@ -37,6 +37,7 @@ const (
 	ethereumValidatorKey         = "ETHEREUM_VALIDATOR_KEY"
 	ethereumRelayerKey           = "ETHEREUM_RELAYER_KEY"
 	verbosity                    = "VERBOSITY"
+	gasLimitBumpRatio            = "GAS_LIMIT_BUMP_RATIO"
 
 	roninValidatorKmsKeyTokenPath = "RONIN_VALIDATOR_KMS_KEY_TOKEN_PATH"
 	roninValidatorKmsSslCertPath  = "RONIN_VALIDATOR_KMS_SSL_CERT_PATH"
@@ -330,6 +331,15 @@ func checkEnv(cfg *bridgeCore.Config) {
 				log.Error("error while parsing from block", "err", err)
 			} else {
 				cfg.Listeners[RoninNetwork].FromHeight = fromHeight
+			}
+		}
+
+		if os.Getenv(gasLimitBumpRatio) != "" {
+			gasLimitBump, err := strconv.ParseUint(os.Getenv(gasLimitBumpRatio), 10, 64)
+			if err != nil {
+				log.Error("error while parsing gas limit bump ratio", "err", err)
+			} else {
+				cfg.Listeners[RoninNetwork].GasLimitBumpRatio = gasLimitBump
 			}
 		}
 	}

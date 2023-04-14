@@ -33,33 +33,47 @@ const (
 )
 
 type task struct {
-	util           utils.Utils
-	task           *models.Task
-	store          stores.BridgeStore
-	validator      *ecdsa.PrivateKey
-	client         bind.ContractBackend
-	ethClient      bind.ContractBackend
-	contracts      map[string]string
-	chainId        *big.Int
-	maxTry         int
-	taskType       string
-	listener       bridgeCore.Listener
-	releaseTasksCh chan int
+	util              utils.Utils
+	task              *models.Task
+	store             stores.BridgeStore
+	validator         *ecdsa.PrivateKey
+	client            bind.ContractBackend
+	ethClient         bind.ContractBackend
+	contracts         map[string]string
+	chainId           *big.Int
+	maxTry            int
+	taskType          string
+	listener          bridgeCore.Listener
+	releaseTasksCh    chan int
+	gasLimitBumpRatio uint64
 }
 
-func newTask(listener bridgeCore.Listener, client, ethClient bind.ContractBackend, store stores.BridgeStore, chainId *big.Int, contracts map[string]string, maxTry int, taskType string, releaseTasksCh chan int, util utils.Utils) *task {
+func newTask(
+	listener bridgeCore.Listener,
+	client,
+	ethClient bind.ContractBackend,
+	store stores.BridgeStore,
+	chainId *big.Int,
+	contracts map[string]string,
+	maxTry int,
+	taskType string,
+	releaseTasksCh chan int,
+	util utils.Utils,
+	gasLimitBumpRatio uint64,
+) *task {
 	return &task{
-		util:           util,
-		task:           nil,
-		store:          store,
-		client:         client,
-		ethClient:      ethClient,
-		contracts:      contracts,
-		chainId:        chainId,
-		maxTry:         maxTry,
-		taskType:       taskType,
-		listener:       listener,
-		releaseTasksCh: releaseTasksCh,
+		util:              util,
+		task:              nil,
+		store:             store,
+		client:            client,
+		ethClient:         ethClient,
+		contracts:         contracts,
+		chainId:           chainId,
+		maxTry:            maxTry,
+		taskType:          taskType,
+		listener:          listener,
+		releaseTasksCh:    releaseTasksCh,
+		gasLimitBumpRatio: gasLimitBumpRatio,
 	}
 }
 
@@ -170,7 +184,7 @@ func (r *task) voteBridgeOperatorsBySignature(task *models.Task) (doneTasks, pro
 	signatureStruct := parseSignatureAsRsv(signature)
 	log.Debug("[RoninTask][BridgeOperatorSetCallback] Prepared data", "r", common.Bytes2Hex(signatureStruct.R[:]), "s", common.Bytes2Hex(signatureStruct.S[:]), "v", signatureStruct.V, "period", event.Period.Int64(), "bridgeOperators", bridgeOperators)
 
-	tx, err = r.util.SendContractTransaction(r.listener.GetVoterSign(), r.chainId, func(opts *bind.TransactOpts) (*ethtypes.Transaction, error) {
+	tx, err = r.util.SendContractTransaction(r.listener.GetVoterSign(), r.chainId, r.gasLimitBumpRatio, func(opts *bind.TransactOpts) (*ethtypes.Transaction, error) {
 		return roninGovernanceTransactor.VoteBridgeOperatorsBySignatures(opts, roninGovernance.BridgeOperatorsBallotBridgeOperatorSet{
 			Period:    event.Period,
 			Epoch:     event.Epoch,
@@ -282,7 +296,7 @@ func (r *task) relayBridgeOperators(task *models.Task) (doneTasks, processingTas
 		return nil, nil, failedTasks, nil
 	}
 
-	tx, err = r.util.SendContractTransaction(r.listener.GetRelayerSign(), ethChainId, func(opts *bind.TransactOpts) (*ethtypes.Transaction, error) {
+	tx, err = r.util.SendContractTransaction(r.listener.GetRelayerSign(), ethChainId, r.gasLimitBumpRatio, func(opts *bind.TransactOpts) (*ethtypes.Transaction, error) {
 		return ethGovernanceTransactor.RelayBridgeOperators(opts, ethGovernance.BridgeOperatorsBallotBridgeOperatorSet{
 			Period:    event.Period,
 			Epoch:     event.Epoch,
