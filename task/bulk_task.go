@@ -31,31 +31,45 @@ const (
 )
 
 type bulkTask struct {
-	util           utils.Utils
-	tasks          []*models.Task
-	store          stores.BridgeStore
-	validator      *ecdsa.PrivateKey
-	client         *ethclient.Client
-	contracts      map[string]string
-	chainId        *big.Int
-	maxTry         int
-	taskType       string
-	listener       bridgeCore.Listener
-	releaseTasksCh chan int
+	util              utils.Utils
+	tasks             []*models.Task
+	store             stores.BridgeStore
+	validator         *ecdsa.PrivateKey
+	client            *ethclient.Client
+	contracts         map[string]string
+	chainId           *big.Int
+	maxTry            int
+	taskType          string
+	listener          bridgeCore.Listener
+	releaseTasksCh    chan int
+	gasLimitBumpRatio uint64
 }
 
-func newBulkTask(listener bridgeCore.Listener, client *ethclient.Client, store stores.BridgeStore, chainId *big.Int, contracts map[string]string, ticker time.Duration, maxTry int, taskType string, releaseTasksCh chan int, util utils.Utils) *bulkTask {
+func newBulkTask(
+	listener bridgeCore.Listener,
+	client *ethclient.Client,
+	store stores.BridgeStore,
+	chainId *big.Int,
+	contracts map[string]string,
+	ticker time.Duration,
+	maxTry int,
+	taskType string,
+	releaseTasksCh chan int,
+	util utils.Utils,
+	gasLimitBumpRatio uint64,
+) *bulkTask {
 	return &bulkTask{
-		util:           util,
-		tasks:          make([]*models.Task, 0),
-		store:          store,
-		client:         client,
-		contracts:      contracts,
-		chainId:        chainId,
-		maxTry:         maxTry,
-		taskType:       taskType,
-		listener:       listener,
-		releaseTasksCh: releaseTasksCh,
+		util:              util,
+		tasks:             make([]*models.Task, 0),
+		store:             store,
+		client:            client,
+		contracts:         contracts,
+		chainId:           chainId,
+		maxTry:            maxTry,
+		taskType:          taskType,
+		listener:          listener,
+		releaseTasksCh:    releaseTasksCh,
+		gasLimitBumpRatio: gasLimitBumpRatio,
 	}
 }
 
@@ -216,7 +230,7 @@ func (r *bulkTask) sendDepositTransaction(tasks []*models.Task) (doneTasks, proc
 	metrics.Pusher.IncrCounter(metrics.DepositTaskMetric, len(tasks))
 
 	if len(receipts) > 0 {
-		tx, err = r.util.SendContractTransaction(r.getSignMethod(), r.chainId, func(opts *bind.TransactOpts) (*ethtypes.Transaction, error) {
+		tx, err = r.util.SendContractTransaction(r.getSignMethod(), r.chainId, r.gasLimitBumpRatio, func(opts *bind.TransactOpts) (*ethtypes.Transaction, error) {
 			return transactor.TryBulkDepositFor(opts, receipts)
 		})
 		if err != nil {
@@ -298,7 +312,7 @@ func (r *bulkTask) sendWithdrawalSignaturesTransaction(tasks []*models.Task) (do
 	metrics.Pusher.IncrCounter(metrics.WithdrawalTaskMetric, len(tasks))
 
 	if len(ids) > 0 {
-		tx, err = r.util.SendContractTransaction(r.getSignMethod(), r.chainId, func(opts *bind.TransactOpts) (*ethtypes.Transaction, error) {
+		tx, err = r.util.SendContractTransaction(r.getSignMethod(), r.chainId, r.gasLimitBumpRatio, func(opts *bind.TransactOpts) (*ethtypes.Transaction, error) {
 			return transactor.BulkSubmitWithdrawalSignatures(opts, ids, signatures)
 		})
 		if err != nil {
@@ -374,7 +388,7 @@ func (r *bulkTask) sendAckTransactions(tasks []*models.Task) (doneTasks, process
 
 	metrics.Pusher.IncrCounter(metrics.AckWithdrawalTaskMetric, len(tasks))
 	if len(ids) > 0 {
-		tx, err = r.util.SendContractTransaction(r.getSignMethod(), r.chainId, func(opts *bind.TransactOpts) (*ethtypes.Transaction, error) {
+		tx, err = r.util.SendContractTransaction(r.getSignMethod(), r.chainId, r.gasLimitBumpRatio, func(opts *bind.TransactOpts) (*ethtypes.Transaction, error) {
 			return transactor.TryBulkAcknowledgeMainchainWithdrew(opts, ids)
 		})
 		if err != nil {

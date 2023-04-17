@@ -225,7 +225,7 @@ func (r *task) welcomeTask(task *models.Task) (doneTasks, processingTasks, faile
 	// create caller
 	transactor, err := helloEth.NewHelloEth(common.HexToAddress(r.contracts[HELLO_ETH_CONTRACT]), r.ethClient)
 	
-    tx, err = r.util.SendContractTransaction(r.listener.GetValidatorSign(), r.chainId, func(opts *bind.TransactOpts) (*ethtypes.Transaction, error) {
+    tx, err = r.util.SendContractTransaction(r.listener.GetValidatorSign(), r.chainId, utils.Percentage, func(opts *bind.TransactOpts) (*ethtypes.Transaction, error) {
       return transactor.SubmitFromRonin(opts)
     })
 	doneTasks = append(doneTasks, task)

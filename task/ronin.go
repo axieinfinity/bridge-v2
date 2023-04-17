@@ -54,6 +54,7 @@ type RoninTask struct {
 
 	processingIdsMap   sync.Map
 	maxProcessingTasks int
+	gasLimitBumpRatio  uint64
 }
 
 func NewRoninTask(listener bridgeCore.Listener, db *gorm.DB, util utils.Utils) (*RoninTask, error) {
@@ -66,6 +67,12 @@ func NewRoninTask(listener bridgeCore.Listener, db *gorm.DB, util utils.Utils) (
 	chainId, err := listener.GetChainID()
 	if err != nil {
 		return nil, err
+	}
+	var gasLimitBumpRatio uint64
+	if config.GasLimitBumpRatio > 0 {
+		gasLimitBumpRatio = config.GasLimitBumpRatio
+	} else {
+		gasLimitBumpRatio = utils.Percentage
 	}
 	newCtx, cancelFunc := context.WithCancel(listener.Context())
 	task := &RoninTask{
@@ -83,6 +90,7 @@ func NewRoninTask(listener bridgeCore.Listener, db *gorm.DB, util utils.Utils) (
 		limitQuery:         defaultLimitRecords,
 		releaseTasksCh:     make(chan int, defaultLimitRecords),
 		maxProcessingTasks: defaultMaxProcessingTasks,
+		gasLimitBumpRatio:  gasLimitBumpRatio,
 	}
 	if config.TaskInterval > 0 {
 		task.taskInterval = config.TaskInterval
@@ -180,9 +188,45 @@ func (r *RoninTask) processPending(ethClient *ethclient.Client) error {
 	}
 	metrics.Pusher.IncrCounter(metrics.PendingTaskMetric, len(tasks))
 
-	bulkDepositTask := newBulkTask(r.listener, r.client, r.store, r.chainId, r.contracts, r.txCheckInterval, defaultMaxTry, DEPOSIT_TASK, r.releaseTasksCh, r.util)
-	bulkSubmitWithdrawalSignaturesTask := newBulkTask(r.listener, r.client, r.store, r.chainId, r.contracts, r.txCheckInterval, defaultMaxTry, WITHDRAWAL_TASK, r.releaseTasksCh, r.util)
-	ackWithdrewTasks := newBulkTask(r.listener, r.client, r.store, r.chainId, r.contracts, r.txCheckInterval, defaultMaxTry, ACK_WITHDREW_TASK, r.releaseTasksCh, r.util)
+	bulkDepositTask := newBulkTask(
+		r.listener,
+		r.client,
+		r.store,
+		r.chainId,
+		r.contracts,
+		r.txCheckInterval,
+		defaultMaxTry,
+		DEPOSIT_TASK,
+		r.releaseTasksCh,
+		r.util,
+		r.gasLimitBumpRatio,
+	)
+	bulkSubmitWithdrawalSignaturesTask := newBulkTask(
+		r.listener,
+		r.client,
+		r.store,
+		r.chainId,
+		r.contracts,
+		r.txCheckInterval,
+		defaultMaxTry,
+		WITHDRAWAL_TASK,
+		r.releaseTasksCh,
+		r.util,
+		r.gasLimitBumpRatio,
+	)
+	ackWithdrewTasks := newBulkTask(
+		r.listener,
+		r.client,
+		r.store,
+		r.chainId,
+		r.contracts,
+		r.txCheckInterval,
+		defaultMaxTry,
+		ACK_WITHDREW_TASK,
+		r.releaseTasksCh,
+		r.util,
+		r.gasLimitBumpRatio,
+	)
 
 	singleTasks := make([]*task, 0)
 	for _, task := range tasks {
@@ -200,11 +244,35 @@ func (r *RoninTask) processPending(ethClient *ethclient.Client) error {
 
 		switch task.Type {
 		case VOTE_BRIDGE_OPERATORS_TASK:
-			voteBridgeOperatorsTask := newTask(r.listener, r.client, ethClient, r.store, r.chainId, r.contracts, defaultMaxTry, VOTE_BRIDGE_OPERATORS_TASK, r.releaseTasksCh, r.util)
+			voteBridgeOperatorsTask := newTask(
+				r.listener,
+				r.client,
+				ethClient,
+				r.store,
+				r.chainId,
+				r.contracts,
+				defaultMaxTry,
+				VOTE_BRIDGE_OPERATORS_TASK,
+				r.releaseTasksCh,
+				r.util,
+				r.gasLimitBumpRatio,
+			)
 			voteBridgeOperatorsTask.collectTask(task)
 			singleTasks = append(singleTasks, voteBridgeOperatorsTask)
 		case RELAY_BRIDGE_OPERATORS_TASK:
-			relayBridgeOperatorsTask := newTask(r.listener, r.client, ethClient, r.store, r.chainId, r.contracts, defaultMaxTry, RELAY_BRIDGE_OPERATORS_TASK, r.releaseTasksCh, r.util)
+			relayBridgeOperatorsTask := newTask(
+				r.listener,
+				r.client,
+				ethClient,
+				r.store,
+				r.chainId,
+				r.contracts,
+				defaultMaxTry,
+				RELAY_BRIDGE_OPERATORS_TASK,
+				r.releaseTasksCh,
+				r.util,
+				r.gasLimitBumpRatio,
+			)
 			relayBridgeOperatorsTask.collectTask(task)
 			singleTasks = append(singleTasks, relayBridgeOperatorsTask)
 		}

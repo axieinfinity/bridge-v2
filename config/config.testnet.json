@@ -9,6 +9,7 @@
       "minTasksQuery": 50,
       "taskInterval": 3,
       "transactionCheckPeriod": 5,
+      "gasLimitBumpRatio": 200,
       "secret": {
         "bridgeOperator": {
           "plainPrivateKey": ""
