@@ -2,6 +2,7 @@ package stores
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/axieinfinity/bridge-v2/models"
 	"gorm.io/gorm"
@@ -41,6 +42,7 @@ func (t *taskStore) GetTasks(chain, status string, limit, retrySeconds int, befo
 	// also apply exponential at created_time
 	var tasks []*models.Task
 	db := t.Model(&models.Task{}).Where("chain_id = ? AND status = ?", chain, status)
+	db = db.Where("created_at + POWER(2, retries) * ? <= ?", retrySeconds, time.Now().Unix())
 	if before > 0 {
 		db = db.Where("tx_created_at <= ?", before)
 	}
