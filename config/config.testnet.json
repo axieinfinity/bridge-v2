@@ -25,9 +25,9 @@
       "processWithinBlocks": 864000,
       "contracts": {
         "Gateway": "0xCee681C9108c42C710c6A8A949307D5F13C9F3ca",
-        "EthGateway": "0xFc4319Ae9e6134C708b88D5Ad5Da1A4a83372502",
-        "EthGovernance": "0xEDBD0bE9660Fd6F8d322Cf90F8A32a83Fb3a54EE",
-        "Governance": "0xEac7DaB101E4676D0538d8885F3eE29614Fa7513",
+        "EthGateway": "0xde78AcB426e24074674af9C03cA595037613388B",
+        "EthGovernance": "0xF0287c547947d4316B68CfbAfa8668bB54a277b8",
+        "Governance": "0x0362Ab3e6A48d363de1E8E4FdE7bfc3104ABE697",
         "TrustedOrganization": "0x7507dc433a98E1fE105d69f19f3B40E4315A4F32"
       },
       "subscriptions": {
@@ -76,7 +76,7 @@
           }
         },
         "BridgeOperatorsApprovedSubscription": {
-          "to": "0xEac7DaB101E4676D0538d8885F3eE29614Fa7513",
+          "to": "0x0362Ab3e6A48d363de1E8E4FdE7bfc3104ABE697",
           "type": 1,
           "handler": {
             "contract": "RoninGovernanceAdmin",
@@ -106,11 +106,11 @@
       "fromHeight": 12522064,
       "processWithinBlocks": 198720,
       "contracts": {
-        "Gateway": "0xFc4319Ae9e6134C708b88D5Ad5Da1A4a83372502"
+        "Gateway": "0xde78AcB426e24074674af9C03cA595037613388B"
       },
       "subscriptions": {
         "DepositRequestedSubscription": {
-          "to": "0xFc4319Ae9e6134C708b88D5Ad5Da1A4a83372502",
+          "to": "0xde78AcB426e24074674af9C03cA595037613388B",
           "type": 1,
           "handler": {
             "contract": "EthereumGateway",
@@ -121,7 +121,7 @@
           }
         },
         "WithdrewSubscription": {
-          "to": "0xFc4319Ae9e6134C708b88D5Ad5Da1A4a83372502",
+          "to": "0xde78AcB426e24074674af9C03cA595037613388B",
           "type": 1,
           "handler": {
             "contract": "EthereumGateway",
