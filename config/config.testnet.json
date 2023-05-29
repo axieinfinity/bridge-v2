@@ -27,7 +27,7 @@
         "Gateway": "0xCee681C9108c42C710c6A8A949307D5F13C9F3ca",
         "EthGateway": "0xde78AcB426e24074674af9C03cA595037613388B",
         "EthGovernance": "0xF0287c547947d4316B68CfbAfa8668bB54a277b8",
-        "Governance": "0x0362Ab3e6A48d363de1E8E4FdE7bfc3104ABE697",
+        "Governance": "0x53Ea388CB72081A3a397114a43741e7987815896",
         "TrustedOrganization": "0x7507dc433a98E1fE105d69f19f3B40E4315A4F32"
       },
       "subscriptions": {
@@ -76,7 +76,7 @@
           }
         },
         "BridgeOperatorsApprovedSubscription": {
-          "to": "0x0362Ab3e6A48d363de1E8E4FdE7bfc3104ABE697",
+          "to": "0x53Ea388CB72081A3a397114a43741e7987815896",
           "type": 1,
           "handler": {
             "contract": "RoninGovernanceAdmin",
