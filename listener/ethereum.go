@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/axieinfinity/bridge-v2/stats"
 	"math/big"
 	"sync"
 	"sync/atomic"
@@ -290,7 +291,9 @@ func (e *EthereumListener) SaveCurrentBlockToDB() error {
 	if err := e.store.GetProcessedBlockStore().Save(hexutil.EncodeBig(chainId), int64(e.GetCurrentBlock().GetHeight())); err != nil {
 		return err
 	}
-
+	if stats.BridgeStats != nil {
+		stats.BridgeStats.SendProcessedBlock(stats.ProcessedBlockMessage{ProcessedBlock: e.GetCurrentBlock().GetHeight(), Listener: e.GetName()})
+	}
 	metrics.Pusher.IncrCounter(fmt.Sprintf(metrics.ListenerProcessedBlockMetric, e.GetName()), 1)
 	return nil
 }
