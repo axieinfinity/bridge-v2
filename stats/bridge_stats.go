@@ -39,18 +39,6 @@ func SendErrorToStats(listener bridgeCore.Listener, err error) {
 	}
 }
 
-//
-//func init() {
-//	BridgeStats = &Service{
-//		lastError:        make(map[string]string),
-//		processedBlock:   make(map[string]uint64),
-//		pongCh:           make(chan struct{}, 1),
-//		errCh:            make(chan ErrorMessage, 1),
-//		processedBlockCh: make(chan ProcessedBlockMessage, 1),
-//		quitCh:           make(chan struct{}, 1),
-//	}
-//}
-
 // connWrapper is a wrapper to prevent concurrent-write or concurrent-read on the
 // websocket.
 //
