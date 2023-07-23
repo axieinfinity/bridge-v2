@@ -3,9 +3,11 @@ package stats
 import (
 	"encoding/json"
 	"errors"
+	bridgeCore "github.com/axieinfinity/bridge-core"
 	"github.com/axieinfinity/bridge-v2/stores"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/gorilla/websocket"
+	"gorm.io/gorm"
 	"net/http"
 	"strings"
 	"sync"
@@ -26,11 +28,28 @@ type NodeInfo struct {
 	Client        string `json:"client" mapstructure:"client"`
 	History       bool   `json:"canUpdateHistory" mapstructure:"canUpdateHistory"`
 	Operator      string `json:"operator" mapstructure:"operator"`
-	Voter         string `json:"voter" mapstructure:"voter"`
 	BridgeVersion string `json:"bridgeVersion" mapstructure:"bridgeVersion"`
 }
 
 var BridgeStats *Service
+
+func SendErrorToStats(listener bridgeCore.Listener, err error) {
+	if err != nil && BridgeStats != nil {
+		BridgeStats.SendError(listener.GetName(), err.Error())
+	}
+}
+
+//
+//func init() {
+//	BridgeStats = &Service{
+//		lastError:        make(map[string]string),
+//		processedBlock:   make(map[string]uint64),
+//		pongCh:           make(chan struct{}, 1),
+//		errCh:            make(chan ErrorMessage, 1),
+//		processedBlockCh: make(chan ProcessedBlockMessage, 1),
+//		quitCh:           make(chan struct{}, 1),
+//	}
+//}
 
 // connWrapper is a wrapper to prevent concurrent-write or concurrent-read on the
 // websocket.
@@ -77,12 +96,12 @@ func (w *connWrapper) Close() error {
 	return w.conn.Close()
 }
 
-type ErrorMessage struct {
+type errorMessage struct {
 	Listener string `json:"listener"`
-	Err      error  `json:"error"`
+	Err      string `json:"error"`
 }
 
-type ProcessedBlockMessage struct {
+type processedBlockMessage struct {
 	Listener       string `json:"listener"`
 	ProcessedBlock uint64 `json:"processedBlock"`
 }
@@ -90,7 +109,6 @@ type ProcessedBlockMessage struct {
 type BridgeInfo struct {
 	Node           string            `json:"node"`
 	Operator       string            `json:"operator"`
-	Voter          string            `json:"voter"`
 	Version        string            `json:"version"`
 	LastError      map[string]string `json:"lastError"`
 	ProcessedBlock map[string]uint64 `json:"processedBlock"`
@@ -118,28 +136,26 @@ type Service struct {
 	pendingTasks     uint64
 	failedTasks      uint64
 	pongCh           chan struct{}
-	errCh            chan ErrorMessage
-	processedBlockCh chan ProcessedBlockMessage
+	errCh            chan errorMessage
+	processedBlockCh chan processedBlockMessage
 	quitCh           chan struct{}
-	store            stores.BridgeStore
+	store            stores.TaskStore
 }
 
-func NewService(chainId, node, operator, voter, version, host, pass string, store stores.BridgeStore) {
+func NewService(node, chainId, operator, host, pass string, db *gorm.DB) {
 	BridgeStats = &Service{
-		chainId:          chainId,
 		node:             node,
+		chainId:          chainId,
 		operator:         operator,
-		voter:            voter,
-		version:          version,
 		pass:             pass,
 		host:             host,
-		pongCh:           make(chan struct{}),
-		errCh:            make(chan ErrorMessage, 1),
-		processedBlockCh: make(chan ProcessedBlockMessage, 1),
-		quitCh:           make(chan struct{}, 1),
+		store:            stores.NewTaskStore(db),
 		lastError:        make(map[string]string),
 		processedBlock:   make(map[string]uint64),
-		store:            store,
+		pongCh:           make(chan struct{}, 1),
+		errCh:            make(chan errorMessage, 1),
+		processedBlockCh: make(chan processedBlockMessage, 1),
+		quitCh:           make(chan struct{}, 1),
 	}
 }
 
@@ -194,7 +210,6 @@ func (s *Service) login(conn *connWrapper) error {
 		Info: &NodeInfo{
 			Node:          s.node,
 			Operator:      s.operator,
-			Voter:         s.voter,
 			BridgeVersion: s.version,
 		},
 		Secret: s.pass,
@@ -220,21 +235,20 @@ func (s *Service) report(conn *connWrapper) error {
 	info := &BridgeInfo{
 		Node:           s.node,
 		Operator:       s.operator,
-		Voter:          s.voter,
 		Version:        s.version,
 		LastError:      s.lastError,
 		ProcessedBlock: s.processedBlock,
 	}
 
 	// count pending/failed tasks from database
-	pending, err := s.store.GetTaskStore().CountTasks(s.chainId, "pending")
+	pending, err := s.store.CountTasks(s.chainId, "pending")
 	if err != nil {
 		log.Error("error while getting pending tasks", "err", err)
 	} else {
 		info.PendingTasks = int(pending)
 	}
 
-	failed, err := s.store.GetTaskStore().CountTasks(s.chainId, "failed")
+	failed, err := s.store.CountTasks(s.chainId, "failed")
 	if err != nil {
 		log.Error("error while getting failed tasks", "err", err)
 	} else {
@@ -242,7 +256,7 @@ func (s *Service) report(conn *connWrapper) error {
 	}
 
 	report := map[string][]interface{}{
-		"emit": {"bridgeStats", info},
+		"emit": {"bridge-stats", info},
 	}
 	return conn.WriteJSON(report)
 }
@@ -252,7 +266,7 @@ func (s *Service) loop(conn *connWrapper) {
 	for {
 		select {
 		case msg := <-s.errCh:
-			s.setLastError(msg.Listener, msg.Err.Error())
+			s.setLastError(msg.Listener, msg.Err)
 		case msg := <-s.processedBlockCh:
 			s.setProcessedBlock(msg.Listener, msg.ProcessedBlock)
 		case <-sendStatsTicker.C:
@@ -336,10 +350,10 @@ func (s *Service) setProcessedBlock(listener string, block uint64) {
 	}
 }
 
-func (s *Service) SendError(errMsg ErrorMessage) {
-	s.errCh <- errMsg
+func (s *Service) SendError(listener, err string) {
+	s.errCh <- errorMessage{Listener: listener, Err: err}
 }
 
-func (s *Service) SendProcessedBlock(block ProcessedBlockMessage) {
-	s.processedBlockCh <- block
+func (s *Service) SendProcessedBlock(listener string, block uint64) {
+	s.processedBlockCh <- processedBlockMessage{Listener: listener, ProcessedBlock: block}
 }

@@ -45,6 +45,10 @@ ENV DB_CONN_MAX_LIFE_TIME ''
 ENV DB_MAX_IDLE_CONNS ''
 ENV DB_MAX_OPEN_CONNS ''
 
+ENV BRIDGE_STATS_NODE_NAME ''
+ENV BRIDGE_STATS_URL ''
+ENV BRIDGE_STATS_SECRET ''
+
 COPY --from=builder /go/bin/bridge /usr/local/bin/bridge
 COPY --from=builder /opt/bridge/config/ ./
 COPY --from=builder /opt/bridge/docker/entrypoint.sh ./

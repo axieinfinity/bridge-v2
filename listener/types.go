@@ -195,12 +195,6 @@ type EthListenJob struct {
 	*bridgeCore.BaseJob
 }
 
-func sendErrorToStats(listener bridgeCore.Listener, err error) {
-	if err != nil && stats.BridgeStats != nil {
-		stats.BridgeStats.SendError(stats.ErrorMessage{Listener: listener.GetName(), Err: err})
-	}
-}
-
 func NewEthListenJob(jobType int, listener bridgeCore.Listener, subscriptionName string, tx bridgeCore.Transaction, data []byte) *EthListenJob {
 	chainId, err := listener.GetChainID()
 	if err != nil {
@@ -225,7 +219,7 @@ func NewEthListenJob(jobType int, listener bridgeCore.Listener, subscriptionName
 
 func (e *EthListenJob) Process() ([]byte, error) {
 	data, err := e.BaseJob.Process()
-	sendErrorToStats(e.GetListener(), err)
+	stats.SendErrorToStats(e.GetListener(), err)
 	return data, err
 }
 
@@ -261,12 +255,12 @@ func (e *EthCallbackJob) Process() ([]byte, error) {
 	log.Info("[EthCallbackJob] Start Process", "method", e.method, "jobId", e.GetID())
 	val, err := e.Utils().Invoke(e.GetListener(), e.method, e.FromChainID(), e.GetTransaction(), e.GetData())
 	if err != nil {
-		sendErrorToStats(e.GetListener(), err)
+		stats.SendErrorToStats(e.GetListener(), err)
 		return nil, err
 	}
 	invokeErr, ok := val.Interface().(error)
 	if ok {
-		sendErrorToStats(e.GetListener(), invokeErr)
+		stats.SendErrorToStats(e.GetListener(), invokeErr)
 		return nil, invokeErr
 	}
 	return nil, nil

@@ -2,6 +2,7 @@ package task
 
 import (
 	"crypto/ecdsa"
+	"github.com/axieinfinity/bridge-v2/stats"
 	"math/big"
 	"sort"
 	"strings"
@@ -119,6 +120,7 @@ func (r *task) voteBridgeOperatorsBySignature(task *models.Task) (doneTasks, pro
 	event, err := r.unpackBridgeOperatorSetUpdatedEvent(task)
 	if err != nil {
 		task.LastError = err.Error()
+		stats.SendErrorToStats(r.listener, err)
 		failedTasks = append(failedTasks, task)
 		return nil, nil, failedTasks, nil
 	}
@@ -128,6 +130,7 @@ func (r *task) voteBridgeOperatorsBySignature(task *models.Task) (doneTasks, pro
 	roninGovernanceTransactor, err := roninGovernance.NewGovernance(common.HexToAddress(r.contracts[GOVERNANCE_CONTRACT]), r.client)
 	if err != nil {
 		task.LastError = err.Error()
+		stats.SendErrorToStats(r.listener, err)
 		failedTasks = append(failedTasks, task)
 		return nil, nil, failedTasks, nil
 	}
@@ -135,6 +138,7 @@ func (r *task) voteBridgeOperatorsBySignature(task *models.Task) (doneTasks, pro
 	voted, err := roninGovernanceTransactor.BridgeOperatorsVoted(nil, event.Period, event.Epoch, r.listener.GetVoterSign().GetAddress())
 	if err != nil {
 		task.LastError = err.Error()
+		stats.SendErrorToStats(r.listener, err)
 		failedTasks = append(failedTasks, task)
 		return nil, nil, failedTasks, nil
 	}
@@ -148,6 +152,7 @@ func (r *task) voteBridgeOperatorsBySignature(task *models.Task) (doneTasks, pro
 	syncedInfo, err := roninGovernanceTransactor.LastSyncedBridgeOperatorSetInfo(nil)
 	if err != nil {
 		task.LastError = err.Error()
+		stats.SendErrorToStats(r.listener, err)
 		failedTasks = append(failedTasks, task)
 		return nil, nil, failedTasks, nil
 	}
@@ -177,6 +182,7 @@ func (r *task) voteBridgeOperatorsBySignature(task *models.Task) (doneTasks, pro
 	signature, err := signBridgeOperatorsBallot(opts, event.Period.Int64(), event.Epoch.Int64(), bridgeOperators)
 	if err != nil {
 		task.LastError = err.Error()
+		stats.SendErrorToStats(r.listener, err)
 		failedTasks = append(failedTasks, task)
 		return nil, nil, failedTasks, nil
 	}
@@ -194,6 +200,7 @@ func (r *task) voteBridgeOperatorsBySignature(task *models.Task) (doneTasks, pro
 		})
 	})
 	if err != nil {
+		stats.SendErrorToStats(r.listener, err)
 		switch err.Error() {
 		case ErrOutdatedPeriod:
 			log.Warn("[RoninTask][BridgeOperatorSetCallback] Bridge operators period outdated")
@@ -220,6 +227,7 @@ func (r *task) relayBridgeOperators(task *models.Task) (doneTasks, processingTas
 	// create caller
 	roninGovernanceCaller, err := roninGovernance.NewGovernanceCaller(common.HexToAddress(r.contracts[GOVERNANCE_CONTRACT]), r.client)
 	if err != nil {
+		stats.SendErrorToStats(r.listener, err)
 		task.LastError = err.Error()
 		failedTasks = append(failedTasks, task)
 		return nil, nil, failedTasks, nil
@@ -227,6 +235,7 @@ func (r *task) relayBridgeOperators(task *models.Task) (doneTasks, processingTas
 
 	ethGovernanceTransactor, err := ethGovernance.NewGovernance(common.HexToAddress(r.contracts[ETH_GOVERNANCE_CONTRACT]), r.ethClient)
 	if err != nil {
+		stats.SendErrorToStats(r.listener, err)
 		task.LastError = err.Error()
 		failedTasks = append(failedTasks, task)
 		return nil, nil, failedTasks, nil
@@ -234,6 +243,7 @@ func (r *task) relayBridgeOperators(task *models.Task) (doneTasks, processingTas
 
 	event, err := r.unpackBridgeOperatorsApprovedEvent(task)
 	if err != nil {
+		stats.SendErrorToStats(r.listener, err)
 		task.LastError = err.Error()
 		failedTasks = append(failedTasks, task)
 		return nil, nil, failedTasks, nil
@@ -244,6 +254,7 @@ func (r *task) relayBridgeOperators(task *models.Task) (doneTasks, processingTas
 	// Ethereum call
 	ethSyncedInfo, err := ethGovernanceTransactor.LastSyncedBridgeOperatorSetInfo(nil)
 	if err != nil {
+		stats.SendErrorToStats(r.listener, err)
 		task.LastError = err.Error()
 		failedTasks = append(failedTasks, task)
 		return nil, nil, failedTasks, nil
@@ -262,6 +273,7 @@ func (r *task) relayBridgeOperators(task *models.Task) (doneTasks, processingTas
 
 	signatures, err := roninGovernanceCaller.GetBridgeOperatorVotingSignatures(nil, event.Period, event.Epoch)
 	if err != nil {
+		stats.SendErrorToStats(r.listener, err)
 		task.LastError = err.Error()
 		failedTasks = append(failedTasks, task)
 		return nil, nil, failedTasks, nil
@@ -292,6 +304,7 @@ func (r *task) relayBridgeOperators(task *models.Task) (doneTasks, processingTas
 	ethChainId, err := ethListener.GetChainID()
 	if err != nil {
 		task.LastError = err.Error()
+		stats.SendErrorToStats(r.listener, err)
 		failedTasks = append(failedTasks, task)
 		return nil, nil, failedTasks, nil
 	}
@@ -304,6 +317,7 @@ func (r *task) relayBridgeOperators(task *models.Task) (doneTasks, processingTas
 		}, ethSignatures)
 	})
 	if err != nil {
+		stats.SendErrorToStats(r.listener, err)
 		// Prevent retry submit signature if the signature was already submitted
 		switch err.Error() {
 		case ErrSigAlreadySubmitted:
