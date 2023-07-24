@@ -181,8 +181,20 @@ func (s *Service) Start() {
 				errTimer.Reset(10 * time.Second)
 				continue
 			}
-			go s.loop(conn)
-			s.readLoop(conn)
+			stopChn := make(chan struct{}, 1)
+			// process report loop
+			go func() {
+				s.reportLoop(conn)
+				stopChn <- struct{}{}
+			}()
+
+			// process read loop
+			go func() {
+				s.readLoop(conn)
+				stopChn <- struct{}{}
+			}()
+			<-stopChn
+			errTimer = time.NewTimer(0)
 		}
 	}
 }
@@ -249,10 +261,12 @@ func (s *Service) report(conn *connWrapper) error {
 	return conn.WriteJSON(report)
 }
 
-func (s *Service) loop(conn *connWrapper) {
+func (s *Service) reportLoop(conn *connWrapper) {
 	sendStatsTicker := time.NewTicker(10 * time.Second)
 	for {
 		select {
+		case <-s.quitCh:
+			return
 		case msg := <-s.errCh:
 			s.setLastError(msg.Listener, msg.Err)
 		case msg := <-s.processedBlockCh:
@@ -260,6 +274,7 @@ func (s *Service) loop(conn *connWrapper) {
 		case <-sendStatsTicker.C:
 			if err := s.report(conn); err != nil {
 				log.Warn("bridge stats report failed", "err", err)
+				return
 			}
 		}
 	}
@@ -272,8 +287,12 @@ func (s *Service) loop(conn *connWrapper) {
 func (s *Service) readLoop(conn *connWrapper) {
 	// If the read loop exits, close the connection
 	defer conn.Close()
-
 	for {
+		select {
+		case <-s.quitCh:
+			return
+		default:
+		}
 		// Retrieve the next generic network packet and bail out on error
 		var blob json.RawMessage
 		if err := conn.ReadJSON(&blob); err != nil {
@@ -289,36 +308,6 @@ func (s *Service) readLoop(conn *connWrapper) {
 			}
 			continue
 		}
-		// Not a system ping, try to decode an actual state message
-		var msg map[string][]interface{}
-		if err := json.Unmarshal(blob, &msg); err != nil {
-			log.Warn("Failed to decode stats server message", "err", err)
-			return
-		}
-		log.Trace("Received message from stats server", "msg", msg)
-		if len(msg["emit"]) == 0 {
-			log.Warn("Stats server sent non-broadcast", "msg", msg)
-			return
-		}
-		command, ok := msg["emit"][0].(string)
-		if !ok {
-			log.Warn("Invalid stats server message type", "type", msg["emit"][0])
-			return
-		}
-		// If the message is a ping reply, deliver (someone must be listening!)
-		if len(msg["emit"]) == 2 && command == "node-pong" {
-			select {
-			case s.pongCh <- struct{}{}:
-				// Pong delivered, continue listening
-				continue
-			default:
-				// Ping routine dead, abort
-				log.Warn("Stats server pinger seems to have died")
-				return
-			}
-		}
-		// Report anything else and continue
-		log.Info("Unknown stats message", "msg", msg)
 	}
 }
 
