@@ -118,7 +118,7 @@ type Service struct {
 	node             string
 	operator         string
 	version          string
-	pass             string
+	secret           string
 	host             string
 	lastError        map[string]string
 	processedBlock   map[string]uint64
@@ -128,12 +128,12 @@ type Service struct {
 	store            stores.TaskStore
 }
 
-func NewService(node, chainId, operator, host, pass string, db *gorm.DB) {
+func NewService(node, chainId, operator, host, secret string, db *gorm.DB) {
 	BridgeStats = &Service{
 		node:             node,
 		chainId:          chainId,
 		operator:         operator,
-		pass:             pass,
+		secret:           secret,
 		host:             host,
 		store:            stores.NewTaskStore(db),
 		lastError:        make(map[string]string),
@@ -209,7 +209,7 @@ func (s *Service) login(conn *connWrapper) error {
 			Operator:      s.operator,
 			BridgeVersion: s.version,
 		},
-		Secret: s.pass,
+		Secret: s.secret,
 	}
 	login := map[string][]interface{}{
 		"emit": {"hello", auth},
