@@ -160,7 +160,7 @@ func (s *Service) Start() {
 			dialer := websocket.Dialer{HandshakeTimeout: 5 * time.Second}
 			header := make(http.Header)
 			header.Set("origin", "http://localhost")
-			log.Info("Dial to host", "host", s.host)
+			log.Info("Dial to host ", "host", s.host)
 			c, _, e := dialer.Dial(s.host, header)
 			err = e
 			if err == nil {
