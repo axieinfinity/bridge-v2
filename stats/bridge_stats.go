@@ -3,15 +3,16 @@ package stats
 import (
 	"encoding/json"
 	"errors"
+	"net/http"
+	"strings"
+	"sync"
+	"time"
+
 	bridgeCore "github.com/axieinfinity/bridge-core"
 	"github.com/axieinfinity/bridge-v2/stores"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/gorilla/websocket"
 	"gorm.io/gorm"
-	"net/http"
-	"strings"
-	"sync"
-	"time"
 )
 
 type NodeInfo struct {
@@ -43,13 +44,14 @@ func SendErrorToStats(listener bridgeCore.Listener, err error) {
 // websocket.
 //
 // From Gorilla websocket docs:
-//   Connections support one concurrent reader and one concurrent writer.
-//   Applications are responsible for ensuring that no more than one goroutine calls the write methods
-//     - NextWriter, SetWriteDeadline, WriteMessage, WriteJSON, EnableWriteCompression, SetCompressionLevel
-//   concurrently and that no more than one goroutine calls the read methods
-//     - NextReader, SetReadDeadline, ReadMessage, ReadJSON, SetPongHandler, SetPingHandler
-//   concurrently.
-//   The Close and WriteControl methods can be called concurrently with all other methods.
+//
+//	Connections support one concurrent reader and one concurrent writer.
+//	Applications are responsible for ensuring that no more than one goroutine calls the write methods
+//	  - NextWriter, SetWriteDeadline, WriteMessage, WriteJSON, EnableWriteCompression, SetCompressionLevel
+//	concurrently and that no more than one goroutine calls the read methods
+//	  - NextReader, SetReadDeadline, ReadMessage, ReadJSON, SetPongHandler, SetPingHandler
+//	concurrently.
+//	The Close and WriteControl methods can be called concurrently with all other methods.
 type connWrapper struct {
 	conn *websocket.Conn
 
@@ -123,7 +125,6 @@ type Service struct {
 	processedBlock   map[string]uint64
 	pendingTasks     uint64
 	failedTasks      uint64
-	pongCh           chan struct{}
 	errCh            chan errorMessage
 	processedBlockCh chan processedBlockMessage
 	quitCh           chan struct{}
@@ -140,7 +141,6 @@ func NewService(node, chainId, operator, host, pass string, db *gorm.DB) {
 		store:            stores.NewTaskStore(db),
 		lastError:        make(map[string]string),
 		processedBlock:   make(map[string]uint64),
-		pongCh:           make(chan struct{}, 1),
 		errCh:            make(chan errorMessage, 1),
 		processedBlockCh: make(chan processedBlockMessage, 1),
 		quitCh:           make(chan struct{}, 1),
