@@ -117,14 +117,11 @@ type Service struct {
 	chainId          string
 	node             string
 	operator         string
-	voter            string
 	version          string
 	pass             string
 	host             string
 	lastError        map[string]string
 	processedBlock   map[string]uint64
-	pendingTasks     uint64
-	failedTasks      uint64
 	errCh            chan errorMessage
 	processedBlockCh chan processedBlockMessage
 	quitCh           chan struct{}
