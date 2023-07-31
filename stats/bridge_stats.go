@@ -98,7 +98,7 @@ type processedBlockMessage struct {
 
 type BridgeInfo struct {
 	Node           string            `json:"node"`
-	Operator       string            `json:"operator"`
+	Operator       string            `json:"bridgeOperatorAddress"`
 	Version        string            `json:"version"`
 	LastError      map[string]string `json:"lastError"`
 	ProcessedBlock map[string]uint64 `json:"processedBlock"`
@@ -160,7 +160,7 @@ func (s *Service) Start() {
 			dialer := websocket.Dialer{HandshakeTimeout: 5 * time.Second}
 			header := make(http.Header)
 			header.Set("origin", "http://localhost")
-			log.Info("Dial to host ", "host", s.host)
+			log.Info("[Bridge stats] Dial to host ", "host", s.host)
 			c, _, e := dialer.Dial(s.host, header)
 			err = e
 			if err == nil {
@@ -186,12 +186,10 @@ func (s *Service) Start() {
 				stopChn <- struct{}{}
 			}()
 
-			// process read loop
-			go func() {
-				s.readLoop(conn)
-				stopChn <- struct{}{}
-			}()
 			<-stopChn
+			// Close the current connection and establish a new one
+			log.Warn("[Bridge stats] Redial connection")
+			conn.Close()
 			errTimer = time.NewTimer(0)
 		}
 	}
@@ -233,7 +231,7 @@ func (s *Service) report(conn *connWrapper) error {
 	info := &BridgeInfo{
 		Node:           s.node,
 		Operator:       s.operator,
-		Version:        s.version,
+		Version:        "v2",
 		LastError:      s.lastError,
 		ProcessedBlock: s.processedBlock,
 	}
@@ -256,6 +254,7 @@ func (s *Service) report(conn *connWrapper) error {
 	report := map[string][]interface{}{
 		"emit": {"bridge-stats", info},
 	}
+	log.Info("[Bridge-Stats] Emit Bridge stats")
 	return conn.WriteJSON(report)
 }
 
@@ -269,9 +268,11 @@ func (s *Service) reportLoop(conn *connWrapper) {
 			s.setLastError(msg.Listener, msg.Err)
 		case msg := <-s.processedBlockCh:
 			s.setProcessedBlock(msg.Listener, msg.ProcessedBlock)
-		case <-sendStatsTicker.C:
+		case <-sendStatsTicker.C: // Checking stats interval
 			if err := s.report(conn); err != nil {
 				log.Warn("bridge stats report failed", "err", err)
+				// When bridge stats report failed need to relogn after 10 seconds
+				time.Sleep(5 * time.Second)
 				return
 			}
 		}
