@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
-	"strings"
 	"sync"
 	"time"
 
@@ -279,26 +278,30 @@ func (s *Service) readLoop(conn *connWrapper) {
 	// If the read loop exits, close the connection
 	defer conn.Close()
 	for {
-		select {
-		case <-s.quitCh:
-			return
-		default:
-		}
+
 		// Retrieve the next generic network packet and bail out on error
 		var blob json.RawMessage
 		if err := conn.ReadJSON(&blob); err != nil {
 			log.Warn("Failed to retrieve stats server message", "err", err)
 			return
 		}
-		// If the network packet is a system ping, respond to it directly
-		var ping string
-		if err := json.Unmarshal(blob, &ping); err == nil && strings.HasPrefix(ping, "primus::ping::") {
-			if err := conn.WriteJSON(strings.Replace(ping, "ping", "pong", -1)); err != nil {
-				log.Warn("Failed to respond to system ping message", "err", err)
-				return
-			}
-			continue
+		// // If the network packet is a system ping, respond to it directly
+		// var ping string
+		// if err := json.Unmarshal(blob, &ping); err == nil && strings.HasPrefix(ping, "primus::ping::") {
+		// 	if err := conn.WriteJSON(strings.Replace(ping, "ping", "pong", -1)); err != nil {
+		// 		log.Warn("Failed to respond to system ping message", "err", err)
+		// 		return
+		// 	}
+		// 	continue
+		// }
+
+		// Not a system ping, try to decode an actual state message
+		var msg map[string][]interface{}
+		if err := json.Unmarshal(blob, &msg); err != nil {
+			log.Warn("Failed to decode stats server message", "err", err)
+			return
 		}
+		log.Info("Received message from stats server", "msg", msg)
 	}
 }
 
