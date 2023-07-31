@@ -240,8 +240,6 @@ func (s *Service) login(conn *connWrapper) error {
 }
 
 func (s *Service) report(conn *connWrapper) error {
-	s.lock.Lock()
-	defer s.lock.Unlock()
 	// collect bridge stats and send to ronin stats
 	info := &BridgeInfo{
 		Node:           s.node,
