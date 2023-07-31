@@ -186,6 +186,11 @@ func (s *Service) Start() {
 				stopChn <- struct{}{}
 			}()
 
+			// process read loop
+			go func() {
+				s.readLoop(conn)
+				stopChn <- struct{}{}
+			}()
 			<-stopChn
 			// Close the current connection and establish a new one
 			log.Warn("[Bridge stats] Redial connection")
