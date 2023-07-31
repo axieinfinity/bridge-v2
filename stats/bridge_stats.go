@@ -144,9 +144,11 @@ func NewService(node, chainId, operator, host, secret string, db *gorm.DB) {
 	}
 }
 
+// Start loop keeps trying to connect to ronin stats server, reporting bridge stats.
 func (s *Service) Start() {
 	errTimer := time.NewTimer(0)
 	defer errTimer.Stop()
+	// Loop reporting until termination
 	for {
 		select {
 		case <-s.quitCh:
@@ -179,23 +181,31 @@ func (s *Service) Start() {
 				errTimer.Reset(10 * time.Second)
 				continue
 			}
-			stopChn := make(chan struct{}, 1)
-			// process report loop
-			go func() {
-				s.reportLoop(conn)
-				stopChn <- struct{}{}
-			}()
+			go s.readLoop(conn)
 
-			// process read loop
-			go func() {
-				s.readLoop(conn)
-				stopChn <- struct{}{}
-			}()
-			<-stopChn
-			// Close the current connection and establish a new one
+			sendStatsTicker := time.NewTicker(10 * time.Second)
+			for err == nil {
+				select {
+				case <-s.quitCh:
+					sendStatsTicker.Stop()
+					conn.Close()
+					return
+				case msg := <-s.errCh:
+					err = s.setLastError(msg.Listener, msg.Err)
+				case msg := <-s.processedBlockCh:
+					err = s.setProcessedBlock(msg.Listener, msg.ProcessedBlock)
+				case <-sendStatsTicker.C: // Checking stats interval
+					if err = s.report(conn); err != nil {
+						log.Warn("bridge stats report failed", "err", err)
+						// When bridge stats report failed need to relogn after 10 seconds
+					}
+				}
+			}
+			sendStatsTicker.Stop()
 			log.Warn("[Bridge stats] Redial connection")
+			// Close the current connection and establish a new one
 			conn.Close()
-			errTimer = time.NewTimer(0)
+			errTimer.Reset(0)
 		}
 	}
 }
@@ -263,27 +273,6 @@ func (s *Service) report(conn *connWrapper) error {
 	return conn.WriteJSON(report)
 }
 
-func (s *Service) reportLoop(conn *connWrapper) {
-	sendStatsTicker := time.NewTicker(10 * time.Second)
-	for {
-		select {
-		case <-s.quitCh:
-			return
-		case msg := <-s.errCh:
-			s.setLastError(msg.Listener, msg.Err)
-		case msg := <-s.processedBlockCh:
-			s.setProcessedBlock(msg.Listener, msg.ProcessedBlock)
-		case <-sendStatsTicker.C: // Checking stats interval
-			if err := s.report(conn); err != nil {
-				log.Warn("bridge stats report failed", "err", err)
-				// When bridge stats report failed need to relogn after 10 seconds
-				time.Sleep(5 * time.Second)
-				return
-			}
-		}
-	}
-}
-
 // readLoop loops as long as the connection is alive and retrieves data packets
 // from the network socket. If any of them match an active request, it forwards
 // it, if they themselves are requests it initiates a reply, and lastly it drops
@@ -315,20 +304,22 @@ func (s *Service) readLoop(conn *connWrapper) {
 	}
 }
 
-func (s *Service) setLastError(listener, err string) {
+func (s *Service) setLastError(listener, err string) error {
 	s.lock.Lock()
 	defer s.lock.Unlock()
 	if err != "" {
 		s.lastError[listener] = err
 	}
+	return nil
 }
 
-func (s *Service) setProcessedBlock(listener string, block uint64) {
+func (s *Service) setProcessedBlock(listener string, block uint64) error {
 	s.lock.Lock()
 	defer s.lock.Unlock()
 	if s.processedBlock[listener] < block {
 		s.processedBlock[listener] = block
 	}
+	return nil
 }
 
 func (s *Service) SendError(listener, err string) {
