@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 
@@ -182,6 +183,13 @@ func (s *Service) Start() {
 			}
 			go s.readLoop(conn)
 
+			if err = s.report(conn); err != nil {
+				log.Warn("Initial stats report failed", "err", err)
+				conn.Close()
+				errTimer.Reset(0)
+				continue
+			}
+
 			sendStatsTicker := time.NewTicker(10 * time.Second)
 			for err == nil {
 				select {
@@ -277,6 +285,7 @@ func (s *Service) report(conn *connWrapper) error {
 func (s *Service) readLoop(conn *connWrapper) {
 	// If the read loop exits, close the connection
 	defer conn.Close()
+	log.Info("[Bridge stats] Start read loop")
 	for {
 
 		// Retrieve the next generic network packet and bail out on error
@@ -285,15 +294,16 @@ func (s *Service) readLoop(conn *connWrapper) {
 			log.Warn("Failed to retrieve stats server message", "err", err)
 			return
 		}
-		// // If the network packet is a system ping, respond to it directly
-		// var ping string
-		// if err := json.Unmarshal(blob, &ping); err == nil && strings.HasPrefix(ping, "primus::ping::") {
-		// 	if err := conn.WriteJSON(strings.Replace(ping, "ping", "pong", -1)); err != nil {
-		// 		log.Warn("Failed to respond to system ping message", "err", err)
-		// 		return
-		// 	}
-		// 	continue
-		// }
+		// If the network packet is a system ping, respond to it directly
+		var ping string
+		if err := json.Unmarshal(blob, &ping); err == nil && strings.HasPrefix(ping, "primus::ping::") {
+			log.Info("[Bridge stats] The client receives ping from peers, should pong again.")
+			if err := conn.WriteJSON(strings.Replace(ping, "ping", "pong", -1)); err != nil {
+				log.Warn("Failed to respond to system ping message", "err", err)
+				return
+			}
+			continue
+		}
 
 		// Not a system ping, try to decode an actual state message
 		var msg map[string][]interface{}
