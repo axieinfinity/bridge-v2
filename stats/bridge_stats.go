@@ -190,7 +190,7 @@ func (s *Service) Start() {
 				continue
 			}
 
-			sendStatsTicker := time.NewTicker(10 * time.Second)
+			sendStatsTicker := time.NewTicker(5 * time.Second) // Every 5 seconds
 			for err == nil {
 				select {
 				case <-s.quitCh:
