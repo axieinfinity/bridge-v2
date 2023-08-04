@@ -15,6 +15,8 @@ import (
 	"gorm.io/gorm"
 )
 
+const bridgeVersion = "v2"
+
 type NodeInfo struct {
 	Organization  string `json:"organization,omitempty" mapstructure:"organization"`
 	Coinbase      string `json:"coinbase" mapstructure:"coinbase"`
@@ -117,7 +119,6 @@ type Service struct {
 	chainId          string
 	node             string
 	operator         string
-	version          string
 	secret           string
 	host             string
 	lastError        map[string]string
@@ -211,7 +212,7 @@ func (s *Service) login(conn *connWrapper) error {
 		Info: &NodeInfo{
 			Node:          s.node,
 			Operator:      s.operator,
-			BridgeVersion: s.version,
+			BridgeVersion: bridgeVersion,
 		},
 		Secret: s.secret,
 	}
@@ -263,7 +264,7 @@ func (s *Service) report(conn *connWrapper) error {
 	info := &BridgeInfo{
 		Node:           s.node,
 		Operator:       s.operator,
-		Version:        "v2",
+		Version:        bridgeVersion,
 		LastError:      s.lastError,
 		ProcessedBlock: s.processedBlock,
 	}
@@ -299,7 +300,7 @@ func (s *Service) readLoop(conn *connWrapper) {
 	defer conn.Close()
 	log.Info("[Bridge stats] Start read loop")
 	for {
-		// Exist the function when receiving the quit signal
+		// Exit the function when receiving the quit signal
 		select {
 		case <-s.quitCh:
 			return
