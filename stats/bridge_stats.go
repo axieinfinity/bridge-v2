@@ -190,25 +190,8 @@ func (s *Service) Start() {
 				continue
 			}
 
-			sendStatsTicker := time.NewTicker(5 * time.Second) // Every 5 seconds
-			for err == nil {
-				select {
-				case <-s.quitCh:
-					sendStatsTicker.Stop()
-					conn.Close()
-					return
-				case msg := <-s.errCh:
-					err = s.setLastError(msg.Listener, msg.Err)
-				case msg := <-s.processedBlockCh:
-					err = s.setProcessedBlock(msg.Listener, msg.ProcessedBlock)
-				case <-sendStatsTicker.C: // Checking stats interval
-					if err = s.report(conn); err != nil {
-						log.Warn("bridge stats report failed", "err", err)
-						// When bridge stats report failed need to relogn after 10 seconds
-					}
-				}
-			}
-			sendStatsTicker.Stop()
+			s.reportLoop(conn)
+
 			log.Warn("[Bridge stats] Redial connection")
 			// Close the current connection and establish a new one
 			conn.Close()
@@ -243,6 +226,35 @@ func (s *Service) login(conn *connWrapper) error {
 	if err := conn.ReadJSON(&ack); err != nil || len(ack["emit"]) != 1 || ack["emit"][0] != "ready" {
 		return errors.New("unauthorized")
 	}
+	return nil
+}
+
+// reportLoop loops as long as the connection is alive and try to report the bridge stats
+// every sendStatsTicket. If the conenction is drop or we got any issues, we will exist the
+// function for reprocessing the flow
+func (s *Service) reportLoop(conn *connWrapper) error {
+	var err error
+
+	sendStatsTicker := time.NewTicker(5 * time.Second) // Every 5 seconds
+
+	for err == nil {
+		select {
+		case <-s.quitCh:
+			sendStatsTicker.Stop()
+			conn.Close()
+			return nil
+		case msg := <-s.errCh:
+			err = s.setLastError(msg.Listener, msg.Err)
+		case msg := <-s.processedBlockCh:
+			err = s.setProcessedBlock(msg.Listener, msg.ProcessedBlock)
+		case <-sendStatsTicker.C: // Checking stats interval
+			if err = s.report(conn); err != nil {
+				log.Warn("bridge stats report failed", "err", err)
+				// When bridge stats report failed need to relogn after 10 seconds
+			}
+		}
+	}
+	sendStatsTicker.Stop()
 	return nil
 }
 
@@ -287,6 +299,12 @@ func (s *Service) readLoop(conn *connWrapper) {
 	defer conn.Close()
 	log.Info("[Bridge stats] Start read loop")
 	for {
+		// Exist the function when receiving the quit signal
+		select {
+		case <-s.quitCh:
+			return
+		default:
+		}
 
 		// Retrieve the next generic network packet and bail out on error
 		var blob json.RawMessage
@@ -316,8 +334,6 @@ func (s *Service) readLoop(conn *connWrapper) {
 }
 
 func (s *Service) setLastError(listener, err string) error {
-	s.lock.Lock()
-	defer s.lock.Unlock()
 	if err != "" {
 		s.lastError[listener] = err
 	}
@@ -325,8 +341,6 @@ func (s *Service) setLastError(listener, err string) error {
 }
 
 func (s *Service) setProcessedBlock(listener string, block uint64) error {
-	s.lock.Lock()
-	defer s.lock.Unlock()
 	if s.processedBlock[listener] < block {
 		s.processedBlock[listener] = block
 	}
