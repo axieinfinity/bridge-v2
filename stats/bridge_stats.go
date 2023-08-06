@@ -115,7 +115,6 @@ type authMsg struct {
 }
 
 type Service struct {
-	lock             sync.Mutex
 	chainId          string
 	node             string
 	operator         string
