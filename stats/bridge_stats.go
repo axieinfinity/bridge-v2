@@ -15,6 +15,8 @@ import (
 	"gorm.io/gorm"
 )
 
+const bridgeVersion = "v2"
+
 type NodeInfo struct {
 	Organization  string `json:"organization,omitempty" mapstructure:"organization"`
 	Coinbase      string `json:"coinbase" mapstructure:"coinbase"`
@@ -98,7 +100,7 @@ type processedBlockMessage struct {
 
 type BridgeInfo struct {
 	Node           string            `json:"node"`
-	Operator       string            `json:"operator"`
+	Operator       string            `json:"bridgeOperatorAddress"`
 	Version        string            `json:"version"`
 	LastError      map[string]string `json:"lastError"`
 	ProcessedBlock map[string]uint64 `json:"processedBlock"`
@@ -113,11 +115,9 @@ type authMsg struct {
 }
 
 type Service struct {
-	lock             sync.Mutex
 	chainId          string
 	node             string
 	operator         string
-	version          string
 	secret           string
 	host             string
 	lastError        map[string]string
@@ -144,9 +144,11 @@ func NewService(node, chainId, operator, host, secret string, db *gorm.DB) {
 	}
 }
 
+// Start loop keeps trying to connect to ronin stats server, reporting bridge stats.
 func (s *Service) Start() {
 	errTimer := time.NewTimer(0)
 	defer errTimer.Stop()
+	// Loop reporting until termination
 	for {
 		select {
 		case <-s.quitCh:
@@ -160,6 +162,7 @@ func (s *Service) Start() {
 			dialer := websocket.Dialer{HandshakeTimeout: 5 * time.Second}
 			header := make(http.Header)
 			header.Set("origin", "http://localhost")
+			log.Info("[Bridge stats] Dial to host ", "host", s.host)
 			c, _, e := dialer.Dial(s.host, header)
 			err = e
 			if err == nil {
@@ -178,20 +181,21 @@ func (s *Service) Start() {
 				errTimer.Reset(10 * time.Second)
 				continue
 			}
-			stopChn := make(chan struct{}, 1)
-			// process report loop
-			go func() {
-				s.reportLoop(conn)
-				stopChn <- struct{}{}
-			}()
+			go s.readLoop(conn)
 
-			// process read loop
-			go func() {
-				s.readLoop(conn)
-				stopChn <- struct{}{}
-			}()
-			<-stopChn
-			errTimer = time.NewTimer(0)
+			if err = s.report(conn); err != nil {
+				log.Warn("Initial stats report failed", "err", err)
+				conn.Close()
+				errTimer.Reset(0)
+				continue
+			}
+
+			s.reportLoop(conn)
+
+			log.Warn("[Bridge stats] Redial connection")
+			// Close the current connection and establish a new one
+			conn.Close()
+			errTimer.Reset(0)
 		}
 	}
 }
@@ -207,7 +211,7 @@ func (s *Service) login(conn *connWrapper) error {
 		Info: &NodeInfo{
 			Node:          s.node,
 			Operator:      s.operator,
-			BridgeVersion: s.version,
+			BridgeVersion: bridgeVersion,
 		},
 		Secret: s.secret,
 	}
@@ -225,14 +229,41 @@ func (s *Service) login(conn *connWrapper) error {
 	return nil
 }
 
+// reportLoop loops as long as the connection is alive and try to report the bridge stats
+// every sendStatsTicket. If the conenction is drop or we got any issues, we will exist the
+// function for reprocessing the flow
+func (s *Service) reportLoop(conn *connWrapper) error {
+	var err error
+
+	sendStatsTicker := time.NewTicker(5 * time.Second) // Every 5 seconds
+
+	for err == nil {
+		select {
+		case <-s.quitCh:
+			sendStatsTicker.Stop()
+			conn.Close()
+			return nil
+		case msg := <-s.errCh:
+			err = s.setLastError(msg.Listener, msg.Err)
+		case msg := <-s.processedBlockCh:
+			err = s.setProcessedBlock(msg.Listener, msg.ProcessedBlock)
+		case <-sendStatsTicker.C: // Checking stats interval
+			if err = s.report(conn); err != nil {
+				log.Warn("bridge stats report failed", "err", err)
+				// When bridge stats report failed need to relogn after 10 seconds
+			}
+		}
+	}
+	sendStatsTicker.Stop()
+	return nil
+}
+
 func (s *Service) report(conn *connWrapper) error {
-	s.lock.Lock()
-	defer s.lock.Unlock()
 	// collect bridge stats and send to ronin stats
 	info := &BridgeInfo{
 		Node:           s.node,
 		Operator:       s.operator,
-		Version:        s.version,
+		Version:        bridgeVersion,
 		LastError:      s.lastError,
 		ProcessedBlock: s.processedBlock,
 	}
@@ -255,26 +286,8 @@ func (s *Service) report(conn *connWrapper) error {
 	report := map[string][]interface{}{
 		"emit": {"bridge-stats", info},
 	}
+	log.Info("[Bridge-Stats] Emit Bridge stats")
 	return conn.WriteJSON(report)
-}
-
-func (s *Service) reportLoop(conn *connWrapper) {
-	sendStatsTicker := time.NewTicker(10 * time.Second)
-	for {
-		select {
-		case <-s.quitCh:
-			return
-		case msg := <-s.errCh:
-			s.setLastError(msg.Listener, msg.Err)
-		case msg := <-s.processedBlockCh:
-			s.setProcessedBlock(msg.Listener, msg.ProcessedBlock)
-		case <-sendStatsTicker.C:
-			if err := s.report(conn); err != nil {
-				log.Warn("bridge stats report failed", "err", err)
-				return
-			}
-		}
-	}
 }
 
 // readLoop loops as long as the connection is alive and retrieves data packets
@@ -284,12 +297,15 @@ func (s *Service) reportLoop(conn *connWrapper) {
 func (s *Service) readLoop(conn *connWrapper) {
 	// If the read loop exits, close the connection
 	defer conn.Close()
+	log.Info("[Bridge stats] Start read loop")
 	for {
+		// Exit the function when receiving the quit signal
 		select {
 		case <-s.quitCh:
 			return
 		default:
 		}
+
 		// Retrieve the next generic network packet and bail out on error
 		var blob json.RawMessage
 		if err := conn.ReadJSON(&blob); err != nil {
@@ -299,29 +315,36 @@ func (s *Service) readLoop(conn *connWrapper) {
 		// If the network packet is a system ping, respond to it directly
 		var ping string
 		if err := json.Unmarshal(blob, &ping); err == nil && strings.HasPrefix(ping, "primus::ping::") {
+			log.Info("[Bridge stats] The client receives ping from peers, should pong again.")
 			if err := conn.WriteJSON(strings.Replace(ping, "ping", "pong", -1)); err != nil {
 				log.Warn("Failed to respond to system ping message", "err", err)
 				return
 			}
 			continue
 		}
+
+		// Not a system ping, try to decode an actual state message
+		var msg map[string][]interface{}
+		if err := json.Unmarshal(blob, &msg); err != nil {
+			log.Warn("Failed to decode stats server message", "err", err)
+			return
+		}
+		log.Info("Received message from stats server", "msg", msg)
 	}
 }
 
-func (s *Service) setLastError(listener, err string) {
-	s.lock.Lock()
-	defer s.lock.Unlock()
+func (s *Service) setLastError(listener, err string) error {
 	if err != "" {
 		s.lastError[listener] = err
 	}
+	return nil
 }
 
-func (s *Service) setProcessedBlock(listener string, block uint64) {
-	s.lock.Lock()
-	defer s.lock.Unlock()
+func (s *Service) setProcessedBlock(listener string, block uint64) error {
 	if s.processedBlock[listener] < block {
 		s.processedBlock[listener] = block
 	}
+	return nil
 }
 
 func (s *Service) SendError(listener, err string) {
