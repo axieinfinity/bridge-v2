@@ -9,6 +9,8 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/axieinfinity/bridge-v2/stats"
+
 	bridgeCore "github.com/axieinfinity/bridge-core"
 	"github.com/axieinfinity/bridge-core/metrics"
 	bridgeCoreModels "github.com/axieinfinity/bridge-core/models"
@@ -290,7 +292,9 @@ func (e *EthereumListener) SaveCurrentBlockToDB() error {
 	if err := e.store.GetProcessedBlockStore().Save(hexutil.EncodeBig(chainId), int64(e.GetCurrentBlock().GetHeight())); err != nil {
 		return err
 	}
-
+	if stats.BridgeStats != nil {
+		stats.BridgeStats.SendProcessedBlock(e.GetName(), e.GetCurrentBlock().GetHeight())
+	}
 	metrics.Pusher.IncrCounter(fmt.Sprintf(metrics.ListenerProcessedBlockMetric, e.GetName()), 1)
 	return nil
 }

@@ -13,6 +13,7 @@ type TaskStore interface {
 	DeleteTasks([]string, uint64) error
 	Count() int64
 	ResetTo(ids []string, status string) error
+	CountTasks(chain, status string) (int64, error)
 }
 
 type DepositStore interface {

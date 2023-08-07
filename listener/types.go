@@ -2,6 +2,7 @@ package listener
 
 import (
 	"context"
+	"github.com/axieinfinity/bridge-v2/stats"
 	"math/big"
 	"time"
 
@@ -216,6 +217,12 @@ func NewEthListenJob(jobType int, listener bridgeCore.Listener, subscriptionName
 	}
 }
 
+func (e *EthListenJob) Process() ([]byte, error) {
+	data, err := e.BaseJob.Process()
+	stats.SendErrorToStats(e.GetListener(), err)
+	return data, err
+}
+
 type EthCallbackJob struct {
 	*bridgeCore.BaseJob
 	result interface{}
@@ -248,10 +255,12 @@ func (e *EthCallbackJob) Process() ([]byte, error) {
 	log.Info("[EthCallbackJob] Start Process", "method", e.method, "jobId", e.GetID())
 	val, err := e.Utils().Invoke(e.GetListener(), e.method, e.FromChainID(), e.GetTransaction(), e.GetData())
 	if err != nil {
+		stats.SendErrorToStats(e.GetListener(), err)
 		return nil, err
 	}
 	invokeErr, ok := val.Interface().(error)
 	if ok {
+		stats.SendErrorToStats(e.GetListener(), invokeErr)
 		return nil, invokeErr
 	}
 	return nil, nil

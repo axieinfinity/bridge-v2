@@ -54,6 +54,12 @@ func (t *taskStore) GetTasks(chain, status string, limit, retrySeconds int, befo
 	return tasks, err
 }
 
+func (t *taskStore) CountTasks(chain, status string) (int64, error) {
+	var count int64
+	err := t.Model(&models.Task{}).Where("chain_id = ? AND status = ?", chain, status).Count(&count).Error
+	return count, err
+}
+
 func (t *taskStore) UpdateTasksWithTransactionHash(txs []string, transactionStatus int, status string) error {
 	return t.Model(&models.Task{}).Where("transaction_hash in ?", txs).Updates(map[string]interface{}{
 		"status":             status,

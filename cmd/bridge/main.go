@@ -3,6 +3,8 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/axieinfinity/bridge-v2/stats"
+	"gorm.io/gorm"
 	"io/ioutil"
 	"os"
 	"os/signal"
@@ -85,6 +87,10 @@ const (
 	RoninNetwork    = "Ronin"
 
 	fromBlock = "FROM_BLOCK"
+
+	bridgeStatsNodeName = "BRIDGE_STATS_NODE_NAME"
+	bridgeStatsUrl      = "BRIDGE_STATS_URL"
+	bridgeStatsSecret   = "BRIDGE_STATS_SECRET"
 )
 
 var (
@@ -401,6 +407,31 @@ func createPgDb(cfg *bridgeCore.Config) {
 	}
 }
 
+func setupStats(cfg *bridgeCore.Config, db *gorm.DB) {
+	// check if bridge stats is enabled
+	if os.Getenv(bridgeStatsNodeName) != "" && os.Getenv(bridgeStatsUrl) != "" {
+		// NOTE: only get chainId, operator from ronin
+		var (
+			chainId, operator string
+			node              = os.Getenv(bridgeStatsNodeName)
+			host              = os.Getenv(bridgeStatsUrl)
+			pass              = os.Getenv(bridgeStatsSecret)
+		)
+		if _, ok := cfg.Listeners[RoninNetwork]; ok {
+			chainId = cfg.Listeners[RoninNetwork].ChainId
+			if cfg.Listeners[RoninNetwork].Secret != nil && cfg.Listeners[RoninNetwork].Secret.BridgeOperator != nil {
+				signMethod, err := bridgeCoreUtils.NewSignMethod(cfg.Listeners[RoninNetwork].Secret.BridgeOperator)
+				if err != nil {
+					panic(err)
+				}
+				operator = signMethod.GetAddress().Hex()
+			}
+		}
+		stats.NewService(node, chainId, operator, host, pass, db)
+		go stats.BridgeStats.Start()
+	}
+}
+
 func bridge(ctx *cli.Context) {
 	cfg := prepare(ctx)
 	// init db
@@ -408,6 +439,8 @@ func bridge(ctx *cli.Context) {
 	if err != nil {
 		panic(err)
 	}
+	// setup stats
+	setupStats(cfg, db)
 	// start migration
 	if err = migration.Migrate(db, cfg); err != nil {
 		panic(err)
@@ -427,6 +460,9 @@ func bridge(ctx *cli.Context) {
 	select {
 	case <-sigc:
 		controller.Close()
+		if stats.BridgeStats != nil {
+			stats.BridgeStats.Stop()
+		}
 	}
 }
 

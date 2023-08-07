@@ -4,6 +4,9 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"math/big"
+	"testing"
+
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/axieinfinity/bridge-contracts/generated_contracts/ethereum/gateway"
 	internal "github.com/axieinfinity/bridge-core"
@@ -20,8 +23,6 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	core2 "github.com/ethereum/go-ethereum/signer/core"
 	"github.com/stretchr/testify/suite"
-	"math/big"
-	"testing"
 )
 
 type SimulatedSuite struct {
