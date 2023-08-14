@@ -12,6 +12,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/log"
+	"time"
 )
 
 func (r *task) sendFullFillRandomSeedTransactions(task *models.Task) (doneTasks, processingTasks, failedTasks []*models.Task, tx *ethtypes.Transaction) {
@@ -56,15 +57,21 @@ func (r *task) sendFullFillRandomSeedTransactions(task *models.Task) (doneTasks,
 		goto PROCESSING
 	}
 	// if not, base on smart contract to get next assignee
-	assignee, err = getNextAssignee(caller)
-	if err != nil {
-		goto ERROR
+	if waitTooLong(r, task) {
+		assignee, err = getNextAssignee(caller)
+		if err != nil {
+			goto ERROR
+		}
+		tx, err = tryFulfilRandomSeed(r, event.ReqHash, event.Request, assignee)
+		if err != nil {
+			goto ERROR
+		}
+		goto PROCESSING
 	}
-	tx, err = tryFulfilRandomSeed(r, event.ReqHash, event.Request, assignee)
-	if err != nil {
-		goto ERROR
-	}
-	// otherwise goto processing at the next line => do nothing.
+	// otherwise task is still pending but retry count is increased by 1
+	task.Retries++
+	go updateTasks(r.store, []*models.Task{task}, STATUS_PENDING, "", 0, r.releaseTasksCh)
+	return nil, nil, nil, nil
 PROCESSING:
 	// append task to prcessing tasks
 	processingTasks = append(processingTasks, task)
@@ -77,6 +84,11 @@ DONE:
 ERROR:
 	r.appendFailedTask(err, task, failedTasks)
 	return nil, nil, failedTasks, nil
+}
+
+func waitTooLong(r *task, task *models.Task) bool {
+	deadline := int64(VRFConfig.WaitForBlock) * int64(r.listener.Config().LoadInterval.Seconds())
+	return task.CreatedAt+deadline < time.Now().Unix()
 }
 
 func tryFulfilRandomSeed(r *task, requestHash [32]byte, request contract.SLARandomRequest, assignee common.Address) (*ethtypes.Transaction, error) {

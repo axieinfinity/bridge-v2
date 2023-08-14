@@ -179,7 +179,7 @@ func (r *RoninTask) processPending(ethClient *ethclient.Client) error {
 	if limitQuery == 0 {
 		return nil
 	}
-	tasks, err := r.store.GetTaskStore().GetTasks(hexutil.EncodeBig(r.chainId), STATUS_PENDING, limitQuery, 10, 0, excludeIds)
+	tasks, err := r.store.GetTaskStore().GetTasks(hexutil.EncodeBig(r.chainId), STATUS_PENDING, limitQuery, 10, 0, 0, excludeIds)
 	if err != nil {
 		return err
 	}
@@ -272,7 +272,7 @@ func (r *RoninTask) checkProcessingTasks() error {
 		}
 	}()
 	before := time.Now().Unix() - int64(r.listener.Config().SafeBlockRange*uint64(r.listener.Config().LoadInterval.Seconds()))
-	tasks, err := r.store.GetTaskStore().GetTasks(hexutil.EncodeBig(r.chainId), STATUS_PROCESSING, r.limitQuery, 2, before, nil)
+	tasks, err := r.store.GetTaskStore().GetTasks(hexutil.EncodeBig(r.chainId), STATUS_PROCESSING, r.limitQuery, 2, before, 0, nil)
 	if err != nil {
 		return err
 	}
