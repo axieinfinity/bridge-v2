@@ -56,11 +56,17 @@ func (r *task) sendFullFillRandomSeedTransactions(task *models.Task) (doneTasks,
 		}
 		goto PROCESSING
 	}
-	// if not, base on smart contract to get next assignee
+	// if not, check if the task has been waiting too long
 	if waitTooLong(r, task) {
+		// try to get the next assignee
 		assignee, err = getNextAssignee(caller)
 		if err != nil {
 			goto ERROR
+		}
+		// FIXME: update createdTime of current task to now
+		task.CreatedAt = time.Now().Unix()
+		if !isAssigned(r.listener.GetBridgeOperatorSign(), assignee) {
+			goto PENDING
 		}
 		tx, err = tryFulfilRandomSeed(r, event.ReqHash, event.Request, assignee)
 		if err != nil {
@@ -68,6 +74,7 @@ func (r *task) sendFullFillRandomSeedTransactions(task *models.Task) (doneTasks,
 		}
 		goto PROCESSING
 	}
+PENDING:
 	// otherwise task is still pending but retry count is increased by 1
 	task.Retries++
 	go updateTasks(r.store, []*models.Task{task}, STATUS_PENDING, "", 0, r.releaseTasksCh)
@@ -76,7 +83,6 @@ PROCESSING:
 	// append task to prcessing tasks
 	processingTasks = append(processingTasks, task)
 	return
-
 DONE:
 	// append task to done tasks
 	doneTasks = append(doneTasks, task)
