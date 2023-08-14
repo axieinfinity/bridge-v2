@@ -25,7 +25,7 @@
       "processWithinBlocks": 864000,
       "contracts": {
         "Gateway": "0xCee681C9108c42C710c6A8A949307D5F13C9F3ca",
-        "EthGateway": "0x9e359F42cDDc84A386a2Ef1D9Ae06623f3970D1D"
+        "EthGateway": "0x9e359F42cDDc84A386a2Ef1D9Ae06623f3970D1D",
       },
       "subscriptions": {
         "MainchainWithdrewSubscription": {
@@ -59,6 +59,17 @@
           },
           "callbacks": {
             "Ronin": "ProvideReceiptSignatureAgainCallback"
+          }
+        },
+        "RandomSeedRequestedSubscription": {
+          "to": "",
+          "type": 1,
+          "handler": {
+            "contract": "VRFCoordinatorContract",
+            "name": "RandomSeedRequested"
+          },
+          "callbacks": {
+            "Ronin": "RandomSeedRequestedCallback"
           }
         }
       }
@@ -116,5 +127,11 @@
     "dbName": "bridge",
     "port": 5432,
     "maxOpenConns": 500
+  },
+  "vrf": {
+    "waitForBlock": 10,
+    "contractAddress": "0xA60c1e07fa030E4B49Eb54950ADb298Ab94dD312",
+    "contractName": "VRFCoordinatorContract",
+    "secretKey": "abcd"
   }
 }

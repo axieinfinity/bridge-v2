@@ -3,7 +3,10 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	bridge_contracts "github.com/axieinfinity/bridge-contracts"
+	"github.com/axieinfinity/bridge-v2/contract"
 	"github.com/axieinfinity/bridge-v2/stats"
+	"github.com/axieinfinity/bridge-v2/task"
 	"gorm.io/gorm"
 	"io/ioutil"
 	"os"
@@ -105,6 +108,11 @@ var (
 	}
 )
 
+type Config struct {
+	*bridgeCore.Config
+	VRF *task.VRF `json:"vrf"`
+}
+
 func init() {
 	app.Action = bridge
 	app.HideVersion = true // we have a command to print the version
@@ -122,7 +130,7 @@ func init() {
 	adapters.New()
 }
 
-func setRpcUrlFromEnv(cfg *bridgeCore.Config, rpc, network string) {
+func setRpcUrlFromEnv(cfg *Config, rpc, network string) {
 	if rpc == "" {
 		return
 	}
@@ -131,7 +139,7 @@ func setRpcUrlFromEnv(cfg *bridgeCore.Config, rpc, network string) {
 	}
 }
 
-func setKeyFromEnv(cfg *bridgeCore.Config, isValidator bool, key, network string) {
+func setKeyFromEnv(cfg *Config, isValidator bool, key, network string) {
 	if key == "" {
 		return
 	}
@@ -150,7 +158,7 @@ func setKeyFromEnv(cfg *bridgeCore.Config, isValidator bool, key, network string
 	}
 }
 
-func setKmsFromEnv(cfg *bridgeCore.Config, isValidator bool, config *kms.KmsConfig, network string) {
+func setKmsFromEnv(cfg *Config, isValidator bool, config *kms.KmsConfig, network string) {
 	if _, ok := cfg.Listeners[network]; ok {
 		if isValidator {
 			cfg.Listeners[network].Secret.BridgeOperator = &bridgeCoreUtils.SignMethodConfig{
@@ -165,7 +173,7 @@ func setKmsFromEnv(cfg *bridgeCore.Config, isValidator bool, config *kms.KmsConf
 
 }
 
-func prepare(ctx *cli.Context) *bridgeCore.Config {
+func prepare(ctx *cli.Context) *Config {
 	// load log level
 	logLvl := log.LvlInfo
 	if os.Getenv(verbosity) != "" {
@@ -178,7 +186,7 @@ func prepare(ctx *cli.Context) *bridgeCore.Config {
 	}
 	log.Root().SetHandler(log.LvlFilterHandler(logLvl, log.StreamHandler(os.Stderr, log.TerminalFormat(true))))
 
-	cfg := &bridgeCore.Config{}
+	cfg := &Config{}
 
 	if os.Getenv(configPath) != "" {
 		if err := ctx.GlobalSet(ConfigFlag.Name, os.Getenv(configPath)); err != nil {
@@ -211,7 +219,7 @@ func prepare(ctx *cli.Context) *bridgeCore.Config {
 	return cfg
 }
 
-func checkEnv(cfg *bridgeCore.Config) {
+func checkEnv(cfg *Config) {
 	if cfg.DB == nil {
 		cfg.DB = &bridgeCoreStore.Database{}
 	}
@@ -397,7 +405,7 @@ func checkEnv(cfg *bridgeCore.Config) {
 	os.Setenv(roninBridgeVoterKey, "")
 }
 
-func createPgDb(cfg *bridgeCore.Config) {
+func createPgDb(cfg *Config) {
 	db, err := bridgeCoreStore.MustConnectDatabaseWithName(cfg.DB, "postgres", false)
 	if err != nil {
 		panic(err)
@@ -432,6 +440,20 @@ func setupStats(cfg *bridgeCore.Config, db *gorm.DB) {
 	}
 }
 
+func setupVrf(cfg *Config) {
+	if cfg.VRF != nil {
+		cfg.VRF.SetVRFKey()
+		task.VRFConfig = cfg.VRF
+		bridge_contracts.ABIMaps[cfg.VRF.ContractName] = contract.RoninVRFCoordinatorMetaData
+		if ronCfg, ok := cfg.Listeners[RoninNetwork]; ok && !ronCfg.Disabled {
+			if ronCfg.Contracts == nil {
+				ronCfg.Contracts = make(map[string]string)
+			}
+			ronCfg.Contracts[cfg.VRF.ContractName] = cfg.VRF.ContractAddress
+		}
+	}
+}
+
 func bridge(ctx *cli.Context) {
 	cfg := prepare(ctx)
 	// init db
@@ -440,13 +462,17 @@ func bridge(ctx *cli.Context) {
 		panic(err)
 	}
 	// setup stats
-	setupStats(cfg, db)
+	setupStats(cfg.Config, db)
 	// start migration
-	if err = migration.Migrate(db, cfg); err != nil {
+	if err = migration.Migrate(db, cfg.Config); err != nil {
 		panic(err)
 	}
+
+	// setup vrf
+	setupVrf(cfg)
+
 	//init controller
-	controller, err := internal.NewBridgeController(cfg, db, nil)
+	controller, err := internal.NewBridgeController(cfg.Config, db, nil)
 	if err != nil {
 		panic(err)
 	}

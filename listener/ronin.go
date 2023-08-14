@@ -3,6 +3,7 @@ package listener
 import (
 	"context"
 	"errors"
+	"github.com/axieinfinity/bridge-v2/contract"
 	"math/big"
 	"time"
 
@@ -292,6 +293,35 @@ func (l *RoninListener) WithdrewCallback(fromChainId *big.Int, tx bridgeCore.Tra
 		CreatedAt:       time.Now().Unix(),
 	}
 	return l.bridgeStore.GetTaskStore().Save(ackWithdrewTask)
+}
+
+func (l *RoninListener) RandomSeedRequestedCallback(fromChainId *big.Int, tx bridgeCore.Transaction, data []byte) error {
+	log.Info("[RoninListener] RandomSeedRequestedCallback", "tx", tx.GetHash().Hex())
+	event := new(contract.RoninVRFCoordinatorRandomSeedRequested)
+	contractAbi, err := contract.RoninVRFCoordinatorMetaData.GetAbi()
+	if err != nil {
+		return err
+	}
+	if err = l.utilsWrapper.UnpackLog(*contractAbi, event, "RandomSeedRequested", data); err != nil {
+		return err
+	}
+	// get chainID
+	chainId, err := l.GetChainID()
+	if err != nil {
+		return err
+	}
+	vrfTask := &models.Task{
+		ChainId:         hexutil.EncodeBig(chainId),
+		FromChainId:     hexutil.EncodeBig(fromChainId),
+		FromTransaction: tx.GetHash().Hex(),
+		Type:            task.VRF_RANDOM_SEED_REQUEST,
+		Data:            common.Bytes2Hex(data),
+		Retries:         0,
+		Status:          task.STATUS_PENDING,
+		LastError:       "",
+		CreatedAt:       time.Now().Unix(),
+	}
+	return l.bridgeStore.GetTaskStore().Save(vrfTask)
 }
 
 type RoninCallBackJob struct {
