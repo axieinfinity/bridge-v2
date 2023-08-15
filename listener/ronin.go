@@ -297,6 +297,10 @@ func (l *RoninListener) WithdrewCallback(fromChainId *big.Int, tx bridgeCore.Tra
 
 func (l *RoninListener) RandomSeedRequestedCallback(fromChainId *big.Int, tx bridgeCore.Transaction, data []byte) error {
 	log.Info("[RoninListener] RandomSeedRequestedCallback", "tx", tx.GetHash().Hex())
+	// if vrf is not enabled, we don't need to create task for it to prevent further errors or panics
+	if task.VRFConfig == nil {
+		return nil
+	}
 	event := new(contract.RoninVRFCoordinatorRandomSeedRequested)
 	contractAbi, err := contract.RoninVRFCoordinatorMetaData.GetAbi()
 	if err != nil {
