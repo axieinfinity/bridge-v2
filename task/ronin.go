@@ -206,9 +206,9 @@ func (r *RoninTask) processPending(ethClient *ethclient.Client) error {
 		// collect tasks for acknowledge withdrawal
 		ackWithdrewTasks.collectTask(t)
 
-		r.collectSingleTask(singleTasks, VOTE_BRIDGE_OPERATORS_TASK, t, ethClient)
-		r.collectSingleTask(singleTasks, RELAY_BRIDGE_OPERATORS_TASK, t, ethClient)
-		r.collectSingleTask(singleTasks, VRF_RANDOM_SEED_REQUEST, t, nil)
+		r.collectSingleTask(&singleTasks, VOTE_BRIDGE_OPERATORS_TASK, t, ethClient)
+		r.collectSingleTask(&singleTasks, RELAY_BRIDGE_OPERATORS_TASK, t, ethClient)
+		r.collectSingleTask(&singleTasks, VRF_RANDOM_SEED_REQUEST, t, nil)
 	}
 	bulkDepositTasks.send()
 	bulkSubmitWithdrawalSignaturesTasks.send()
@@ -220,9 +220,9 @@ func (r *RoninTask) processPending(ethClient *ethclient.Client) error {
 	return nil
 }
 
-func (r *RoninTask) collectSingleTask(singleTasks []*task, taskType string, t *models.Task, ethClient *ethclient.Client) {
+func (r *RoninTask) collectSingleTask(singleTasks *[]*task, taskType string, t *models.Task, ethClient *ethclient.Client) {
 	if taskType == t.Type {
-		singleTasks = append(singleTasks, newTask(
+		*singleTasks = append(*singleTasks, newTask(
 			r.listener,
 			r.client,
 			ethClient,

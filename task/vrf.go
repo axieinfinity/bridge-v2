@@ -88,7 +88,7 @@ DONE:
 	doneTasks = append(doneTasks, task)
 	return
 ERROR:
-	r.appendFailedTask(err, task, failedTasks)
+	r.appendFailedTask(err, task, &failedTasks)
 	return nil, nil, failedTasks, nil
 }
 
