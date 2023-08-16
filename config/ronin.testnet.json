@@ -1,51 +1,53 @@
 {
   "listeners": {
     "Ronin": {
-      "chainId": "0x7e5",
-      "rpcUrl": "http://localhost:8545",
-      "blockTime": 3,
-      "safeBlockRange": 3,
-      "transactionCheckPeriod": 5,
-      "secret": {
-        "validator": "",
-        "relayer": ""
-      },
-      "fromHeight": 6508284,
-      "contracts": {
-        "Gateway": "0x03d1F13c7391F6B5A651143a31034cf728A93694"
-      },
-      "subscriptions": {
-        "MainchainWithdrewSubscription": {
-          "to": "0x03d1F13c7391F6B5A651143a31034cf728A93694",
-          "type": 1,
-          "handler": {
-            "contract": "RoninGateway",
-            "name": "MainchainWithdrew"
-          },
-          "callbacks": {
-            "Ronin": "StoreMainchainWithdrawCallback"
-          }
+      "config": {
+        "chainId": "0x7e5",
+        "rpcUrl": "http://localhost:8545",
+        "blockTime": 3,
+        "safeBlockRange": 3,
+        "transactionCheckPeriod": 5,
+        "secret": {
+          "validator": "",
+          "relayer": ""
         },
-        "WithdrawalRequestedSubscription": {
-          "to": "0x03d1F13c7391F6B5A651143a31034cf728A93694",
-          "type": 1,
-          "handler": {
-            "contract": "RoninGateway",
-            "name": "WithdrawalRequested"
-          },
-          "callbacks": {
-            "Ronin": "ProvideReceiptSignatureCallback"
-          }
+        "fromHeight": 6508284,
+        "contracts": {
+          "Gateway": "0x03d1F13c7391F6B5A651143a31034cf728A93694"
         },
-        "WithdrawalSignaturesRequestedSubscription": {
-          "to": "0x03d1F13c7391F6B5A651143a31034cf728A93694",
-          "type": 1,
-          "handler": {
-            "contract": "RoninGateway",
-            "name": "WithdrawalSignaturesRequested"
+        "subscriptions": {
+          "MainchainWithdrewSubscription": {
+            "to": "0x03d1F13c7391F6B5A651143a31034cf728A93694",
+            "type": 1,
+            "handler": {
+              "contract": "RoninGateway",
+              "name": "MainchainWithdrew"
+            },
+            "callbacks": {
+              "Ronin": "StoreMainchainWithdrawCallback"
+            }
           },
-          "callbacks": {
-            "Ronin": "ProvideReceiptSignatureCallback"
+          "WithdrawalRequestedSubscription": {
+            "to": "0x03d1F13c7391F6B5A651143a31034cf728A93694",
+            "type": 1,
+            "handler": {
+              "contract": "RoninGateway",
+              "name": "WithdrawalRequested"
+            },
+            "callbacks": {
+              "Ronin": "ProvideReceiptSignatureCallback"
+            }
+          },
+          "WithdrawalSignaturesRequestedSubscription": {
+            "to": "0x03d1F13c7391F6B5A651143a31034cf728A93694",
+            "type": 1,
+            "handler": {
+              "contract": "RoninGateway",
+              "name": "WithdrawalSignaturesRequested"
+            },
+            "callbacks": {
+              "Ronin": "ProvideReceiptSignatureCallback"
+            }
           }
         }
       }

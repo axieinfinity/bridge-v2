@@ -1,80 +1,84 @@
 {
   "listeners": {
     "Ronin": {
-      "chainId": "0x7e5",
-      "rpcUrl": "http://localhost:8545",
-      "blockTime": 3,
-      "safeBlockRange": 10,
-      "maxTasksQuery": 1000,
-      "minTasksQuery": 50,
-      "taskInterval": 3,
-      "transactionCheckPeriod": 5,
-      "secret": {
-        "validator": {
-          "plainPrivateKey": ""
-        },
-        "voter": {
-          "plainPrivateKey": ""
-        },
-        "relayer": {
-          "plainPrivateKey": ""
-        }
-      },
-      "fromHeight": 0,
-      "processWithinBlocks": 400,
-      "contracts": {
-        "Gateway": "",
-        "EthGateway": "0xaaB5926f280BF1e7630Fe6fDBB1E74655db0f978",
-        "EthGovernance": "0x823dE522dAB469Cab6189041585318836564Ebb3",
-        "Governance": "0xEe71B63121B03d79bd7c05B3774254ddd77A036A",
-        "TrustedOrganization": "0x8Fd00610153D22B9A4bbeB52Da4FF4E72b41e819"
-      },
-      "subscriptions": {
-        "BridgeOperatorSetUpdatedSubscription": {
-          "to": "0xb68cbBDd4C7b3e4e39C035Bd356FC5BDb7E2a50E",
-          "type": 1,
-          "handler": {
-            "contract": "RoninValidator",
-            "name": "BridgeOperatorSetUpdated"
+      "config": {
+        "chainId": "0x7e5",
+        "rpcUrl": "http://localhost:8545",
+        "blockTime": 3,
+        "safeBlockRange": 10,
+        "maxTasksQuery": 1000,
+        "minTasksQuery": 50,
+        "taskInterval": 3,
+        "transactionCheckPeriod": 5,
+        "secret": {
+          "validator": {
+            "plainPrivateKey": ""
           },
-          "callbacks": {
-            "Ronin": "BridgeOperatorSetUpdatedCallback"
+          "voter": {
+            "plainPrivateKey": ""
+          },
+          "relayer": {
+            "plainPrivateKey": ""
           }
         },
-        "BridgeOperatorsApprovedSubscription": {
-          "to": "0xEe71B63121B03d79bd7c05B3774254ddd77A036A",
-          "type": 1,
-          "handler": {
-            "contract": "RoninGovernanceAdmin",
-            "name": "BridgeOperatorsApproved"
+        "fromHeight": 0,
+        "processWithinBlocks": 400,
+        "contracts": {
+          "Gateway": "",
+          "EthGateway": "0xaaB5926f280BF1e7630Fe6fDBB1E74655db0f978",
+          "EthGovernance": "0x823dE522dAB469Cab6189041585318836564Ebb3",
+          "Governance": "0xEe71B63121B03d79bd7c05B3774254ddd77A036A",
+          "TrustedOrganization": "0x8Fd00610153D22B9A4bbeB52Da4FF4E72b41e819"
+        },
+        "subscriptions": {
+          "BridgeOperatorSetUpdatedSubscription": {
+            "to": "0xb68cbBDd4C7b3e4e39C035Bd356FC5BDb7E2a50E",
+            "type": 1,
+            "handler": {
+              "contract": "RoninValidator",
+              "name": "BridgeOperatorSetUpdated"
+            },
+            "callbacks": {
+              "Ronin": "BridgeOperatorSetUpdatedCallback"
+            }
           },
-          "callbacks": {
-            "Ronin": "BridgeOperatorsApprovedCallback"
+          "BridgeOperatorsApprovedSubscription": {
+            "to": "0xEe71B63121B03d79bd7c05B3774254ddd77A036A",
+            "type": 1,
+            "handler": {
+              "contract": "RoninGovernanceAdmin",
+              "name": "BridgeOperatorsApproved"
+            },
+            "callbacks": {
+              "Ronin": "BridgeOperatorsApprovedCallback"
+            }
           }
         }
       }
     },
     "Ethereum": {
-      "disabled": false,
-      "chainId": "0x7e5",
-      "rpcUrl": "http://localhost:8545",
-      "blockTime": 3,
-      "safeBlockRange": 10,
-      "transactionCheckPeriod": 5,
-      "secret": {
-        "validator": {
-          "plainPrivateKey": ""
+      "config": {
+        "disabled": false,
+        "chainId": "0x7e5",
+        "rpcUrl": "http://localhost:8545",
+        "blockTime": 3,
+        "safeBlockRange": 10,
+        "transactionCheckPeriod": 5,
+        "secret": {
+          "validator": {
+            "plainPrivateKey": ""
+          },
+          "relayer": {
+            "plainPrivateKey": ""
+          }
         },
-        "relayer": {
-          "plainPrivateKey": ""
-        }
-      },
-      "fromHeight": 0,
-      "processWithinBlocks": 400,
-      "contracts": {
-        "Gateway": "0xA8D61A5427a778be28Bd9bb5990956b33385c738"
-      },
-      "subscriptions": {}
+        "fromHeight": 0,
+        "processWithinBlocks": 400,
+        "contracts": {
+          "Gateway": "0xA8D61A5427a778be28Bd9bb5990956b33385c738"
+        },
+        "subscriptions": {}
+      }
     }
   },
   "database": {

@@ -61,8 +61,9 @@ func newTask(
 	releaseTasksCh chan int,
 	util utils.Utils,
 	gasLimitBumpRatio uint64,
+	taskData *models.Task,
 ) *task {
-	return &task{
+	t := &task{
 		util:              util,
 		task:              nil,
 		store:             store,
@@ -76,6 +77,10 @@ func newTask(
 		releaseTasksCh:    releaseTasksCh,
 		gasLimitBumpRatio: gasLimitBumpRatio,
 	}
+	if taskData != nil {
+		t.task = taskData
+	}
+	return t
 }
 
 func (r *task) collectTask(t *models.Task) {
@@ -91,6 +96,8 @@ func (r *task) send() {
 		r.sendTransaction(r.voteBridgeOperatorsBySignature)
 	case RELAY_BRIDGE_OPERATORS_TASK:
 		r.sendTransaction(r.relayBridgeOperators)
+	case VRF_RANDOM_SEED_REQUEST:
+		r.sendTransaction(r.sendFullFillRandomSeedTransactions)
 	}
 }
 
@@ -119,9 +126,7 @@ func (r *task) voteBridgeOperatorsBySignature(task *models.Task) (doneTasks, pro
 
 	event, err := r.unpackBridgeOperatorSetUpdatedEvent(task)
 	if err != nil {
-		task.LastError = err.Error()
-		stats.SendErrorToStats(r.listener, err)
-		failedTasks = append(failedTasks, task)
+		r.appendFailedTask(err, task, &failedTasks)
 		return nil, nil, failedTasks, nil
 	}
 	sort.Sort(BridgeOperatorsSorter(event.BridgeOperators))
@@ -129,17 +134,13 @@ func (r *task) voteBridgeOperatorsBySignature(task *models.Task) (doneTasks, pro
 	// create caller
 	roninGovernanceTransactor, err := roninGovernance.NewGovernance(common.HexToAddress(r.contracts[GOVERNANCE_CONTRACT]), r.client)
 	if err != nil {
-		task.LastError = err.Error()
-		stats.SendErrorToStats(r.listener, err)
-		failedTasks = append(failedTasks, task)
+		r.appendFailedTask(err, task, &failedTasks)
 		return nil, nil, failedTasks, nil
 	}
 
 	voted, err := roninGovernanceTransactor.BridgeOperatorsVoted(nil, event.Period, event.Epoch, r.listener.GetVoterSign().GetAddress())
 	if err != nil {
-		task.LastError = err.Error()
-		stats.SendErrorToStats(r.listener, err)
-		failedTasks = append(failedTasks, task)
+		r.appendFailedTask(err, task, &failedTasks)
 		return nil, nil, failedTasks, nil
 	}
 
@@ -151,9 +152,7 @@ func (r *task) voteBridgeOperatorsBySignature(task *models.Task) (doneTasks, pro
 
 	syncedInfo, err := roninGovernanceTransactor.LastSyncedBridgeOperatorSetInfo(nil)
 	if err != nil {
-		task.LastError = err.Error()
-		stats.SendErrorToStats(r.listener, err)
-		failedTasks = append(failedTasks, task)
+		r.appendFailedTask(err, task, &failedTasks)
 		return nil, nil, failedTasks, nil
 	}
 
@@ -181,9 +180,7 @@ func (r *task) voteBridgeOperatorsBySignature(task *models.Task) (doneTasks, pro
 	}
 	signature, err := signBridgeOperatorsBallot(opts, event.Period.Int64(), event.Epoch.Int64(), bridgeOperators)
 	if err != nil {
-		task.LastError = err.Error()
-		stats.SendErrorToStats(r.listener, err)
-		failedTasks = append(failedTasks, task)
+		r.appendFailedTask(err, task, &failedTasks)
 		return nil, nil, failedTasks, nil
 	}
 
@@ -212,8 +209,7 @@ func (r *task) voteBridgeOperatorsBySignature(task *models.Task) (doneTasks, pro
 			return doneTasks, nil, nil, nil
 		default:
 			log.Error("[RoninTask][BridgeOperatorSetCallback] Send transaction error", "err", err)
-			task.LastError = err.Error()
-			failedTasks = append(failedTasks, task)
+			r.appendFailedTask(err, task, &failedTasks)
 			return nil, nil, failedTasks, nil
 		}
 	}
@@ -227,25 +223,19 @@ func (r *task) relayBridgeOperators(task *models.Task) (doneTasks, processingTas
 	// create caller
 	roninGovernanceCaller, err := roninGovernance.NewGovernanceCaller(common.HexToAddress(r.contracts[GOVERNANCE_CONTRACT]), r.client)
 	if err != nil {
-		stats.SendErrorToStats(r.listener, err)
-		task.LastError = err.Error()
-		failedTasks = append(failedTasks, task)
+		r.appendFailedTask(err, task, &failedTasks)
 		return nil, nil, failedTasks, nil
 	}
 
 	ethGovernanceTransactor, err := ethGovernance.NewGovernance(common.HexToAddress(r.contracts[ETH_GOVERNANCE_CONTRACT]), r.ethClient)
 	if err != nil {
-		stats.SendErrorToStats(r.listener, err)
-		task.LastError = err.Error()
-		failedTasks = append(failedTasks, task)
+		r.appendFailedTask(err, task, &failedTasks)
 		return nil, nil, failedTasks, nil
 	}
 
 	event, err := r.unpackBridgeOperatorsApprovedEvent(task)
 	if err != nil {
-		stats.SendErrorToStats(r.listener, err)
-		task.LastError = err.Error()
-		failedTasks = append(failedTasks, task)
+		r.appendFailedTask(err, task, &failedTasks)
 		return nil, nil, failedTasks, nil
 	}
 	log.Debug("[RoninTask][BridgeOperatorsApprovedCallback] Unpacked event", "event", event)
@@ -254,9 +244,7 @@ func (r *task) relayBridgeOperators(task *models.Task) (doneTasks, processingTas
 	// Ethereum call
 	ethSyncedInfo, err := ethGovernanceTransactor.LastSyncedBridgeOperatorSetInfo(nil)
 	if err != nil {
-		stats.SendErrorToStats(r.listener, err)
-		task.LastError = err.Error()
-		failedTasks = append(failedTasks, task)
+		r.appendFailedTask(err, task, &failedTasks)
 		return nil, nil, failedTasks, nil
 	}
 	sort.Sort(BridgeOperatorsSorter(ethSyncedInfo.Operators))
@@ -273,9 +261,7 @@ func (r *task) relayBridgeOperators(task *models.Task) (doneTasks, processingTas
 
 	signatures, err := roninGovernanceCaller.GetBridgeOperatorVotingSignatures(nil, event.Period, event.Epoch)
 	if err != nil {
-		stats.SendErrorToStats(r.listener, err)
-		task.LastError = err.Error()
-		failedTasks = append(failedTasks, task)
+		r.appendFailedTask(err, task, &failedTasks)
 		return nil, nil, failedTasks, nil
 	}
 	log.Info("[RoninTask][BridgeOperatorsApprovedCallback] Bridge operator voting signatures", "signatures", signatures.Signatures, "voters", signatures.Voters)
@@ -326,8 +312,7 @@ func (r *task) relayBridgeOperators(task *models.Task) (doneTasks, processingTas
 			return doneTasks, nil, nil, nil
 		default:
 			log.Error("[RoninTask][BridgeOperatorsApprovedCallback] Send transaction error", "err", err)
-			task.LastError = err.Error()
-			failedTasks = append(failedTasks, task)
+			r.appendFailedTask(err, task, &failedTasks)
 			return nil, nil, failedTasks, nil
 		}
 	}
@@ -446,4 +431,10 @@ func signBridgeOperatorsBallot(opts *signDataOpts, period, epoch int64, bridgeOp
 	}
 
 	return opts.SignTypedDataCallback(bridgeOperatorsBallotTypes)
+}
+
+func (r *task) appendFailedTask(err error, task *models.Task, failedTasks *[]*models.Task) {
+	task.LastError = err.Error()
+	stats.SendErrorToStats(r.listener, err)
+	*failedTasks = append(*failedTasks, task)
 }

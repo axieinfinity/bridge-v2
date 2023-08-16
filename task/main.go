@@ -8,6 +8,7 @@ const (
 	WITHDRAWAL_TASK             = "withdrawal"
 	VOTE_BRIDGE_OPERATORS_TASK  = "voteBridgeOperatorsBySignatures"
 	RELAY_BRIDGE_OPERATORS_TASK = "relayBridgeOperators"
+	VRF_RANDOM_SEED_REQUEST     = "randomSeedRequest"
 
 	STATUS_PENDING    = "pending"
 	STATUS_FAILED     = "failed"
@@ -19,13 +20,7 @@ const (
 	TRUSTED_ORGANIZATION_CONTRACT = "TrustedOrganization"
 	ETH_GOVERNANCE_CONTRACT       = "EthGovernance"
 	ETH_GATEWAY_CONTRACT          = "EthGateway"
-	BRIDGEADMIN_CONTRACT          = "BridgeAdmin"
-)
-
-const (
-	VoteStatusPending = iota
-	VoteStatusApproved
-	VoteStatusExecuted
+	VRF_CONTRACT                  = "VRFCoordinatorContract"
 )
 
 type Tasker interface {

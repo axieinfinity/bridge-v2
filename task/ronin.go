@@ -179,7 +179,7 @@ func (r *RoninTask) processPending(ethClient *ethclient.Client) error {
 	if limitQuery == 0 {
 		return nil
 	}
-	tasks, err := r.store.GetTaskStore().GetTasks(hexutil.EncodeBig(r.chainId), STATUS_PENDING, limitQuery, 10, 0, excludeIds)
+	tasks, err := r.store.GetTaskStore().GetTasks(hexutil.EncodeBig(r.chainId), STATUS_PENDING, limitQuery, 10, 0, 0, excludeIds)
 	if err != nil {
 		return err
 	}
@@ -188,103 +188,71 @@ func (r *RoninTask) processPending(ethClient *ethclient.Client) error {
 	}
 	metrics.Pusher.IncrCounter(metrics.PendingTaskMetric, len(tasks))
 
-	bulkDepositTask := newBulkTask(
-		r.listener,
-		r.client,
-		r.store,
-		r.chainId,
-		r.contracts,
-		r.txCheckInterval,
-		defaultMaxTry,
-		DEPOSIT_TASK,
-		r.releaseTasksCh,
-		r.util,
-		r.gasLimitBumpRatio,
-	)
-	bulkSubmitWithdrawalSignaturesTask := newBulkTask(
-		r.listener,
-		r.client,
-		r.store,
-		r.chainId,
-		r.contracts,
-		r.txCheckInterval,
-		defaultMaxTry,
-		WITHDRAWAL_TASK,
-		r.releaseTasksCh,
-		r.util,
-		r.gasLimitBumpRatio,
-	)
-	ackWithdrewTasks := newBulkTask(
-		r.listener,
-		r.client,
-		r.store,
-		r.chainId,
-		r.contracts,
-		r.txCheckInterval,
-		defaultMaxTry,
-		ACK_WITHDREW_TASK,
-		r.releaseTasksCh,
-		r.util,
-		r.gasLimitBumpRatio,
-	)
+	bulkDepositTasks := r.newBulkTask(DEPOSIT_TASK)
+	bulkSubmitWithdrawalSignaturesTasks := r.newBulkTask(WITHDRAWAL_TASK)
+	ackWithdrewTasks := r.newBulkTask(ACK_WITHDREW_TASK)
 
 	singleTasks := make([]*task, 0)
-	for _, task := range tasks {
+	for _, t := range tasks {
 		// lock task
-		r.lockTask(task)
+		r.lockTask(t)
 
 		// collect tasks for bulk deposits
-		bulkDepositTask.collectTask(task)
+		bulkDepositTasks.collectTask(t)
 
 		// collect tasks for bulk withdrawal signature
-		bulkSubmitWithdrawalSignaturesTask.collectTask(task)
+		bulkSubmitWithdrawalSignaturesTasks.collectTask(t)
 
 		// collect tasks for acknowledge withdrawal
-		ackWithdrewTasks.collectTask(task)
+		ackWithdrewTasks.collectTask(t)
 
-		switch task.Type {
-		case VOTE_BRIDGE_OPERATORS_TASK:
-			voteBridgeOperatorsTask := newTask(
-				r.listener,
-				r.client,
-				ethClient,
-				r.store,
-				r.chainId,
-				r.contracts,
-				defaultMaxTry,
-				VOTE_BRIDGE_OPERATORS_TASK,
-				r.releaseTasksCh,
-				r.util,
-				r.gasLimitBumpRatio,
-			)
-			voteBridgeOperatorsTask.collectTask(task)
-			singleTasks = append(singleTasks, voteBridgeOperatorsTask)
-		case RELAY_BRIDGE_OPERATORS_TASK:
-			relayBridgeOperatorsTask := newTask(
-				r.listener,
-				r.client,
-				ethClient,
-				r.store,
-				r.chainId,
-				r.contracts,
-				defaultMaxTry,
-				RELAY_BRIDGE_OPERATORS_TASK,
-				r.releaseTasksCh,
-				r.util,
-				r.gasLimitBumpRatio,
-			)
-			relayBridgeOperatorsTask.collectTask(task)
-			singleTasks = append(singleTasks, relayBridgeOperatorsTask)
-		}
+		r.collectSingleTask(&singleTasks, VOTE_BRIDGE_OPERATORS_TASK, t, ethClient)
+		r.collectSingleTask(&singleTasks, RELAY_BRIDGE_OPERATORS_TASK, t, ethClient)
+		r.collectSingleTask(&singleTasks, VRF_RANDOM_SEED_REQUEST, t, nil)
 	}
-	bulkDepositTask.send()
-	bulkSubmitWithdrawalSignaturesTask.send()
+	bulkDepositTasks.send()
+	bulkSubmitWithdrawalSignaturesTasks.send()
 	ackWithdrewTasks.send()
 
-	for _, task := range singleTasks {
-		task.send()
+	for _, t := range singleTasks {
+		t.send()
 	}
 	return nil
+}
+
+func (r *RoninTask) collectSingleTask(singleTasks *[]*task, taskType string, t *models.Task, ethClient *ethclient.Client) {
+	if taskType == t.Type {
+		*singleTasks = append(*singleTasks, newTask(
+			r.listener,
+			r.client,
+			ethClient,
+			r.store,
+			r.chainId,
+			r.contracts,
+			defaultMaxTry,
+			RELAY_BRIDGE_OPERATORS_TASK,
+			r.releaseTasksCh,
+			r.util,
+			r.gasLimitBumpRatio,
+			t,
+		))
+	}
+}
+
+func (r *RoninTask) newBulkTask(taskType string) *bulkTask {
+	return newBulkTask(
+		r.listener,
+		r.client,
+		r.store,
+		r.chainId,
+		r.contracts,
+		r.txCheckInterval,
+		defaultMaxTry,
+		taskType,
+		r.releaseTasksCh,
+		r.util,
+		r.gasLimitBumpRatio,
+	)
 }
 
 func (r *RoninTask) lockTask(t *models.Task) {
@@ -304,7 +272,7 @@ func (r *RoninTask) checkProcessingTasks() error {
 		}
 	}()
 	before := time.Now().Unix() - int64(r.listener.Config().SafeBlockRange*uint64(r.listener.Config().LoadInterval.Seconds()))
-	tasks, err := r.store.GetTaskStore().GetTasks(hexutil.EncodeBig(r.chainId), STATUS_PROCESSING, r.limitQuery, 2, before, nil)
+	tasks, err := r.store.GetTaskStore().GetTasks(hexutil.EncodeBig(r.chainId), STATUS_PROCESSING, r.limitQuery, 2, before, 0, nil)
 	if err != nil {
 		return err
 	}
