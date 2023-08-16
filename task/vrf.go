@@ -17,7 +17,6 @@ import (
 
 func (r *task) sendFullFillRandomSeedTransactions(task *models.Task) (doneTasks, processingTasks, failedTasks []*models.Task, tx *ethtypes.Transaction) {
 	log.Info("[RoninTask][sendFullFillRandomSeedTransactions] Processing task")
-	// check whether current operator is assigned or not
 	var (
 		err         error
 		event       = new(contract.RoninVRFCoordinatorRandomSeedRequested)
@@ -39,7 +38,7 @@ func (r *task) sendFullFillRandomSeedTransactions(task *models.Task) (doneTasks,
 		goto ERROR
 	}
 	// req is finalized, GOTO update done
-	finalized, err = isFinalized(caller, event.ReqHash)
+	finalized, err = IsFinalized(caller, event.ReqHash)
 	if err != nil {
 		goto ERROR
 	}
@@ -119,7 +118,7 @@ func isAssigned(signer utils.ISign, assignee common.Address) bool {
 	return true
 }
 
-func isFinalized(caller *contract.RoninVRFCoordinatorCaller, req [32]byte) (bool, error) {
+func IsFinalized(caller *contract.RoninVRFCoordinatorCaller, req [32]byte) (bool, error) {
 	result, err := caller.RequestFinalized(nil, req)
 	if err != nil {
 		return false, err

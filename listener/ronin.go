@@ -309,6 +309,20 @@ func (l *RoninListener) RandomSeedRequestedCallback(fromChainId *big.Int, tx bri
 	if err = l.utilsWrapper.UnpackLog(*contractAbi, event, "RandomSeedRequested", data); err != nil {
 		return err
 	}
+	// call to contract to see if the request is finalized or not?
+	caller, err := contract.NewRoninVRFCoordinatorCaller(common.HexToAddress(task.VRFConfig.ContractAddress), l.client)
+	if err != nil {
+		log.Error("error while init new VRF caller", "err", err, "contractAddress", task.VRFConfig.ContractAddress)
+		return err
+	}
+	isFinalized, err := task.IsFinalized(caller, event.ReqHash)
+	if err != nil {
+		log.Error("error while checking random request is finalized or not", "err", err)
+		return err
+	}
+	if isFinalized {
+		return nil
+	}
 	// get chainID
 	chainId, err := l.GetChainID()
 	if err != nil {
