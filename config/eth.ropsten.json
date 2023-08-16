@@ -1,56 +1,60 @@
 {
   "listeners": {
     "Ronin": {
-      "disabled": true,
-      "chainId": "0x7e5",
-      "rpcUrl": "http://localhost:8545",
-      "blockTime": 3,
-      "safeBlockRange": 3,
-      "transactionCheckPeriod": 5,
-      "secret": {
-        "validator": "",
-        "relayer": ""
-      },
-      "fromHeight": 6567000,
-      "contracts": {
-        "Gateway": "0x03d1F13c7391F6B5A651143a31034cf728A93694"
+      "config": {
+        "disabled": true,
+        "chainId": "0x7e5",
+        "rpcUrl": "http://localhost:8545",
+        "blockTime": 3,
+        "safeBlockRange": 3,
+        "transactionCheckPeriod": 5,
+        "secret": {
+          "validator": "",
+          "relayer": ""
+        },
+        "fromHeight": 6567000,
+        "contracts": {
+          "Gateway": "0x03d1F13c7391F6B5A651143a31034cf728A93694"
+        }
       }
     },
     "Ethereum": {
-      "chainId": "0x3",
-      "rpcUrl": "",
-      "blockTime": 15,
-      "safeBlockRange": 8,
-      "transactionCheckPeriod": 5,
-      "secret": {
-        "validator": "",
-        "relayer": ""
-      },
-      "fromHeight": 12234008,
-      "contracts": {
-        "Gateway": "0x03d1F13c7391F6B5A651143a31034cf728A93694"
-      },
-      "subscriptions": {
-        "DepositRequestedSubscription": {
-          "to": "0x3b6371EB912bFd5C0E249A16000ffbC6B881555A",
-          "type": 1,
-          "handler": {
-            "contract": "EthereumGateway",
-            "name": "DepositRequested"
-          },
-          "callbacks": {
-            "Ronin": "DepositRequestedCallback"
-          }
+      "config": {
+        "chainId": "0x3",
+        "rpcUrl": "",
+        "blockTime": 15,
+        "safeBlockRange": 8,
+        "transactionCheckPeriod": 5,
+        "secret": {
+          "validator": "",
+          "relayer": ""
         },
-        "WithdrewSubscription": {
-          "to": "0x3b6371EB912bFd5C0E249A16000ffbC6B881555A",
-          "type": 1,
-          "handler": {
-            "contract": "EthereumGateway",
-            "name": "Withdrew"
+        "fromHeight": 12234008,
+        "contracts": {
+          "Gateway": "0x03d1F13c7391F6B5A651143a31034cf728A93694"
+        },
+        "subscriptions": {
+          "DepositRequestedSubscription": {
+            "to": "0x3b6371EB912bFd5C0E249A16000ffbC6B881555A",
+            "type": 1,
+            "handler": {
+              "contract": "EthereumGateway",
+              "name": "DepositRequested"
+            },
+            "callbacks": {
+              "Ronin": "DepositRequestedCallback"
+            }
           },
-          "callbacks": {
-            "Ronin": "WithdrewCallback"
+          "WithdrewSubscription": {
+            "to": "0x3b6371EB912bFd5C0E249A16000ffbC6B881555A",
+            "type": 1,
+            "handler": {
+              "contract": "EthereumGateway",
+              "name": "Withdrew"
+            },
+            "callbacks": {
+              "Ronin": "WithdrewCallback"
+            }
           }
         }
       }

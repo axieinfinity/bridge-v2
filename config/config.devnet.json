@@ -1,133 +1,137 @@
 {
   "listeners": {
     "Ronin": {
-      "chainId": "0x7e5",
-      "rpcUrl": "http://localhost:8545",
-      "blockTime": 3,
-      "safeBlockRange": 10,
-      "maxTasksQuery": 1000,
-      "minTasksQuery": 50,
-      "taskInterval": 3,
-      "transactionCheckPeriod": 5,
-      "secret": {
-        "bridgeOperator": {
-          "plainPrivateKey": ""
-        },
-        "voter": {
-          "plainPrivateKey": ""
-        },
-        "relayer": {
-          "plainPrivateKey": ""
-        }
-      },
-      "fromHeight": 8010875,
-      "processWithinBlocks": 864000,
-      "contracts": {
-        "Gateway": "0xA8D61A5427a778be28Bd9bb5990956b33385c738",
-        "EthGateway": "0xb68cbBDd4C7b3e4e39C035Bd356FC5BDb7E2a50E",
-        "EthGovernance": "",
-        "Governance": "",
-        "TrustedOrganization": ""
-      },
-      "subscriptions": {
-        "MainchainWithdrewSubscription": {
-          "to": "0xA8D61A5427a778be28Bd9bb5990956b33385c738",
-          "type": 1,
-          "handler": {
-            "contract": "RoninGateway",
-            "name": "MainchainWithdrew"
+      "config": {
+        "chainId": "0x7e5",
+        "rpcUrl": "http://localhost:8545",
+        "blockTime": 3,
+        "safeBlockRange": 10,
+        "maxTasksQuery": 1000,
+        "minTasksQuery": 50,
+        "taskInterval": 3,
+        "transactionCheckPeriod": 5,
+        "secret": {
+          "bridgeOperator": {
+            "plainPrivateKey": ""
           },
-          "callbacks": {
-            "Ronin": "StoreMainchainWithdrawCallback"
+          "voter": {
+            "plainPrivateKey": ""
+          },
+          "relayer": {
+            "plainPrivateKey": ""
           }
         },
-        "WithdrawalRequestedSubscription": {
-          "to": "0xA8D61A5427a778be28Bd9bb5990956b33385c738",
-          "type": 1,
-          "handler": {
-            "contract": "RoninGateway",
-            "name": "WithdrawalRequested"
-          },
-          "callbacks": {
-            "Ronin": "ProvideReceiptSignatureCallback"
-          }
+        "fromHeight": 8010875,
+        "processWithinBlocks": 864000,
+        "contracts": {
+          "Gateway": "0xA8D61A5427a778be28Bd9bb5990956b33385c738",
+          "EthGateway": "0xb68cbBDd4C7b3e4e39C035Bd356FC5BDb7E2a50E",
+          "EthGovernance": "",
+          "Governance": "",
+          "TrustedOrganization": ""
         },
-        "WithdrawalSignaturesRequestedSubscription": {
-          "to": "0xA8D61A5427a778be28Bd9bb5990956b33385c738",
-          "type": 1,
-          "handler": {
-            "contract": "RoninGateway",
-            "name": "WithdrawalSignaturesRequested"
+        "subscriptions": {
+          "MainchainWithdrewSubscription": {
+            "to": "0xA8D61A5427a778be28Bd9bb5990956b33385c738",
+            "type": 1,
+            "handler": {
+              "contract": "RoninGateway",
+              "name": "MainchainWithdrew"
+            },
+            "callbacks": {
+              "Ronin": "StoreMainchainWithdrawCallback"
+            }
           },
-          "callbacks": {
-            "Ronin": "ProvideReceiptSignatureAgainCallback"
-          }
-        },
-        "BridgeOperatorSetUpdatedSubscription": {
-          "to": "",
-          "type": 1,
-          "handler": {
-            "contract": "RoninValidator",
-            "name": "BridgeOperatorSetUpdated"
+          "WithdrawalRequestedSubscription": {
+            "to": "0xA8D61A5427a778be28Bd9bb5990956b33385c738",
+            "type": 1,
+            "handler": {
+              "contract": "RoninGateway",
+              "name": "WithdrawalRequested"
+            },
+            "callbacks": {
+              "Ronin": "ProvideReceiptSignatureCallback"
+            }
           },
-          "callbacks": {
-            "Ronin": "BridgeOperatorSetUpdatedCallback"
-          }
-        },
-        "BridgeOperatorsApprovedSubscription": {
-          "to": "",
-          "type": 1,
-          "handler": {
-            "contract": "RoninGovernanceAdmin",
-            "name": "BridgeOperatorsApproved"
+          "WithdrawalSignaturesRequestedSubscription": {
+            "to": "0xA8D61A5427a778be28Bd9bb5990956b33385c738",
+            "type": 1,
+            "handler": {
+              "contract": "RoninGateway",
+              "name": "WithdrawalSignaturesRequested"
+            },
+            "callbacks": {
+              "Ronin": "ProvideReceiptSignatureAgainCallback"
+            }
           },
-          "callbacks": {
-            "Ronin": "BridgeOperatorsApprovedCallback"
+          "BridgeOperatorSetUpdatedSubscription": {
+            "to": "",
+            "type": 1,
+            "handler": {
+              "contract": "RoninValidator",
+              "name": "BridgeOperatorSetUpdated"
+            },
+            "callbacks": {
+              "Ronin": "BridgeOperatorSetUpdatedCallback"
+            }
+          },
+          "BridgeOperatorsApprovedSubscription": {
+            "to": "",
+            "type": 1,
+            "handler": {
+              "contract": "RoninGovernanceAdmin",
+              "name": "BridgeOperatorsApproved"
+            },
+            "callbacks": {
+              "Ronin": "BridgeOperatorsApprovedCallback"
+            }
           }
         }
       }
     },
     "Ethereum": {
-      "disabled": false,
-      "chainId": "0x5",
-      "rpcUrl": "",
-      "blockTime": 15,
-      "safeBlockRange": 8,
-      "transactionCheckPeriod": 15,
-      "secret": {
-        "bridgeOperator": {
-          "plainPrivateKey": ""
-        },
-        "relayer": {
-          "plainPrivateKey": ""
-        }
-      },
-      "fromHeight": 12522064,
-      "processWithinBlocks": 198720,
-      "contracts": {
-        "Gateway": "0xA8D61A5427a778be28Bd9bb5990956b33385c738"
-      },
-      "subscriptions": {
-        "DepositRequestedSubscription": {
-          "to": "0xb68cbBDd4C7b3e4e39C035Bd356FC5BDb7E2a50E",
-          "type": 1,
-          "handler": {
-            "contract": "EthereumGateway",
-            "name": "DepositRequested"
+      "config": {
+        "disabled": false,
+        "chainId": "0x5",
+        "rpcUrl": "",
+        "blockTime": 15,
+        "safeBlockRange": 8,
+        "transactionCheckPeriod": 15,
+        "secret": {
+          "bridgeOperator": {
+            "plainPrivateKey": ""
           },
-          "callbacks": {
-            "Ronin": "DepositRequestedCallback"
+          "relayer": {
+            "plainPrivateKey": ""
           }
         },
-        "WithdrewSubscription": {
-          "to": "0xb68cbBDd4C7b3e4e39C035Bd356FC5BDb7E2a50E",
-          "type": 1,
-          "handler": {
-            "contract": "EthereumGateway",
-            "name": "Withdrew"
+        "fromHeight": 12522064,
+        "processWithinBlocks": 198720,
+        "contracts": {
+          "Gateway": "0xA8D61A5427a778be28Bd9bb5990956b33385c738"
+        },
+        "subscriptions": {
+          "DepositRequestedSubscription": {
+            "to": "0xb68cbBDd4C7b3e4e39C035Bd356FC5BDb7E2a50E",
+            "type": 1,
+            "handler": {
+              "contract": "EthereumGateway",
+              "name": "DepositRequested"
+            },
+            "callbacks": {
+              "Ronin": "DepositRequestedCallback"
+            }
           },
-          "callbacks": {
-            "Ronin": "WithdrewCallback"
+          "WithdrewSubscription": {
+            "to": "0xb68cbBDd4C7b3e4e39C035Bd356FC5BDb7E2a50E",
+            "type": 1,
+            "handler": {
+              "contract": "EthereumGateway",
+              "name": "Withdrew"
+            },
+            "callbacks": {
+              "Ronin": "WithdrewCallback"
+            }
           }
         }
       }

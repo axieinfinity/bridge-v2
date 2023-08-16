@@ -12,10 +12,10 @@ import (
 var VRFConfig *VRF
 
 type VRF struct {
-	WaitForBlock    int          `json:"waitForBlock"`
-	ContractAddress string       `json:"contractAddress"`
-	ContractName    string       `json:"contractName"`
-	SecretKey       string       `json:"secretKey"`
+	WaitForBlock    int          `json:"waitForBlock" mapstructure:"waitForBlock"`
+	ContractAddress string       `json:"contractAddress" mapstructure:"contractAddress"`
+	ContractName    string       `json:"contractName" mapstructure:"contractName"`
+	SecretKey       string       `json:"secretKey" mapstructure:"secretKey"`
 	Key             vrfkey.KeyV2 `json:"-"`
 	KeyHash         common.Hash  `json:"-"`
 }

@@ -229,7 +229,7 @@ require (
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.0
 	github.com/axieinfinity/bridge-contracts v0.0.0-20230403071733-9fca121e6448
-	github.com/axieinfinity/bridge-core v0.1.2-0.20230417033945-8258b81bcbe5
+	github.com/axieinfinity/bridge-core v0.1.3-0.20230816014356-1fe5563768e0
 	github.com/axieinfinity/bridge-migrations v0.0.0-20230405070530-7bb3be2afe72
 	github.com/axieinfinity/ronin-kms-client v0.0.0-20220805072849-960e04981b70
 	github.com/ethereum/go-ethereum v1.10.26
@@ -294,7 +294,7 @@ require (
 	github.com/tklauser/numcpus v0.6.0 // indirect
 	github.com/tyler-smith/go-bip39 v1.1.0 // indirect
 	github.com/yusufpapurcu/wmi v1.2.2 // indirect
-	golang.org/x/net v0.6.0 // indirect
+	golang.org/x/net v0.7.0 // indirect
 	golang.org/x/sync v0.1.0 // indirect
 	golang.org/x/text v0.7.0 // indirect
 	google.golang.org/genproto v0.0.0-20221107162902-2d387536bcdd // indirect
