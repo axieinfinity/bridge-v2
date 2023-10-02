@@ -26,6 +26,7 @@ require (
 	github.com/axieinfinity/bridge-migrations v0.0.0-20230405070530-7bb3be2afe72
 	github.com/axieinfinity/ronin-kms-client v0.0.0-20220805072849-960e04981b70
 	github.com/ethereum/go-ethereum v1.10.21
+	github.com/gorilla/websocket v1.5.0
 	github.com/stretchr/testify v1.8.1
 	gorm.io/driver/postgres v1.4.5
 )
@@ -33,7 +34,6 @@ require (
 require (
 	github.com/VictoriaMetrics/fastcache v1.12.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
-	github.com/btcsuite/btcd v0.22.0-beta // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/edsrzf/mmap-go v1.1.0 // indirect
@@ -44,7 +44,6 @@ require (
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/uuid v1.3.0 // indirect
-	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/hashicorp/golang-lru v0.5.5-0.20210104140557-80c98217689d // indirect
 	github.com/holiman/bloomfilter/v2 v2.0.3 // indirect
 	github.com/holiman/uint256 v1.2.1 // indirect
