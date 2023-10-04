@@ -27,7 +27,8 @@ import (
 )
 
 const (
-	ErrNotBridgeOperator = "execution reverted: RoninGatewayV2: unauthorized sender"
+	ErrNotBridgeOperator      = "execution reverted: RoninGatewayV2: unauthorized sender"
+	BridgeManagerContractType = 11
 )
 
 type bulkTask struct {
@@ -86,11 +87,10 @@ func (r *bulkTask) getSignMethod() utils.ISign {
 		return nil
 	}
 
-	// Bridge tracking contract is only avaible in DPoS version.
+	// getContract is only available in newer version.
 	// If we get error when calling this function, it means it is
-	// in POA version, return legacy bridge operator if it is
-	// provided.
-	_, err = caller.BridgeTrackingContract(nil)
+	// in older version, return legacy bridge operator if it is provided.
+	_, err = caller.GetContract(nil, BridgeManagerContractType)
 	if err != nil && r.listener.GetLegacyBridgeOperatorSign() != nil {
 		log.Debug("[bulkTask][getSignMethod] Use legacy bridge operator key")
 		return r.listener.GetLegacyBridgeOperatorSign()
