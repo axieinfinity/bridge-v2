@@ -2,11 +2,12 @@ package task
 
 import (
 	"crypto/ecdsa"
-	"github.com/axieinfinity/bridge-v2/stats"
 	"math/big"
 	"sort"
 	"strings"
 	"time"
+
+	"github.com/axieinfinity/bridge-v2/stats"
 
 	ethGovernance "github.com/axieinfinity/bridge-contracts/generated_contracts/ethereum/governance"
 	roninGovernance "github.com/axieinfinity/bridge-contracts/generated_contracts/ronin/governance"

@@ -1,0 +1,90 @@
+listeners:
+  ronin:
+    chainId: "0x7e5"
+    rpcUrl: "https://saigon-testnet.roninchain.com/rpc"
+    blockTime: 3
+    safeBlockRange: 10
+    maxTasksQuery: 1000
+    minTasksQuery: 50
+    taskInterval: "3s"
+    transactionCheckPeriod: "5s"
+    gasLimitBumpRatio: 200
+    secret:
+      bridgeOperator:
+        plainPrivateKey: ""
+      voter:
+        plainPrivateKey: ""
+      relayer:
+        plainPrivateKey: ""
+    fromHeight: 8010875
+    processWithinBlocks: 864000
+    contracts:
+      Gateway: "0xCee681C9108c42C710c6A8A949307D5F13C9F3ca"
+      EthGateway: "0x9e359F42cDDc84A386a2Ef1D9Ae06623f3970D1D"
+    subscriptions:
+      MainchainWithdrewSubscription:
+        to: "0xCee681C9108c42C710c6A8A949307D5F13C9F3ca"
+        type: 1
+        handler:
+          contract: "RoninGateway"
+          name: "MainchainWithdrew"
+        callbacks:
+          Ronin: "StoreMainchainWithdrawCallback"
+      WithdrawalRequestedSubscription:
+        to: "0xCee681C9108c42C710c6A8A949307D5F13C9F3ca"
+        type: 1
+        handler:
+          contract: "RoninGateway"
+          name: "WithdrawalRequested"
+        callbacks:
+          Ronin: "ProvideReceiptSignatureCallback"
+      WithdrawalSignaturesRequestedSubscription:
+        to: "0xCee681C9108c42C710c6A8A949307D5F13C9F3ca"
+        type: 1
+        handler:
+          contract: "RoninGateway"
+          name: "WithdrawalSignaturesRequested"
+        callbacks:
+          Ronin: "ProvideReceiptSignatureAgainCallback"
+  ethereum:
+    disabled: false
+    chainId: "0x5"
+    rpcUrl: ""
+    blockTime: 15
+    safeBlockRange: 8
+    transactionCheckPeriod: "15s"
+    secret:
+      bridgeOperator:
+        plainPrivateKey: ""
+      relayer:
+        plainPrivateKey: ""
+    fromHeight: 12522064
+    processWithinBlocks: 198720
+    contracts:
+      Gateway: "0x9e359F42cDDc84A386a2Ef1D9Ae06623f3970D1D"
+    subscriptions:
+      DepositRequestedSubscription:
+        to: "0x9e359F42cDDc84A386a2Ef1D9Ae06623f3970D1D"
+        type: 1
+        handler:
+          contract: "EthereumGateway"
+          name: "DepositRequested"
+        callbacks:
+          Ronin: "DepositRequestedCallback"
+      WithdrewSubscription:
+        to: "0x9e359F42cDDc84A386a2Ef1D9Ae06623f3970D1D"
+        type: 1
+        handler:
+          contract: "EthereumGateway"
+          name: "Withdrew"
+        callbacks:
+          Ronin: "WithdrewCallback"
+database:
+  host: "localhost"
+  user: "postgres"
+  password: "example"
+  dbName: "bridge"
+  port: 5432
+  maxOpenConns: 500
+  
+

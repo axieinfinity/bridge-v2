@@ -1,14 +1,14 @@
 {
   "listeners": {
-    "Ronin": {
+    "ronin": {
       "chainId": "0x7e4",
       "rpcUrl": "http://localhost:8545",
       "blockTime": 3,
       "safeBlockRange": 10,
       "maxTasksQuery": 1000,
       "minTasksQuery": 50,
-      "taskInterval": 10,
-      "transactionCheckPeriod": 50,
+      "taskInterval": "10s",
+      "transactionCheckPeriod": "50s",
       "gasLimitBumpRatio": 300,
       "secret": {
         "bridgeOperator": {
@@ -88,13 +88,13 @@
         }
       }
     },
-    "Ethereum": {
+    "ethereum": {
       "disabled": false,
       "chainId": "0x1",
       "rpcUrl": "",
       "blockTime": 15,
       "safeBlockRange": 8,
-      "transactionCheckPeriod": 15,
+      "transactionCheckPeriod": "15s",
       "getLogsBatchSize": 200,
       "secret": {
         "bridgeOperator": {

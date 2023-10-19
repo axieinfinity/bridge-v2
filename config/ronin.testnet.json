@@ -1,16 +1,21 @@
 {
   "listeners": {
-    "Ronin": {
+    "ronin": {
       "chainId": "0x7e5",
-      "rpcUrl": "http://localhost:8545",
+      "rpcUrl": "https://saigon-testnet.roninchain.com/rpc",
       "blockTime": 3,
       "safeBlockRange": 3,
-      "transactionCheckPeriod": 5,
+      "transactionCheckPeriod": "5s",
       "secret": {
-        "validator": "",
-        "relayer": ""
+        "bridgeOperator": {
+          "plainPrivateKey": ""
+        },
+        "relayer": {
+          "plainPrivateKey": ""
+        }
       },
-      "fromHeight": 6508284,
+      "fromHeight": 8010875,
+      "processWithinBlocks": 864000,
       "contracts": {
         "Gateway": "0x03d1F13c7391F6B5A651143a31034cf728A93694"
       },

@@ -2,6 +2,7 @@ package task
 
 import (
 	"bytes"
+
 	"github.com/ethereum/go-ethereum/common"
 )
 
