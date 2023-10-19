@@ -22,7 +22,7 @@ require (
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.0
 	github.com/axieinfinity/bridge-contracts v0.0.0-20231004085724-072c76e1bf73
-	github.com/axieinfinity/bridge-core v0.1.3-0.20231019070148-c0fac5aefd89
+	github.com/axieinfinity/bridge-core v0.1.3-0.20231019083704-13047bb9c3bf
 	github.com/axieinfinity/bridge-migrations v0.0.0-20230405070530-7bb3be2afe72
 	github.com/ethereum/go-ethereum v1.10.26
 	github.com/gorilla/websocket v1.5.0
