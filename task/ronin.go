@@ -44,7 +44,9 @@ type RoninTask struct {
 	txCheckInterval time.Duration
 	secret          *bridgeCore.Secret
 
-	client    *ethclient.Client
+	roninRpcClient *ethclient.Client
+	ethRpcClient   *ethclient.Client
+
 	contracts map[string]string
 
 	limitQuery int
@@ -84,7 +86,7 @@ func NewRoninTask(listener bridgeCore.Listener, db *gorm.DB, util utils.Utils) (
 		txCheckInterval:    defaultReceiptCheck,
 		secret:             config.Secret,
 		contracts:          config.Contracts,
-		client:             client,
+		roninRpcClient:     client,
 		chainId:            chainId,
 		util:               util,
 		limitQuery:         defaultLimitRecords,
@@ -112,14 +114,16 @@ func (r *RoninTask) Start() {
 	taskTicker := time.NewTicker(r.taskInterval)
 	processingTicker := time.NewTicker(r.txCheckInterval)
 
-	ethConfig := r.listener.GetListener(bridgeUtils.Ethereum).Config()
-	ethClient, _ := ethclient.Dial(ethConfig.RpcUrl)
+	if r.listener.GetListener(bridgeUtils.Ethereum) != nil {
+		ethConfig := r.listener.GetListener(bridgeUtils.Ethereum).Config()
+		r.ethRpcClient, _ = ethclient.Dial(ethConfig.RpcUrl)
+	}
 
 	for {
 		select {
 		case <-taskTicker.C:
 			go func() {
-				if err := r.processPending(ethClient); err != nil {
+				if err := r.processPending(); err != nil {
 					log.Error("[RoninTask] error while process tasks", "err", err)
 				}
 			}()
@@ -133,7 +137,10 @@ func (r *RoninTask) Start() {
 			r.unlockTask(id)
 
 		case <-r.ctx.Done():
-			r.client.Close()
+			r.roninRpcClient.Close()
+			if r.ethRpcClient != nil {
+				r.ethRpcClient.Close()
+			}
 			return
 		}
 	}
@@ -162,7 +169,7 @@ func (r *RoninTask) getLimitQuery(numberOfExcludedIds int) int {
 	return r.limitQuery
 }
 
-func (r *RoninTask) processPending(ethClient *ethclient.Client) error {
+func (r *RoninTask) processPending() error {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Error("[RoninTask][processPending] recover from panic", "err", err, "trace", string(debug.Stack()))
@@ -190,7 +197,7 @@ func (r *RoninTask) processPending(ethClient *ethclient.Client) error {
 
 	bulkDepositTask := newBulkTask(
 		r.listener,
-		r.client,
+		r.roninRpcClient,
 		r.store,
 		r.chainId,
 		r.contracts,
@@ -203,7 +210,7 @@ func (r *RoninTask) processPending(ethClient *ethclient.Client) error {
 	)
 	bulkSubmitWithdrawalSignaturesTask := newBulkTask(
 		r.listener,
-		r.client,
+		r.roninRpcClient,
 		r.store,
 		r.chainId,
 		r.contracts,
@@ -216,7 +223,7 @@ func (r *RoninTask) processPending(ethClient *ethclient.Client) error {
 	)
 	ackWithdrewTasks := newBulkTask(
 		r.listener,
-		r.client,
+		r.roninRpcClient,
 		r.store,
 		r.chainId,
 		r.contracts,
@@ -228,61 +235,51 @@ func (r *RoninTask) processPending(ethClient *ethclient.Client) error {
 		r.gasLimitBumpRatio,
 	)
 
-	singleTasks := make([]*task, 0)
-	for _, task := range tasks {
+	singleTasks := make([]Tasker, 0)
+	for _, t := range tasks {
 		// lock task
-		r.lockTask(task)
+		r.lockTask(t)
 
 		// collect tasks for bulk deposits
-		bulkDepositTask.collectTask(task)
+		bulkDepositTask.collectTask(t)
 
 		// collect tasks for bulk withdrawal signature
-		bulkSubmitWithdrawalSignaturesTask.collectTask(task)
+		bulkSubmitWithdrawalSignaturesTask.collectTask(t)
 
 		// collect tasks for acknowledge withdrawal
-		ackWithdrewTasks.collectTask(task)
+		ackWithdrewTasks.collectTask(t)
 
-		switch task.Type {
-		case VOTE_BRIDGE_OPERATORS_TASK:
-			voteBridgeOperatorsTask := newTask(
-				r.listener,
-				r.client,
-				ethClient,
-				r.store,
-				r.chainId,
-				r.contracts,
-				defaultMaxTry,
-				VOTE_BRIDGE_OPERATORS_TASK,
-				r.releaseTasksCh,
-				r.util,
-				r.gasLimitBumpRatio,
-			)
-			voteBridgeOperatorsTask.collectTask(task)
-			singleTasks = append(singleTasks, voteBridgeOperatorsTask)
-		case RELAY_BRIDGE_OPERATORS_TASK:
-			relayBridgeOperatorsTask := newTask(
-				r.listener,
-				r.client,
-				ethClient,
-				r.store,
-				r.chainId,
-				r.contracts,
-				defaultMaxTry,
-				RELAY_BRIDGE_OPERATORS_TASK,
-				r.releaseTasksCh,
-				r.util,
-				r.gasLimitBumpRatio,
-			)
-			relayBridgeOperatorsTask.collectTask(task)
-			singleTasks = append(singleTasks, relayBridgeOperatorsTask)
+		if operatorTask := r.collectOperatorsTask(t); operatorTask != nil {
+			singleTasks = append(singleTasks, operatorTask)
 		}
 	}
 	bulkDepositTask.send()
 	bulkSubmitWithdrawalSignaturesTask.send()
 	ackWithdrewTasks.send()
 
-	for _, task := range singleTasks {
-		task.send()
+	for _, t := range singleTasks {
+		t.send()
+	}
+	return nil
+}
+
+func (r *RoninTask) collectOperatorsTask(task *models.Task) Tasker {
+	if r.ethRpcClient != nil && (task.Type == VOTE_BRIDGE_OPERATORS_TASK || task.Type == RELAY_BRIDGE_OPERATORS_TASK) {
+		operatorTask := newTask(
+			r.listener,
+			r.roninRpcClient,
+			r.ethRpcClient,
+			r.store,
+			r.chainId,
+			r.contracts,
+			defaultMaxTry,
+			task.Type,
+			r.releaseTasksCh,
+			r.util,
+			r.gasLimitBumpRatio,
+		)
+		operatorTask.collectTask(task)
+		return operatorTask
 	}
 	return nil
 }

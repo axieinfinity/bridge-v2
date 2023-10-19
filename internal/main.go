@@ -19,8 +19,8 @@ type BridgeController struct {
 }
 
 func NewBridgeController(cfg *bridgeCore.Config, db *gorm.DB, helpers utils.Utils) (*BridgeController, error) {
-	bridgeCore.AddListener("Ethereum", InitEthereum)
-	bridgeCore.AddListener("Ronin", InitRonin)
+	bridgeCore.AddListener("ethereum", InitEthereum)
+	bridgeCore.AddListener("ronin", InitRonin)
 	controller, err := bridgeCore.New(cfg, db, helpers)
 	if err != nil {
 		return nil, err
@@ -39,6 +39,7 @@ func InitEthereum(ctx context.Context, lsConfig *bridgeCore.LsConfig, store brid
 }
 
 func InitRonin(ctx context.Context, lsConfig *bridgeCore.LsConfig, store bridgeCoreStores.MainStore, helpers utils.Utils, pool *bridgeCore.Pool) bridgeCore.Listener {
+	log.Info("initiating ronin listener")
 	roninListener, err := listener.NewRoninListener(ctx, lsConfig, helpers, store, pool)
 	if err != nil {
 		log.Error("[RoninListener]Error while init new ronin listener", "err", err)

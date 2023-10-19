@@ -2,9 +2,10 @@ package listener
 
 import (
 	"context"
-	"github.com/axieinfinity/bridge-v2/stats"
 	"math/big"
 	"time"
+
+	"github.com/axieinfinity/bridge-v2/stats"
 
 	bridgeCore "github.com/axieinfinity/bridge-core"
 	bridgeCoreModels "github.com/axieinfinity/bridge-core/models"
