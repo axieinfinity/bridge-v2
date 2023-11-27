@@ -2,7 +2,7 @@ module github.com/axieinfinity/bridge-v2
 
 replace github.com/ethereum/go-ethereum => github.com/axieinfinity/ronin v1.10.4-0.20230327040419-9bf4895fbd51
 
-go 1.18
+go 1.20
 
 require (
 	github.com/fjl/memsize v0.0.0-20190710130421-bcb5799ab5e5
@@ -26,6 +26,7 @@ require (
 	github.com/axieinfinity/bridge-migrations v0.0.0-20230405070530-7bb3be2afe72
 	github.com/axieinfinity/ronin-kms-client v0.0.0-20220805072849-960e04981b70
 	github.com/ethereum/go-ethereum v1.10.21
+	github.com/gorilla/websocket v1.5.0
 	github.com/stretchr/testify v1.8.1
 	gorm.io/driver/postgres v1.4.5
 )
@@ -44,7 +45,6 @@ require (
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/uuid v1.3.0 // indirect
-	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/hashicorp/golang-lru v0.5.5-0.20210104140557-80c98217689d // indirect
 	github.com/holiman/bloomfilter/v2 v2.0.3 // indirect
 	github.com/holiman/uint256 v1.2.1 // indirect
