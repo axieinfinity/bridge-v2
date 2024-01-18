@@ -240,19 +240,15 @@ func (e *EthereumListener) GetProcessedBlock() (bridgeCore.Block, error) {
 		log.Error(fmt.Sprintf("[%sListener][GetLatestBlock] error while getting latest height from database", e.GetName()), "err", err, "chainId", encodedChainId)
 		return nil, err
 	}
-	block, err := e.client.BlockByNumber(e.ctx, big.NewInt(height))
-	if err != nil {
-		return nil, err
-	}
-	return NewEthBlock(e.client, block, false)
+	return e.GetBlock(uint64(height))
 }
 
 func (e *EthereumListener) GetLatestBlock() (bridgeCore.Block, error) {
-	block, err := e.client.BlockByNumber(e.ctx, nil)
+	header, err := e.client.HeaderByNumber(e.ctx, nil)
 	if err != nil {
 		return nil, err
 	}
-	return NewEthBlock(e.client, block, false)
+	return NewEthBlock(e.client, ethtypes.NewBlockWithHeader(header), false)
 }
 
 func (e *EthereumListener) GetLatestBlockHeight() (uint64, error) {
