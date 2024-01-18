@@ -240,19 +240,15 @@ func (e *EthereumListener) GetProcessedBlock() (bridgeCore.Block, error) {
 		log.Error(fmt.Sprintf("[%sListener][GetLatestBlock] error while getting latest height from database", e.GetName()), "err", err, "chainId", encodedChainId)
 		return nil, err
 	}
-	block, err := e.client.BlockByNumber(e.ctx, big.NewInt(height))
-	if err != nil {
-		return nil, err
-	}
-	return NewEthBlock(e.client, chainId, block, false)
+	return e.GetBlock(uint64(height))
 }
 
 func (e *EthereumListener) GetLatestBlock() (bridgeCore.Block, error) {
-	block, err := e.client.BlockByNumber(e.ctx, nil)
+	header, err := e.client.HeaderByNumber(e.ctx, nil)
 	if err != nil {
 		return nil, err
 	}
-	return NewEthBlock(e.client, e.chainId, block, false)
+	return NewEthBlock(ethtypes.NewBlockWithHeader(header)), nil
 }
 
 func (e *EthereumListener) GetLatestBlockHeight() (uint64, error) {
@@ -363,19 +359,15 @@ func (e *EthereumListener) SendCallbackJobs(listeners map[string]bridgeCore.List
 }
 
 func (e *EthereumListener) GetBlock(height uint64) (bridgeCore.Block, error) {
-	block, err := e.client.BlockByNumber(e.ctx, big.NewInt(int64(height)))
+	header, err := e.client.HeaderByNumber(e.ctx, big.NewInt(int64(height)))
 	if err != nil {
 		return nil, err
 	}
-	return NewEthBlock(e.client, e.chainId, block, false)
+	return NewEthBlock(ethtypes.NewBlockWithHeader(header)), nil
 }
 
 func (e *EthereumListener) GetBlockWithLogs(height uint64) (bridgeCore.Block, error) {
-	block, err := e.client.BlockByNumber(e.ctx, big.NewInt(int64(height)))
-	if err != nil {
-		return nil, err
-	}
-	return NewEthBlock(e.client, e.chainId, block, true)
+	return nil, nil
 }
 
 func (e *EthereumListener) GetReceipt(txHash common.Hash) (*ethtypes.Receipt, error) {

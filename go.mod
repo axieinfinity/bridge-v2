@@ -1,6 +1,6 @@
 module github.com/axieinfinity/bridge-v2
 
-replace github.com/ethereum/go-ethereum => github.com/axieinfinity/ronin v1.10.4-0.20230327040419-9bf4895fbd51
+replace github.com/ethereum/go-ethereum => github.com/axieinfinity/ronin v1.10.4-0.20240117085004-bf2f0d1787d0
 
 go 1.20
 
@@ -8,15 +8,15 @@ require (
 	github.com/fjl/memsize v0.0.0-20190710130421-bcb5799ab5e5
 	github.com/hashicorp/go-bexpr v0.1.10
 	github.com/mattn/go-colorable v0.1.13
-	github.com/mattn/go-isatty v0.0.17
-	golang.org/x/crypto v0.13.0 // indirect
+	github.com/mattn/go-isatty v0.0.18
+	golang.org/x/crypto v0.17.0 // indirect
 	gopkg.in/urfave/cli.v1 v1.20.0
 	gorm.io/gorm v1.24.1
 )
 
 require (
 	github.com/deckarep/golang-set v1.8.0 // indirect
-	golang.org/x/sys v0.12.0 // indirect
+	golang.org/x/sys v0.15.0 // indirect
 )
 
 require (
@@ -35,7 +35,7 @@ require (
 	github.com/VictoriaMetrics/fastcache v1.12.0 // indirect
 	github.com/axieinfinity/ronin-kms-client v0.0.0-20220805072849-960e04981b70 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
-	github.com/btcsuite/btcd v0.22.0-beta // indirect
+	github.com/btcsuite/btcd v0.22.3 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/edsrzf/mmap-go v1.1.0 // indirect
@@ -49,6 +49,7 @@ require (
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/hashicorp/golang-lru v0.5.5-0.20210104140557-80c98217689d // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
+	github.com/herumi/bls-eth-go-binary v1.31.0 // indirect
 	github.com/holiman/bloomfilter/v2 v2.0.3 // indirect
 	github.com/holiman/uint256 v1.2.1 // indirect
 	github.com/huin/goupnp v1.1.0 // indirect
@@ -81,7 +82,7 @@ require (
 	github.com/prometheus/common v0.37.0 // indirect
 	github.com/prometheus/procfs v0.8.0 // indirect
 	github.com/prometheus/tsdb v0.10.0 // indirect
-	github.com/rivo/uniseg v0.4.2 // indirect
+	github.com/rivo/uniseg v0.4.3 // indirect
 	github.com/rjeczalik/notify v0.9.2 // indirect
 	github.com/sagikazarmark/locafero v0.3.0 // indirect
 	github.com/sagikazarmark/slog-shim v0.1.0 // indirect
@@ -93,6 +94,7 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/status-im/keycard-go v0.2.0 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
+	github.com/supranational/blst v0.3.11 // indirect
 	github.com/syndtr/goleveldb v1.0.1-0.20220721030215-126854af5e6d // indirect
 	github.com/tklauser/go-sysconf v0.3.11 // indirect
 	github.com/tklauser/numcpus v0.6.0 // indirect
@@ -101,9 +103,9 @@ require (
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.9.0 // indirect
 	golang.org/x/exp v0.0.0-20230905200255-921286631fa9 // indirect
-	golang.org/x/net v0.15.0 // indirect
+	golang.org/x/net v0.17.0 // indirect
 	golang.org/x/sync v0.3.0 // indirect
-	golang.org/x/text v0.13.0 // indirect
+	golang.org/x/text v0.14.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20230920204549-e6e6cdab5c13 // indirect
 	google.golang.org/grpc v1.58.2 // indirect
 	google.golang.org/protobuf v1.31.0 // indirect

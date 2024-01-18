@@ -1,7 +1,6 @@
 package listener
 
 import (
-	"context"
 	"math/big"
 	"time"
 
@@ -10,7 +9,6 @@ import (
 	bridgeCore "github.com/axieinfinity/bridge-core"
 	bridgeCoreModels "github.com/axieinfinity/bridge-core/models"
 	"github.com/axieinfinity/bridge-core/utils"
-	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
@@ -19,50 +17,23 @@ import (
 
 type EthBlock struct {
 	block *ethtypes.Block
-	txs   []bridgeCore.Transaction
-	logs  []bridgeCore.Log
 }
 
-func NewEthBlock(client utils.EthClient, chainId *big.Int, block *ethtypes.Block, getLogs bool) (*EthBlock, error) {
-	ethBlock := &EthBlock{
+func NewEthBlock(block *ethtypes.Block) *EthBlock {
+	return &EthBlock{
 		block: block,
 	}
-	// convert txs into ILog
-	for _, tx := range block.Transactions() {
-		transaction, err := NewEthTransaction(chainId, tx)
-		if err != nil {
-			log.Error("[NewEthBlock] error while init new Eth Transaction", "err", err, "tx", tx.Hash().Hex())
-			return nil, err
-		}
-		ethBlock.txs = append(ethBlock.txs, transaction)
-	}
-	if getLogs {
-		log.Info("Getting logs from block hash", "block", block.NumberU64(), "hash", block.Hash().Hex())
-		blockHash := block.Hash()
-		logs, err := client.FilterLogs(context.Background(), ethereum.FilterQuery{BlockHash: &blockHash})
-		if err != nil {
-			log.Error("[NewEthBlock] error while getting logs", "err", err, "block", block.NumberU64(), "hash", block.Hash().Hex())
-			return nil, err
-		}
-		// convert logs to ILog
-		for _, l := range logs {
-			ethLog := EthLog(l)
-			ethBlock.logs = append(ethBlock.logs, &ethLog)
-		}
-	}
-	log.Info("[NewEthBlock] Finish getting eth block", "block", ethBlock.block.NumberU64(), "txs", len(ethBlock.txs), "logs", len(ethBlock.logs))
-	return ethBlock, nil
 }
 
 func (b *EthBlock) GetHash() common.Hash { return b.block.Hash() }
 func (b *EthBlock) GetHeight() uint64    { return b.block.NumberU64() }
 
 func (b *EthBlock) GetTransactions() []bridgeCore.Transaction {
-	return b.txs
+	return nil
 }
 
 func (b *EthBlock) GetLogs() []bridgeCore.Log {
-	return b.logs
+	return nil
 }
 
 func (b *EthBlock) GetTimestamp() uint64 {
@@ -119,48 +90,6 @@ func (b *EthTransaction) GetData() []byte {
 
 func (b *EthTransaction) GetValue() *big.Int {
 	return b.tx.Value()
-}
-
-type EmptyTransaction struct {
-	chainId  *big.Int
-	hash     common.Hash
-	from, to *common.Address
-	data     []byte
-}
-
-func NewEmptyTransaction(chainId *big.Int, tx common.Hash, data []byte, from, to *common.Address) *EmptyTransaction {
-	return &EmptyTransaction{
-		chainId: chainId,
-		hash:    tx,
-		from:    from,
-		to:      to,
-		data:    data,
-	}
-}
-
-func (b *EmptyTransaction) GetHash() common.Hash {
-	return b.hash
-}
-
-func (b *EmptyTransaction) GetFromAddress() string {
-	if b.from != nil {
-		return b.from.Hex()
-	}
-	return ""
-}
-func (b *EmptyTransaction) GetToAddress() string {
-	if b.to != nil {
-		return b.to.Hex()
-	}
-	return ""
-}
-
-func (b *EmptyTransaction) GetData() []byte {
-	return b.data
-}
-
-func (b *EmptyTransaction) GetValue() *big.Int {
-	return nil
 }
 
 type EthLog ethtypes.Log
