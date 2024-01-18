@@ -248,7 +248,7 @@ func (e *EthereumListener) GetLatestBlock() (bridgeCore.Block, error) {
 	if err != nil {
 		return nil, err
 	}
-	return NewEthBlock(e.client, ethtypes.NewBlockWithHeader(header), false)
+	return NewEthBlock(ethtypes.NewBlockWithHeader(header)), nil
 }
 
 func (e *EthereumListener) GetLatestBlockHeight() (uint64, error) {
@@ -363,15 +363,11 @@ func (e *EthereumListener) GetBlock(height uint64) (bridgeCore.Block, error) {
 	if err != nil {
 		return nil, err
 	}
-	return NewEthBlock(e.client, ethtypes.NewBlockWithHeader(header), false)
+	return NewEthBlock(ethtypes.NewBlockWithHeader(header)), nil
 }
 
 func (e *EthereumListener) GetBlockWithLogs(height uint64) (bridgeCore.Block, error) {
-	block, err := e.client.BlockByNumber(e.ctx, big.NewInt(int64(height)))
-	if err != nil {
-		return nil, err
-	}
-	return NewEthBlock(e.client, block, true)
+	return nil, nil
 }
 
 func (e *EthereumListener) GetReceipt(txHash common.Hash) (*ethtypes.Receipt, error) {

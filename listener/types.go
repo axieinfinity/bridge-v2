@@ -1,7 +1,6 @@
 package listener
 
 import (
-	"context"
 	"math/big"
 	"time"
 
@@ -10,7 +9,6 @@ import (
 	bridgeCore "github.com/axieinfinity/bridge-core"
 	bridgeCoreModels "github.com/axieinfinity/bridge-core/models"
 	"github.com/axieinfinity/bridge-core/utils"
-	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
@@ -19,29 +17,12 @@ import (
 
 type EthBlock struct {
 	block *ethtypes.Block
-	logs  []bridgeCore.Log
 }
 
-func NewEthBlock(client utils.EthClient, block *ethtypes.Block, getLogs bool) (*EthBlock, error) {
-	ethBlock := &EthBlock{
+func NewEthBlock(block *ethtypes.Block) *EthBlock {
+	return &EthBlock{
 		block: block,
 	}
-	if getLogs {
-		log.Info("Getting logs from block hash", "block", block.NumberU64(), "hash", block.Hash().Hex())
-		blockHash := block.Hash()
-		logs, err := client.FilterLogs(context.Background(), ethereum.FilterQuery{BlockHash: &blockHash})
-		if err != nil {
-			log.Error("[NewEthBlock] error while getting logs", "err", err, "block", block.NumberU64(), "hash", block.Hash().Hex())
-			return nil, err
-		}
-		// convert logs to ILog
-		for _, l := range logs {
-			ethLog := EthLog(l)
-			ethBlock.logs = append(ethBlock.logs, &ethLog)
-		}
-	}
-	log.Info("[NewEthBlock] Finish getting eth block", "block", ethBlock.block.NumberU64(), "logs", len(ethBlock.logs))
-	return ethBlock, nil
 }
 
 func (b *EthBlock) GetHash() common.Hash { return b.block.Hash() }
@@ -52,7 +33,7 @@ func (b *EthBlock) GetTransactions() []bridgeCore.Transaction {
 }
 
 func (b *EthBlock) GetLogs() []bridgeCore.Log {
-	return b.logs
+	return nil
 }
 
 func (b *EthBlock) GetTimestamp() uint64 {
