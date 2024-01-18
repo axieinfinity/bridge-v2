@@ -14,12 +14,12 @@ const (
 	STATUS_PROCESSING = "processing"
 	STATUS_DONE       = "done"
 
-	GATEWAY_CONTRACT              = "Gateway"
-	GOVERNANCE_CONTRACT           = "Governance"
-	TRUSTED_ORGANIZATION_CONTRACT = "TrustedOrganization"
-	ETH_GOVERNANCE_CONTRACT       = "EthGovernance"
-	ETH_GATEWAY_CONTRACT          = "EthGateway"
-	BRIDGEADMIN_CONTRACT          = "BridgeAdmin"
+	GATEWAY_CONTRACT              = "gateway"
+	GOVERNANCE_CONTRACT           = "governance"
+	TRUSTED_ORGANIZATION_CONTRACT = "trustedorganization"
+	ETH_GOVERNANCE_CONTRACT       = "ethgovernance"
+	ETH_GATEWAY_CONTRACT          = "ethgateway"
+	BRIDGEADMIN_CONTRACT          = "bridgeadmin"
 )
 
 const (
