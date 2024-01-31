@@ -18,6 +18,10 @@ listeners:
         plainPrivateKey: ""
     fromHeight": 14763470
     processWithinBlocks": 864000
+    stats:
+      node: ""
+      host: ""
+      secret: ""
     contracts:
       Gateway: "0x0CF8fF40a508bdBc39fBe1Bb679dCBa64E65C7Df"
       EthGateway: "0x64192819Ac13Ef72bF6b5AE239AC672B43a9AF08"

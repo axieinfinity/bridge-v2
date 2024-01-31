@@ -27,6 +27,11 @@
         "Gateway": "0xCee681C9108c42C710c6A8A949307D5F13C9F3ca",
         "EthGateway": "0x9e359F42cDDc84A386a2Ef1D9Ae06623f3970D1D"
       },
+      "stats": {
+        "node": "",
+        "host": "",
+        "secret": ""
+      },
       "subscriptions": {
         "MainchainWithdrewSubscription": {
           "to": "0xCee681C9108c42C710c6A8A949307D5F13C9F3ca",
